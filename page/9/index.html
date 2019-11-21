@@ -184,23 +184,27 @@
 
 <div class="post-preview">
 
-    <a href="/2018/01/redis缓存服务搭建/">
+    <a href="/2017/12/python-threading模块中thread类简介/">
         <h2 class="post-title">
-            Redis 缓存服务搭建
+            Python threading模块中Thread类简介
         </h2>
         <h3 class="post-subtitle">
             
         </h3>
         <div class="post-content-preview">
-            安装 Redis1、从官网获取下载连接 http://download.redis.io/releases/redis-4.0.6.tar.gz 并通过wget方式下载,并解压
-wget http://download.redis.io/releases/redis-4.0.6.tar.gztar -xzvf redis-4.0.6.tar.gz
-2、安装依赖包
-yum install gc......
+            Thread类threading中的Thread类是主要的执行对象。有如下的对象属性以及方法。
+Thread 对象数据属性
+name  线程名
+ident  线程的标识符
+daemon  bool标识，表示该线程是否为守护线程
+
+Thread 对象方法
+__init__(self, group=None, target=None, name=None, args=(), kwargs=Non......
         </div>
     </a>
     <p class="post-meta">
         Posted by kingkk on
-        2018-01-19
+        2017-12-07
     </p>
 
 </div>
@@ -208,23 +212,23 @@ yum install gc......
 
 <div class="post-preview">
 
-    <a href="/2018/01/mysql搭建/">
+    <a href="/2017/12/python之thread模块简介/">
         <h2 class="post-title">
-            Mysql搭建
+            Python之thread模块简介
         </h2>
         <h3 class="post-subtitle">
             
         </h3>
         <div class="post-content-preview">
-            Mysql安装1、由于我是CentOs6.5的版本，直接用yum就可以了
-yum install mysql-server
-假如是CentOs7及以上的版本，默认数据库为mariadb，要先移除mariadb，然后再进行安装
-yum remove mariadb-libs.x86_64     #版本号视具体版本而定wget http://dev.mysql.com/get/mysql57-......
+            由于thread模块的局限性，以及如今以及普遍使用功能更加强大的threading模块替代thread模块进行多线程操作，所以就在此对thread模块进行简单的介绍，作为学习的记录。
+thread 模块的函数
+start_new_thread(function, args[, kwargs]) 派生一个新的线程，并使用元组传递指定的参数来执行function函数
+allocate_lock(......
         </div>
     </a>
     <p class="post-meta">
         Posted by kingkk on
-        2018-01-18
+        2017-12-06
     </p>
 
 </div>
@@ -232,28 +236,22 @@ yum remove mariadb-libs.x86_64     #版本号视具体版本而定wget http://de
 
 <div class="post-preview">
 
-    <a href="/2018/01/webserver搭建/">
+    <a href="/2017/12/python之re模块方法/">
         <h2 class="post-title">
-            Webserver 搭建
+            Python之re模块方法
         </h2>
         <h3 class="post-subtitle">
             
         </h3>
         <div class="post-content-preview">
-            emm因为在先前的学习中，发现对linux许多操作与配置极其不熟练，各种百度谷歌，还不一定弄得对，所以最近想系统学习下linux的操作，那就先从webserver服务开始。废话不多说，直接上吧。
-环境：
-CentOs 6.5
-Apache 2.2.15
-虚拟机
-
-tips:要想虚拟机上运行的服务可以在电脑本机上能够访问，需要设置为桥接模式  
-Apache1、安装apache :
-yum i......
+            match()  match(pattern, string, flags=0)match对字符串进行正则匹配，匹配成功返回一个匹配对象，匹配失败，返回None 匹配成功时：
+In [14]: m = re.match(‘foo’,’foo’)In [15]: m Out[15]: &lt;_sre.SRE_Match at 0x6bd8870&gt;
+In [16]: if m is no......
         </div>
     </a>
     <p class="post-meta">
         Posted by kingkk on
-        2018-01-18
+        2017-12-04
     </p>
 
 </div>
@@ -261,21 +259,24 @@ yum i......
 
 <div class="post-preview">
 
-    <a href="/2018/01/生无所息/">
+    <a href="/2017/12/正则表达式特殊符号和字符/">
         <h2 class="post-title">
-            生无所息
+            Python 正则表达式 特殊符号和字符
         </h2>
         <h3 class="post-subtitle">
             
         </h3>
         <div class="post-content-preview">
-            考试终于考完了，考试成绩也出来了，还算考的可以把，比上学期稍微好一点。期末考阶段已经过去，那接下来就是重要的寒假了。我们寒假大概能有一个月多二十天的样子，快抵上一个短点的暑假了，接下来的任务当然是疯狂的学习学习加学习。在寝室宅了大半个个月，偶尔看下书，刷点题，打打游戏，但是那些东西哪有学习这些知识有趣列。 
-停止学习和更新博客也有大半个月了，接下来的时间应该会经常更新，记录一些自己学习历程上......
+            择一匹配符号：  |In [18]: bt = ‘bat|bet|bit’   #匹配 bat或bet或bit
+In [19]: m = re.match(bt,’bat’)
+In [20]: if m is not None: print m.group()bat
+In [21]: m = re.match(bt,’bot’)  #匹配失败
+In [22]: if m is not Non......
         </div>
     </a>
     <p class="post-meta">
         Posted by kingkk on
-        2018-01-16
+        2017-12-04
     </p>
 
 </div>
@@ -283,25 +284,21 @@ yum i......
 
 <div class="post-preview">
 
-    <a href="/2017/12/apache配置多站点/">
+    <a href="/2017/12/重新养成写博客的习惯/">
         <h2 class="post-title">
-            apache配置多站点
+            重新养成写博客的习惯
         </h2>
         <h3 class="post-subtitle">
             
         </h3>
         <div class="post-content-preview">
-            由于最近需要搭建一个自己的xss平台，想用一个xss.kingkk.com的子域名，由于之前自己也一直好奇，是怎么把一个服务器下的不同站点指向不同的域名。今天就花了一个下午的时间去弄了下这件事，顺便记录下。  
-
-
-找到域名解析这里
-点击进去之后添加解析，主机记录填写自己想分配的子域名，记录值处填写你的ip地址
-接下来，连上自己的云服务器，我的是lamp的环境，所以找到/alidata/se......
+            哎，就上了学之后就懒得去弄这个博客了，导致博客放在这这两三个月差不多都生灰了。这学期开始陆陆续续接触了一些CTF的比赛，以及学了一些Python,很多的东西都没来及的做记录与整理。决定还是要好好利用好这个博客，记录下自己平时的学习。
+...
         </div>
     </a>
     <p class="post-meta">
         Posted by kingkk on
-        2017-12-29
+        2017-12-04
     </p>
 
 </div>
@@ -309,20 +306,25 @@ yum i......
 
 <div class="post-preview">
 
-    <a href="/2017/12/进入期末准备/">
+    <a href="/2017/09/sql注入之万能密码/">
         <h2 class="post-title">
-            进入期末准备
+            SQL注入之万能密码
         </h2>
         <h3 class="post-subtitle">
             
         </h3>
         <div class="post-content-preview">
-            这学期真的是过的好快呀，刚刚意识到马上就要2018年了，在实验室的学习可能要先放缓下脚步，去准备准备万恶的期末考，毕竟这学期好几门都没认真听，不好好考前准备一下，真的怕挂科呀。然后之前的sql注入练习，就先做到38为止，后期的话有机会再来做。期末这段时间，打算重新读一下《白帽子讲web安全》这本书，因为本来之前是想去看《黑客攻防宝典-web实战篇》这本书的，但翻了几页发现好像还是有些晦涩，可......
+            ‘ or 1=’1
+这估计是最最简单的一个万能密码了，原理也就不过多解释，今天就记录刚刚看到的一种万能密码（数据库类型为mysql,并为在其他数据库中进行测试）
+username= 1’=’0password= 1’=’0
+username=what’=’password=what’=’
+username:admin’=’password:admin’=’
+当or、and以及注释符号被严格过......
         </div>
     </a>
     <p class="post-meta">
         Posted by kingkk on
-        2017-12-19
+        2017-09-12
     </p>
 
 </div>
@@ -330,20 +332,27 @@ yum i......
 
 <div class="post-preview">
 
-    <a href="/2017/12/sqli-labs练习(less23-38)/">
+    <a href="/2017/09/python文件操作之文件指针/">
         <h2 class="post-title">
-            sqli-labs练习（less23-38）
+            Python文件操作之文件指针
         </h2>
         <h3 class="post-subtitle">
             
         </h3>
         <div class="post-content-preview">
-            less-23常规的单引号测试，出错  然后用#闭合，好像不行。。。编码一下。。好像也不行。。。试一下–+。。怎么还是不行。。。  查看源码之后发现，把注释符都改为空了，而不难发现之前的报错语句都是一样的  于是可以用 or ‘1’=’1闭合  这个没问题，可是好像获取不到数据。。于是得换一种注释方式（要提前测试字段数）  然后就可以开始提取数据了  还发现一种注入姿势，好像再多用一个单引号......
+            最近在学习Python的文件操作，发现了一个比较有意思的东西，便随手记录一下。 首先先列举一下Python常用的文件打开方式
+
+r      只读
+w    只写，如果文件不存在，则创建，如果文件存在，则覆盖文件
+a     追加写，如果文件不存在，则创建文件
+r+   读、写
+w+  读、写，如果文件不存在，则创建，如果文件存在，则覆盖文件
+a+   追加打开文件，可读可写，如果文件不存在......
         </div>
     </a>
     <p class="post-meta">
         Posted by kingkk on
-        2017-12-17
+        2017-09-06
     </p>
 
 </div>
@@ -351,74 +360,21 @@ yum i......
 
 <div class="post-preview">
 
-    <a href="/2017/12/sqli-labs练习(less11-22)/">
+    <a href="/2017/08/关于阿里云一键安装之后phpwind首页的修改/">
         <h2 class="post-title">
-            sqli-labs练习（less11-22）
+            关于阿里云一键安装之后phpwind首页的修改
         </h2>
         <h3 class="post-subtitle">
             
         </h3>
         <div class="post-content-preview">
-            之前less1-10的主要通过get注入，less11-20几乎通过POST注入
-less-11先检测出是post方式提交的数据（最简单的方法就看有没有增加参数嘛） 然后可以通过抓包或者审查元素的方式获取到post的参数，如下三个
-
-uname=1
-passwd=1
-submit=Submit
-
-然后就可以去构造然后去post发包啦 首先在uname字段构造个万能密码，然后通过#注释后面的内......
+            相信不少用阿里云一键部署web的人都出现过这种情况，网站的首页莫名其妙被导向了安装包中自带的phpwind。今天就来说一下重新自定义网站首页的方法。（PS:只是想知道修改方法可以直接跳到第五部分）1.首先一开始我也是各种百度和谷歌，发现网上介绍的大致如下两种方法：
+修改/alidata/server/httpd-2.4.10/conf/下的httpd.conf配置文件中下面那两行代码的文件位......
         </div>
     </a>
     <p class="post-meta">
         Posted by kingkk on
-        2017-12-14
-    </p>
-
-</div>
-<hr>
-
-<div class="post-preview">
-
-    <a href="/2017/12/sqli-labs练习(less1-10)/">
-        <h2 class="post-title">
-            sqli-labs练习（less1-10）
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            为了学习的便利性，我在一些文件中都出了sql语句
-less-1先理清一下注入动机：目的是为了获取账号密码，于是得获取对应的表名、字段名、数据库名，并得绕过一些设定，从而获取你想要的数据库中的数据。 自己做个一个注入流程：  接下来开始注入： 输入单引号，引起错误，说明存在注入点  通过#将后面引号注释掉（此处直接打#并没有进行编码，要自己编码为%23），成功注释了后面的单引号  
-通过ord......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2017-12-10
-    </p>
-
-</div>
-<hr>
-
-<div class="post-preview">
-
-    <a href="/2017/12/python用queuequeue模块来实现多线程间通信/">
-        <h2 class="post-title">
-            Python 用Queue/queue模块来实现多线程间通信
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            使用Queue模块（2.x版本，3.x版本中重命名为queue），通过创建一个队列来提供线程间通信的机制，从而让线程之间可以互相分享数据。 先列举一下Queue模块中的一些属性
-Queue/queue模块的类
-Queue(maxsize=0) 创建一个先入先出队列。若指定maxsize，则在队列满时阻塞；否则则为无限队列
-LifoQueue(maxsize=0) 创建一个后入先出队列（个人感......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2017-12-09
+        2017-08-31
     </p>
 
 </div>
@@ -434,10 +390,6 @@ LifoQueue(maxsize=0) 创建一个后入先出队列（个人感......
             <a href="/page/8/">&larr; Newer Posts</a>
         </li>
     
-    
-        <li class="next">
-            <a href="/page/10/">Older Posts &rarr;</a>
-        </li>
     
 </ul>
 
@@ -465,11 +417,29 @@ LifoQueue(maxsize=0) 创建一个后入先出队列（个人感......
                             
                         
                             
-                            <a href="/tags/#代码审计" title="代码审计" rel="8">代码审计</a>
+                            <a href="/tags/#代码审计" title="代码审计" rel="4">代码审计</a>
                             
                         
                             
-                            <a href="/tags/#php" title="php" rel="7">php</a>
+                        
+                            
+                            <a href="/tags/#php" title="php" rel="4">php</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#java" title="java" rel="5">java</a>
+                            
+                        
+                            
+                        
                             
                         
                             
@@ -478,8 +448,6 @@ LifoQueue(maxsize=0) 创建一个后入先出队列（个人感......
                         
                             
                             <a href="/tags/#writeup" title="writeup" rel="6">writeup</a>
-                            
-                        
                             
                         
                             
@@ -503,23 +471,9 @@ LifoQueue(maxsize=0) 创建一个后入先出队列（个人感......
                             
                         
                             
-                            <a href="/tags/#java" title="java" rel="10">java</a>
-                            
                         
                             
                         
-                            
-                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="10">漏洞分析</a>
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#struts2" title="struts2" rel="5">struts2</a>
-                            
-                        
-                            
-                            <a href="/tags/#ThinkPHP" title="ThinkPHP" rel="2">ThinkPHP</a>
                             
                         
                             
@@ -547,7 +501,7 @@ LifoQueue(maxsize=0) 创建一个后入先出队列（个人感......
                             
                         
                             
-                            <a href="/tags/#渗透测试" title="渗透测试" rel="2">渗透测试</a>
+                            <a href="/tags/#vulnhub" title="vulnhub" rel="2">vulnhub</a>
                             
                         
                             
@@ -555,7 +509,7 @@ LifoQueue(maxsize=0) 创建一个后入先出队列（个人感......
                             
                         
                             
-                            <a href="/tags/#vulnhub" title="vulnhub" rel="2">vulnhub</a>
+                            <a href="/tags/#渗透测试" title="渗透测试" rel="2">渗透测试</a>
                             
                         
                             
@@ -565,9 +519,9 @@ LifoQueue(maxsize=0) 创建一个后入先出队列（个人感......
                             
                         
                             
-                        
-                            
                             <a href="/tags/#ctf" title="ctf" rel="2">ctf</a>
+                            
+                        
                             
                         
                             

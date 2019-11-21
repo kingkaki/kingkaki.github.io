@@ -184,180 +184,6 @@
 
 <div class="post-preview">
 
-    <a href="/2018/08/xss知识点小记/">
-        <h2 class="post-title">
-            xss知识点小记
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            前言最近在学习xss，记录一些比较重要的知识点。有时能从根本上解决一些问题的疑惑
-同源策略同源策略可以说是浏览器安全中最最基础也最为重要的部分了。同源策略限制了资源的任意加载，限制恶意请求。
-何为同源这个估计大家都比熟悉，简单的来说就是如下三点
-
-协议相同（http/https）
-端口相同
-host相同
-
-
-请求过程跨域请求在html中的不同位置都会有发生，主要分为如下三类
-Cross-or......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2018-08-23
-    </p>
-
-</div>
-<hr>
-
-<div class="post-preview">
-
-    <a href="/2018/08/网鼎杯writeup-web/">
-        <h2 class="post-title">
-            网鼎杯writeup-web
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            前言感觉又是一对web狗极度不友好的比赛，一开始网络环境都是奔溃的，正紧能做题已经是最后两个半小时了。第二道题还是最后一个半小时放出来的，相当难受了。（i春秋真的可以升级下服务器了。。。
-不过spider这道反日爬虫的题目感觉还是很有意思的，加上最近刚学的xss和redis，决定还是好好复现一下
-spider题目给了提示说是动态爬虫，一开始对这个不是很了解，大意应该就是自带js解析，类似于浏......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2018-08-21
-    </p>
-
-</div>
-<hr>
-
-<div class="post-preview">
-
-    <a href="/2018/08/xss练习记录/">
-        <h2 class="post-title">
-            xss练习记录
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            前言由于各种原因吧，之前也没好好学过xss，就知道简单的闭合弹个窗什么的，趁暑假有时候，系统的学习一下xss。毕竟xss也是web安全的一个重头戏。而且看完一叶飘零师傅的文章，感觉xss比我之前想象的要强的多，也可以达到很强的破坏力。
-就先和刷sqllibs一样吧，做一些题目练手。
-prompt.mllevel 0比较简单了，没做什么过滤和防护，闭合双引号就能逃逸出来了
-
-level 1做了......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2018-08-19
-    </p>
-
-</div>
-<hr>
-
-<div class="post-preview">
-
-    <a href="/2018/08/redis未授权访问与ssrf利用/">
-        <h2 class="post-title">
-            redis未授权访问与ssrf利用
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            Redis未授权访问About Redis简介redis是一种key-value键值对的非关系型数据库，默认运行在6379端口
-它启动时不会像apache一样，以一种www-data低权限身份运行。而是以运行者的身份，例如用root权限直接运行redis时，redis的权限就是root权限
-其次它的默认配置是无需密码的，也就造成了默认的未授权访问
-redis还支持本地存储，也就导致了任意文件......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2018-08-17
-    </p>
-
-</div>
-<hr>
-
-<div class="post-preview">
-
-    <a href="/2018/08/Flask-debug-pin安全问题/">
-        <h2 class="post-title">
-            Flask debug pin安全问题
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            前言之前在国赛决赛的时候看到p0师傅提到的关于Flask debug模式下，配合任意文件读取，造成的任意代码执行。那时候就很感兴趣，无奈后来事情有点多，一直没来得及研究。今天把这个终于把这个问题复现了一下
-主要就是利用Flask在debug模式下会生成一个Debugger PIN
-12345kingkk@ubuntu:~/Code/flask$ python3 app.py  * Runni......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2018-08-10
-    </p>
-
-</div>
-<hr>
-
-<div class="post-preview">
-
-    <a href="/2018/08/docker-笔记/">
-        <h2 class="post-title">
-            docker 笔记
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            前言上学期寒假开始就稍微了解了下docker，无奈用的不是很多，也不是很懂
-后来被强制性要求使用了几次docker（不得不说，安装配置问题一直令我很头大），就也算勉强能起来一个服务了
-用了几次之后就决定系统的总结一下docker的使用，因为只是一些总结，更多的只是针对于我个人用的，不官方，不权威，不系统
-Docker的三大概念镜像（Images）
-Docker 镜像是一个特殊的文件系统，除了......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2018-08-09
-    </p>
-
-</div>
-<hr>
-
-<div class="post-preview">
-
-    <a href="/2018/08/迟学的哈希长度拓展攻击/">
-        <h2 class="post-title">
-            迟学的哈希长度扩展攻击
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            前言本来这个哈希长度扩展攻击应该在一年前刷实验吧的时候就应该解决的。但是由于那时候实在看不懂，再加上有点偷懒，就把这部分给跳了时隔一年，在学习中偶尔有碰到这个（虽然不是很多），感觉没有想象中那么鸡肋，就决定重新捡起来学习一下  
-不过，就算过了一年，发现依旧是那么菜，看了一整天的分析博客，才勉强理清逻辑  
-攻击的用途和原理用途感觉这个还是很重要的，更多时候需要知道的是怎么用，在什么环境下才......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2018-08-04
-    </p>
-
-</div>
-<hr>
-
-<div class="post-preview">
-
     <a href="/2018/07/Typecho反序列化漏洞复现/">
         <h2 class="post-title">
             Typecho反序列化漏洞复现
@@ -426,6 +252,160 @@ XML格式主要由XML声明、文档类型定义(DTD)、文档元......
 </div>
 <hr>
 
+<div class="post-preview">
+
+    <a href="/2018/07/phpinfo-with-LFI/">
+        <h2 class="post-title">
+            phpinfo with LFI
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            phpinfo with LFI利用场景当存在一个任意文件包含的页面，然而又找不到可以包含的文件，且有phpinfo页面时可以利用phpinfo页面，找到上传的tmp文件，进行条件竞争，生成想要获得shell
+利用原理在对一个页面进行文件上传时，无论这个页面将来是否要利用这个文件，php都会将这个文件保存成一个临时文件，默认为 tmp/php[\d\w]{6}关于这个文件的信息可以通过$_F......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-07-18
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/07/随笔-7-3/">
+        <h2 class="post-title">
+            随笔-7.3
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            随笔-7.3又是一个学期的期末，由于突然做完了手头的一些事情，但又没有大量空余的时间学习。不知道干什么好的我还是随便写篇随笔吧。  
+这应该算是变化比较大的一个学期了。一个学期前还在考虑安全到底能不能当饭吃。如今实验室的三个学长也都到找了工作和实习。至少对在网安这路上的前行打了一剂强心针吧。这学期一开学，组长刚刚学了一寒假的pwn，应该算是刚入门吧。有了pwn选手之后的我们，差不多打了连续两......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-07-03
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/06/Flask-Jinja2-SSTI-python-沙箱逃逸/">
+        <h2 class="post-title">
+            Flask/Jinja2 SSTI && python 沙箱逃逸
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            前言想着之前学了Flask,就正好把之前的SSTI模板注入，和python沙箱逃逸一起给学了虽然模板注入和沙箱逃逸是两码事，但是由于jinja2的python运行环境也是一个沙箱，就会涉及到到一些沙箱逃逸的东西而且沙箱逃逸也不仅仅只有在SSTI中发挥作用，所以虽然写在一起，但沙箱逃逸可能还会占一块比较大而独立的部分  
+SSTISSTI，又称服务端模板注入攻击。其发生在MVC框架中的view......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-06-25
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/06/flask-学习记录/">
+        <h2 class="post-title">
+            flask-学习记录
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            前言等待漏洞审核和国赛名单真是个难熬的事情，目前已经等到麻木了期间就决定学习一下flask,了解一下python web之前学过一些Django，但是那时候还懵懵懂懂，而且Django封装了太多东西，那时候也就只能照着教程来依葫芦画瓢然后这回打算从更加轻量级的flask入手，来学习python web  
+正文不知道写啥就写博客系统呗，于是就花了两个星期左右时间写了一个博客系统还是先上下项目......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-06-21
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/05/一个从零开始的mvc/">
+        <h2 class="post-title">
+            一个从零开始的mvc
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            前言仔细算来，已经差不多有20天没有更新过博客了，自己的网站页差不多有十几天没来过了。好吧，其实是去coding去了，感觉没什么好记录也没什么需要记录的，也就没有写博客了。
+正文emm，身为半个野路子出来的人，没有做过开发，从小迪开始，零星的收集着知识点，用着一些大佬写好的工具，抓几个包，肆意的跑着。实际渗透起来，总觉得像是一个无头的苍蝇，乱飞，费力而且找不到想要的东西。 这学期一开学差不多......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-05-12
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/04/2018ddctf-writeup/">
+        <h2 class="post-title">
+            2018DDCTF writeup
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            前言DDCTF实在被虐的有点惨，中途就放弃了（逃……）只能赛后复现一下，不间断更新。。  
+数据库的秘密进入第一步是一个ip验证 用firefox的插件，添加一个x-forwarded-for 的header就行进入之后是个简单的查询功能任意查询之后发送给一个包，发现多了一个author参数回到html页面，发现的确有这个隐藏的form值经过一些尝试之后发现如下几点1、其他的非隐藏值都有被过......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-04-23
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/04/bctf2018-love-q/">
+        <h2 class="post-title">
+            BCTF2018 LOVE Q
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            前言为数不多做出来的“高分题”（刚做出来的时候算高分，后来就掉下去了），记录一下  
+正文进入首页 和之前的N1CTF的web 7777类似，算是一个升级版最恶心的部分是waf，过滤了很多 数字部分能用的只有 2 和 9 比较符号除了 &gt;  其余等号和小于号都过滤了还有一个问题，没有回显,ha?这回的points设置之后无法判断回显时间盲注的函数sleep、benchmark之类的函数......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-04-21
+    </p>
+
+</div>
+<hr>
+
 
 
 <!-- Pager -->
@@ -467,11 +447,29 @@ XML格式主要由XML声明、文档类型定义(DTD)、文档元......
                             
                         
                             
-                            <a href="/tags/#代码审计" title="代码审计" rel="8">代码审计</a>
+                            <a href="/tags/#代码审计" title="代码审计" rel="4">代码审计</a>
                             
                         
                             
-                            <a href="/tags/#php" title="php" rel="7">php</a>
+                        
+                            
+                            <a href="/tags/#php" title="php" rel="4">php</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#java" title="java" rel="5">java</a>
+                            
+                        
+                            
+                        
                             
                         
                             
@@ -480,8 +478,6 @@ XML格式主要由XML声明、文档类型定义(DTD)、文档元......
                         
                             
                             <a href="/tags/#writeup" title="writeup" rel="6">writeup</a>
-                            
-                        
                             
                         
                             
@@ -505,23 +501,9 @@ XML格式主要由XML声明、文档类型定义(DTD)、文档元......
                             
                         
                             
-                            <a href="/tags/#java" title="java" rel="10">java</a>
-                            
                         
                             
                         
-                            
-                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="10">漏洞分析</a>
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#struts2" title="struts2" rel="5">struts2</a>
-                            
-                        
-                            
-                            <a href="/tags/#ThinkPHP" title="ThinkPHP" rel="2">ThinkPHP</a>
                             
                         
                             
@@ -549,7 +531,7 @@ XML格式主要由XML声明、文档类型定义(DTD)、文档元......
                             
                         
                             
-                            <a href="/tags/#渗透测试" title="渗透测试" rel="2">渗透测试</a>
+                            <a href="/tags/#vulnhub" title="vulnhub" rel="2">vulnhub</a>
                             
                         
                             
@@ -557,7 +539,7 @@ XML格式主要由XML声明、文档类型定义(DTD)、文档元......
                             
                         
                             
-                            <a href="/tags/#vulnhub" title="vulnhub" rel="2">vulnhub</a>
+                            <a href="/tags/#渗透测试" title="渗透测试" rel="2">渗透测试</a>
                             
                         
                             
@@ -567,9 +549,9 @@ XML格式主要由XML声明、文档类型定义(DTD)、文档元......
                             
                         
                             
-                        
-                            
                             <a href="/tags/#ctf" title="ctf" rel="2">ctf</a>
+                            
+                        
                             
                         
                             

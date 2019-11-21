@@ -184,20 +184,22 @@
 
 <div class="post-preview">
 
-    <a href="/2018/02/记录一次hgame-ctf的注入/">
+    <a href="/2018/02/一次失败的代码审计74cms/">
         <h2 class="post-title">
-            记录一次hgame ctf的注入
+            一次失败的代码审计-74cms
         </h2>
         <h3 class="post-subtitle">
             
         </h3>
         <div class="post-content-preview">
-            前言组里莫名开始在线上刷hgame，一个寒假没碰过这些，而且不得不说杭电的题目有点难，可能也是自己太菜了，总之这回的week4差不多无从下手。 然后今天要记录的是这道题根据那个描述，应该能猜到有文件泄露，找了下备份文件index.php~123456789101112131415161718192021222324&lt;?php error_reporting(0); include("s......
+            哎，弄得有点头大。。弄了一整个下午，虽然还是失败了，但还是记录一下吧   emmm，一开始，想从user这个文件夹下入手，大体瞟了下那些基础的类文件，当然没看全， 然后配合seay的代码审计工具，发现了一个点 74cms\user\connect_qq_client.php
+elseif ($act==’login_go’){
+$\_SESSION\[&quot;openid&quot;\]......
         </div>
     </a>
     <p class="post-meta">
         Posted by kingkk on
-        2018-02-28
+        2018-02-02
     </p>
 
 </div>
@@ -205,21 +207,25 @@
 
 <div class="post-preview">
 
-    <a href="/2018/02/第一次远程桌面的日站过程/">
+    <a href="/2018/01/php之mvc框架/">
         <h2 class="post-title">
-            第一次远程桌面的日站过程
+            php之MVC框架
         </h2>
         <h3 class="post-subtitle">
             
         </h3>
         <div class="post-content-preview">
-            前言既然都说日站孰能生巧，日多了才能出感觉，今天就在找一些网站进行测试。然后无意间百度出了一个功能很奇怪的网页，居然能查看目录。然后折腾了一天，终于能远程登录了。就记录一下，算是一次实战经验。  
-正文一开始看到的网页是这个样子的 一看这url，path参数不就是路径名么。而且好像还可以查看非网站目录，应该是phpstudy的原因，导致权限较高。虽然能看目录，但是看不了里面的内容，那就翻翻有......
+            由于代码审计的需要，简略的学习了下，MVC大体的架构，希望对以后代码审计时一些结构逻辑能有帮助把。  
+MVC（摘自wikipedia）
+MVC模式（Model–view–controller）是软件工程中的一种软件架构模式，把软件系统分为三个基本部分：模型（Model）、视图（View）和控制器（Controller）
+
+以下是我自己对MVC三个部分一个粗略的理解
+Model（模型）连接数......
         </div>
     </a>
     <p class="post-meta">
         Posted by kingkk on
-        2018-02-21
+        2018-01-31
     </p>
 
 </div>
@@ -227,26 +233,21 @@
 
 <div class="post-preview">
 
-    <a href="/2018/02/python-requests库/">
+    <a href="/2018/01/代码审计练习篇xdcms/">
         <h2 class="post-title">
-            Python-requests库
+            代码审计练习篇-xdcms
         </h2>
         <h3 class="post-subtitle">
             
         </h3>
         <div class="post-content-preview">
-            前言requests库真的特别好用，一开始进行网络编程的时候就使用的requests，封装的特别好，编程风格也很优雅 只是之前一直都是零零散散的学习一些基本操作，今天看了一遍官方文档，做一些总结，希望能更好的运用这个库  
-正文请求方式
-requests.get()
-requests.post()
-requests.head()
-requests.options()
-requests.put......
+            看完了《代码审计》的基础部分，然后想找几个实战练练手，毕竟不会操作都tm白搭，于是看了一期实战的视频，跟着一起学习了下审计操作流程。本次审计的cms为：XDcms_v2.0.8(中文的话叫旭东cms) 视频挖的是一个sql注入漏洞，我这里就不赘述他的挖掘过程，就记录下两个自己挖的过程
+SQL注入漏洞一开始都是丢进seay代码审计跑一跑，跑出一堆可能有风险的函数，然后反向审计（回溯）一堆。。。......
         </div>
     </a>
     <p class="post-meta">
         Posted by kingkk on
-        2018-02-14
+        2018-01-30
     </p>
 
 </div>
@@ -254,23 +255,20 @@ requests.put......
 
 <div class="post-preview">
 
-    <a href="/2018/02/python携程/">
+    <a href="/2018/01/短期代码审计学习计划/">
         <h2 class="post-title">
-            Python-携程
+            短期代码审计学习计划
         </h2>
         <h3 class="post-subtitle">
             
         </h3>
         <div class="post-content-preview">
-            简介通俗的讲，就是在几个函数之间切换 在某个函数阻塞时，切换到另一个等待运行的函数之中。阻塞停止时，再从之前阻塞的地方继续执行。以此提升cpu的利用率 携程是在同一个线程之下进行的，不需要开辟新的线程，减少了线程直接切换的cpu消耗  
-正文python中完成携程是通过生成器来实现的，顺带提一下几个函数的作用
-
-**generator.send(args)**   使yield x拥有一个返......
+            前段时间学完那些linux基础之后，想着可以重点攻击web安全这块主业了。因为之前看乌云镜像，然后在自己本地也搭建了一个，然后也看了蛮多的漏洞详情。 然而，自己开始渗透的时候，仿佛完全是两码事，找不到攻击点，只能瞎试，见个get参数就试着sql跑下，然后就被ban了，看见输入框就试试alert(/xss/)，然并卵。。。虽然其中有一次无疑挖了个xss，但还是感觉纯属就是碰运气 于是，感觉无力......
         </div>
     </a>
     <p class="post-meta">
         Posted by kingkk on
-        2018-02-13
+        2018-01-30
     </p>
 
 </div>
@@ -278,22 +276,21 @@ requests.put......
 
 <div class="post-preview">
 
-    <a href="/2018/02/python-smtp发送邮箱/">
+    <a href="/2018/01/python2、3的兼容并切换/">
         <h2 class="post-title">
-            Python-smtp发送邮箱
+            Python2、3的兼容并切换
         </h2>
         <h3 class="post-subtitle">
             
         </h3>
         <div class="post-content-preview">
-            前言主要就记录下最常用的发送邮件的方式吧，复杂的，有需要的话再去学。一切从简…一切从简……  
-正文主要有两种smtp形式，一种是没有ssl加密的（如新浪、163等），还有就是有ssl加密的（如腾讯、谷歌等） 要使用smtp的话要在设置里开启smtp服务，具体不会可以自行百度，然后就以新浪和腾讯的邮箱为例 新浪邮箱
-#encoding=utf8import smtplibfrom email......
+            如今，python3已经逐渐在替代以及成为未来Python的一个大势所趋，然而由于时间问题，python2又是许多好用的，前人所开发的语言，一时半会儿又丢弃不了。所以经常会出现python2、python3都需要的场景，一直更换环境变量，总是会很麻烦。其实python官方也有考虑到这个问题，所以还是有办法同时切换python2、3的，只是需要一些小小的操作
+首先要将Python2、3都添加进......
         </div>
     </a>
     <p class="post-meta">
         Posted by kingkk on
-        2018-02-12
+        2018-01-21
     </p>
 
 </div>
@@ -301,22 +298,29 @@ requests.put......
 
 <div class="post-preview">
 
-    <a href="/2018/02/python多进程与多线程/">
+    <a href="/2018/01/python-web环境搭建/">
         <h2 class="post-title">
-            Python-多进程与多线程
+            Python web环境搭建
         </h2>
         <h3 class="post-subtitle">
             
         </h3>
         <div class="post-content-preview">
-            前言对于一些扫描器、爬虫之类的，要实现高并发是很重要的，这就涉及到多进程与多线程了。 不得不说之前写的那篇多进程又臭又长，自己都懒得看，重写一遍，一切从简  
-正文多进程利用多核cpu的优势，充分利用每个核心的功能 使用方法（默认开启的进程数为）
-from multiprocessing import Poolp = Pool()for i in task:    p.apply_async......
+            安装pipcentos6.x版本的话
+yum install python-pip.noarch
+centos7.x版本
+yum install python2-pip
+安装virtualenv用于独立每个python环境
+pip install virtualenv
+创建virtualenv
+virtualenv pythonweb
+切换virtualenv
+[root@localhost......
         </div>
     </a>
     <p class="post-meta">
         Posted by kingkk on
-        2018-02-11
+        2018-01-21
     </p>
 
 </div>
@@ -324,28 +328,23 @@ from multiprocessing import Poolp = Pool()for i in task:    p.apply_async......
 
 <div class="post-preview">
 
-    <a href="/2018/02/python闭包与装饰器/">
+    <a href="/2018/01/java-web环境搭建/">
         <h2 class="post-title">
-            Python-闭包与装饰器
+            java web环境搭建
         </h2>
         <h3 class="post-subtitle">
             
         </h3>
         <div class="post-content-preview">
-            闭包讲闭包前先说一下在函数内部，返回一个函数
-def lazy_sum(*args):    def sum():        ax = 0        for n in args:            ax = ax + n        return ax    return sum
-f = lazy_sum(1,3,5,7,9)
-利用返回的函数，可以在后期使用
-f()
-
-
-
-25......
+            系统环境centos6.5
+安装java包yum install java-1.8.0-openjdk*
+有点大，等一下就好了，好像有点简单啊。。 检验下是否安装完毕
+[root@localhost ~]# java -versionopenjdk version “1.8.0_161”OpenJDK Runtime Environment (build 1.8.0_161-b14)Open......
         </div>
     </a>
     <p class="post-meta">
         Posted by kingkk on
-        2018-02-10
+        2018-01-20
     </p>
 
 </div>
@@ -353,24 +352,22 @@ f()
 
 <div class="post-preview">
 
-    <a href="/2018/02/python迭代器与生成器/">
+    <a href="/2018/01/php5-6安装/">
         <h2 class="post-title">
-            Python-迭代器与生成器
+            php5.6 安装
         </h2>
         <h3 class="post-subtitle">
             
         </h3>
         <div class="post-content-preview">
-            迭代器（Iterable）可以被for循环，但是不能被next调用 如：list、tuple、set、dict以及生成器等
-生成器（Iterator）可以被for循环，并可以通过next调用下一个值 如：range()等可以被next()调用的对象  
-tips:生成器属于迭代器，但迭代器不一定是生成器
-详解生成器：通过yield不断生成数据，并通过next不断调用
-def myfun():......
+            一开始想试着装下php7.0的，后来编译安装搞得有点头大，转向5.6了，直接开始吧 由于yum中自带的时php5.3，要重新配置下yum源
+配置yum源追加CentOS 6.5的epel及remi源。
+# rpm -Uvh http://ftp.iij.ad.jp/pub/linux/fedora/epel/6/x86_64/epel-release-6-8.noarch.rpm# rpm ......
         </div>
     </a>
     <p class="post-meta">
         Posted by kingkk on
-        2018-02-10
+        2018-01-20
     </p>
 
 </div>
@@ -378,35 +375,23 @@ def myfun():......
 
 <div class="post-preview">
 
-    <a href="/2018/02/python函数参数/">
+    <a href="/2018/01/git安装与操作/">
         <h2 class="post-title">
-            Python-函数参数
+            Git 安装与操作
         </h2>
         <h3 class="post-subtitle">
             
         </h3>
         <div class="post-content-preview">
-            前言之前python学的有些零散与碎片化，近期就打算系统的开始学下Python，今天就去了解了下之前一直搞不太懂的可变参数，与*arg,**kw这些，今天就记录下  
-正文几种Python中的传参方式
-
-位置参数
-默认参数
-可变参数
-关键字参数
-
-位置参数就是最普通的一种传参方式：传入有且唯一的参数
-def mysum(x,y):    return x+y
-mysum(1,2)
-
-
-
-3
-......
+            不得不说，在大一开始就听说有github那么一个牛逼的社区平台，后来也在上面借鉴过许多大佬们的源码，也十分感谢各位优秀的行业人员的无私奉献。不过，至今为止，个人还是不会使用git命令，就连之前上传代码什么的也仅仅只是通过网页点击的方式，没有感到一丝便利的地方。因此，决定好好学习一下git的操作。  
+Git 安装其实不能再简单了 centos下
+yum install git
+windows......
         </div>
     </a>
     <p class="post-meta">
         Posted by kingkk on
-        2018-02-09
+        2018-01-19
     </p>
 
 </div>
@@ -414,26 +399,23 @@ mysum(1,2)
 
 <div class="post-preview">
 
-    <a href="/2018/02/php的伪随机数/">
+    <a href="/2018/01/redis缓存服务搭建/">
         <h2 class="post-title">
-            php的伪随机数
+            Redis 缓存服务搭建
         </h2>
         <h3 class="post-subtitle">
             
         </h3>
         <div class="post-content-preview">
-            前言之前打CTF的时候就有一道题，一个关键的点就是预测随机数，根据前一次给的随机数，预测出下一次的随机数。今天在看《白帽子》的时候就重点看了下，就顺便记录一下  
-正文php里两个重要的随机函数，
-
-rand()   //不指定参数时，范围0-32767
-md_rand()   //不指定参数时，范围0-2^32-1
-srand()   //给rand()函数播种
-mt_srand()  /......
+            安装 Redis1、从官网获取下载连接 http://download.redis.io/releases/redis-4.0.6.tar.gz 并通过wget方式下载,并解压
+wget http://download.redis.io/releases/redis-4.0.6.tar.gztar -xzvf redis-4.0.6.tar.gz
+2、安装依赖包
+yum install gc......
         </div>
     </a>
     <p class="post-meta">
         Posted by kingkk on
-        2018-02-07
+        2018-01-19
     </p>
 
 </div>
@@ -480,11 +462,29 @@ mt_srand()  /......
                             
                         
                             
-                            <a href="/tags/#代码审计" title="代码审计" rel="8">代码审计</a>
+                            <a href="/tags/#代码审计" title="代码审计" rel="4">代码审计</a>
                             
                         
                             
-                            <a href="/tags/#php" title="php" rel="7">php</a>
+                        
+                            
+                            <a href="/tags/#php" title="php" rel="4">php</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#java" title="java" rel="5">java</a>
+                            
+                        
+                            
+                        
                             
                         
                             
@@ -493,8 +493,6 @@ mt_srand()  /......
                         
                             
                             <a href="/tags/#writeup" title="writeup" rel="6">writeup</a>
-                            
-                        
                             
                         
                             
@@ -518,23 +516,9 @@ mt_srand()  /......
                             
                         
                             
-                            <a href="/tags/#java" title="java" rel="10">java</a>
-                            
                         
                             
                         
-                            
-                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="10">漏洞分析</a>
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#struts2" title="struts2" rel="5">struts2</a>
-                            
-                        
-                            
-                            <a href="/tags/#ThinkPHP" title="ThinkPHP" rel="2">ThinkPHP</a>
                             
                         
                             
@@ -562,7 +546,7 @@ mt_srand()  /......
                             
                         
                             
-                            <a href="/tags/#渗透测试" title="渗透测试" rel="2">渗透测试</a>
+                            <a href="/tags/#vulnhub" title="vulnhub" rel="2">vulnhub</a>
                             
                         
                             
@@ -570,7 +554,7 @@ mt_srand()  /......
                             
                         
                             
-                            <a href="/tags/#vulnhub" title="vulnhub" rel="2">vulnhub</a>
+                            <a href="/tags/#渗透测试" title="渗透测试" rel="2">渗透测试</a>
                             
                         
                             
@@ -580,9 +564,9 @@ mt_srand()  /......
                             
                         
                             
-                        
-                            
                             <a href="/tags/#ctf" title="ctf" rel="2">ctf</a>
+                            
+                        
                             
                         
                             

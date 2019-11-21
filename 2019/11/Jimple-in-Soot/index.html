@@ -13,11 +13,11 @@
 
     <title>
         
-          phar &amp; fastcgi &amp; rsync 漏洞小结 - Kingkk&#39;s Blog
+          Jimple in Soot - Kingkk&#39;s Blog
         
     </title>
 
-    <link rel="canonical" href="https://www.kingkk/2018/10/phar-fastcgi-rsync-漏洞小结/">
+    <link rel="canonical" href="https://www.kingkk/2019/11/Jimple-in-Soot/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -165,12 +165,16 @@
                 <div class="post-heading">
                     <div class="tags">
                         
+                          <a class="tag" href="/tags/#soot" title="soot">soot</a>
+                        
+                          <a class="tag" href="/tags/#语法分析" title="语法分析">语法分析</a>
+                        
                     </div>
-                    <h1>phar &amp; fastcgi &amp; rsync 漏洞小结</h1>
+                    <h1>Jimple in Soot</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
                         Posted by kingkk on
-                        2018-10-14
+                        2019-11-21
                     </span>
                 </div>
             </div>
@@ -189,63 +193,64 @@
                 col-md-10 col-md-offset-1
                 post-container">
 
-                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>几个简单复现了下的漏洞类型，但是又我之前没学过的。</p>
-<p>总是喜欢记录一下，但是又不想分开三篇来记录，就合到了一篇里面。</p>
-<h1 id="phar反序列化"><a href="#phar反序列化" class="headerlink" title="phar反序列化"></a>phar反序列化</h1><p>前段时间black hat会议上新提出的一种攻击手法（但orange师傅2017年就用这个在hitcon出过题）</p>
-<p>主要是利用<code>phar://</code>协议在解析数据的时候，会触发一次<code>unserialize</code>，从而产生反序列化</p>
-<h2 id="phar文件格式"><a href="#phar文件格式" class="headerlink" title="phar文件格式"></a>phar文件格式</h2><p>文件格式里有那么几个比较重要的参数</p>
-<h3 id="stub"><a href="#stub" class="headerlink" title="stub"></a>stub</h3><p>为一个phar的标志，格式为</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xxx<span class="meta">&lt;?php</span> xxx; <span class="comment"><span class="keyword">__HALT_COMPILER</span>();?&gt;</span></span><br></pre></td></tr></table></figure>
-<p>后面必须以<code>__HALT_COMPILER();?&gt;</code>结尾，否则无法识别</p>
-<h3 id="manifest"><a href="#manifest" class="headerlink" title="manifest"></a>manifest</h3><p>会以<strong>序列化</strong>形式存储用户自定义的<code>meta-data</code></p>
-<p>也就是这块内容在解析的时候会被反序列化，从而产生反序列化漏洞</p>
-<h3 id="file-contens"><a href="#file-contens" class="headerlink" title="file contens"></a>file contens</h3><p>被压缩的文件内容</p>
-<h3 id="signature"><a href="#signature" class="headerlink" title="signature"></a>signature</h3><p>文件签名</p>
-<h2 id="demo"><a href="#demo" class="headerlink" title="demo"></a>demo</h2><p>首先测试生成一个<code>phar</code>文件</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">TestObject</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @unlink(<span class="string">"phar.phar"</span>);</span><br><span class="line">    $phar = <span class="keyword">new</span> Phar(<span class="string">"1.phar"</span>); <span class="comment">//后缀名必须为phar</span></span><br><span class="line">    $phar-&gt;startBuffering();</span><br><span class="line">    $phar-&gt;setStub(<span class="string">"&lt;?php __HALT_COMPILER(); ?&gt;"</span>); <span class="comment">//设置stub</span></span><br><span class="line">    $o = <span class="keyword">new</span> TestObject();</span><br><span class="line">    $phar-&gt;setMetadata($o); <span class="comment">//将自定义的meta-data存入manifest</span></span><br><span class="line">    $phar-&gt;addFromString(<span class="string">"test.txt"</span>, <span class="string">"test"</span>); <span class="comment">//添加要压缩的文件</span></span><br><span class="line">    <span class="comment">//签名自动计算</span></span><br><span class="line">    $phar-&gt;stopBuffering();</span><br></pre></td></tr></table></figure>
-<p>主要要设置的就三个值</p>
-<ul>
-<li><code>setStub</code>： 一般为固定值 <code>&lt;?php __HALT_COMPILER(); ?&gt;</code>或者也可以添加一些自定义文件头之类的</li>
-<li><code>setMetadata</code>：需要反序列化的类</li>
-<li><code>addFormString</code>：文件名和文件内容可以随意填，这里文件名（这里为<code>test.txt</code>到后续需要使用</li>
-</ul>
-<p>重命名为<code>1.jpg</code>，然后尝试触发</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">TestObject</span> </span>&#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">echo</span> <span class="string">'Destruct called'</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    $filename = <span class="string">'phar://1.jpg/test.txt'</span>;</span><br><span class="line">    file_exists($filename); </span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phar-fastcgi-rsync-漏洞小结/2.png" alt></p>
-<p><code>test.txt</code>就是之前的文件名，成功反序列化</p>
-<p>而且可以触发的函数也比较多</p>
-<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/(phar-fastcgi-rsync-漏洞小结/1.png" alt></p>
-<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><p>需要注意的就是，文件存在的时候需要先删掉才能重建</p>
-<p>文件后缀必须为<code>.phar</code>，但是生成好之后可以改</p>
-<p>这样，无疑极大的拓展了反序列化的攻击面，无需强制使用<code>unserialize</code>。只要能完全控制文件名，甚至文件名的前面一部分，就可以触发反序列化。感觉触发的场景无疑多了许多，主要任务就是寻找pop chain了。</p>
-<h1 id="Fast-cgi未授权访问"><a href="#Fast-cgi未授权访问" class="headerlink" title="Fast-cgi未授权访问"></a>Fast-cgi未授权访问</h1><h2 id="漏洞原理"><a href="#漏洞原理" class="headerlink" title="漏洞原理"></a>漏洞原理</h2><p>Fastcgi是一种跟高效的php与webserver之间通信的协议。</p>
-<p>PHP-FPM是一个fastcgi协议解析器，webserver将用户请求按照fastcgi的规则打包好后传给FPM。</p>
-<p>当fastcgi端口（默认为9000）暴露在公网中时，就可以伪造fastcgi协议通信内容，从而执行php</p>
-<p>当端口没有暴露的时候，也是可以通过SSRF进行攻击的</p>
-<p>具体原理和分析可以看<a href="https://www.leavesongs.com/PENETRATION/fastcgi-and-php-fpm.html" target="_blank" rel="noopener">https://www.leavesongs.com/PENETRATION/fastcgi-and-php-fpm.html</a></p>
-<h2 id="复现"><a href="#复现" class="headerlink" title="复现"></a>复现</h2><p>漏洞环境用p神的vulhub</p>
-<p><a href="https://github.com/vulhub/vulhub/tree/master/fpm" target="_blank" rel="noopener">https://github.com/vulhub/vulhub/tree/master/fpm</a></p>
-<p>脚本</p>
-<p><a href="https://github.com/kingkaki/Exploit-scripts/blob/master/fast-cgi/fpm.py" target="_blank" rel="noopener">https://github.com/kingkaki/Exploit-scripts/blob/master/fast-cgi/fpm.py</a></p>
-<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phar-fastcgi-rsync-漏洞小结/3.png" alt></p>
-<h1 id="rsync-未授权访问漏洞"><a href="#rsync-未授权访问漏洞" class="headerlink" title="rsync 未授权访问漏洞"></a>rsync 未授权访问漏洞</h1><blockquote>
-<p>rsync是Linux下一款数据备份工具，支持通过rsync协议、ssh协议进行远程文件传输。其中rsync协议默认监听873端口，如果目标开启了rsync服务，并且没有配置ACL或访问密码，我们将可以读写目标服务器文件。</p>
-</blockquote>
-<p>在没有设置密码的时候，就可以任意文件读取和写入，在内网渗透的时候用处较大</p>
-<p>可以通过访问<code>/src</code>目录看到备份了的文件</p>
-<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rsync rsync:<span class="regexp">//</span>localhost:<span class="number">873</span><span class="regexp">/src/</span></span><br></pre></td></tr></table></figure>
-<p>或者</p>
-<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">rsync</span> 127<span class="selector-class">.0</span><span class="selector-class">.0</span><span class="selector-class">.1</span><span class="selector-pseudo">::src</span></span><br></pre></td></tr></table></figure>
-<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phar-fastcgi-rsync-漏洞小结/4.png" alt></p>
-<p>任意文件下载</p>
-<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rsync -av  rsync:<span class="regexp">//</span>localhost:<span class="number">873</span><span class="regexp">/src/</span>etc<span class="regexp">/passwd ./</span></span><br></pre></td></tr></table></figure>
-<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phar-fastcgi-rsync-漏洞小结/5.png" alt></p>
-<p>还可以写入文件，例如写一个定时任务，反弹shell</p>
-<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rsync -av shell rsync:<span class="regexp">//</span>localhost:<span class="number">873</span><span class="regexp">/src/</span>etc<span class="regexp">/cron.d/</span>shell</span><br></pre></td></tr></table></figure>
-<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phar-fastcgi-rsync-漏洞小结/6.png" alt></p>
-<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="https://paper.seebug.org/680/" target="_blank" rel="noopener">https://paper.seebug.org/680/</a></p>
-<p><a href="https://www.leavesongs.com/PENETRATION/fastcgi-and-php-fpm.html" target="_blank" rel="noopener">https://www.leavesongs.com/PENETRATION/fastcgi-and-php-fpm.html</a></p>
-<p><a href="https://github.com/vulhub/vulhub" target="_blank" rel="noopener">https://github.com/vulhub/vulhub</a></p>
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>还是一篇类似于笔记一样的东西，我不保证百分百的准确，只是以一种自己能看懂的方式，记录一些自己理解的东西。</p>
+<p>主要记录下<code>jimple</code>，也就是Soot中最擅长处理的一种中间代码。（图来源网络）</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20191020201758.png" alt></p>
+<p>可以看到还算是一种人类比较好理解的中间代码，并且将一些编译中做的操作给显示的显现了出来（因为本来就是从java字节码反编译过来的）</p>
+<p>Soot中对这种中间代码建立了一套比较完整的体系来描述，方便人们通过程序来分析代码。</p>
+<h1 id="几个主要结构"><a href="#几个主要结构" class="headerlink" title="几个主要结构"></a>几个主要结构</h1><p><code>jimple</code>的主要数据结构位于<code>soot.jimple</code>，但这里主要是定义好的一些接口，具体的实现类位于<code>soot.jimple.internal</code>中，通过IDEA生的关系图可以大概看到对应关系，这篇笔记也主要围绕这个关系图展开。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/Package%20internal.png" alt></p>
+<h2 id="Stmt"><a href="#Stmt" class="headerlink" title="Stmt"></a>Stmt</h2><p>应该就是<code>statement</code>语句的意思，有很多继承他的类，用来描述不同的语句。</p>
+<h3 id="AbstractDefinitionStmt"><a href="#AbstractDefinitionStmt" class="headerlink" title="AbstractDefinitionStmt"></a>AbstractDefinitionStmt</h3><p>指一个赋值语句</p>
+<p>这个语句的左边通常是一个变量</p>
+<p>右边可能是任何其他东西，例如语句，表达式，另一个变量，一些常量等等</p>
+<h4 id="JAssignStmt"><a href="#JAssignStmt" class="headerlink" title="JAssignStmt"></a>JAssignStmt</h4><p>一个<em>正常</em>的赋值语句，例如，我们将一个变量赋值给变量<code>$r5</code></p>
+<figure class="highlight gams"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"><span class="meta-keyword">$r5</span> = newarray (java.lang.Object)[0]</span></span><br></pre></td></tr></table></figure>
+<h4 id="JIdentityStmt"><a href="#JIdentityStmt" class="headerlink" title="JIdentityStmt"></a>JIdentityStmt</h4><p>指的是一些非显式的内部赋值语句</p>
+<p>例如在真正执行代码时，程序会帮你把从参数传入的变量，赋值给一个临时变量，给函数内部调用</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">r1 :</span>= <span class="meta">@parameter</span><span class="string">0:</span> java.lang.String</span><br></pre></td></tr></table></figure>
+<p>再例如class中指向本身的this指针，都会进行一次非显示的赋值操作</p>
+<figure class="highlight avrasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">r0</span> := @this: <span class="keyword">com</span>.kingkk.test.Controller</span><br></pre></td></tr></table></figure>
+<h3 id="JInvokeStmt"><a href="#JInvokeStmt" class="headerlink" title="JInvokeStmt"></a>JInvokeStmt</h3><p> 当一个变量，调用本身的方法</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">specialinvoke <span class="variable">$r4</span>.&lt;org<span class="selector-class">.springframework</span><span class="selector-class">.web</span><span class="selector-class">.client</span><span class="selector-class">.RestTemplate</span>: void &lt;init&gt;()&gt;()</span><br></pre></td></tr></table></figure>
+<h3 id="AbstractSwitchStmt"><a href="#AbstractSwitchStmt" class="headerlink" title="AbstractSwitchStmt"></a>AbstractSwitchStmt</h3><p>switch语句主要由于JVM对于不同的Switch语句，会生成不同的操作指令，从而也就有了两种Switch语句</p>
+<h4 id="JLookupSwitchStmt"><a href="#JLookupSwitchStmt" class="headerlink" title="JLookupSwitchStmt"></a>JLookupSwitchStmt</h4><p>对应LookupSwitch</p>
+<h4 id="JTableSwitchStmt"><a href="#JTableSwitchStmt" class="headerlink" title="JTableSwitchStmt"></a>JTableSwitchStmt</h4><p>对应TableSwitch</p>
+<h3 id="JIfStmt"><a href="#JIfStmt" class="headerlink" title="JIfStmt"></a>JIfStmt</h3><p>if语句</p>
+<h3 id="JBreakpointStmt"><a href="#JBreakpointStmt" class="headerlink" title="JBreakpointStmt"></a>JBreakpointStmt</h3><p>break语句</p>
+<h3 id="JRetStmt"><a href="#JRetStmt" class="headerlink" title="JRetStmt"></a>JRetStmt</h3><p>return 语句</p>
+<h4 id="JReturnVoidStmt"><a href="#JReturnVoidStmt" class="headerlink" title="JReturnVoidStmt"></a>JReturnVoidStmt</h4><p>return void</p>
+<h4 id="JGotoStmt"><a href="#JGotoStmt" class="headerlink" title="JGotoStmt"></a>JGotoStmt</h4><p>goto语句</p>
+<h3 id="JNopStmt"><a href="#JNopStmt" class="headerlink" title="JNopStmt"></a>JNopStmt</h3><p>我也不知道..</p>
+<h3 id="AbstractOpStmt"><a href="#AbstractOpStmt" class="headerlink" title="AbstractOpStmt"></a>AbstractOpStmt</h3><p>这个类下面的我也不太熟，先列出来</p>
+<h4 id="JThrowStmt"><a href="#JThrowStmt" class="headerlink" title="JThrowStmt"></a>JThrowStmt</h4><p>这是throw语句（已验证</p>
+<h4 id="JExitMonitorStmt"><a href="#JExitMonitorStmt" class="headerlink" title="JExitMonitorStmt"></a>JExitMonitorStmt</h4><h4 id="JEnterMonitorStmt"><a href="#JEnterMonitorStmt" class="headerlink" title="JEnterMonitorStmt"></a>JEnterMonitorStmt</h4><h4 id="JRetStmt-1"><a href="#JRetStmt-1" class="headerlink" title="JRetStmt"></a>JRetStmt</h4><h2 id="Expr"><a href="#Expr" class="headerlink" title="Expr"></a>Expr</h2><p>应该就是<code>expression</code>表达式的意思</p>
+<h3 id="AbstractInvokeExpr"><a href="#AbstractInvokeExpr" class="headerlink" title="AbstractInvokeExpr"></a>AbstractInvokeExpr</h3><p>只一个调用了函数的表达式，比如 <code>user.setName(&quot;kingkk&quot;)</code></p>
+<p>里面很多主要是根据JVM的操作指令来进行的描述</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/ScreenClip.png" alt></p>
+<h4 id="JStaticInvokeExpr"><a href="#JStaticInvokeExpr" class="headerlink" title="JStaticInvokeExpr"></a>JStaticInvokeExpr</h4><p>主要指的是一个static静态方法的调用</p>
+<h4 id="JDynamicInvokeExpr"><a href="#JDynamicInvokeExpr" class="headerlink" title="JDynamicInvokeExpr"></a>JDynamicInvokeExpr</h4><p>一般是一些invoke的动态调用？（我也不是特别懂</p>
+<h4 id="AbstractInstanceInvokeExpr"><a href="#AbstractInstanceInvokeExpr" class="headerlink" title="AbstractInstanceInvokeExpr"></a>AbstractInstanceInvokeExpr</h4><p>指的是一个变量调用自身的方法，但根据情况，还可以细分</p>
+<h5 id="JVirtualInvokeExpr"><a href="#JVirtualInvokeExpr" class="headerlink" title="JVirtualInvokeExpr"></a>JVirtualInvokeExpr</h5><p>调用自身的方法</p>
+<h5 id="JInterfaceInvokeExpr"><a href="#JInterfaceInvokeExpr" class="headerlink" title="JInterfaceInvokeExpr"></a>JInterfaceInvokeExpr</h5><p>调用接口方法</p>
+<h5 id="JSpecialInvokeExpr"><a href="#JSpecialInvokeExpr" class="headerlink" title="JSpecialInvokeExpr"></a>JSpecialInvokeExpr</h5><p>一般是一些初始化、父类、私有等方法</p>
+<h3 id="AbstractBinopExpr"><a href="#AbstractBinopExpr" class="headerlink" title="AbstractBinopExpr"></a>AbstractBinopExpr</h3><p>一些二进制的数字操作</p>
+<p>例如加减乘除，逻辑且或非，一些比较操作，以及一些位运算，这里就不具体列了</p>
+<h3 id="JNewExpr"><a href="#JNewExpr" class="headerlink" title="JNewExpr"></a>JNewExpr</h3><p>new 一个类表达式</p>
+<h3 id="JNewArrayExpr"><a href="#JNewArrayExpr" class="headerlink" title="JNewArrayExpr"></a>JNewArrayExpr</h3><p>new 一个数组</p>
+<h3 id="JNewMultiArrayExpr"><a href="#JNewMultiArrayExpr" class="headerlink" title="JNewMultiArrayExpr"></a>JNewMultiArrayExpr</h3><p>应该是指一个多维数组</p>
+<h3 id="JCastExpr"><a href="#JCastExpr" class="headerlink" title="JCastExpr"></a>JCastExpr</h3><p>强制类型转换</p>
+<h3 id="JInstanceOfExpr"><a href="#JInstanceOfExpr" class="headerlink" title="JInstanceOfExpr"></a>JInstanceOfExpr</h3><p>instanceof</p>
+<h3 id="AbstractUnopExpr"><a href="#AbstractUnopExpr" class="headerlink" title="AbstractUnopExpr"></a>AbstractUnopExpr</h3><p>这下面的类我也不太清楚</p>
+<h4 id="JNegExpr"><a href="#JNegExpr" class="headerlink" title="JNegExpr"></a>JNegExpr</h4><h4 id="JLengthExpr"><a href="#JLengthExpr" class="headerlink" title="JLengthExpr"></a>JLengthExpr</h4><h2 id="其余一些"><a href="#其余一些" class="headerlink" title="其余一些"></a>其余一些</h2><p>其余剩下的一下常用的，就统一写这了</p>
+<h3 id="Constant"><a href="#Constant" class="headerlink" title="Constant"></a>Constant</h3><p>常量</p>
+<h4 id="StringConstant"><a href="#StringConstant" class="headerlink" title="StringConstant"></a>StringConstant</h4><p>字符串常量</p>
+<h4 id="NumberConstant"><a href="#NumberConstant" class="headerlink" title="NumberConstant"></a>NumberConstant</h4><p>数字常量</p>
+<h3 id="IdentityRef"><a href="#IdentityRef" class="headerlink" title="IdentityRef"></a>IdentityRef</h3><p>本身的一些引用</p>
+<h4 id="ParameterRef"><a href="#ParameterRef" class="headerlink" title="ParameterRef"></a>ParameterRef</h4><p>函数参数</p>
+<h4 id="ThisRef"><a href="#ThisRef" class="headerlink" title="ThisRef"></a>ThisRef</h4><p>this指针</p>
+<h4 id="CaughtExceptionRef"><a href="#CaughtExceptionRef" class="headerlink" title="CaughtExceptionRef"></a>CaughtExceptionRef</h4><p>捕获到的异常</p>
+<h3 id="JimpleLocal"><a href="#JimpleLocal" class="headerlink" title="JimpleLocal"></a>JimpleLocal</h3><p>Local变量</p>
 
 
                 <hr>
@@ -254,13 +259,9 @@
 
                 <ul class="pager">
                     
-                        <li class="previous">
-                            <a href="/2018/10/Thinkphp-聚合查询漏洞/" data-toggle="tooltip" data-placement="top" title="ThinkPHP 聚合查询漏洞">&larr; Previous Post</a>
-                        </li>
-                    
                     
                         <li class="next">
-                            <a href="/2018/10/护网杯-web/" data-toggle="tooltip" data-placement="top" title="护网杯-web">Next Post &rarr;</a>
+                            <a href="/2019/11/SQLi-in-Java/" data-toggle="tooltip" data-placement="top" title="SQLi in Java">Next Post &rarr;</a>
                         </li>
                     
                 </ul>
@@ -287,6 +288,10 @@
                     <h5><a href="/tags/">FEATURED TAGS</a></h5>
                     <div class="tags">
                        
+                          <a class="tag" href="/tags/#soot" title="soot">soot</a>
+                        
+                          <a class="tag" href="/tags/#语法分析" title="语法分析">语法分析</a>
+                        
                     </div>
                 </section>
                 
