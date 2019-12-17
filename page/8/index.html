@@ -184,30 +184,6 @@
 
 <div class="post-preview">
 
-    <a href="/2018/01/mysql搭建/">
-        <h2 class="post-title">
-            Mysql搭建
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            Mysql安装1、由于我是CentOs6.5的版本，直接用yum就可以了
-yum install mysql-server
-假如是CentOs7及以上的版本，默认数据库为mariadb，要先移除mariadb，然后再进行安装
-yum remove mariadb-libs.x86_64     #版本号视具体版本而定wget http://dev.mysql.com/get/mysql57-......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2018-01-18
-    </p>
-
-</div>
-<hr>
-
-<div class="post-preview">
-
     <a href="/2018/01/webserver搭建/">
         <h2 class="post-title">
             Webserver 搭建
@@ -414,6 +390,34 @@ LifoQueue(maxsize=0) 创建一个后入先出队列（个人感......
 先介绍一下锁引入的原因以及锁的主要是为了结尾哪一类的问题。先看如下的试例：
 #encoding=utf8from atexit import registerfrom random import randrangefrom threading import Thread, currentThreadfrom time import sleep, ctime
 class CleanOut......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2017-12-07
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2017/12/python-threading模块中thread类简介/">
+        <h2 class="post-title">
+            Python threading模块中Thread类简介
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            Thread类threading中的Thread类是主要的执行对象。有如下的对象属性以及方法。
+Thread 对象数据属性
+name  线程名
+ident  线程的标识符
+daemon  bool标识，表示该线程是否为守护线程
+
+Thread 对象方法
+__init__(self, group=None, target=None, name=None, args=(), kwargs=Non......
         </div>
     </a>
     <p class="post-meta">
