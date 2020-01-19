@@ -90,14 +90,14 @@
 
                         
                         <li>
-                            <a href="/archives/">Archives</a>
+                            <a href="/about/">About</a>
                         </li>
                         
                     
 
                         
                         <li>
-                            <a href="/about/">About</a>
+                            <a href="/archives/">Archives</a>
                         </li>
                         
                     
@@ -181,6 +181,27 @@
             
                 <!-- Main Content -->
 
+
+<div class="post-preview">
+
+    <a href="/2018/02/记录一次hgame-ctf的注入/">
+        <h2 class="post-title">
+            记录一次hgame ctf的注入
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            前言组里莫名开始在线上刷hgame，一个寒假没碰过这些，而且不得不说杭电的题目有点难，可能也是自己太菜了，总之这回的week4差不多无从下手。 然后今天要记录的是这道题根据那个描述，应该能猜到有文件泄露，找了下备份文件index.php~123456789101112131415161718192021222324&lt;?php error_reporting(0); include("s......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-02-28
+    </p>
+
+</div>
+<hr>
 
 <div class="post-preview">
 
@@ -418,27 +439,6 @@ mt_srand()  /......
 </div>
 <hr>
 
-<div class="post-preview">
-
-    <a href="/2018/02/令人头大的crlf注入/">
-        <h2 class="post-title">
-            令人头大的CRLF注入
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            由于在重温《白帽子讲web安全》这本书，在注入攻击一章发现了这个新奇的crlf注入攻击，甚至可以改变http的报文，并将http头的部分当成httpbody输出。先大致解释下原理把。 就是在可以控制http的一些地方，插入%0d%0a，转义后就是\r\n，也就是换行符，从而破坏http报文。 例如在set-cookie后插入1%0d%0a%0d%0aalert(/xss/)，在返回的报文中就......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2018-02-07
-    </p>
-
-</div>
-<hr>
-
 
 
 <!-- Pager -->
@@ -478,41 +478,11 @@ mt_srand()  /......
                     <div class="tags">
                         
                             
-                        
-                            
-                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#php" title="php" rel="4">php</a>
+                            <a href="/tags/#writeup" title="writeup" rel="6">writeup</a>
                             
                         
                             
                             <a href="/tags/#代码审计" title="代码审计" rel="4">代码审计</a>
-                            
-                        
-                            
-                            <a href="/tags/#java" title="java" rel="6">java</a>
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#writeup" title="writeup" rel="6">writeup</a>
                             
                         
                             
@@ -521,10 +491,6 @@ mt_srand()  /......
                         
                             
                             <a href="/tags/#反序列化" title="反序列化" rel="4">反序列化</a>
-                            
-                        
-                            
-                        
                             
                         
                             
@@ -540,17 +506,35 @@ mt_srand()  /......
                             
                         
                             
-                        
-                            
-                        
-                            
-                            <a href="/tags/#XXE" title="XXE" rel="2">XXE</a>
+                            <a href="/tags/#java" title="java" rel="6">java</a>
                             
                         
                             
                         
                             
                         
+                            
+                            <a href="/tags/#Java" title="Java" rel="2">Java</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#php" title="php" rel="4">php</a>
                             
                         
                             
@@ -559,6 +543,10 @@ mt_srand()  /......
                         
                             
                         
+                            
+                        
+                            
+                            <a href="/tags/#XXE" title="XXE" rel="3">XXE</a>
                             
                         
                             
@@ -585,6 +573,20 @@ mt_srand()  /......
                         
                             
                             <a href="/tags/#ctf" title="ctf" rel="2">ctf</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
                             
                         
                             
@@ -698,7 +700,7 @@ mt_srand()  /......
 
                 </ul>
                 <p class="copyright text-muted">
-                    Copyright &copy; Kingkk&#39;s Blog 2019 
+                    Copyright &copy; Kingkk&#39;s Blog 2020 
                     浙ICP备17041487号
                     <br>
                     Theme by <a href="http://huangxuan.me">Hux</a> 
