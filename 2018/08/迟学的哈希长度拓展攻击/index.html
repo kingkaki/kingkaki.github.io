@@ -90,13 +90,6 @@
 
                         
                         <li>
-                            <a href="/about/">About</a>
-                        </li>
-                        
-                    
-
-                        
-                        <li>
                             <a href="/archives/">Archives</a>
                         </li>
                         
@@ -105,6 +98,13 @@
                         
                         <li>
                             <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
                         </li>
                         
                     
@@ -194,7 +194,7 @@
                 <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本来这个哈希长度扩展攻击应该在一年前刷实验吧的时候就应该解决的。<br>但是由于那时候实在看不懂，再加上有点偷懒，就把这部分给跳了<br>时隔一年，在学习中偶尔有碰到这个（虽然不是很多），感觉没有想象中那么鸡肋，就决定重新捡起来学习一下  </p>
 <p>不过，就算过了一年，发现依旧是那么菜，看了一整天的分析博客，才勉强理清逻辑  </p>
 <h1 id="攻击的用途和原理"><a href="#攻击的用途和原理" class="headerlink" title="攻击的用途和原理"></a>攻击的用途和原理</h1><h2 id="用途"><a href="#用途" class="headerlink" title="用途"></a>用途</h2><p>感觉这个还是很重要的，更多时候需要知道的是怎么用，在什么环境下才能利用这种漏洞  </p>
-<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">在 $hash = md5($secret.$key) 中已知 $hash 和 $key 以及 $secret 的长度时  </span><br><span class="line">可以找到另一个 $_hash 和 $_key 使得 $_hash = md5($secrect.$_key) 成立</span><br></pre></td></tr></table></figure>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">在 $hash = md5($secret.$key) 中已知 $hash 和 $key 以及 $secret 的长度时  </span><br><span class="line">可以找到另一个 $_hash 和 $_key 使得 $_hash = md5($secrect.$_key) 成立</span><br></pre></td></tr></table></figure>
 <h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>网上有很多，也很清楚的分析了md5加密的过程，我这里就不赘述<br>贴几个感觉比较好的博客<br><a href="http://seaii-blog.com/index.php/2017/05/12/56.html" target="_blank" rel="noopener">http://seaii-blog.com/index.php/2017/05/12/56.html</a><br><a href="http://archimesan.me/2017/12/23/hash长度扩展攻击/" target="_blank" rel="noopener">http://archimesan.me/2017/12/23/hash长度扩展攻击/</a><br><a href="http://blog.chinaunix.net/uid-27070210-id-3255947.html" target="_blank" rel="noopener">http://blog.chinaunix.net/uid-27070210-id-3255947.html</a>  </p>
 <p>具体的payload构造过程下面通过一个ctf的题目来引入</p>
 <h1 id="实验吧中的ctf题"><a href="#实验吧中的ctf题" class="headerlink" title="实验吧中的ctf题"></a>实验吧中的ctf题</h1><p>代码如下<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">$flag = <span class="string">"XXXXXXXXXXXXXXXXXXXXXXX"</span>;</span><br><span class="line">$secret = <span class="string">"XXXXXXXXXXXXXXX"</span>; <span class="comment">// This secret is 15 characters long for security!</span></span><br><span class="line"></span><br><span class="line">$username = $_POST[<span class="string">"username"</span>];</span><br><span class="line">$password = $_POST[<span class="string">"password"</span>];</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (!<span class="keyword">empty</span>($_COOKIE[<span class="string">"getmein"</span>])) &#123;</span><br><span class="line">    <span class="keyword">if</span> (urldecode($username) === <span class="string">"admin"</span> &amp;&amp; urldecode($password) != <span class="string">"admin"</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> ($COOKIE[<span class="string">"getmein"</span>] === md5($secret . urldecode($username . $password))) &#123;</span><br><span class="line">            <span class="keyword">echo</span> <span class="string">"Congratulations! You are a registered user.\n"</span>;</span><br><span class="line">            <span class="keyword">die</span> (<span class="string">"The flag is "</span>. $flag);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">die</span> (<span class="string">"Your cookies don't match up! STOP HACKING THIS SITE."</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">die</span> (<span class="string">"You are not an admin! LEAVE."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">setcookie(<span class="string">"sample-hash"</span>, md5($secret . urldecode(<span class="string">"admin"</span> . <span class="string">"admin"</span>)), time() + (<span class="number">60</span> * <span class="number">60</span> * <span class="number">24</span> * <span class="number">7</span>));</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">empty</span>($_COOKIE[<span class="string">"source"</span>])) &#123;</span><br><span class="line">    setcookie(<span class="string">"source"</span>, <span class="number">0</span>, time() + (<span class="number">60</span> * <span class="number">60</span> * <span class="number">24</span> * <span class="number">7</span>));</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> ($_COOKIE[<span class="string">"source"</span>] != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">""</span>; <span class="comment">// This source code is outputted here</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>

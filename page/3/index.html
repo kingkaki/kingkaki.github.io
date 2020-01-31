@@ -90,13 +90,6 @@
 
                         
                         <li>
-                            <a href="/about/">About</a>
-                        </li>
-                        
-                    
-
-                        
-                        <li>
                             <a href="/archives/">Archives</a>
                         </li>
                         
@@ -105,6 +98,13 @@
                         
                         <li>
                             <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
                         </li>
                         
                     
@@ -181,6 +181,31 @@
             
                 <!-- Main Content -->
 
+
+<div class="post-preview">
+
+    <a href="/2018/10/Apache-Nginx中Host头攻击的一些差异/">
+        <h2 class="post-title">
+            Apache/Nginx中Host头攻击的一些差异
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            Host header
+服务器的域名(用于虚拟主机 )，以及服务器所监听的传输控制协议端口号。如果所请求的端口是对应的服务的标准端口，则端口号可被省略。
+自超文件传输协议版本1.1（HTTP/1.1）开始便是必需字段。
+
+以上是维基百科中对于Host头部的说明。可以看到Host头部并非是用于区别发送到哪台主机的字段。而是用于区分一台主机上不同的虚拟主机。（可以在Apache和Nginx中配置......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-10-12
+    </p>
+
+</div>
+<hr>
 
 <div class="post-preview">
 
@@ -410,31 +435,6 @@ redis还支持本地存储，也就导致了任意文件......
 </div>
 <hr>
 
-<div class="post-preview">
-
-    <a href="/2018/08/docker-笔记/">
-        <h2 class="post-title">
-            docker 笔记
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            前言上学期寒假开始就稍微了解了下docker，无奈用的不是很多，也不是很懂
-后来被强制性要求使用了几次docker（不得不说，安装配置问题一直令我很头大），就也算勉强能起来一个服务了
-用了几次之后就决定系统的总结一下docker的使用，因为只是一些总结，更多的只是针对于我个人用的，不官方，不权威，不系统
-Docker的三大概念镜像（Images）
-Docker 镜像是一个特殊的文件系统，除了......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2018-08-09
-    </p>
-
-</div>
-<hr>
-
 
 
 <!-- Pager -->
@@ -474,7 +474,17 @@ Docker 镜像是一个特殊的文件系统，除了......
                     <div class="tags">
                         
                             
-                            <a href="/tags/#writeup" title="writeup" rel="6">writeup</a>
+                        
+                            
+                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#java" title="java" rel="7">java</a>
+                            
+                        
                             
                         
                             
@@ -484,9 +494,35 @@ Docker 镜像是一个特殊的文件系统，除了......
                             
                         
                             
+                            <a href="/tags/#php" title="php" rel="4">php</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#writeup" title="writeup" rel="6">writeup</a>
+                            
+                        
+                            
+                        
+                            
                         
                             
                             <a href="/tags/#反序列化" title="反序列化" rel="4">反序列化</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#语法分析" title="语法分析" rel="2">语法分析</a>
+                            
+                        
                             
                         
                             
@@ -500,41 +536,11 @@ Docker 镜像是一个特殊的文件系统，除了......
                             
                         
                             
-                        
-                            
-                            <a href="/tags/#java" title="java" rel="6">java</a>
-                            
-                        
-                            
-                        
-                            
-                        
-                            
                             <a href="/tags/#Java" title="Java" rel="2">Java</a>
                             
                         
                             
                         
-                            
-                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#php" title="php" rel="4">php</a>
-                            
-                        
-                            
-                            <a href="/tags/#weblogic" title="weblogic" rel="2">weblogic</a>
                             
                         
                             
@@ -548,9 +554,11 @@ Docker 镜像是一个特殊的文件系统，除了......
                             
                         
                             
+                            <a href="/tags/#weblogic" title="weblogic" rel="2">weblogic</a>
+                            
                         
                             
-                            <a href="/tags/#vulnhub" title="vulnhub" rel="2">vulnhub</a>
+                        
                             
                         
                             
@@ -562,23 +570,17 @@ Docker 镜像是一个特殊的文件系统，除了......
                             
                         
                             
+                            <a href="/tags/#vulnhub" title="vulnhub" rel="2">vulnhub</a>
+                            
                         
                             
                             <a href="/tags/#xss" title="xss" rel="2">xss</a>
                             
                         
                             
+                        
+                            
                             <a href="/tags/#ctf" title="ctf" rel="2">ctf</a>
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
                             
                         
                             

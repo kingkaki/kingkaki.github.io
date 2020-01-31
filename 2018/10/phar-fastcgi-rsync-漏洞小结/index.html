@@ -90,13 +90,6 @@
 
                         
                         <li>
-                            <a href="/about/">About</a>
-                        </li>
-                        
-                    
-
-                        
-                        <li>
                             <a href="/archives/">Archives</a>
                         </li>
                         
@@ -105,6 +98,13 @@
                         
                         <li>
                             <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
                         </li>
                         
                     
@@ -195,7 +195,7 @@
 <p>主要是利用<code>phar://</code>协议在解析数据的时候，会触发一次<code>unserialize</code>，从而产生反序列化</p>
 <h2 id="phar文件格式"><a href="#phar文件格式" class="headerlink" title="phar文件格式"></a>phar文件格式</h2><p>文件格式里有那么几个比较重要的参数</p>
 <h3 id="stub"><a href="#stub" class="headerlink" title="stub"></a>stub</h3><p>为一个phar的标志，格式为</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xxx<span class="php"><span class="meta">&lt;?php</span> xxx; <span class="comment"><span class="keyword">__HALT_COMPILER</span>();?&gt;</span></span></span><br></pre></td></tr></table></figure>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xxx<span class="meta">&lt;?php</span> xxx; <span class="comment"><span class="keyword">__HALT_COMPILER</span>();?&gt;</span></span><br></pre></td></tr></table></figure>
 <p>后面必须以<code>__HALT_COMPILER();?&gt;</code>结尾，否则无法识别</p>
 <h3 id="manifest"><a href="#manifest" class="headerlink" title="manifest"></a>manifest</h3><p>会以<strong>序列化</strong>形式存储用户自定义的<code>meta-data</code></p>
 <p>也就是这块内容在解析的时候会被反序列化，从而产生反序列化漏洞</p>
