@@ -90,14 +90,14 @@
 
                         
                         <li>
-                            <a href="/archives/">Archives</a>
+                            <a href="/tags/">Tags</a>
                         </li>
                         
                     
 
                         
                         <li>
-                            <a href="/tags/">Tags</a>
+                            <a href="/archives/">Archives</a>
                         </li>
                         
                     
@@ -181,6 +181,29 @@
             
                 <!-- Main Content -->
 
+
+<div class="post-preview">
+
+    <a href="/2017/12/sqli-labs练习(less1-10)/">
+        <h2 class="post-title">
+            sqli-labs练习（less1-10）
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            为了学习的便利性，我在一些文件中都出了sql语句
+less-1先理清一下注入动机：目的是为了获取账号密码，于是得获取对应的表名、字段名、数据库名，并得绕过一些设定，从而获取你想要的数据库中的数据。 自己做个一个注入流程：  接下来开始注入： 输入单引号，引起错误，说明存在注入点  通过#将后面引号注释掉（此处直接打#并没有进行编码，要自己编码为%23），成功注释了后面的单引号  
+通过ord......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2017-12-10
+    </p>
+
+</div>
+<hr>
 
 <div class="post-preview">
 
@@ -406,28 +429,6 @@ a+   追加打开文件，可读可写，如果文件不存在......
 </div>
 <hr>
 
-<div class="post-preview">
-
-    <a href="/2017/08/关于阿里云一键安装之后phpwind首页的修改/">
-        <h2 class="post-title">
-            关于阿里云一键安装之后phpwind首页的修改
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            相信不少用阿里云一键部署web的人都出现过这种情况，网站的首页莫名其妙被导向了安装包中自带的phpwind。今天就来说一下重新自定义网站首页的方法。（PS:只是想知道修改方法可以直接跳到第五部分）1.首先一开始我也是各种百度和谷歌，发现网上介绍的大致如下两种方法：
-修改/alidata/server/httpd-2.4.10/conf/下的httpd.conf配置文件中下面那两行代码的文件位......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2017-08-31
-    </p>
-
-</div>
-<hr>
-
 
 
 <!-- Pager -->
@@ -438,6 +439,10 @@ a+   追加打开文件，可读可写，如果文件不存在......
             <a href="/page/8/">&larr; Newer Posts</a>
         </li>
     
+    
+        <li class="next">
+            <a href="/page/10/">Older Posts &rarr;</a>
+        </li>
     
 </ul>
 
@@ -463,6 +468,36 @@ a+   追加打开文件，可读可写，如果文件不存在......
                     <div class="tags">
                         
                             
+                            <a href="/tags/#writeup" title="writeup" rel="6">writeup</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#代码审计" title="代码审计" rel="4">代码审计</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#反序列化" title="反序列化" rel="4">反序列化</a>
+                            
+                        
+                            
+                            <a href="/tags/#python" title="python" rel="2">python</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#java" title="java" rel="8">java</a>
+                            
+                        
+                            
+                        
+                            
                         
                             
                             <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
@@ -471,13 +506,15 @@ a+   追加打开文件，可读可写，如果文件不存在......
                             
                         
                             
-                            <a href="/tags/#java" title="java" rel="7">java</a>
-                            
                         
                             
                         
                             
-                            <a href="/tags/#代码审计" title="代码审计" rel="4">代码审计</a>
+                            <a href="/tags/#语法分析" title="语法分析" rel="2">语法分析</a>
+                            
+                        
+                            
+                            <a href="/tags/#Java" title="Java" rel="2">Java</a>
                             
                         
                             
@@ -493,45 +530,9 @@ a+   追加打开文件，可读可写，如果文件不存在......
                             
                         
                             
-                            <a href="/tags/#writeup" title="writeup" rel="6">writeup</a>
-                            
                         
                             
-                        
-                            
-                        
-                            
-                            <a href="/tags/#反序列化" title="反序列化" rel="4">反序列化</a>
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#语法分析" title="语法分析" rel="2">语法分析</a>
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#python" title="python" rel="2">python</a>
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#Java" title="Java" rel="2">Java</a>
-                            
-                        
-                            
-                        
-                            
-                        
+                            <a href="/tags/#weblogic" title="weblogic" rel="2">weblogic</a>
                             
                         
                             
@@ -543,11 +544,9 @@ a+   追加打开文件，可读可写，如果文件不存在......
                             
                         
                             
-                            <a href="/tags/#weblogic" title="weblogic" rel="2">weblogic</a>
-                            
                         
                             
-                        
+                            <a href="/tags/#渗透测试" title="渗透测试" rel="2">渗透测试</a>
                             
                         
                             
@@ -555,11 +554,9 @@ a+   追加打开文件，可读可写，如果文件不存在......
                             
                         
                             
-                            <a href="/tags/#渗透测试" title="渗透测试" rel="2">渗透测试</a>
+                            <a href="/tags/#vulnhub" title="vulnhub" rel="2">vulnhub</a>
                             
                         
-                            
-                            <a href="/tags/#vulnhub" title="vulnhub" rel="2">vulnhub</a>
                             
                         
                             
@@ -567,9 +564,17 @@ a+   追加打开文件，可读可写，如果文件不存在......
                             
                         
                             
+                            <a href="/tags/#ctf" title="ctf" rel="2">ctf</a>
+                            
                         
                             
-                            <a href="/tags/#ctf" title="ctf" rel="2">ctf</a>
+                        
+                            
+                        
+                            
+                        
+                            
+                        
                             
                         
                             

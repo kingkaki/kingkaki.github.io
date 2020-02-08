@@ -90,14 +90,14 @@
 
                         
                         <li>
-                            <a href="/archives/">Archives</a>
+                            <a href="/tags/">Tags</a>
                         </li>
                         
                     
 
                         
                         <li>
-                            <a href="/tags/">Tags</a>
+                            <a href="/archives/">Archives</a>
                         </li>
                         
                     
@@ -181,6 +181,28 @@
             
                 <!-- Main Content -->
 
+
+<div class="post-preview">
+
+    <a href="/2020/02/ysoserial-payload分析/">
+        <h2 class="post-title">
+            ysoserial payload分析
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            URLDNS先从最简单的开始，根据ysoserial中的gadget提示，可以比较容易的找到触发过程12345Gadget Chain:    HashMap.readObject()        HashMap.putVal()            HashMap.hash()                URL.hashCode()
+在HashMap中重写了readObject方法......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2020-02-08
+    </p>
+
+</div>
+<hr>
 
 <div class="post-preview">
 
@@ -406,30 +428,6 @@ https://badcode.cc/2018/05/20/......
 </div>
 <hr>
 
-<div class="post-preview">
-
-    <a href="/2019/05/SPEL表达式注入-入门篇/">
-        <h2 class="post-title">
-            SPEL表达式注入-入门篇
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            SPEL表达式
-Spring Expression Language（简称SpEL）是一种强大的表达式语言，支持在运行时查询和操作对象图。语言语法类似于Unified EL，但提供了额外的功能，特别是方法调用和基本的字符串模板功能。同时因为SpEL是以API接口的形式创建的，所以允许将其集成到其他应用程序和框架中。
-
-个人理解就是Spring框架中的一种语言表达式，类似于Struts2中的O......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2019-05-09
-    </p>
-
-</div>
-<hr>
-
 
 
 <!-- Pager -->
@@ -465,6 +463,36 @@ Spring Expression Language（简称SpEL）是一种强大的表达式语言，�
                     <div class="tags">
                         
                             
+                            <a href="/tags/#writeup" title="writeup" rel="6">writeup</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#代码审计" title="代码审计" rel="4">代码审计</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#反序列化" title="反序列化" rel="4">反序列化</a>
+                            
+                        
+                            
+                            <a href="/tags/#python" title="python" rel="2">python</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#java" title="java" rel="8">java</a>
+                            
+                        
+                            
+                        
+                            
                         
                             
                             <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
@@ -473,13 +501,15 @@ Spring Expression Language（简称SpEL）是一种强大的表达式语言，�
                             
                         
                             
-                            <a href="/tags/#java" title="java" rel="7">java</a>
-                            
                         
                             
                         
                             
-                            <a href="/tags/#代码审计" title="代码审计" rel="4">代码审计</a>
+                            <a href="/tags/#语法分析" title="语法分析" rel="2">语法分析</a>
+                            
+                        
+                            
+                            <a href="/tags/#Java" title="Java" rel="2">Java</a>
                             
                         
                             
@@ -495,45 +525,9 @@ Spring Expression Language（简称SpEL）是一种强大的表达式语言，�
                             
                         
                             
-                            <a href="/tags/#writeup" title="writeup" rel="6">writeup</a>
-                            
                         
                             
-                        
-                            
-                        
-                            
-                            <a href="/tags/#反序列化" title="反序列化" rel="4">反序列化</a>
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#语法分析" title="语法分析" rel="2">语法分析</a>
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#python" title="python" rel="2">python</a>
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#Java" title="Java" rel="2">Java</a>
-                            
-                        
-                            
-                        
-                            
-                        
+                            <a href="/tags/#weblogic" title="weblogic" rel="2">weblogic</a>
                             
                         
                             
@@ -545,11 +539,9 @@ Spring Expression Language（简称SpEL）是一种强大的表达式语言，�
                             
                         
                             
-                            <a href="/tags/#weblogic" title="weblogic" rel="2">weblogic</a>
-                            
                         
                             
-                        
+                            <a href="/tags/#渗透测试" title="渗透测试" rel="2">渗透测试</a>
                             
                         
                             
@@ -557,11 +549,9 @@ Spring Expression Language（简称SpEL）是一种强大的表达式语言，�
                             
                         
                             
-                            <a href="/tags/#渗透测试" title="渗透测试" rel="2">渗透测试</a>
+                            <a href="/tags/#vulnhub" title="vulnhub" rel="2">vulnhub</a>
                             
                         
-                            
-                            <a href="/tags/#vulnhub" title="vulnhub" rel="2">vulnhub</a>
                             
                         
                             
@@ -569,9 +559,17 @@ Spring Expression Language（简称SpEL）是一种强大的表达式语言，�
                             
                         
                             
+                            <a href="/tags/#ctf" title="ctf" rel="2">ctf</a>
+                            
                         
                             
-                            <a href="/tags/#ctf" title="ctf" rel="2">ctf</a>
+                        
+                            
+                        
+                            
+                        
+                            
+                        
                             
                         
                             
