@@ -90,7 +90,7 @@
 
                         
                         <li>
-                            <a href="/tags/">Tags</a>
+                            <a href="/about/">About</a>
                         </li>
                         
                     
@@ -104,7 +104,7 @@
 
                         
                         <li>
-                            <a href="/about/">About</a>
+                            <a href="/tags/">Tags</a>
                         </li>
                         
                     
@@ -260,7 +260,7 @@
 <li><code>e.key == key</code> false<br>e就是当前map中的entry，key则是当前要put的值(value其实是没什么意义的)<br>第二个条件比较容易成立，只要当前map中的key没有和要put的key相同即可（也就是指LinkedHashSet两次put的值不一致）<br>第一个条件就是这个payload比较有意思的地方了，只能默默喊一声nb<br>我们可以看下hashCode的具体实现<br>由于<code>useAltHashing</code>默认为false，所以hash的值仅与<code>k.hashCode()</code>的结果有关<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208190755.png" alt><br>这里的k我们设置的是一个被<code>AnnotationInvocationHandler</code>动态代理了的HashMap<br>这样hashCode的逻辑就会动态代理到invoke的逻辑中<br>invoke中当触发到<code>hashCode</code>时，会到<code>hashCodeImpl</code>方法中处理<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208191258.png" alt></li>
 </ul>
 <p><code>this.memberValues</code>就是被我们动态代理的HashMap,所以<code>var2</code>就是每个entry<br>对于单个键值对的HashMap来说，hashCode值就是<code>127 * key.hashCode() ^ memberValueHashCode(value);</code><br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">hashCodeImpl</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> var1 = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        Entry var3;</span><br><span class="line">        Iterator var2 = <span class="keyword">this</span>.memberValues.entrySet().iterator();</span><br><span class="line">        <span class="keyword">for</span>( ;var2.hasNext(); ) &#123;</span><br><span class="line">            var3 = (Entry)var2.next();</span><br><span class="line">            String key = var3.getKey();</span><br><span class="line">            Object value = var3.getValue();</span><br><span class="line">            var1 += <span class="number">127</span> * </span><br><span class="line">                key.hashCode() ^          </span><br><span class="line">                memberValueHashCode(value); </span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> var1;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
-<p>由于任何一个数与0亦或都是本身，所以我们可以在前面的LinkedHashSet中put这样一个HashMap</p>
+<p>由于任何一个数与0异或都是本身，所以我们可以在前面的LinkedHashSet中put这样一个HashMap</p>
 <ul>
 <li><code>HashMap.key.HashCode == 0</code></li>
 <li><code>LinkedHashSet.contains(HashMap.value) == false</code><br>关于<code>HashCode==0</code>的字符串，网上就有不少<a href="https://stackoverflow.com/questions/18746394/can-a-non-empty-string-have-a-hashcode-of-zero" target="_blank" rel="noopener">https://stackoverflow.com/questions/18746394/can-a-non-empty-string-have-a-hashcode-of-zero</a><br>比如ysoserial中用的就是<code>String zeroHashCodeStr = &quot;f5a5a608&quot;;</code><br>到这里就可以成功解决了<code>e.hash == hash</code>的问题，从而可以进入到<code>key.equals(k)</code>的逻辑中<br>由于key是个被<code>AnnotationInvocationHandler</code>动态代理了的HashMap,所以也会走到invoke逻辑中，进而走到<code>equalsImpl</code><br>需要留意一下这里传入的<code>var3[0]</code>，也就是之前的k,就是LinkedHashSet中已经存在了值<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208193632.png" alt><br>然后在<code>equalsImpl</code>函数中获取所有接口的方法，通过invoke动态调用<br>所以只要将一开始存在LinkedHashMap中的key设置为<code>TemplatesImpl</code>,就可以动态调用到<code>TemplatesImpl</code>的<code>getOutputProperties</code>方法<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208194117.png" alt><br><code>getOutputProperties</code>之后就是之前的template的gadget了。调用到<code>newTransformer()</code>，然后加载恶意字节码即可。<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208194427.png" alt></li>
