@@ -90,7 +90,7 @@
 
                         
                         <li>
-                            <a href="/tags/">Tags</a>
+                            <a href="/about/">About</a>
                         </li>
                         
                     
@@ -104,7 +104,7 @@
 
                         
                         <li>
-                            <a href="/about/">About</a>
+                            <a href="/tags/">Tags</a>
                         </li>
                         
                     
@@ -281,7 +281,7 @@
 <h2 id="CommonsCollection5"><a href="#CommonsCollection5" class="headerlink" title="CommonsCollection5"></a>CommonsCollection5</h2><p>针对<code>commons-collections3.1</code><br>由于将1中的<code>AnnotationInvocationHandler</code>变成了<code>BadAttributeValueExpException</code><br>从而解决了1中无法利用的问题</p>
 <h2 id="CommonsCollection6"><a href="#CommonsCollection6" class="headerlink" title="CommonsCollection6"></a>CommonsCollection6</h2><p>针对<code>commons-collections3.1</code><br>前半部分的触发链根据HashSet而来，从而也没有了版本限制</p>
 <h2 id="CommonsCollection7"><a href="#CommonsCollection7" class="headerlink" title="CommonsCollection7"></a>CommonsCollection7</h2><p>针对<code>commons-collections3.1</code><br>前半部分的触发链根据HashTable而来，从而也没有了版本限制</p>
-<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>所以，这样看来，其实只有1和3是某些情况下无法利用的。<br>所以之前看别人payload时经常选用的也就是4、5。<br>一般来说，试了4、5之后都无法利用，就表示4.0和3.1的gadget不存在。（shiro那种自定义类加载的情况除外）</p>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>所以，这样看来，其实只有1和3是某些情况下无法利用的。<br>所以之前看别人payload时经常选用的也就是4、5。<br>不过5貌似有个security manager的限制，多一事不如少一事，所以个人感觉还是推荐6、7.<br>一般来说，试了4、6之后都无法利用，就表示4.0和3.1的gadget不存在。（shiro那种自定义类加载的情况除外）</p>
 <p>一般测试的话最好选用URLDNS，对环境要求小（shell沙箱之类的），而且没有限制<br>Jdk7u21最适合演示危害的时候用了，不用添加额外gadget，就能rce，坏处就是一些万一不支持jdk7就尴尬了。</p>
 
 
