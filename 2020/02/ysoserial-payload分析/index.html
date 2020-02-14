@@ -90,7 +90,7 @@
 
                         
                         <li>
-                            <a href="/about/">About</a>
+                            <a href="/tags/">Tags</a>
                         </li>
                         
                     
@@ -104,7 +104,7 @@
 
                         
                         <li>
-                            <a href="/tags/">Tags</a>
+                            <a href="/about/">About</a>
                         </li>
                         
                     
@@ -273,6 +273,16 @@
 <p>都是在原来的基础上改动了之后变成了新的链，不过shiro中的commons-collection3的链确实还是比较有实际意义的。</p>
 <p>如果还是以commons-collection为基础，感觉可以关注<code>org.apache.commons.collections4.functors.*</code>中所有的<code>Transformer</code><br>里面远不止payload中的那些<code>Transformer</code>，以梅子酒师傅的gadget为例，就是重新找了个功能类似的<code>Transformer</code></p>
 <p>之前分析过的gadgetinspector就是一款自动化的gadget分析工具，通过数据流分析来寻找新的gadget<br>但是数据流分析比较重要的问题就是污点信息的跟踪，无法涵盖到尽可能多的函数时，污点信息很容易就跟丢了。<br>而且对于一些动态语法的跟踪，静态分析会显得无能为力，就像<code>InvokerTransformer</code>中的invoke就很难判断。<br>比较好的方式是从<code>Map.get</code>这些地方当作sink点来找新的链。</p>
+<h1 id="总结一下实战中的payload使用"><a href="#总结一下实战中的payload使用" class="headerlink" title="总结一下实战中的payload使用"></a>总结一下实战中的payload使用</h1><p>实战中，真的需要漏洞利用时，一般都会选用CommonsCollections的利用链，但是实际使用时，一些利用链经常触发不了，这里稍微总结一下原因，和最优利用链。</p>
+<h2 id="CommonsCollections1-1"><a href="#CommonsCollections1-1" class="headerlink" title="CommonsCollections1"></a>CommonsCollections1</h2><p>针对<code>commons-collections3.1</code><br>前面也提到过了，对于高版本的jdk8是不能用的，那具体是多高呢，我也不清楚，总之本地测试是<code>jdk8_u40</code>是可以利用的，<code>jdk8_u112</code>是无法利用的。<br>所以总体来说，可以利用的版本还是比较低的。</p>
+<h2 id="CommonsCollection2"><a href="#CommonsCollection2" class="headerlink" title="CommonsCollection2"></a>CommonsCollection2</h2><p>针对<code>commons-collections4.0</code><br>比较好的一个触发链，11的版本中都可以用</p>
+<h2 id="CommonsCollection3"><a href="#CommonsCollection3" class="headerlink" title="CommonsCollection3"></a>CommonsCollection3</h2><p>针对<code>commons-collections3.1</code><br>和CommonsCollection1一样，前面也是调用的<code>AnnotationInvocationHandler</code>动态代理，导致1不能用的同时3也一样无法利用。</p>
+<h2 id="CommonsCollection4"><a href="#CommonsCollection4" class="headerlink" title="CommonsCollection4"></a>CommonsCollection4</h2><p>针对<code>commons-collections4.0</code><br>也是一样都可以触发</p>
+<h2 id="CommonsCollection5"><a href="#CommonsCollection5" class="headerlink" title="CommonsCollection5"></a>CommonsCollection5</h2><p>针对<code>commons-collections3.1</code><br>由于将1中的<code>AnnotationInvocationHandler</code>变成了<code>BadAttributeValueExpException</code><br>从而解决了1中无法利用的问题</p>
+<h2 id="CommonsCollection6"><a href="#CommonsCollection6" class="headerlink" title="CommonsCollection6"></a>CommonsCollection6</h2><p>针对<code>commons-collections3.1</code><br>前半部分的触发链根据HashSet而来，从而也没有了版本限制</p>
+<h2 id="CommonsCollection7"><a href="#CommonsCollection7" class="headerlink" title="CommonsCollection7"></a>CommonsCollection7</h2><p>针对<code>commons-collections3.1</code><br>前半部分的触发链根据HashTable而来，从而也没有了版本限制</p>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>所以，这样看来，其实只有1和3是某些情况下无法利用的。<br>所以之前看别人payload时经常选用的也就是4、5。<br>一般来说，试了4、5之后都无法利用，就表示4.0和3.1的gadget不存在。（shiro那种自定义类加载的情况除外）</p>
+<p>一般测试的话最好选用URLDNS，对环境要求小（shell沙箱之类的），而且没有限制<br>Jdk7u21最适合演示危害的时候用了，不用添加额外gadget，就能rce，坏处就是一些万一不支持jdk7就尴尬了。</p>
 
 
                 <hr>
