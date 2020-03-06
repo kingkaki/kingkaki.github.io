@@ -184,6 +184,29 @@
 
 <div class="post-preview">
 
+    <a href="/2020/03/Tomcat中一种半通用回显方法/">
+        <h2 class="post-title">
+            Tomcat中一种半通用回显方法
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            前言前段时间和@lufei 大哥学习了一波Linux下基于文件描述符的反序列化回显方式的思路。
+在自己实现的过程中发现，是通过IP和端口号的筛选，从而过滤出当前线程（也可以说是请求）的文件描述符，进而加入回显的内容。
+但是同时也有一个疑问，我们使用回显的目前主要是因为一些端口的过滤，一些内外网的隔离。从而将一些无法从别的途径传输的执行结果，通过http请求的方式，附加在原本的response......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2020-03-06
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
     <a href="/2020/02/ysoserial-payload分析/">
         <h2 class="post-title">
             ysoserial payload分析
@@ -399,35 +422,6 @@ DocumentBuilderjavax.xml.parsers.DocumentBuilderFactory
 </div>
 <hr>
 
-<div class="post-preview">
-
-    <a href="/2019/05/Weblogic-XMLDecoder反序列化学习/">
-        <h2 class="post-title">
-            Weblogic XMLDecoder反序列化学习
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            前言鉴于 @男壹号 大哥的建议，为之前写的一个扫描器又增加了几个POC，顺带学习了下weblogic的几个xmldecoder反序列化漏洞。
-
-CVE-2017-3506
-CVE-2017-10271
-CVE-2019-2725
-
-由于之前没有本地调试过weblogic的经验，走了不少弯路，也踩了不少坑。安装和调试的过程可以看。
-
-https://badcode.cc/2018/05/20/......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2019-05-19
-    </p>
-
-</div>
-<hr>
-
 
 
 <!-- Pager -->
@@ -463,37 +457,7 @@ https://badcode.cc/2018/05/20/......
                     <div class="tags">
                         
                             
-                        
-                            
-                        
-                            
-                            <a href="/tags/#php" title="php" rel="4">php</a>
-                            
-                        
-                            
                             <a href="/tags/#代码审计" title="代码审计" rel="4">代码审计</a>
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#java" title="java" rel="8">java</a>
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
                             
                         
                             
@@ -502,6 +466,10 @@ https://badcode.cc/2018/05/20/......
                         
                             
                         
+                            
+                        
+                            
+                            <a href="/tags/#反序列化" title="反序列化" rel="4">反序列化</a>
                             
                         
                             
@@ -515,7 +483,7 @@ https://badcode.cc/2018/05/20/......
                             
                         
                             
-                            <a href="/tags/#反序列化" title="反序列化" rel="4">反序列化</a>
+                            <a href="/tags/#java" title="java" rel="9">java</a>
                             
                         
                             
@@ -533,7 +501,19 @@ https://badcode.cc/2018/05/20/......
                             
                         
                             
+                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#php" title="php" rel="4">php</a>
+                            
+                        
+                            
                             <a href="/tags/#XXE" title="XXE" rel="3">XXE</a>
+                            
+                        
                             
                         
                             
@@ -567,13 +547,27 @@ https://badcode.cc/2018/05/20/......
                             
                         
                             
-                        
-                            
                             <a href="/tags/#xss" title="xss" rel="2">xss</a>
                             
                         
                             
+                        
+                            
                             <a href="/tags/#ctf" title="ctf" rel="2">ctf</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
                             
                         
                             
@@ -648,6 +642,10 @@ https://badcode.cc/2018/05/20/......
                         <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
                     
                         <li><a href="https://patrilic.top/" target="_blank">Patrilic&#39;s Blog</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
                     
                 </ul>
                 

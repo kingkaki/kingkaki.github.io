@@ -184,6 +184,34 @@
 
 <div class="post-preview">
 
+    <a href="/2017/12/sqli-labs练习(less11-22)/">
+        <h2 class="post-title">
+            sqli-labs练习（less11-22）
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            之前less1-10的主要通过get注入，less11-20几乎通过POST注入
+less-11先检测出是post方式提交的数据（最简单的方法就看有没有增加参数嘛） 然后可以通过抓包或者审查元素的方式获取到post的参数，如下三个
+
+uname=1
+passwd=1
+submit=Submit
+
+然后就可以去构造然后去post发包啦 首先在uname字段构造个万能密码，然后通过#注释后面的内......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2017-12-14
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
     <a href="/2017/12/sqli-labs练习(less1-10)/">
         <h2 class="post-title">
             sqli-labs练习（less1-10）
@@ -401,34 +429,6 @@ username:admin’=’password:admin’=’
 </div>
 <hr>
 
-<div class="post-preview">
-
-    <a href="/2017/09/python文件操作之文件指针/">
-        <h2 class="post-title">
-            Python文件操作之文件指针
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            最近在学习Python的文件操作，发现了一个比较有意思的东西，便随手记录一下。 首先先列举一下Python常用的文件打开方式
-
-r      只读
-w    只写，如果文件不存在，则创建，如果文件存在，则覆盖文件
-a     追加写，如果文件不存在，则创建文件
-r+   读、写
-w+  读、写，如果文件不存在，则创建，如果文件存在，则覆盖文件
-a+   追加打开文件，可读可写，如果文件不存在......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2017-09-06
-    </p>
-
-</div>
-<hr>
-
 
 
 <!-- Pager -->
@@ -468,37 +468,7 @@ a+   追加打开文件，可读可写，如果文件不存在......
                     <div class="tags">
                         
                             
-                        
-                            
-                        
-                            
-                            <a href="/tags/#php" title="php" rel="4">php</a>
-                            
-                        
-                            
                             <a href="/tags/#代码审计" title="代码审计" rel="4">代码审计</a>
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#java" title="java" rel="8">java</a>
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
                             
                         
                             
@@ -507,6 +477,10 @@ a+   追加打开文件，可读可写，如果文件不存在......
                         
                             
                         
+                            
+                        
+                            
+                            <a href="/tags/#反序列化" title="反序列化" rel="4">反序列化</a>
                             
                         
                             
@@ -520,7 +494,7 @@ a+   追加打开文件，可读可写，如果文件不存在......
                             
                         
                             
-                            <a href="/tags/#反序列化" title="反序列化" rel="4">反序列化</a>
+                            <a href="/tags/#java" title="java" rel="9">java</a>
                             
                         
                             
@@ -538,7 +512,19 @@ a+   追加打开文件，可读可写，如果文件不存在......
                             
                         
                             
+                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#php" title="php" rel="4">php</a>
+                            
+                        
+                            
                             <a href="/tags/#XXE" title="XXE" rel="3">XXE</a>
+                            
+                        
                             
                         
                             
@@ -572,13 +558,27 @@ a+   追加打开文件，可读可写，如果文件不存在......
                             
                         
                             
-                        
-                            
                             <a href="/tags/#xss" title="xss" rel="2">xss</a>
                             
                         
                             
+                        
+                            
                             <a href="/tags/#ctf" title="ctf" rel="2">ctf</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
                             
                         
                             
@@ -653,6 +653,10 @@ a+   追加打开文件，可读可写，如果文件不存在......
                         <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
                     
                         <li><a href="https://patrilic.top/" target="_blank">Patrilic&#39;s Blog</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
                     
                 </ul>
                 
