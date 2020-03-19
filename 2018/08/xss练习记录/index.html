@@ -295,7 +295,7 @@
 <p>看了writeup之后是说用<code>in</code>运算符，则会执行前面的语句</p>
 <p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/17.png" alt></p>
 <p>可以看到虽然报了错，但是还是执行了<code>alert</code>语句，利用这个方法就可以构造payload</p>
-<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"(prompt(1))in"</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"(prompt(1))in"</span></span><br></pre></td></tr></table></figure>
 <p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/18.png" alt></p>
 <h2 id="level-12"><a href="#level-12" class="headerlink" title="level 12"></a>level 12</h2><p>本来一开始想用<code>eval(String.fromCharCode(97, 108, 101, 114, 116, 40, 47, 120, 115, 115, 47, 41))</code></p>
 <p>后来发现url编码之后<code>,</code>不能使用了，于此同时，很多<code>=</code>,<code>:</code>之类的也不能用了</p>
