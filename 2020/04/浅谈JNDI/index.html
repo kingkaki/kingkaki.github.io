@@ -352,7 +352,7 @@
 <p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200401141707.png" alt></p>
 <p>服务端也就是在这里面bind时调用到了readObject方法。</p>
 <h2 id="为什么InitialContext可以不用初始化"><a href="#为什么InitialContext可以不用初始化" class="headerlink" title="为什么InitialContext可以不用初始化"></a>为什么InitialContext可以不用初始化</h2><p>如果不提供初始化参数，也就是不入HashTable，发现也是可以lookup到对应的iiop、rmi、ldap之类的服务的。</p>
-<p>因为这几个协议<code>InitialContext</code>是会自动根据协议名去找对应的工厂类</p>
+<p>因为这几个协议<code>InitialContext</code>默认是会自动根据协议名去找对应的工厂类</p>
 <p><code>javax.naming.spi.NamingManager.getURLObject()</code></p>
 <p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200401142139.png" alt></p>
 <p>具体有如下工厂方法</p>
