@@ -90,13 +90,6 @@
 
                         
                         <li>
-                            <a href="/about/">About</a>
-                        </li>
-                        
-                    
-
-                        
-                        <li>
                             <a href="/archives/">Archives</a>
                         </li>
                         
@@ -105,6 +98,13 @@
                         
                         <li>
                             <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
                         </li>
                         
                     
@@ -181,6 +181,29 @@
             
                 <!-- Main Content -->
 
+
+<div class="post-preview">
+
+    <a href="/2020/06/浅谈下Fastjson的autotype绕过/">
+        <h2 class="post-title">
+            浅谈下Fastjson的autotype绕过
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            前言继去年1.2.47 Fastjson被绕过之后，最近的1.2.68又出现了绕过。
+正好前段时间翻了一遍Fastjson的源码，对整体逻辑有了一些了解，就尝试分析下autotype的校验过程，以及这两次绕过的思路。若有错误，还望指出。
+autotype的校验为什么校验一直被绕过？1.2.24之后，fastjson对反序列化的类型进行了校验，主要就体现在ParserConfig.checkA......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2020-06-08
+    </p>
+
+</div>
+<hr>
 
 <div class="post-preview">
 
@@ -402,30 +425,6 @@ java.sq......
 </div>
 <hr>
 
-<div class="post-preview">
-
-    <a href="/2019/07/Fastjson反序列化漏洞-1-2-24-1-2-48/">
-        <h2 class="post-title">
-            Fastjson反序列化漏洞 1.2.24-1.2.48
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            Fastjson中的利用方式讲漏洞前先来说下一些利用方式
-来看下第一次漏洞的Poc，一个JNDI注入的利用
-1&#123;"@type":"com.sun.rowset.JdbcRowSetImpl","dataSourceName":"rmi://localhost:1099/Exploit","autoCommit":true&#125;
-个人理解就是，JdbcRowSetImpl这个类......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2019-07-25
-    </p>
-
-</div>
-<hr>
-
 
 
 <!-- Pager -->
@@ -461,36 +460,6 @@ java.sq......
                     <div class="tags">
                         
                             
-                        
-                            
-                        
-                            
-                            <a href="/tags/#php" title="php" rel="4">php</a>
-                            
-                        
-                            
-                            <a href="/tags/#代码审计" title="代码审计" rel="4">代码审计</a>
-                            
-                        
-                            
-                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#java" title="java" rel="10">java</a>
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
                             <a href="/tags/#writeup" title="writeup" rel="6">writeup</a>
                             
                         
@@ -515,17 +484,31 @@ java.sq......
                             
                         
                             
+                            <a href="/tags/#代码审计" title="代码审计" rel="4">代码审计</a>
+                            
+                        
+                            
+                            <a href="/tags/#java" title="java" rel="11">java</a>
+                            
+                        
+                            
                         
                             
                             <a href="/tags/#语法分析" title="语法分析" rel="2">语法分析</a>
                             
                         
                             
-                        
-                            
-                        
-                            
                             <a href="/tags/#Java" title="Java" rel="2">Java</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
                             
                         
                             
@@ -542,6 +525,12 @@ java.sq......
                         
                             
                         
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#php" title="php" rel="4">php</a>
                             
                         
                             
@@ -567,8 +556,6 @@ java.sq......
                             
                         
                             
-                        
-                            
                             <a href="/tags/#xss" title="xss" rel="2">xss</a>
                             
                         
@@ -578,6 +565,20 @@ java.sq......
                         
                             
                             <a href="/tags/#ctf" title="ctf" rel="2">ctf</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
                             
                         
                             

@@ -90,13 +90,6 @@
 
                         
                         <li>
-                            <a href="/about/">About</a>
-                        </li>
-                        
-                    
-
-                        
-                        <li>
                             <a href="/archives/">Archives</a>
                         </li>
                         
@@ -105,6 +98,13 @@
                         
                         <li>
                             <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
                         </li>
                         
                     
@@ -371,7 +371,7 @@
 <p>因此<code>&lt;/script&gt;</code>标签在<code>script</code>标签中有最终的闭合权，无论是在引号还是在别的地方，因为第一次html解码时，是不会解析其中的js代码，只会去识别标签。</p>
 <p>从而这里就可以利用双写的方式，来构造<code>&lt;/script&gt;</code>标签，从而闭合标签，造成xss</p>
 <p>payload</p>
-<figure class="highlight django"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="xml"><span class="tag">&lt;/<span class="name">s</span>&lt;/<span class="attr">scriptcript</span>&gt;</span><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="actionscript">alert(<span class="number">1</span>);<span class="comment">//</span></span></span></span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="regexp">/s&lt;/</span>scriptcript&gt;<span class="xml"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="actionscript">alert(<span class="number">1</span>);<span class="comment">//</span></span></span></span><br></pre></td></tr></table></figure>
 <p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/30.png" alt></p>
 <h2 id="callback-2"><a href="#callback-2" class="headerlink" title="callback 2"></a>callback 2</h2><p>虽然是自己写出来的，但是有点蒙的成分，有个小trick</p>
 <p><code>&lt;!--</code>在js中也可以当作单行注释来用，然而之前的<code>--&gt;</code>只能在行头使用</p>

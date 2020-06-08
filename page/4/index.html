@@ -90,13 +90,6 @@
 
                         
                         <li>
-                            <a href="/about/">About</a>
-                        </li>
-                        
-                    
-
-                        
-                        <li>
                             <a href="/archives/">Archives</a>
                         </li>
                         
@@ -105,6 +98,13 @@
                         
                         <li>
                             <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
                         </li>
                         
                     
@@ -181,6 +181,37 @@
             
                 <!-- Main Content -->
 
+
+<div class="post-preview">
+
+    <a href="/2018/08/xss知识点小记/">
+        <h2 class="post-title">
+            xss知识点小记
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            前言最近在学习xss，记录一些比较重要的知识点。有时能从根本上解决一些问题的疑惑
+同源策略同源策略可以说是浏览器安全中最最基础也最为重要的部分了。同源策略限制了资源的任意加载，限制恶意请求。
+何为同源这个估计大家都比熟悉，简单的来说就是如下三点
+
+协议相同（http/https）
+端口相同
+host相同
+
+
+请求过程跨域请求在html中的不同位置都会有发生，主要分为如下三类
+Cross-or......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-08-23
+    </p>
+
+</div>
+<hr>
 
 <div class="post-preview">
 
@@ -395,28 +426,6 @@ XML格式主要由XML声明、文档类型定义(DTD)、文档元......
 </div>
 <hr>
 
-<div class="post-preview">
-
-    <a href="/2018/07/phpinfo-with-LFI/">
-        <h2 class="post-title">
-            phpinfo with LFI
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            phpinfo with LFI利用场景当存在一个任意文件包含的页面，然而又找不到可以包含的文件，且有phpinfo页面时可以利用phpinfo页面，找到上传的tmp文件，进行条件竞争，生成想要获得shell
-利用原理在对一个页面进行文件上传时，无论这个页面将来是否要利用这个文件，php都会将这个文件保存成一个临时文件，默认为 tmp/php[\d\w]{6}关于这个文件的信息可以通过$_F......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2018-07-18
-    </p>
-
-</div>
-<hr>
-
 
 
 <!-- Pager -->
@@ -456,36 +465,6 @@ XML格式主要由XML声明、文档类型定义(DTD)、文档元......
                     <div class="tags">
                         
                             
-                        
-                            
-                        
-                            
-                            <a href="/tags/#php" title="php" rel="4">php</a>
-                            
-                        
-                            
-                            <a href="/tags/#代码审计" title="代码审计" rel="4">代码审计</a>
-                            
-                        
-                            
-                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#java" title="java" rel="10">java</a>
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
                             <a href="/tags/#writeup" title="writeup" rel="6">writeup</a>
                             
                         
@@ -510,17 +489,31 @@ XML格式主要由XML声明、文档类型定义(DTD)、文档元......
                             
                         
                             
+                            <a href="/tags/#代码审计" title="代码审计" rel="4">代码审计</a>
+                            
+                        
+                            
+                            <a href="/tags/#java" title="java" rel="11">java</a>
+                            
+                        
+                            
                         
                             
                             <a href="/tags/#语法分析" title="语法分析" rel="2">语法分析</a>
                             
                         
                             
-                        
-                            
-                        
-                            
                             <a href="/tags/#Java" title="Java" rel="2">Java</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
                             
                         
                             
@@ -537,6 +530,12 @@ XML格式主要由XML声明、文档类型定义(DTD)、文档元......
                         
                             
                         
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#php" title="php" rel="4">php</a>
                             
                         
                             
@@ -562,8 +561,6 @@ XML格式主要由XML声明、文档类型定义(DTD)、文档元......
                             
                         
                             
-                        
-                            
                             <a href="/tags/#xss" title="xss" rel="2">xss</a>
                             
                         
@@ -573,6 +570,20 @@ XML格式主要由XML声明、文档类型定义(DTD)、文档元......
                         
                             
                             <a href="/tags/#ctf" title="ctf" rel="2">ctf</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
                             
                         
                             
