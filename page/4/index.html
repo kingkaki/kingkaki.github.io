@@ -90,7 +90,7 @@
 
                         
                         <li>
-                            <a href="/tags/">Tags</a>
+                            <a href="/about/">About</a>
                         </li>
                         
                     
@@ -104,7 +104,7 @@
 
                         
                         <li>
-                            <a href="/about/">About</a>
+                            <a href="/tags/">Tags</a>
                         </li>
                         
                     
@@ -181,6 +181,36 @@
             
                 <!-- Main Content -->
 
+
+<div class="post-preview">
+
+    <a href="/2018/09/vulnhub-练习记录/">
+        <h2 class="post-title">
+            vulnhub 练习记录
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            Node 1主机探测先用arp-scan -l或者nmap -sP扫描一下C段进行主机发现
+发现主机ip为192.168.85.135
+然后利用nmap进行详细扫描
+1nmap -sS -T4 -A -v 192.168.85.135
+
+获取源码访问下3000端口，是个正常的web服务
+
+查看js文件后可以看到一些api端口，访问一下可以发现一些类似memached的字段
+
+可以试着找一些网......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-09-13
+    </p>
+
+</div>
+<hr>
 
 <div class="post-preview">
 
@@ -400,31 +430,6 @@ Docker 镜像是一个特殊的文件系统，除了......
 </div>
 <hr>
 
-<div class="post-preview">
-
-    <a href="/2018/07/php反序列化漏洞/">
-        <h2 class="post-title">
-            php反序列化漏洞
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            序列化与反序列化目的和意义
-序列化：把对象转换为字节序列的过程。反序列化：把字节序列恢复为对象的过程。
-
-其目的是为了将一个对象通过可保存的字节方式存储起来这样就可以将学列化字节存储到数据库或者文本当中，当需要的时候再通过反序列化获取  
-类的序列化在反序列化对象之后，需要当前作用域中存在该类的定义，否则php无法将类对应到指定类12$ser = 'O:6:"kingkk":1:&#123;......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2018-07-20
-    </p>
-
-</div>
-<hr>
-
 
 
 <!-- Pager -->
@@ -470,13 +475,27 @@ Docker 镜像是一个特殊的文件系统，除了......
                             
                         
                             
+                            <a href="/tags/#java" title="java" rel="13">java</a>
+                            
+                        
+                            
+                            <a href="/tags/#weblogic" title="weblogic" rel="3">weblogic</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
                             <a href="/tags/#反序列化" title="反序列化" rel="4">反序列化</a>
                             
                         
                             
+                            <a href="/tags/#python" title="python" rel="2">python</a>
+                            
                         
                             
-                            <a href="/tags/#python" title="python" rel="2">python</a>
+                        
                             
                         
                             
@@ -490,10 +509,6 @@ Docker 镜像是一个特殊的文件系统，除了......
                             
                         
                             
-                            <a href="/tags/#java" title="java" rel="12">java</a>
-                            
-                        
-                            
                             <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
                             
                         
@@ -502,15 +517,15 @@ Docker 镜像是一个特殊的文件系统，除了......
                             
                         
                             
-                        
+                            <a href="/tags/#语法分析" title="语法分析" rel="2">语法分析</a>
                             
                         
                             
-                            <a href="/tags/#weblogic" title="weblogic" rel="2">weblogic</a>
-                            
                         
                             
-                            <a href="/tags/#php" title="php" rel="4">php</a>
+                            <a href="/tags/#Java" title="Java" rel="2">Java</a>
+                            
+                        
                             
                         
                             
@@ -526,19 +541,9 @@ Docker 镜像是一个特殊的文件系统，除了......
                             
                         
                             
-                            <a href="/tags/#Java" title="Java" rel="2">Java</a>
-                            
                         
                             
-                        
-                            
-                        
-                            
-                            <a href="/tags/#语法分析" title="语法分析" rel="2">语法分析</a>
-                            
-                        
-                            
-                        
+                            <a href="/tags/#php" title="php" rel="4">php</a>
                             
                         
                             
@@ -663,6 +668,8 @@ Docker 镜像是一个特殊的文件系统，除了......
                         <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
                     
                         <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
                     
                 </ul>
                 
