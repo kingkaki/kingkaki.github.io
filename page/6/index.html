@@ -97,14 +97,14 @@
 
                         
                         <li>
-                            <a href="/tags/">Tags</a>
+                            <a href="/about/">About</a>
                         </li>
                         
                     
 
                         
                         <li>
-                            <a href="/about/">About</a>
+                            <a href="/tags/">Tags</a>
                         </li>
                         
                     
@@ -181,6 +181,28 @@
             
                 <!-- Main Content -->
 
+
+<div class="post-preview">
+
+    <a href="/2018/04/2018ddctf-writeup/">
+        <h2 class="post-title">
+            2018DDCTF writeup
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            前言DDCTF实在被虐的有点惨，中途就放弃了（逃……）只能赛后复现一下，不间断更新。。  
+数据库的秘密进入第一步是一个ip验证 用firefox的插件，添加一个x-forwarded-for 的header就行进入之后是个简单的查询功能任意查询之后发送给一个包，发现多了一个author参数回到html页面，发现的确有这个隐藏的form值经过一些尝试之后发现如下几点1、其他的非隐藏值都有被过......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-04-23
+    </p>
+
+</div>
+<hr>
 
 <div class="post-preview">
 
@@ -399,33 +421,6 @@ msf......
 </div>
 <hr>
 
-<div class="post-preview">
-
-    <a href="/2018/03/关于apache的一些安全配置/">
-        <h2 class="post-title">
-            关于Apache的一些安全配置
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            前言：开学也一星期了，也有十多天没更新博客了。开学这两天忙也是有点忙，但还是抽空记录下比较好。
-环境：
-centos  6/7差别不是很大
-httpd-2.2.34
-
-正文：下载源码包
-wget http://apache.website-solution.net/httpd/httpd-2.2.34.tar.gztar xf httpd-2.2.34.tar.gz &amp;&amp; c......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2018-03-11
-    </p>
-
-</div>
-<hr>
-
 
 
 <!-- Pager -->
@@ -473,13 +468,13 @@ wget http://apache.website-solution.net/httpd/httpd-2.2.34.tar.gztar xf httpd-2.
                             
                         
                             
+                        
+                            
                             <a href="/tags/#反序列化" title="反序列化" rel="4">反序列化</a>
                             
                         
                             
                             <a href="/tags/#python" title="python" rel="2">python</a>
-                            
-                        
                             
                         
                             
@@ -499,32 +494,6 @@ wget http://apache.website-solution.net/httpd/httpd-2.2.34.tar.gztar xf httpd-2.
                             
                         
                             
-                            <a href="/tags/#weblogic" title="weblogic" rel="3">weblogic</a>
-                            
-                        
-                            
-                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#XXE" title="XXE" rel="3">XXE</a>
-                            
-                        
-                            
-                            <a href="/tags/#Java" title="Java" rel="2">Java</a>
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
                         
                             
                         
@@ -535,11 +504,37 @@ wget http://apache.website-solution.net/httpd/httpd-2.2.34.tar.gztar xf httpd-2.
                             
                         
                             
+                            <a href="/tags/#Java" title="Java" rel="2">Java</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#weblogic" title="weblogic" rel="3">weblogic</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#XXE" title="XXE" rel="3">XXE</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
                         
                             
                             <a href="/tags/#php" title="php" rel="4">php</a>
-                            
-                        
                             
                         
                             
@@ -568,6 +563,8 @@ wget http://apache.website-solution.net/httpd/httpd-2.2.34.tar.gztar xf httpd-2.
                         
                             
                             <a href="/tags/#ctf" title="ctf" rel="2">ctf</a>
+                            
+                        
                             
                         
                             
@@ -707,7 +704,7 @@ wget http://apache.website-solution.net/httpd/httpd-2.2.34.tar.gztar xf httpd-2.
 
                 </ul>
                 <p class="copyright text-muted">
-                    Copyright &copy; Kingkk&#39;s Blog 2020 
+                    Copyright &copy; Kingkk&#39;s Blog 2021 
                     浙ICP备17041487号
                     <br>
                     Theme by <a href="http://huangxuan.me">Hux</a> 

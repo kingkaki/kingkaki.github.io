@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          静态程序分析笔记 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2021/01/静态程序分析笔记/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#静态程序分析" title="静态程序分析">静态程序分析</a>
+                        
+                    </div>
+                    <h1>静态程序分析笔记</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2021-01-10
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本来2020年就写完了的，但最近发生了比较多事情，就一直也忘了更新，希望2021剩下的日子能好一些吧。</p>
+<p>说实话一部分过程内的数据流分析算法现在也没搞太懂，凑活看吧，仅供参考。</p>
+<h1 id="AST-amp-IR"><a href="#AST-amp-IR" class="headerlink" title="AST &amp; IR"></a>AST &amp; IR</h1><p>通常来说，一个程序从源码（Source Code）到二进制程序/机器码（Machine Code）通常需要经过如下几个步骤</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/123256839571659123kl1.png" alt></p>
+<ol>
+<li>编译器在获取到源码之后，会先对源代码进行词法分析（Lexical Analysis），将源码分解成token。</li>
+<li>之后对token流进行词法分析（Syntax Analysis）,生成AST（Abstract Syntax Tree）抽象语法树。</li>
+<li>然后对AST进行语义分析（Semantic Analysis）,转换为IR（Intermediate Representation）中间表示形式</li>
+<li>最后在IR的基础上进行一些优化（Optimization），最后生成可执行的二进制程序。</li>
+</ol>
+<h2 id="AST"><a href="#AST" class="headerlink" title="AST"></a>AST</h2><ul>
+<li>在层级上更接近源码（Source Code），更高级（high-level）</li>
+<li>适合于更快速的类型检查</li>
+<li>语言相关</li>
+</ul>
+<h2 id="IR"><a href="#IR" class="headerlink" title="IR"></a>IR</h2><ul>
+<li>在层级上更接近机器码（Machine Code）,更低级（low-level）</li>
+<li>更通用，适合静态程序分析</li>
+<li>语言无关</li>
+</ul>
+<h3 id="三地址码"><a href="#三地址码" class="headerlink" title="三地址码"></a>三地址码</h3><p>一种常用的IR，每一条语句最多有三个地址</p>
+<ul>
+<li>i = i + 1</li>
+<li>t1 = a[i]</li>
+<li>if(t1 &lt; v) goto 1</li>
+</ul>
+<h1 id="SSA"><a href="#SSA" class="headerlink" title="SSA"></a>SSA</h1><p>静态单赋值（Static Single Assignment），一种三地址码</p>
+<p>即每个变量都只被赋值一次</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/jf83ji9023fjgwnu.png" alt></p>
+<h2 id="Def-Use"><a href="#Def-Use" class="headerlink" title="Def-Use"></a>Def-Use</h2><blockquote>
+<p>给定变量x，如果结点A可能改变x的值，结点B可能使用结点A改变后的x的值，结点A和结点B存在Def-Use关系</p>
+</blockquote>
+<h1 id="Basic-Block"><a href="#Basic-Block" class="headerlink" title="Basic Block"></a>Basic Block</h1><p>简单说就是一个最基础的代码块，它不会被拆分，只有一个出口和入口，总是从入口 → 出口顺序执行。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/f34hg63ug3fqw.png" alt></p>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p>对于一个函数，通常需要将其分割为几个basic block，简要算法如下</p>
+<p><strong>1、找到所有leaders</strong></p>
+<p>对于所有分支点（branch），比如一些return、goto之类的语句</p>
+<p>找到它要跳转到的语句，如图中则是（3）、（7）（12）</p>
+<p>以及其下一条语句，图中为（5）、（11）、（12）</p>
+<p>外加一条程序入口的语句（1）</p>
+<p>这些就是改函数的leaders。</p>
+<p><strong>2、以leader为分割点将程序进行分割</strong></p>
+<p>因此程序就被分成了</p>
+<ul>
+<li>B1 {（1），（2）}</li>
+<li>B2 {（3），（4）}</li>
+<li>B3 {（5），（6）}</li>
+<li>B4 {（7），（8），（9），（10）}</li>
+<li>B5 {（11）}</li>
+<li>B6 {（12）}</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/k83jv43fq4i9.png" alt></p>
+<h1 id="Control-Flow-Graph"><a href="#Control-Flow-Graph" class="headerlink" title="Control Flow Graph"></a>Control Flow Graph</h1><p>控制流图，在basic block的基础上构建控制流图也相对比较简单。</p>
+<ol>
+<li>对所有最后一条语句不是跳转的basic block与其相邻的basic block相连</li>
+<li>对有最后一条语句是有条件跳转的basic block，与其相邻的basic block和其跳转的basic block相连</li>
+<li>对于最后一条语句是无条件跳转的basic block，直接将其于跳转的basic block相连</li>
+</ol>
+<p>此外，对于控制流图来说还有两个概念Entry 和 Exit</p>
+<ul>
+<li>Entry即程序的入口，通常是第一个语句，一般来说只有一个</li>
+<li>Exit则是程序的出口，通常是return之类的语句，可能会有多个</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/vmq389gj3nj89.png" alt></p>
+<h1 id="数据流分析（过程内）"><a href="#数据流分析（过程内）" class="headerlink" title="数据流分析（过程内）"></a>数据流分析（过程内）</h1><h2 id="到达定值分析"><a href="#到达定值分析" class="headerlink" title="到达定值分析"></a>到达定值分析</h2><p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/fds9kj8f32p.png" alt></p>
+<p>如有上图这样一个函数，要去分析变量x在某个位置可能的值。</p>
+<p>定义：</p>
+<ul>
+<li>gen：该basic block中赋值语句产生新值的语句</li>
+<li>kill：其他basic block中重新定义新值的语句</li>
+<li>In[B]：该basic block初始的状态</li>
+<li>Out[B]：该basic block执行结束的状态</li>
+</ul>
+<p>则有如下伪代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Init:</span><br><span class="line">	Out[Entry] = Φ</span><br><span class="line">    <span class="keyword">for</span> each block: Out[B] = Φ</span><br><span class="line">loops:</span><br><span class="line">    In[B] = ∪ Out[P] // 此处P为B的前驱</span><br><span class="line">    Out[B] = In[B] + gen - kill</span><br></pre></td></tr></table></figure>
+<p>最开始将程序Entry和各个block的Out都设置为空集</p>
+<p>然后计算各个block的gen和kill</p>
+<p>以B1为例，三条语句分别定义了i、j、a，因此gen(b1) = {d1, d2, d3}</p>
+<p>i、j、a同时也在其他语句d4、d5、d6、d7中被重新赋值，因此kill(b1) = {d4, d5, d6, d7}</p>
+<p>其余block依次计算即可获得所有block的gen和kill</p>
+<p>然后通过loops中的迭代的算法，计算每个block的状态</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20201222165507.png" alt></p>
+<p>第一轮的In都是初始前驱的Out，因此都是空集。Out的话根据Out[B] = In[B] + gen - kill即可算出</p>
+<p>第二轮时，In(b1)是Out(entry)，也是空集，Out(b1)计算即可得。In(b2)则是前驱Out(b1)+Out(b4)的结果，也就是第一轮b4的Out和第二轮b1的Out的交集，即{1,2,3,7}</p>
+<p>依次迭代，知道loop3结束时，Exit的结果和loop2时的一致，则表示达到了一个不动点。</p>
+<p>则也意味着{d3, d5, d6, d7}这几条语句的赋值能传递到exit。</p>
+<h2 id="活跃变量分析"><a href="#活跃变量分析" class="headerlink" title="活跃变量分析"></a>活跃变量分析</h2><p>这个分析是为了知道p1处x的值，是否在路径p2上被使用。其实就是分析Def-Use关系</p>
+<p>此时定义</p>
+<ul>
+<li>def：变量在当前block中定值前未被使用</li>
+<li>use：变量在当前block中使用前未被定值</li>
+</ul>
+<p>其余In(B)和Out(b)的定义不变</p>
+<p>则有In[B] = use + (Out[B] - def)</p>
+<p>因此伪代码为</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Init:</span><br><span class="line">    In[Exit] = Φ</span><br><span class="line">    <span class="keyword">for</span> each block: In[B] = Φ</span><br><span class="line">loops:</span><br><span class="line">    Out[B] = ∪ In[S]   <span class="comment">// S为后继</span></span><br><span class="line">    In[B] = Out[B] + use - def</span><br></pre></td></tr></table></figure>
+<p>可以看到这里传播的方向是和前面到达定值分析是相反的</p>
+<p>并且其实把def看作gen，use看作kill，两个关系式是能相互对应起来的</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>因此类似的数据流分析都能通过如上的框架进行分析</p>
+<p>1、每个节点的数据流值分别对应为In[S]和Out[S]，如上的节点单位则是一个block</p>
+<p>2、传递函数（transfer function）定义了In[S]和Out[S]的关系</p>
+<ul>
+<li>前向(forward)传递：Out[S] = fs(In[S])</li>
+<li>后向(backward)传递：In[S] = fb(Out[S])</li>
+</ul>
+<p>一个数据流分析框架可以被表示为一个三元组（D, V, ∧,F）</p>
+<ul>
+<li>D：数据流分析的方向</li>
+<li>V：数据流单位，对于定值分析来说则是定值语句</li>
+<li>∧：交汇运算符，可以是交集或并集</li>
+<li>F：一组传递函数</li>
+</ul>
+<p><strong>然后这个算法是可收敛的么？是否会一致递归下去？</strong></p>
+<p>结论是可收敛的，复杂度是O(n^2)。为什么？超纲了，下一题</p>
+<p><strong>Worklist Algorithm（worklist算法）</strong></p>
+<p>迭代算法的优化</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">OUT[entry] =∅;</span><br><span class="line"><span class="keyword">for</span>(each basic block B\entry) </span><br><span class="line">	OUT[B] =∅;</span><br><span class="line">  Worklist←all basic blocks</span><br><span class="line">	<span class="keyword">while</span> (Worklist <span class="keyword">is</span> notempty) </span><br><span class="line">	Pick a basic block B <span class="keyword">from</span> Worklist</span><br><span class="line">		old_OUT= OUT[B]</span><br><span class="line">	IN[B] =⊔OUT[P]; <span class="comment"># join/meet P为B的前置代码块</span></span><br><span class="line">	OUT[B] = genB U (IN[B] - killB); <span class="comment"># transfer function </span></span><br><span class="line">	<span class="keyword">if</span>(old_OUT≠OUT[B])</span><br><span class="line">		Add all successors of B to Worklis</span><br></pre></td></tr></table></figure>
+<p>话说ASM的Analyzer类就实现了这个算法，可以进行一些变量类型的分析。</p>
+<h1 id="Call-Graph"><a href="#Call-Graph" class="headerlink" title="Call Graph"></a>Call Graph</h1><p>调用图，是一个描述从调用点（call site）到被调函数（callee）的边的集合</p>
+<blockquote>
+<p>A call graph is a set of call edges from call-sites to their target methods (callees)</p>
+</blockquote>
+<h2 id="常用算法"><a href="#常用算法" class="headerlink" title="常用算法"></a>常用算法</h2><p>以Java为例，由于其OOP的多态特性，导致其实际调用的函数只有在运行时才能确定</p>
+<p>因此静态的方式只能尽可能的分析其可能调用到的callee，从而来构造对应Call Graph</p>
+<ol>
+<li>Class hierarchy analysis（CHA）通过类继承关系去构造调用图</li>
+<li>Rapid type analysis（RTA）</li>
+<li>Variable type analysis（VTA）</li>
+<li>Pointer analysis（k-CFA）通过分析可能的引用去构造调用图</li>
+</ol>
+<p>从上至下依次精度越高，但速度越慢。</p>
+<h2 id="CHA-Class-Hierarchy-Analysis"><a href="#CHA-Class-Hierarchy-Analysis" class="headerlink" title="CHA(Class Hierarchy Analysis)"></a>CHA(Class Hierarchy Analysis)</h2><p>这种方式只考虑声明类型，并不会去判断实例的具体类型。</p>
+<p>因此通过类之间的继承关系，找到被重写的函数，即可找到所有可能被调用的函数。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/lf932kfi9230fk9.png" alt></p>
+<p>这种方式相对比较快，不会进行上下文关联的分析</p>
+<p>因此当继承重写关系比较复杂时，生成的Call Graph可能会很庞大</p>
+<h2 id="Pointer-Analysis"><a href="#Pointer-Analysis" class="headerlink" title="Pointer Analysis"></a>Pointer Analysis</h2><p>指针分析，基础的指针分析用于计算指针指向的内存。面向对象的指针分析用于计算指针指向哪个对象。</p>
+<blockquote>
+<p>A fundamental static analysis, computes which memory locations a pointer can point to.<br>For object-oriented programs, computes which objects a pointer (variable or field) can point to.</p>
+</blockquote>
+<p>这里的主要目的则是为了通过指针分析获取到当前实例具体指向的类，从而获取到更精确的Call Graph，不过这样相对来说成本也变高了。</p>
+<p>你问我算法？超纲了 🤧</p>
+<h1 id="Datalog"><a href="#Datalog" class="headerlink" title="Datalog"></a>Datalog</h1><p><strong>编程范式</strong></p>
+<p>Imperative（指令式）语言：Java、C/C++，展示详细的实现细节。</p>
+<p>Declarative（声明式）语言：SQL，屏蔽细节，可读性较高。</p>
+<p>Datalog则是一种声明式语言，早期用于数据库查询，而如今已经被用于程序分析、大数据、云计算等多个领域。</p>
+<p>优点再与语言的可读性比较强，编写相对接单。但其性能完全取决于其实现引擎，并且表达优先，不是一个图灵完备的语言。</p>
+<p><strong>predicate</strong></p>
+<p>谓词（predicate）类似于一个断言，描述符合当前要求数据的事实</p>
+<p>最熟悉的应该就是CodeQL的，它也是采用声明式的语言来进行数据查询。</p>
+<p>CodeQL主要得以于其优秀的查询引擎、在声明式语言中新引入了OOP的编程方式，以及大量的ql基础库中的高质量的轮子，从而使得一个污点分析的查询变得比常规污点分析简单很多。</p>
+<p>但是如果没有那些轮子，这个引擎以及基础库的工作是不是会比指令式的工作要大得多？</p>
+<p>Datalog作为新兴的程序分析模型，让我们以另一种视角去看待程序分析。</p>
+<p>其作用主要在于简化查询的方式，但不会比指令式提供更多的信息源，因此个人对于网上一些仿照CodeQL建数据库的行为一直存疑，不过毕竟是种新视角，最近QL写惯了也慢慢适应了…</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p><a href="https://pascal-group.bitbucket.io/teaching.html" target="_blank" rel="noopener">https://pascal-group.bitbucket.io/teaching.html</a></p>
+<p><a href="https://www.bilibili.com/video/av91858985" target="_blank" rel="noopener">https://www.bilibili.com/video/av91858985</a></p>
+<p><a href="https://anemone.top/pl-%E9%9D%99%E6%80%81%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0%EF%BC%88%E7%AE%80%E4%BB%8B%EF%BC%89" target="_blank" rel="noopener">https://anemone.top/pl-静态程序分析课程笔记（简介）</a><a href="https://anemone.top/pl-%E9%9D%99%E6%80%81%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0%EF%BC%88Datalog%EF%BC%89/" target="_blank" rel="noopener">/</a></p>
+<p><a href="https://anemone.top/pl-%E9%9D%99%E6%80%81%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0%EF%BC%88%E8%BF%87%E7%A8%8B%E9%97%B4%E5%88%86%E6%9E%90%EF%BC%89/" target="_blank" rel="noopener">https://anemone.top/pl-静态程序分析课程笔记（过程间分析）/</a></p>
+<p><a href="https://anemone.top/pl-%E9%9D%99%E6%80%81%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0%EF%BC%88%E6%95%B0%E6%8D%AE%E6%B5%81%E5%88%86%E6%9E%90-%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80%EF%BC%89/" target="_blank" rel="noopener">https://anemone.top/pl-静态程序分析课程笔记（数据流分析-理论基础）/</a></p>
+<p><a href="https://anemone.top/pl-%E9%9D%99%E6%80%81%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0%EF%BC%88Datalog%EF%BC%89/" target="_blank" rel="noopener">https://anemone.top/pl-静态程序分析课程笔记（Datalog）/</a></p>
+<p><a href="https://xiongyingfei.github.io/SA/2019/05_static_single_assignment.pdf" target="_blank" rel="noopener">https://xiongyingfei.github.io/SA/2019/05_static_single_assignment.pdf</a></p>
+<p><a href="http://www.cse.unsw.edu.au/~jingling/papers/ecoop14.pdf" target="_blank" rel="noopener">http://www.cse.unsw.edu.au/~jingling/papers/ecoop14.pdf</a></p>
+<p><a href="https://zh.wikipedia.org/wiki/%E6%8C%87%E4%BB%A4%E5%BC%8F%E7%B7%A8%E7%A8%8B" target="_blank" rel="noopener">https://zh.wikipedia.org/wiki/指令式編程</a></p>
+<p><a href="https://zh.wikipedia.org/wiki/%E5%AE%A3%E5%91%8A%E5%BC%8F%E7%B7%A8%E7%A8%8B" target="_blank" rel="noopener">https://zh.wikipedia.org/wiki/宣告式編程</a></p>
+<p><a href="https://help.semmle.com/QL/learn-ql/introduction-to-ql.html" target="_blank" rel="noopener">https://help.semmle.com/QL/learn-ql/introduction-to-ql.html</a></p>
+<p><a href="https://chengxiao19961022.github.io/2019/03/04/%E9%9D%99%E6%80%81%E6%95%B0%E6%8D%AE%E6%B5%81%E5%88%86%E6%9E%90/" target="_blank" rel="noopener">https://chengxiao19961022.github.io/2019/03/04/静态数据流分析/</a></p>
+<p><a href="https://decaf-lang.gitbook.io/decaf-book/rust-kuang-jia-fen-jie-duan-zhi-dao/pa4-zhong-jian-dai-ma-you-hua/shu-ju-liu-fen-xi-gai-shu" target="_blank" rel="noopener">https://decaf-lang.gitbook.io/decaf-book/rust-kuang-jia-fen-jie-duan-zhi-dao/pa4-zhong-jian-dai-ma-you-hua/shu-ju-liu-fen-xi-gai-shu</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                    
+                        <li class="next">
+                            <a href="/2020/11/从MethodHandle到InvokeDynamic指令/" data-toggle="tooltip" data-placement="top" title="从MethodHandle到InvokeDynamic指令">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#静态程序分析" title="静态程序分析">静态程序分析</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2021 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
