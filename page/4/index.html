@@ -90,7 +90,7 @@
 
                         
                         <li>
-                            <a href="/about/">About</a>
+                            <a href="/tags/">Tags</a>
                         </li>
                         
                     
@@ -104,7 +104,7 @@
 
                         
                         <li>
-                            <a href="/tags/">Tags</a>
+                            <a href="/about/">About</a>
                         </li>
                         
                     
@@ -181,6 +181,36 @@
             
                 <!-- Main Content -->
 
+
+<div class="post-preview">
+
+    <a href="/2018/10/Thinkphp-聚合查询漏洞/">
+        <h2 class="post-title">
+            ThinkPHP 聚合查询漏洞
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            前言说是漏洞，更恰当一点应该是安全隐患吧，由于是框架洞，总要结合一些开发人员不够专业的代码才能产生漏洞。
+这个聚合查询的漏洞主要影响的版本有
+
+Thinkphp5 &lt; 5.1.25
+Thinkphp3 &lt; 3.2.4
+
+影响的函数涉及到所有的聚合查询函数
+
+而且，有一点就是，可以看到在TP5中涉及到SQL查询的地方，几乎都用了预编译
+而且由于PDO::ATTR_EMULATE_P......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-10-19
+    </p>
+
+</div>
+<hr>
 
 <div class="post-preview">
 
@@ -412,31 +442,6 @@ spider题目给了提示说是动态爬虫，一开始对这个不是很了解�
 </div>
 <hr>
 
-<div class="post-preview">
-
-    <a href="/2018/08/xss练习记录/">
-        <h2 class="post-title">
-            xss练习记录
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            前言由于各种原因吧，之前也没好好学过xss，就知道简单的闭合弹个窗什么的，趁暑假有时候，系统的学习一下xss。毕竟xss也是web安全的一个重头戏。而且看完一叶飘零师傅的文章，感觉xss比我之前想象的要强的多，也可以达到很强的破坏力。
-就先和刷sqllibs一样吧，做一些题目练手。
-prompt.mllevel 0比较简单了，没做什么过滤和防护，闭合双引号就能逃逸出来了
-
-level 1做了......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2018-08-19
-    </p>
-
-</div>
-<hr>
-
 
 
 <!-- Pager -->
@@ -490,11 +495,17 @@ level 1做了......
                             
                         
                             
+                            <a href="/tags/#java" title="java" rel="15">java</a>
+                            
+                        
+                            
+                            <a href="/tags/#weblogic" title="weblogic" rel="3">weblogic</a>
+                            
+                        
+                            
+                        
+                            
                             <a href="/tags/#python" title="python" rel="2">python</a>
-                            
-                        
-                            
-                        
                             
                         
                             
@@ -504,17 +515,17 @@ level 1做了......
                             
                         
                             
-                            <a href="/tags/#java" title="java" rel="15">java</a>
-                            
                         
-                            
-                        
-                            
-                            <a href="/tags/#weblogic" title="weblogic" rel="3">weblogic</a>
                             
                         
                             
                             <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#Java" title="Java" rel="2">Java</a>
                             
                         
                             
@@ -526,35 +537,29 @@ level 1做了......
                             
                         
                             
-                            <a href="/tags/#Java" title="Java" rel="2">Java</a>
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#k8s" title="k8s" rel="2">k8s</a>
-                            
-                        
-                            
-                            <a href="/tags/#云原生" title="云原生" rel="3">云原生</a>
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
                             <a href="/tags/#XXE" title="XXE" rel="3">XXE</a>
                             
                         
                             
                         
                             
+                        
+                            
+                        
+                            
+                            <a href="/tags/#docker" title="docker" rel="2">docker</a>
+                            
+                        
+                            
+                            <a href="/tags/#云原生" title="云原生" rel="4">云原生</a>
+                            
+                        
+                            
+                        
+                            
                             <a href="/tags/#php" title="php" rel="4">php</a>
+                            
+                        
                             
                         
                             
@@ -578,9 +583,11 @@ level 1做了......
                             
                         
                             
+                            <a href="/tags/#xss" title="xss" rel="2">xss</a>
+                            
                         
                             
-                            <a href="/tags/#xss" title="xss" rel="2">xss</a>
+                            <a href="/tags/#k8s" title="k8s" rel="2">k8s</a>
                             
                         
                             

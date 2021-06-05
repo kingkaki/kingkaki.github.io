@@ -90,7 +90,7 @@
 
                         
                         <li>
-                            <a href="/about/">About</a>
+                            <a href="/tags/">Tags</a>
                         </li>
                         
                     
@@ -104,7 +104,7 @@
 
                         
                         <li>
-                            <a href="/tags/">Tags</a>
+                            <a href="/about/">About</a>
                         </li>
                         
                     
@@ -181,6 +181,27 @@
             
                 <!-- Main Content -->
 
+
+<div class="post-preview">
+
+    <a href="/2017/12/sqli-labs练习(less23-38)/">
+        <h2 class="post-title">
+            sqli-labs练习（less23-38）
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            less-23常规的单引号测试，出错  然后用#闭合，好像不行。。。编码一下。。好像也不行。。。试一下–+。。怎么还是不行。。。  查看源码之后发现，把注释符都改为空了，而不难发现之前的报错语句都是一样的  于是可以用 or ‘1’=’1闭合  这个没问题，可是好像获取不到数据。。于是得换一种注释方式（要提前测试字段数）  然后就可以开始提取数据了  还发现一种注入姿势，好像再多用一个单引号......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2017-12-17
+    </p>
+
+</div>
+<hr>
 
 <div class="post-preview">
 
@@ -403,32 +424,6 @@ In [22]: if m is not Non......
 </div>
 <hr>
 
-<div class="post-preview">
-
-    <a href="/2017/09/sql注入之万能密码/">
-        <h2 class="post-title">
-            SQL注入之万能密码
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            ‘ or 1=’1
-这估计是最最简单的一个万能密码了，原理也就不过多解释，今天就记录刚刚看到的一种万能密码（数据库类型为mysql,并为在其他数据库中进行测试）
-username= 1’=’0password= 1’=’0
-username=what’=’password=what’=’
-username:admin’=’password:admin’=’
-当or、and以及注释符号被严格过......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2017-09-12
-    </p>
-
-</div>
-<hr>
-
 
 
 <!-- Pager -->
@@ -482,11 +477,17 @@ username:admin’=’password:admin’=’
                             
                         
                             
+                            <a href="/tags/#java" title="java" rel="15">java</a>
+                            
+                        
+                            
+                            <a href="/tags/#weblogic" title="weblogic" rel="3">weblogic</a>
+                            
+                        
+                            
+                        
+                            
                             <a href="/tags/#python" title="python" rel="2">python</a>
-                            
-                        
-                            
-                        
                             
                         
                             
@@ -496,17 +497,17 @@ username:admin’=’password:admin’=’
                             
                         
                             
-                            <a href="/tags/#java" title="java" rel="15">java</a>
-                            
                         
-                            
-                        
-                            
-                            <a href="/tags/#weblogic" title="weblogic" rel="3">weblogic</a>
                             
                         
                             
                             <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#Java" title="Java" rel="2">Java</a>
                             
                         
                             
@@ -518,35 +519,29 @@ username:admin’=’password:admin’=’
                             
                         
                             
-                            <a href="/tags/#Java" title="Java" rel="2">Java</a>
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#k8s" title="k8s" rel="2">k8s</a>
-                            
-                        
-                            
-                            <a href="/tags/#云原生" title="云原生" rel="3">云原生</a>
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
                             <a href="/tags/#XXE" title="XXE" rel="3">XXE</a>
                             
                         
                             
                         
                             
+                        
+                            
+                        
+                            
+                            <a href="/tags/#docker" title="docker" rel="2">docker</a>
+                            
+                        
+                            
+                            <a href="/tags/#云原生" title="云原生" rel="4">云原生</a>
+                            
+                        
+                            
+                        
+                            
                             <a href="/tags/#php" title="php" rel="4">php</a>
+                            
+                        
                             
                         
                             
@@ -570,9 +565,11 @@ username:admin’=’password:admin’=’
                             
                         
                             
+                            <a href="/tags/#xss" title="xss" rel="2">xss</a>
+                            
                         
                             
-                            <a href="/tags/#xss" title="xss" rel="2">xss</a>
+                            <a href="/tags/#k8s" title="k8s" rel="2">k8s</a>
                             
                         
                             

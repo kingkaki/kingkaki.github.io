@@ -90,7 +90,7 @@
 
                         
                         <li>
-                            <a href="/about/">About</a>
+                            <a href="/tags/">Tags</a>
                         </li>
                         
                     
@@ -104,7 +104,7 @@
 
                         
                         <li>
-                            <a href="/tags/">Tags</a>
+                            <a href="/about/">About</a>
                         </li>
                         
                     
@@ -181,6 +181,35 @@
             
                 <!-- Main Content -->
 
+
+<div class="post-preview">
+
+    <a href="/2018/02/python闭包与装饰器/">
+        <h2 class="post-title">
+            Python-闭包与装饰器
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            闭包讲闭包前先说一下在函数内部，返回一个函数
+def lazy_sum(*args):    def sum():        ax = 0        for n in args:            ax = ax + n        return ax    return sum
+f = lazy_sum(1,3,5,7,9)
+利用返回的函数，可以在后期使用
+f()
+
+
+
+25......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-02-10
+    </p>
+
+</div>
+<hr>
 
 <div class="post-preview">
 
@@ -405,36 +434,6 @@ SQL注入漏洞一开始都是丢进seay代码审计跑一跑，跑出一堆可�
 </div>
 <hr>
 
-<div class="post-preview">
-
-    <a href="/2018/01/python-web环境搭建/">
-        <h2 class="post-title">
-            Python web环境搭建
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            安装pipcentos6.x版本的话
-yum install python-pip.noarch
-centos7.x版本
-yum install python2-pip
-安装virtualenv用于独立每个python环境
-pip install virtualenv
-创建virtualenv
-virtualenv pythonweb
-切换virtualenv
-[root@localhost......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by kingkk on
-        2018-01-21
-    </p>
-
-</div>
-<hr>
-
 
 
 <!-- Pager -->
@@ -488,11 +487,17 @@ virtualenv pythonweb
                             
                         
                             
+                            <a href="/tags/#java" title="java" rel="15">java</a>
+                            
+                        
+                            
+                            <a href="/tags/#weblogic" title="weblogic" rel="3">weblogic</a>
+                            
+                        
+                            
+                        
+                            
                             <a href="/tags/#python" title="python" rel="2">python</a>
-                            
-                        
-                            
-                        
                             
                         
                             
@@ -502,17 +507,17 @@ virtualenv pythonweb
                             
                         
                             
-                            <a href="/tags/#java" title="java" rel="15">java</a>
-                            
                         
-                            
-                        
-                            
-                            <a href="/tags/#weblogic" title="weblogic" rel="3">weblogic</a>
                             
                         
                             
                             <a href="/tags/#漏洞分析" title="漏洞分析" rel="2">漏洞分析</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#Java" title="Java" rel="2">Java</a>
                             
                         
                             
@@ -524,35 +529,29 @@ virtualenv pythonweb
                             
                         
                             
-                            <a href="/tags/#Java" title="Java" rel="2">Java</a>
-                            
-                        
-                            
-                        
-                            
-                            <a href="/tags/#k8s" title="k8s" rel="2">k8s</a>
-                            
-                        
-                            
-                            <a href="/tags/#云原生" title="云原生" rel="3">云原生</a>
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
-                        
-                            
                             <a href="/tags/#XXE" title="XXE" rel="3">XXE</a>
                             
                         
                             
                         
                             
+                        
+                            
+                        
+                            
+                            <a href="/tags/#docker" title="docker" rel="2">docker</a>
+                            
+                        
+                            
+                            <a href="/tags/#云原生" title="云原生" rel="4">云原生</a>
+                            
+                        
+                            
+                        
+                            
                             <a href="/tags/#php" title="php" rel="4">php</a>
+                            
+                        
                             
                         
                             
@@ -576,9 +575,11 @@ virtualenv pythonweb
                             
                         
                             
+                            <a href="/tags/#xss" title="xss" rel="2">xss</a>
+                            
                         
                             
-                            <a href="/tags/#xss" title="xss" rel="2">xss</a>
+                            <a href="/tags/#k8s" title="k8s" rel="2">k8s</a>
                             
                         
                             
