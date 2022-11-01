@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          一个从零开始的mvc - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/05/一个从零开始的mvc/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                    </div>
+                    <h1>一个从零开始的mvc</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-05-12
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>仔细算来，已经差不多有20天没有更新过博客了，自己的网站页差不多有十几天没来过了。好吧，其实是去coding去了，感觉没什么好记录也没什么需要记录的，也就没有写博客了。</p>
+<h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><p>emm，身为半个野路子出来的人，没有做过开发，从小迪开始，零星的收集着知识点，用着一些大佬写好的工具，抓几个包，肆意的跑着。<br>实际渗透起来，总觉得像是一个无头的苍蝇，乱飞，费力而且找不到想要的东西。 这学期一开学差不多当了两个月的赛棍，从n1ctf一直到最后参加的ciscn。国际赛，全国赛，学校看重的比赛，乱七八糟的比赛都参加了。中间writeup写了不少，也学了不少骚操作。。<br>可是连续打到了上一个月底的时候，在写writeup的我总感觉有哪里不是很顺畅。说是没有从ctf中学到什么，那也确实不是，也学到了很多新姿势。<br> <strong>知识太碎片化了</strong>。 感觉还是基础太差，对整个web没有更加深入的理解，所以对一个网站，或者一次渗透时，不能找到关键的点。或许就是说是没有感觉。<br> 这种感觉应该是来自于对于网站、对于功能点的洞察力。有时候或许会把它归为运气，但是我觉得，这种洞察力，对于一名黑客来说更加的极为重要。<br> 思路和洞察力是指导的方向，而后期的一些测试更多的可以基于自动化的工具来完成。而ctf带来的或许是更加巧妙地利用姿势，可更加重要的还是那种感觉，对于漏洞的敏感。在哪可能会发生漏洞的一种洞察力。后面，或许可以借助更多的骚操作来绕过限制，攻下这个漏洞。然而，光有骚操作是绝对不够的。<br> 于是我想重新回到代码，去熟悉网站的结构，去了解开发的流程（当然也是LoRexxar大佬的建议，非常感谢）。就决定先从暑假草草而过的MVC框架开始，从框架到各个功能的实现，自己写了一个小型留言的站。暂无借助任何外来的包。<br> <a href="https://github.com/kingkaki/simple_guestbook" target="_blank" rel="noopener">https://github.com/kingkaki/simple_guestbook</a> </p>
+<p> 下面内容帖自该项目的README.md</p>
+<h3 id="simple-guestbook"><a href="#simple-guestbook" class="headerlink" title="simple_guestbook"></a><a href="https://github.com/kingkaki/simple_guestbook#simple_guestbook" target="_blank" rel="noopener"></a>simple_guestbook</h3><p>主要目的是为了学习mvc框架，熟悉一些开发的流程</p>
+<h3 id="功能介绍"><a href="#功能介绍" class="headerlink" title="功能介绍"></a><a href="https://github.com/kingkaki/simple_guestbook#功能介绍" target="_blank" rel="noopener"></a>功能介绍</h3><h4 id="两个个主要控制器"><a href="#两个个主要控制器" class="headerlink" title="两个个主要控制器"></a><a href="https://github.com/kingkaki/simple_guestbook#两个个主要控制器" target="_blank" rel="noopener"></a>两个个主要控制器</h4><ul>
+<li>index</li>
+<li>user</li>
+</ul>
+<h4 id="控制器中的方法-页面"><a href="#控制器中的方法-页面" class="headerlink" title="控制器中的方法/页面"></a><a href="https://github.com/kingkaki/simple_guestbook#控制器中的方法页面" target="_blank" rel="noopener"></a>控制器中的方法/页面</h4><h5 id="index"><a href="#index" class="headerlink" title="index"></a><a href="https://github.com/kingkaki/simple_guestbook#index" target="_blank" rel="noopener"></a>index</h5><ul>
+<li>index (主页面，用于显示全部留言)</li>
+<li>page (留言详情页）</li>
+<li>add (新增留言)</li>
+<li>save (添加留言功能页)</li>
+<li>del (删除留言功能页)</li>
+<li>commentadd (添加评论功能页)</li>
+<li>commentdel (删除评论功能页)</li>
+</ul>
+<h5 id="user"><a href="#user" class="headerlink" title="user"></a><a href="https://github.com/kingkaki/simple_guestbook#user" target="_blank" rel="noopener"></a>user</h5><ul>
+<li>index (个人信息页)</li>
+<li>login (登录页面)</li>
+<li>logout (登出页面)</li>
+<li>register (注册页面)</li>
+<li>uploadavatar (上传头像功能页面)</li>
+</ul>
+<h3 id="后续"><a href="#后续" class="headerlink" title="后续"></a><a href="https://github.com/kingkaki/simple_guestbook#后续" target="_blank" rel="noopener"></a>后续</h3><h4 id="一些功能特色"><a href="#一些功能特色" class="headerlink" title="一些功能特色"></a><a href="https://github.com/kingkaki/simple_guestbook#一些功能特色" target="_blank" rel="noopener"></a>一些功能特色</h4><ul>
+<li>sql查询使用pdo的预编译形式，防止sql注入</li>
+<li>权限分离，在进行操作前会进行权限认证</li>
+<li>自编写xss_escape对注册的变量进行递归html编码</li>
+<li>对上传的文件进行重命名，并对上传类型进行限制</li>
+</ul>
+<h4 id="学到的一些东西"><a href="#学到的一些东西" class="headerlink" title="学到的一些东西"></a><a href="https://github.com/kingkaki/simple_guestbook#学到的一些东西" target="_blank" rel="noopener"></a>学到的一些东西</h4><ul>
+<li>文件上传处理</li>
+<li>sql预编译</li>
+<li>权限认证</li>
+</ul>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a><a href="https://github.com/kingkaki/simple_guestbook#总结" target="_blank" rel="noopener"></a>总结</h4><p>算是对mvc框架有了一定的认知 从框架到实现，算是真正的从零自己动手写了一个php的站（虽然前端页面丑的不想话说） 对文件的处理，以及数据的查询动手操作之后也有更深入的理解</p>
+<h4 id="后期学习计划"><a href="#后期学习计划" class="headerlink" title="后期学习计划"></a><a href="https://github.com/kingkaki/simple_guestbook#后期学习计划" target="_blank" rel="noopener"></a>后期学习计划</h4><p>开始代码审计吧~</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/06/flask-学习记录/" data-toggle="tooltip" data-placement="top" title="flask-学习记录">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/04/2018ddctf-writeup/" data-toggle="tooltip" data-placement="top" title="2018DDCTF writeup">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

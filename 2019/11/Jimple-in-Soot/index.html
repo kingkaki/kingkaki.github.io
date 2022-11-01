@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Jimple in Soot - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2019/11/Jimple-in-Soot/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#soot" title="soot">soot</a>
+                        
+                          <a class="tag" href="/tags/#语法分析" title="语法分析">语法分析</a>
+                        
+                    </div>
+                    <h1>Jimple in Soot</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2019-11-21
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>还是一篇类似于笔记一样的东西，我不保证百分百的准确，只是以一种自己能看懂的方式，记录一些自己理解的东西。</p>
+<p>主要记录下<code>jimple</code>，也就是Soot中最擅长处理的一种中间代码。（图来源网络）</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20191020201758.png" alt></p>
+<p>可以看到还算是一种人类比较好理解的中间代码，并且将一些编译中做的操作给显示的显现了出来（因为本来就是从java字节码反编译过来的）</p>
+<p>Soot中对这种中间代码建立了一套比较完整的体系来描述，方便人们通过程序来分析代码。</p>
+<h1 id="几个主要结构"><a href="#几个主要结构" class="headerlink" title="几个主要结构"></a>几个主要结构</h1><p><code>jimple</code>的主要数据结构位于<code>soot.jimple</code>，但这里主要是定义好的一些接口，具体的实现类位于<code>soot.jimple.internal</code>中，通过IDEA生的关系图可以大概看到对应关系，这篇笔记也主要围绕这个关系图展开。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/Package%20internal.png" alt></p>
+<h2 id="Stmt"><a href="#Stmt" class="headerlink" title="Stmt"></a>Stmt</h2><p>应该就是<code>statement</code>语句的意思，有很多继承他的类，用来描述不同的语句。</p>
+<h3 id="AbstractDefinitionStmt"><a href="#AbstractDefinitionStmt" class="headerlink" title="AbstractDefinitionStmt"></a>AbstractDefinitionStmt</h3><p>指一个赋值语句</p>
+<p>这个语句的左边通常是一个变量</p>
+<p>右边可能是任何其他东西，例如语句，表达式，另一个变量，一些常量等等</p>
+<h4 id="JAssignStmt"><a href="#JAssignStmt" class="headerlink" title="JAssignStmt"></a>JAssignStmt</h4><p>一个<em>正常</em>的赋值语句，例如，我们将一个变量赋值给变量<code>$r5</code></p>
+<figure class="highlight gams"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"><span class="meta-keyword">$r5</span> = newarray (java.lang.Object)[0]</span></span><br></pre></td></tr></table></figure>
+<h4 id="JIdentityStmt"><a href="#JIdentityStmt" class="headerlink" title="JIdentityStmt"></a>JIdentityStmt</h4><p>指的是一些非显式的内部赋值语句</p>
+<p>例如在真正执行代码时，程序会帮你把从参数传入的变量，赋值给一个临时变量，给函数内部调用</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">r1 :</span>= <span class="meta">@parameter</span><span class="string">0:</span> java.lang.String</span><br></pre></td></tr></table></figure>
+<p>再例如class中指向本身的this指针，都会进行一次非显示的赋值操作</p>
+<figure class="highlight avrasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">r0</span> := @this: <span class="keyword">com</span>.kingkk.test.Controller</span><br></pre></td></tr></table></figure>
+<h3 id="JInvokeStmt"><a href="#JInvokeStmt" class="headerlink" title="JInvokeStmt"></a>JInvokeStmt</h3><p> 当一个变量，调用本身的方法</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">specialinvoke <span class="variable">$r4</span>.&lt;org<span class="selector-class">.springframework</span><span class="selector-class">.web</span><span class="selector-class">.client</span><span class="selector-class">.RestTemplate</span>: void &lt;init&gt;()&gt;()</span><br></pre></td></tr></table></figure>
+<h3 id="AbstractSwitchStmt"><a href="#AbstractSwitchStmt" class="headerlink" title="AbstractSwitchStmt"></a>AbstractSwitchStmt</h3><p>switch语句主要由于JVM对于不同的Switch语句，会生成不同的操作指令，从而也就有了两种Switch语句</p>
+<h4 id="JLookupSwitchStmt"><a href="#JLookupSwitchStmt" class="headerlink" title="JLookupSwitchStmt"></a>JLookupSwitchStmt</h4><p>对应LookupSwitch</p>
+<h4 id="JTableSwitchStmt"><a href="#JTableSwitchStmt" class="headerlink" title="JTableSwitchStmt"></a>JTableSwitchStmt</h4><p>对应TableSwitch</p>
+<h3 id="JIfStmt"><a href="#JIfStmt" class="headerlink" title="JIfStmt"></a>JIfStmt</h3><p>if语句</p>
+<h3 id="JBreakpointStmt"><a href="#JBreakpointStmt" class="headerlink" title="JBreakpointStmt"></a>JBreakpointStmt</h3><p>break语句</p>
+<h3 id="JRetStmt"><a href="#JRetStmt" class="headerlink" title="JRetStmt"></a>JRetStmt</h3><p>return 语句</p>
+<h4 id="JReturnVoidStmt"><a href="#JReturnVoidStmt" class="headerlink" title="JReturnVoidStmt"></a>JReturnVoidStmt</h4><p>return void</p>
+<h4 id="JGotoStmt"><a href="#JGotoStmt" class="headerlink" title="JGotoStmt"></a>JGotoStmt</h4><p>goto语句</p>
+<h3 id="JNopStmt"><a href="#JNopStmt" class="headerlink" title="JNopStmt"></a>JNopStmt</h3><p>我也不知道..</p>
+<h3 id="AbstractOpStmt"><a href="#AbstractOpStmt" class="headerlink" title="AbstractOpStmt"></a>AbstractOpStmt</h3><p>这个类下面的我也不太熟，先列出来</p>
+<h4 id="JThrowStmt"><a href="#JThrowStmt" class="headerlink" title="JThrowStmt"></a>JThrowStmt</h4><p>这是throw语句（已验证</p>
+<h4 id="JExitMonitorStmt"><a href="#JExitMonitorStmt" class="headerlink" title="JExitMonitorStmt"></a>JExitMonitorStmt</h4><h4 id="JEnterMonitorStmt"><a href="#JEnterMonitorStmt" class="headerlink" title="JEnterMonitorStmt"></a>JEnterMonitorStmt</h4><h4 id="JRetStmt-1"><a href="#JRetStmt-1" class="headerlink" title="JRetStmt"></a>JRetStmt</h4><h2 id="Expr"><a href="#Expr" class="headerlink" title="Expr"></a>Expr</h2><p>应该就是<code>expression</code>表达式的意思</p>
+<h3 id="AbstractInvokeExpr"><a href="#AbstractInvokeExpr" class="headerlink" title="AbstractInvokeExpr"></a>AbstractInvokeExpr</h3><p>只一个调用了函数的表达式，比如 <code>user.setName(&quot;kingkk&quot;)</code></p>
+<p>里面很多主要是根据JVM的操作指令来进行的描述</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/ScreenClip.png" alt></p>
+<h4 id="JStaticInvokeExpr"><a href="#JStaticInvokeExpr" class="headerlink" title="JStaticInvokeExpr"></a>JStaticInvokeExpr</h4><p>主要指的是一个static静态方法的调用</p>
+<h4 id="JDynamicInvokeExpr"><a href="#JDynamicInvokeExpr" class="headerlink" title="JDynamicInvokeExpr"></a>JDynamicInvokeExpr</h4><p>一般是一些invoke的动态调用？（我也不是特别懂</p>
+<h4 id="AbstractInstanceInvokeExpr"><a href="#AbstractInstanceInvokeExpr" class="headerlink" title="AbstractInstanceInvokeExpr"></a>AbstractInstanceInvokeExpr</h4><p>指的是一个变量调用自身的方法，但根据情况，还可以细分</p>
+<h5 id="JVirtualInvokeExpr"><a href="#JVirtualInvokeExpr" class="headerlink" title="JVirtualInvokeExpr"></a>JVirtualInvokeExpr</h5><p>调用自身的方法</p>
+<h5 id="JInterfaceInvokeExpr"><a href="#JInterfaceInvokeExpr" class="headerlink" title="JInterfaceInvokeExpr"></a>JInterfaceInvokeExpr</h5><p>调用接口方法</p>
+<h5 id="JSpecialInvokeExpr"><a href="#JSpecialInvokeExpr" class="headerlink" title="JSpecialInvokeExpr"></a>JSpecialInvokeExpr</h5><p>一般是一些初始化、父类、私有等方法</p>
+<h3 id="AbstractBinopExpr"><a href="#AbstractBinopExpr" class="headerlink" title="AbstractBinopExpr"></a>AbstractBinopExpr</h3><p>一些二进制的数字操作</p>
+<p>例如加减乘除，逻辑且或非，一些比较操作，以及一些位运算，这里就不具体列了</p>
+<h3 id="JNewExpr"><a href="#JNewExpr" class="headerlink" title="JNewExpr"></a>JNewExpr</h3><p>new 一个类表达式</p>
+<h3 id="JNewArrayExpr"><a href="#JNewArrayExpr" class="headerlink" title="JNewArrayExpr"></a>JNewArrayExpr</h3><p>new 一个数组</p>
+<h3 id="JNewMultiArrayExpr"><a href="#JNewMultiArrayExpr" class="headerlink" title="JNewMultiArrayExpr"></a>JNewMultiArrayExpr</h3><p>应该是指一个多维数组</p>
+<h3 id="JCastExpr"><a href="#JCastExpr" class="headerlink" title="JCastExpr"></a>JCastExpr</h3><p>强制类型转换</p>
+<h3 id="JInstanceOfExpr"><a href="#JInstanceOfExpr" class="headerlink" title="JInstanceOfExpr"></a>JInstanceOfExpr</h3><p>instanceof</p>
+<h3 id="AbstractUnopExpr"><a href="#AbstractUnopExpr" class="headerlink" title="AbstractUnopExpr"></a>AbstractUnopExpr</h3><p>这下面的类我也不太清楚</p>
+<h4 id="JNegExpr"><a href="#JNegExpr" class="headerlink" title="JNegExpr"></a>JNegExpr</h4><h4 id="JLengthExpr"><a href="#JLengthExpr" class="headerlink" title="JLengthExpr"></a>JLengthExpr</h4><h2 id="其余一些"><a href="#其余一些" class="headerlink" title="其余一些"></a>其余一些</h2><p>其余剩下的一下常用的，就统一写这了</p>
+<h3 id="Constant"><a href="#Constant" class="headerlink" title="Constant"></a>Constant</h3><p>常量</p>
+<h4 id="StringConstant"><a href="#StringConstant" class="headerlink" title="StringConstant"></a>StringConstant</h4><p>字符串常量</p>
+<h4 id="NumberConstant"><a href="#NumberConstant" class="headerlink" title="NumberConstant"></a>NumberConstant</h4><p>数字常量</p>
+<h3 id="IdentityRef"><a href="#IdentityRef" class="headerlink" title="IdentityRef"></a>IdentityRef</h3><p>本身的一些引用</p>
+<h4 id="ParameterRef"><a href="#ParameterRef" class="headerlink" title="ParameterRef"></a>ParameterRef</h4><p>函数参数</p>
+<h4 id="ThisRef"><a href="#ThisRef" class="headerlink" title="ThisRef"></a>ThisRef</h4><p>this指针</p>
+<h4 id="CaughtExceptionRef"><a href="#CaughtExceptionRef" class="headerlink" title="CaughtExceptionRef"></a>CaughtExceptionRef</h4><p>捕获到的异常</p>
+<h3 id="JimpleLocal"><a href="#JimpleLocal" class="headerlink" title="JimpleLocal"></a>JimpleLocal</h3><p>Local变量</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2019/12/Java8中两个优雅的特性/" data-toggle="tooltip" data-placement="top" title="Java8中两个优雅的特性">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2019/11/SQLi-in-Java/" data-toggle="tooltip" data-placement="top" title="SQLi in Java">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#soot" title="soot">soot</a>
+                        
+                          <a class="tag" href="/tags/#语法分析" title="语法分析">语法分析</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

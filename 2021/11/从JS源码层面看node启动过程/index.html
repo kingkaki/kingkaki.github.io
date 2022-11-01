@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          从JS源码层面看node启动过程 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2021/11/从JS源码层面看node启动过程/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#node" title="node">node</a>
+                        
+                    </div>
+                    <h1>从JS源码层面看node启动过程</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2021-11-20
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>为什么要写“从JS源码层面”呢，因为众所周知，node是由C++赋予了其控制操作系统的能力，因此node服务本身自然也是从C++层面开始启动，但本文目前暂不涉及C++相关内容，仅从JS代码层面来看下node服务的启动过程。主要是为了弄清主模块的加载、require导入模块的加载 以及preload模块的加载过程。三个文件的代码如下。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// index.js</span></span><br><span class="line"><span class="built_in">require</span>(<span class="string">"./load"</span>)</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"hello world"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// load.js</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"load"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// preload.js</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"preload"</span>)</span><br></pre></td></tr></table></figure>
+<p>通过<code>node -r ./preload ./index.js</code>即可得到如下输出</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">preload</span><br><span class="line">load</span><br><span class="line">hello world</span><br></pre></td></tr></table></figure>
+<p>一个比较直观的感受就是先加载的preload模块，然后在加载index.js时加载了load.js，最后执行完index.js。本文的测试以及调试的node源码版本均为<code>v12.13.0</code></p>
+<h1 id="启动过程"><a href="#启动过程" class="headerlink" title="启动过程"></a>启动过程</h1><h2 id="runMain"><a href="#runMain" class="headerlink" title="runMain"></a>runMain</h2><p>故事的开始从<code>internal/main/run_main_module.js</code>文件开始</p>
+<p>可以看到最开始先执行了<code>prepareMainThreadExecution</code>这个函数，做一些主线程的启动前的准备工作，其实preload模块的加载也在其中，但目前先按下不表，先分析主模块的加载过程，后面再来看这个preload模块的加载。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20211021113414.png" alt></p>
+<p>然后就是加载<code>internal/modules/cjs/loader</code>模块，这里主要是CJSModule的模块加载过程，高版本的node可以支持CommonJS和ESModule两种不同的语法类型，默认是选用CommonJS</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20211021113737.png" alt></p>
+<p><code>require(&#39;internal/modules/cjs/loader&#39;)</code>模块中也执行了一部分代码，主要是一些Module类的初始化工作，以及一些函数定义，这里就先不细讲，主要来看下后面<code>runMain</code>函数中的内容。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20211021114952.png" alt></p>
+<p>一开始是一些实验性模块的判断，对应<code>--experimental-modules</code>参数，用于开启一些特性</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20211021115149.png" alt></p>
+<p>然后就是进入<code>Module._load</code>函数，这是一个递归函数，三个参数分别代表要加载的文件名、caller和是否是main文件。</p>
+<p>其作用引用下注释中的话便比较容易懂了</p>
+<blockquote>
+<p>Check the cache for the requested file.</p>
+<ol>
+<li>If a module already exists in the cache: return its exports object.</li>
+<li>If the module is native: call <code>NativeModule.prototype.compileForPublicLoader()</code> and return the exports.</li>
+<li>Otherwise, create a new module for the file and save it to the cache.<br>Then have it load  the file contents before returning its exports<br>object.</li>
+</ol>
+</blockquote>
+<p>就是如果Module的cache中已经存在对应的要加载的文件，则直接return exports对象。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> filename = Module._resolveFilename(request, parent, isMain);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> cachedModule = Module._cache[filename];</span><br><span class="line"><span class="keyword">if</span> (cachedModule !== <span class="literal">undefined</span>) &#123;</span><br><span class="line">  updateChildren(parent, cachedModule, <span class="literal">true</span>);</span><br><span class="line">  <span class="keyword">return</span> cachedModule.exports;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果模块是一个native模块，则调用<code>NativeModule.prototype.compileForPublicLoader()</code> 然后返回其exports。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> mod = loadNativeModule(filename, request, experimentalModules);</span><br><span class="line"><span class="keyword">if</span> (mod &amp;&amp; mod.canBeRequiredByUsers) <span class="keyword">return</span> mod.exports;</span><br></pre></td></tr></table></figure>
+<p>如果都不是，则就是正经首次加载模块的过程</p>
+<p>如果main模块，则设置process.mainModule为当前模块名，并且设置module.id为<code>.</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (isMain) &#123;</span><br><span class="line">    process.mainModule = <span class="built_in">module</span>;</span><br><span class="line">    <span class="built_in">module</span>.id = <span class="string">'.'</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后会将module放入<code>Module._cache</code>中，并且在<code>relativeResolveCache</code>中缓存对应的文件名，并且如果最后load模块失败时会从缓存中删除对应的cache，从而保证了文件加载时不会产生无限递归的加载。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20211021143051.png" alt></p>
+<p>然后就是核心的<code>module.load</code>方法，根据文件名后缀调用不同的加载器</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20211021143456.png" alt></p>
+<p>可以看到默认支持如下四个文件类型，这里主要来看下正常的<code>.js</code>的加载器</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20211021143551.png" alt></p>
+<p>前面是一些future模块的特性，可以先跳过，然后就是读取文件内容，去掉BOM头，调用<code>module._compile</code>进行编译</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20211021143638.png" alt></p>
+<p>根据<code>Module.prototype._compile</code>的注释可以看出，我们编写的node代码会在一个对应的scope或者沙箱中运行，并且向其中暴露一些变量，如<code>require</code>、<code>module</code>、<code>exports</code>，我们也能知道这就是node中默认提供的一些内置函数。</p>
+<blockquote>
+<p>Run the file contents in the correct scope or sandbox. Expose the correct helper variables (require, module, exports) to the file. Returns exception, if any.</p>
+</blockquote>
+<p>前面是一些<code>stripShebang</code>和处理cache sourcemap相关的逻辑，可以先跳过。</p>
+<p>如果是patched模式，则通过<code>vm.runInThisContext</code>在沙箱中运行代码。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20211021144406.png" alt></p>
+<p>默认情况会进入else分支，则会创建一个函数，可以看到几个熟悉的内置变量名<code>exports</code>、<code>require</code>、<code>module</code>、<code>__filename</code>、<code>__dirname</code>。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20211021144557.png" alt></p>
+<p>可以先不用管函数的具体生成方式，直接来看下生成的函数，即可知道其作用</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> (<span class="params">exports, require, module, __filename, __dirname</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">require</span>(<span class="string">"./load"</span>)</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"hello world"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到其实做的仅是将我们的代码被被套入到了一个函数中，这也是node的js代码的实际运行方式。</p>
+<p>然后其实就是获取到要传入这几个变量，调用这个生成的函数即可。<code>dirname</code>和<code>filename</code>就是对应的文件名没什么好说的，<code>require</code>变量默认情况就是<code>module.require</code>方法，exports和和module则分别就是<code>this.exports</code>和<code>this</code>了。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20211021145016.png" alt></p>
+<p>然后调用这个<code>compiledWrapper.call</code>就会执行我们编写的js文件了。</p>
+<h2 id="require-module"><a href="#require-module" class="headerlink" title="require module"></a>require module</h2><p>然后我们的<code>index.js</code>中调用了<code>require(&quot;./load&quot;)</code>，之前说过，默认情况下require其实就是module.require函数。</p>
+<p>简单的校验下传入的id，然后记录下require的深度，就会继续调用<code>Module._load</code>函数</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20211021145606.png" alt></p>
+<p>但是这回的区别在于传入的函数，parent原本为null，如今则是caller的模块，isMain也设置为了false。</p>
+<p>这里parent为true与之前不同的便是这个缓存的机制，但其实也类似，便是如果<code>Module._cache</code>中存在了对应缓存则直接返回，否则和之前和load的逻辑一致，然后调用<code>.js</code>加载器，最后将源文件封装成一个<code>compiledWrapper</code>并执行。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20211021151052.png" alt></p>
+<p>然后当还有require没加载过的模块时便会这样一致递归加载，直到当前模块所递归引用到的所有模块都加载完成之后依次退出，最后就完成了整个node文件的启动过程。</p>
+<p>这整个过程都是同步的，后面执行的代码则是注册在事件循环中函数了。</p>
+<h2 id="preload"><a href="#preload" class="headerlink" title="preload"></a>preload</h2><p>preload的加载过程则是在一开始的<code>run_main_module</code>的<code>prepareMainThreadExecution</code>中</p>
+<p>其中做了许多init的东西，例如熟悉的inspector、自定义异常堆栈处理、CJS和EMS的模块初始化等，这里就不展开讲了。</p>
+<p>然后就是<code>loadPreloadModules</code>函数的处理，根据<code>-r</code>参数的值，预处理对应的模块</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20211021153447.png" alt></p>
+<p>然后就到了<code>Module._preloadModules</code>模块中，需要注意的就是这里会设置parent为<code>internal/preload</code>module，然后依次for循环<code>-r</code>参数的文件列表，进行require加载。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20211021153606.png" alt></p>
+<p>后面的过程就是<code>Module.prototype.require</code>和之前require模块的过程一样了。</p>
+<p>这样我们就可以通过preload机制在主程序运行前进行一些预加载的处理机制。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><a href="https://nodejs.org/api/modules.html#the-module-wrapper" target="_blank" rel="noopener">https://nodejs.org/api/modules.html#the-module-wrapper</a></p>
+</li>
+<li><p><a href="https://github.com/DavidCai1993/my-blog/issues/26?spm=a2c6h.12873639.0.0.5bf53975O9LSK5" target="_blank" rel="noopener">https://github.com/DavidCai1993/my-blog/issues/26?spm=a2c6h.12873639.0.0.5bf53975O9LSK5</a></p>
+</li>
+</ul>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2022/04/CVE-2022-22965-SpringFramework-漏洞分析/" data-toggle="tooltip" data-placement="top" title="CVE-2022-22965 SpringFramework 漏洞分析">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2021/06/runc容器逃逸漏洞分析（CVE-2021-30465）/" data-toggle="tooltip" data-placement="top" title="runc容器逃逸漏洞分析（CVE-2021-30465）">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#node" title="node">node</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

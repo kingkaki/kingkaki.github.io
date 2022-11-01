@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Apache/Nginx中Host头攻击的一些差异 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/10/Apache-Nginx中Host头攻击的一些差异/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#Host" title="Host">Host</a>
+                        
+                    </div>
+                    <h1>Apache/Nginx中Host头攻击的一些差异</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-10-12
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="Host-header"><a href="#Host-header" class="headerlink" title="Host header"></a>Host header</h1><blockquote>
+<p>服务器的域名(用于虚拟主机 )，以及服务器所监听的传输控制协议端口号。如果所请求的端口是对应的服务的标准端口，则端口号可被省略。</p>
+<p>自超文件传输协议版本1.1（HTTP/1.1）开始便是必需字段。</p>
+</blockquote>
+<p>以上是维基百科中对于Host头部的说明。可以看到Host头部并非是用于区别发送到哪台主机的字段。而是用于区分一台主机上不同的虚拟主机。（可以在Apache和Nginx中配置相应Host对应的虚拟主机。</p>
+<p>利用PHP可以在<code>$_SERVER[&#39;HTTP_HOST&#39;]</code>字段中获取到该字段的值</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">var_dump($_SERVER[<span class="string">'HTTP_HOST'</span>]);</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Apache-Nginx中Host头攻击的一些差异/1.png" alt></p>
+<p>当没有配置虚拟主机或者匹配不到对应的<code>Host</code>主机时，webserver就会发送请求到默认的目录中去解析</p>
+<p>从而<code>Host</code>头部就变成了一个可控的字段，当一些应用程序没有对<code>$SERVER[&#39;HTTP_HOST&#39;]</code>字段进行处理，过分信任时，就会产生一些安全问题</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Apache-Nginx中Host头攻击的一些差异/2.png" alt></p>
+<h1 id="Diff-of-win-linux"><a href="#Diff-of-win-linux" class="headerlink" title="Diff of win/linux"></a>Diff of win/linux</h1><p>这里用的测试环境分别是</p>
+<ul>
+<li>win10下的 phpstudy</li>
+<li>ubuntu 18.04中默认安装的nginx和apache2</li>
+</ul>
+<p>在1.php中会输出<code>$_SERVER[&#39;HTTP_HOST&#39;]</code>变量</p>
+<h2 id="Windows"><a href="#Windows" class="headerlink" title="Windows"></a>Windows</h2><h3 id="Apache"><a href="#Apache" class="headerlink" title="Apache"></a>Apache</h3><p>可以任意修改apache中的值，服务器都会默认接受</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Apache-Nginx中Host头攻击的一些差异/10.png" alt></p>
+<p>甚至可以插入两个<code>Host</code>头部，在win下会用<code>,</code>将两个头部相连</p>
+<figure class="highlight avrasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">Host:</span> localhost</span><br><span class="line"><span class="symbol">Host:</span><span class="number">123468</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Apache-Nginx中Host头攻击的一些差异/11.png" alt></p>
+<h3 id="Nginx"><a href="#Nginx" class="headerlink" title="Nginx"></a>Nginx</h3><p>nginx中对于任意脏字符都是允许修改的</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Apache-Nginx中Host头攻击的一些差异/12.png" alt></p>
+<p>但是在插入两个<code>Host</code>头部的时候只会获取到第二个<code>Host</code>值</p>
+<figure class="highlight n1ql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Host: localhost</span><br><span class="line">Host: '<span class="keyword">select</span> <span class="keyword">user</span>();</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Apache-Nginx中Host头攻击的一些差异/13.png" alt></p>
+<h2 id="Linux"><a href="#Linux" class="headerlink" title="Linux"></a>Linux</h2><p>但是在linux中又会有些不同</p>
+<h3 id="Apache-1"><a href="#Apache-1" class="headerlink" title="Apache"></a>Apache</h3><p>linux下的apache就有着较为严格的限制，只允许修改对应的ip数字</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Apache-Nginx中Host头攻击的一些差异/15.png" alt></p>
+<p>插入一些脏字符就会返回400的错误</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">Host:</span> <span class="number">192.168</span><span class="number">.85</span><span class="number">.145</span><span class="string">'</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Apache-Nginx中Host头攻击的一些差异/16.png" alt></p>
+<p>两个头部也是一样的情况，即使头部是合法的</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">Host:</span> <span class="number">192.168</span><span class="number">.85</span><span class="number">.145</span></span><br><span class="line"><span class="attr">Host:</span> <span class="number">192.168</span><span class="number">.85</span><span class="number">.145</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Apache-Nginx中Host头攻击的一些差异/17.png" alt></p>
+<h3 id="Nginx-1"><a href="#Nginx-1" class="headerlink" title="Nginx"></a>Nginx</h3><p>linux下nginx中对于<code>Host</code>的处理类似于win中的就不过多介绍</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Apache-Nginx中Host头攻击的一些差异/14.png" alt></p>
+<p>从而网上有一些防御手段就变成了设置虚拟主机（virtual host），从而可以确保<code>Host</code>字段不会被更改，因为一旦修改了<code>Host</code>字段就不会解析到对应的目录当中。</p>
+<h1 id="Virtual-Host"><a href="#Virtual-Host" class="headerlink" title="Virtual Host"></a>Virtual Host</h1><p>但即使配置了虚拟主机之后，所接受的<code>Host</code>字段就是可以信任的么？</p>
+<p>在<code>Apache</code>、<code>Nginx</code>中会呈现不同的状态</p>
+<p>测试环境为</p>
+<ul>
+<li>ubuntu 18.04</li>
+<li>Apache/2.4.29 (Ubuntu)</li>
+<li>nginx/1.14.0 (Ubuntu)</li>
+<li>PHP 7.2.10-0ubuntu0.18.04.1</li>
+</ul>
+<p>至于虚拟主机配置的部分就不过多介绍，在网上可以找到很多配置的文章</p>
+<p>至于域名，可以买一个域名修改解析，或者直接修改host文件</p>
+<p>然后在<code>/var/www</code>目录下新建了三个文件夹</p>
+<ul>
+<li><code>html</code> 默认主目录</li>
+<li><code>apache</code> Apache的虚拟主机目录</li>
+<li><code>nginx</code> Nginx的虚拟主机目录</li>
+</ul>
+<h2 id="Apache-2"><a href="#Apache-2" class="headerlink" title="Apache"></a>Apache</h2><p>可以看到，在配置了虚拟主机之后，访问对应的域名就会访问到对应的目录中</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">Host</span>: <span class="selector-tag">localhost</span><span class="selector-class">.ba123</span><span class="selector-class">.top</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Apache-Nginx中Host头攻击的一些差异/3.png" alt></p>
+<p>当遇到一个不认识的域名的时候，就会解析到默认目录下（当然，假如默认目录下没有<code>1.php</code>这个文件就会返回一个404</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">Host</span>: <span class="selector-tag">localhost</span><span class="selector-class">.ba123</span><span class="selector-class">.to</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Apache-Nginx中Host头攻击的一些差异/4.png" alt></p>
+<p>那想攻击Apache中的虚拟主机时<code>Host</code>字段就不能添加别的脏字符了么？目前找到的可以添加的就只有通过冒号<code>:</code>分割开的端口号</p>
+<p>只要是一个合法的端口就可以发起正常的请求</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">Host</span>: <span class="selector-tag">localhost</span><span class="selector-class">.ba123</span><span class="selector-class">.top</span><span class="selector-pseudo">:23333</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Apache-Nginx中Host头攻击的一些差异/5.png" alt></p>
+<p>但是当想插入一些字符或者端口号过大的时候，都会拒绝请求，返回一个400，更不会允许两个<code>Host</code>头部的请求</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">Host</span>: <span class="selector-tag">localhost</span><span class="selector-class">.ba123</span><span class="selector-class">.top</span><span class="selector-pseudo">:23333'select</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Apache-Nginx中Host头攻击的一些差异/6.png" alt></p>
+<p>总体来说，Apache对于<code>Host</code>字段的限制还是比较严格的，在开启了虚拟主机之后，几乎比较难以插入脏字符。</p>
+<h2 id="Nginx-2"><a href="#Nginx-2" class="headerlink" title="Nginx"></a>Nginx</h2><p>在nginx中似乎有着更多的攻击手法</p>
+<p>对于未知的主机名，处理方式还是与apache中一致，会解析到默认目录中</p>
+<figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Host: localhost.ba<span class="number">123</span>.<span class="keyword">to</span>'<span class="keyword">select</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Apache-Nginx中Host头攻击的一些差异/7.png" alt></p>
+<p>但是这里假如利用冒号<code>:</code>的形式分割之后，冒号后面的<code>port</code>部分会直接被nginx给抛弃，从而可以插入任意的字符</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Host: localhost.ba123.top'<span class="keyword">select</span> <span class="keyword">sleep</span>(<span class="number">5</span>);</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Apache-Nginx中Host头攻击的一些差异/8.png" alt></p>
+<p>甚至在nginx中可以传入两个<code>Host</code>头部，Nginx将以第一个为准传送到对应的虚拟主机处理，而PHP-FPM将以第二个为准给<code>$_SERVER[&#39;HTTP_HOST&#39;]</code>赋值。</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">Host</span>: <span class="selector-tag">localhost</span><span class="selector-class">.ba123</span><span class="selector-class">.top</span></span><br><span class="line"><span class="selector-tag">Host</span><span class="selector-pseudo">:'select</span> <span class="selector-tag">sleep</span>(5);</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Apache-Nginx中Host头攻击的一些差异/9.png" alt></p>
+<p>但是在apache中传入两个Host头部的时候，就会直接返回400</p>
+<p>由此可见，在ngin中对于<code>Host</code>的并没有做过多的限制，从而可以比较容易的进行Host头部攻击。</p>
+<p>windows上的虚拟主机原谅我确实没怎么遇到过，就没测试了，感兴趣的可以自己测试下。</p>
+<h1 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h1><p>可以看到<code>Host</code>头部，在不同的情况下会呈现出不同的状态，因此在编写程序的时候一定要将<code>Host</code>这个值设置为不可信任的，对其进行一些正则或者转义的一些过滤。否则极易引发安全问题。</p>
+<p>在windows下对于这种头部的限制比较松，apache和nginx都能比较轻松的绕过去。</p>
+<p>而在两个服务器相比，Apache对于数据的解析更加严谨，尤其是在linux的环境中，极大的限制了非法的请求。</p>
+<p>Nginx则甚至会出现<code>Nginx</code>与<code>PHP-FPM</code>解析不一致的情况，有时这种解析不一样甚至会带来更多的危害。</p>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="https://www.leavesongs.com/PENETRATION/some-tricks-of-attacking-lnmp-web-application.html" target="_blank" rel="noopener">https://www.leavesongs.com/PENETRATION/some-tricks-of-attacking-lnmp-web-application.html</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/10/护网杯-web/" data-toggle="tooltip" data-placement="top" title="护网杯-web">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/09/ThinkPHP-漏洞分析集合/" data-toggle="tooltip" data-placement="top" title="ThinkPHP 漏洞分析集合">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#Host" title="Host">Host</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

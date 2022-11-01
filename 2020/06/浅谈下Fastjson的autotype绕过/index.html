@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          浅谈下Fastjson的autotype绕过 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2020/06/浅谈下Fastjson的autotype绕过/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                          <a class="tag" href="/tags/#fastjson" title="fastjson">fastjson</a>
+                        
+                    </div>
+                    <h1>浅谈下Fastjson的autotype绕过</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2020-06-08
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>继去年1.2.47 Fastjson被绕过之后，最近的1.2.68又出现了绕过。</p>
+<p>正好前段时间翻了一遍Fastjson的源码，对整体逻辑有了一些了解，就尝试分析下autotype的校验过程，以及这两次绕过的思路。若有错误，还望指出。</p>
+<h1 id="autotype的校验"><a href="#autotype的校验" class="headerlink" title="autotype的校验"></a>autotype的校验</h1><h2 id="为什么校验一直被绕过？"><a href="#为什么校验一直被绕过？" class="headerlink" title="为什么校验一直被绕过？"></a>为什么校验一直被绕过？</h2><p>1.2.24之后，fastjson对反序列化的类型进行了校验，主要就体现在<code>ParserConfig.checkAutoType</code>函数中</p>
+<p>里面会对反序列化的类型进行黑白名单和校验，然后获取对应的Java类。</p>
+<p>至于为什么没开启<code>SupportAutoType</code>属性依然会存在反序列化的危险呢？</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200608143131.png" alt></p>
+<p>可以看到在解析过程中，只要key值为<code>@type</code>时，就会进入<code>checkAutoType</code>函数尝试获取类。</p>
+<p>而且校验<code>SupportAutoType</code>属性的工作却是在<code>checkAutoType</code>函数中完成的（跟进之后也可以看到是在函数最末端调校验的值，并且在这之前有多处return）</p>
+<p>那为什么要有这种设计呢？主要原因在于fastjson想让一些基础类（还有一些白名单中的异常类）可以不受<code>SupportAutoType</code>限制就可以反序列化。</p>
+<p>例如之前别人提出的验证是否使用fastjson的<code>java.net.Inet6Address</code>、<code>java.net.URL</code>也都是这个原理。</p>
+<p>可以看到，即使不开启<code>SupportAutoType</code>依然是可以获取到具体的java类的。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200608143424.png" alt></p>
+<p>所以，这就是为什么校验一直被绕过，感觉主要原因就在于为了实现这个feature，而导致的一些逻辑问题。</p>
+<h2 id="校验过程"><a href="#校验过程" class="headerlink" title="校验过程"></a>校验过程</h2><p>checkAutoType主要有三个参数</p>
+<ul>
+<li><code>String typeName</code> 被序列化的类名</li>
+<li><code>Class&lt;?&gt; expectClass</code> 期望类</li>
+<li><code>int features</code> 配置的feature值</li>
+</ul>
+<p>先简单说下<code>expectClass</code>这个期望类，它的主要目的是为了让一些实现了<code>expectClass</code>这个接口的类可以被反序列化。</p>
+<p>然后来看下校验的过程，一开始就是一些非null和长度限制的判断</p>
+<p>之后判断<code>exceptClass</code>的类型，如果非null并且不是如下类型，则设置<code>expectClassFlag</code>为<code>true</code></p>
+<p>简单说的话就是不允许如下类型的<code>exceptClass</code></p>
+<ul>
+<li><code>Object.class</code></li>
+<li><code>Serializable.class</code></li>
+<li><code>Cloneable.class</code></li>
+<li><code>Closeable.class</code></li>
+<li><code>EventListener.class</code></li>
+<li><code>Iterable.class</code></li>
+<li><code>Collection.class</code></li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1591598904384.png" alt></p>
+<p>之后比较长的一个部分就是比较类的哈希值，是否在内部白名单和内部黑名单中</p>
+<p>如果在不在内部白名单并且 开启了<code>SupportAutoType</code> 或者 存在期望类时：如果在白名单中则直接加载，在黑名单中则异常退出。（讲起来有点绕，直接看代码可能好点）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">String className = typeName.replace(<span class="string">'$'</span>, <span class="string">'.'</span>);</span><br><span class="line">Class&lt;?&gt; clazz;</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> <span class="keyword">long</span> BASIC = <span class="number">0xcbf29ce484222325L</span>;</span><br><span class="line"><span class="keyword">final</span> <span class="keyword">long</span> PRIME = <span class="number">0x100000001b3L</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> <span class="keyword">long</span> h1 = (BASIC ^ className.charAt(<span class="number">0</span>)) * PRIME;</span><br><span class="line"><span class="keyword">if</span> (h1 == <span class="number">0xaf64164c86024f1aL</span>) &#123; <span class="comment">// [</span></span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"autoType is not support. "</span> + typeName);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> ((h1 ^ className.charAt(className.length() - <span class="number">1</span>)) * PRIME == <span class="number">0x9198507b5af98f0L</span>) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"autoType is not support. "</span> + typeName);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> <span class="keyword">long</span> h3 = (((((BASIC ^ className.charAt(<span class="number">0</span>))</span><br><span class="line">                    * PRIME)</span><br><span class="line">                   ^ className.charAt(<span class="number">1</span>))</span><br><span class="line">                  * PRIME)</span><br><span class="line">                 ^ className.charAt(<span class="number">2</span>))</span><br><span class="line">    * PRIME;</span><br><span class="line"></span><br><span class="line"><span class="keyword">boolean</span> internalWhite = Arrays.binarySearch(INTERNAL_WHITELIST_HASHCODES,</span><br><span class="line">                                            TypeUtils.fnv1a_64(className)</span><br><span class="line">                                           ) &gt;= <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (internalDenyHashCodes != <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">long</span> hash = h3;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">3</span>; i &lt; className.length(); ++i) &#123;</span><br><span class="line">        hash ^= className.charAt(i);</span><br><span class="line">        hash *= PRIME;</span><br><span class="line">        <span class="keyword">if</span> (Arrays.binarySearch(internalDenyHashCodes, hash) &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"autoType is not support. "</span> + typeName);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> ((!internalWhite) &amp;&amp; (autoTypeSupport || expectClassFlag)) &#123;</span><br><span class="line">    <span class="keyword">long</span> hash = h3;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">3</span>; i &lt; className.length(); ++i) &#123;</span><br><span class="line">        hash ^= className.charAt(i);</span><br><span class="line">        hash *= PRIME;</span><br><span class="line">        <span class="keyword">if</span> (Arrays.binarySearch(acceptHashCodes, hash) &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">            clazz = TypeUtils.loadClass(typeName, defaultClassLoader, <span class="keyword">true</span>);</span><br><span class="line">            <span class="keyword">if</span> (clazz != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> clazz;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (Arrays.binarySearch(denyHashCodes, hash) &gt;= <span class="number">0</span> &amp;&amp; TypeUtils.getClassFromMapping(typeName) == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"autoType is not support. "</span> + typeName);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>之后就是尝试从各种地方去获取class类</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200608151218.png" alt></p>
+<p>首先尝试从<code>TypeUtils</code>的<code>mappings</code>中获取对应类</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200608150040.png" alt></p>
+<p>里面原本就有一些类，而且后续会被当作已获取类的缓存使用</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200608165554.png" alt></p>
+<p>然后是尝试从<code>deserializers.findClass</code>中获取class类</p>
+<p>这里面的类主要是在<code>ParserConfig.initDeserializers()</code>中被赋值的。</p>
+<p>也就相当于这些特殊类也可以被无条件的反序列化</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200608150733.png" alt></p>
+<p>然后就是尝试从<code>typeMapping</code>中获取对应类，这其中默认的值为空，需要开发人员自行赋值。</p>
+<p>之后就是类在白名单中时（但几乎不大可能），尝试自动去加载类。</p>
+<p>最后，如果通过以上方式可以加载到类，则校验期望类，没有问题的话就直接返回对应的class。</p>
+<p>所以其实到这里，依然还没有出现<code>SupportAutoType</code>的校验，但已经可以返回类了（但正常情况下返回的一般都是程序中预先设置好的一些类，还不存在动态加载）。</p>
+<p>然后就是在没有开启<code>SupportAutoType</code>时，通过黑白名单去校验类，黑名单抛出异常，白名单加载类并返回。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200608152200.png" alt></p>
+<p>之后的部分就是通过ASM的操作，去读取类是否有<code>JSONType</code>的注解（有注解的类一般都是开发自行写的JavaBean）</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200608155018.png" alt></p>
+<p>之后如果 开启了<code>SupportAutoType</code> 或者 有<code>JSONType</code>的注解 或者 存在期望类，则会直接去加载对应类</p>
+<p>成功加载类之后，如果有注解，则加入<code>mapping</code>缓存并直接返回</p>
+<p>如果是继承/实现了<code>ClassLoader</code>、<code>DataSource</code> 、<code>RowSet</code>这些类的话直接异常。</p>
+<p>如果存在期望类，则需要加载的类是期望类的子类或实现，并直接返回，否则异常。</p>
+<p>如果类指定了<code>JSONCreator</code>注解，并且开启了<code>SupportAutoType</code> 则抛出异常。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200608155114.png" alt></p>
+<p>最后，校验了是否开启<code>SupportAutoType</code>，然后将类添加至<code>mapping</code>缓存，并返回对应类。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1591603136408.png" alt></p>
+<p>到此就是<code>checkAutoType</code>的校验与加载类的过程。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>可以看到虽然函数名是<code>checkAutoType</code>，但是其实这是一个校验与加载类的过程。</p>
+<p>而且真正的<code>SupportAutoType</code>校验其实是被放到最后的，在这之前也存在许多加载类并返回类的地方，目的也就是一开始说的为了实现基础类的任意反序列化的feature。</p>
+<p>这也就意味着需要通过逻辑来保证在这之前返回的类都是安全的，但也正是因为这个原因导致了autotype被逻辑绕过。</p>
+<p>可以看到主要有如下种情况可以直接返回class</p>
+<ul>
+<li><code>acceptHashCodes</code> 白名单</li>
+<li><code>INTERNAL_WHITELIST_HASHCODES</code> 内部白名单</li>
+<li><code>TypeUtils.mappings</code> mappings缓存</li>
+<li><code>deserializers.findClass</code> 指定类</li>
+<li><code>typeMapping.get</code> 默认为空</li>
+<li><code>JsonType</code> 注解</li>
+<li><code>exceptClass</code> 存在期望类</li>
+</ul>
+<h1 id="1-2-47的绕过"><a href="#1-2-47的绕过" class="headerlink" title="1.2.47的绕过"></a>1.2.47的绕过</h1><p>主要分析思路，这回的绕过主要靠的是<code>mappings</code>缓存的绕过</p>
+<p>根据之前分析的流程可以知道，当<code>mappings</code>缓存中存在指定类时，可以直接返回并且不受<code>SupportAutoType</code>的校验。</p>
+<p>在<code>TypeUtils.loadClass</code>中，如果参数中<code>cache</code>值为<code>true</code>时，则会在加载到类之后，将类加入<code>mappings</code>缓存</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1591604753047.png" alt></p>
+<p>寻找所有调用了该函数，并且<code>cache</code>设置为<code>true</code>的只有它的重载函数，然后继续寻找调用了该重载的地方</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1591604797234.png" alt></p>
+<p>可以看到除了<code>TypeUtils</code>中，还有<code>MiscCodec</code>中调用了该方法</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1591604880065.png" alt></p>
+<p>这里的逻辑是当class是一个<code>java.lang.Class</code>类时，会去加载指定类（从而也就无意之间加入了<code>mappings</code>缓存）</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1591604936748.png" alt></p>
+<p>而<code>java.lang.Class</code>同时也是个默认特殊类，可以直接反序列化。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1591605067167.png" alt></p>
+<p>因此就可以首先通过反序列化<code>java.lang.Class</code>指定恶意类，然后恶意类被加入<code>mappings</code>缓存后，第二次就可以直接从缓存中获取到恶意类，并进行反序列化。</p>
+<h1 id="Throwable和1-2-68的绕过"><a href="#Throwable和1-2-68的绕过" class="headerlink" title="Throwable和1.2.68的绕过"></a>Throwable和1.2.68的绕过</h1><p>这两个的绕过主要都是基于<code>exceptClass</code>期望类的feature特性。</p>
+<p>之前分析的时候提到，期望类的功能主要是实现 继承了期望类的class能被反序列化出来（并且不受autotype影响）</p>
+<p>但是默认情况下<code>exceptClass</code>这个参数是空的，也就不存在期望类的特性。所以主要关注在程序内部别的地方的调用。</p>
+<p>全局搜索一下可以看到主要有<code>ThrowableDeserializer</code>和<code>JavaBeanDeserializer</code>两个类中有调用到。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1591605816260.png" alt></p>
+<p>先来说<code>ThrowableDeserializer</code>，它主要是对 <code>Throwable</code>异常类进行反序列化的。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1591606000052.png" alt></p>
+<p>在<code>ThrowableDeserializer</code>中可以根据第二个<code>@type</code>的值来获取具体类，并且传入指定期望类进行加载。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200608172300.png" alt></p>
+<p>因此对一个异常类进行反序列化时，则可以依赖<code>exceptClass</code>期望类的特性去反序列化一个继承异常类的class。</p>
+<p>但没有gadget时这也只能算作一个feature，本意也就是为了反序列化出异常类，并且异常类的限制其实比较苛刻。</p>
+<p>其实一开始看浅蓝师傅发了这个之后，自己也关注到了<code>JavaBeanDeserializer</code>中的期望类调用，然后开始尝试看何种情况会调用<code>JavaBeanDeserializer</code>。</p>
+<p><code>ParserConfig.getDeserializer</code>中可以看到，其实<code>JavaBeanDeserializer</code>的优先级其实是最低的（通常情况下都是一些第三方类才会调用到这里）</p>
+<p>当时就草草看了下一些默认的基础类发现貌似没有可以走到这部分逻辑的就没整了（然后就被打脸了）。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200608165832.png" alt></p>
+<p>1.2.68的绕过主要靠的就是<code>AutoCloseable</code>类，恰好fastjson没有为它指定特定的deserializer，因此会走到最后的else条件，创建对应的<code>JavaBeanDeserializer</code>。并且它是默认在<code>mappings</code>缓存中的，可以无条件反序列化。</p>
+<p>在<code>JavaBeanDeserializer</code>中也和之前一样，会根据第二个<code>@type</code>的值去获取对应的class</p>
+<p>这里的<code>exceptClass</code>期望类也就是当前类<code>AutoCloseable</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200608172941.png" alt></p>
+<p>而且相较于<code>Throwable</code>来说，<code>AutoCloseable</code>的范围则会大得多，常用的流操作、文件、socket之类的都继承了<code>AutoCloseable</code>接口。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200608171232.png" alt></p>
+<p>之后的工作则是需要找一个gadget，但相较于1.2.47的绕过来说，<code>exceptClass</code>期望类的返回位置相对比较靠后。</p>
+<p>因此会存在黑名单的校验与<code>ClassLoader</code>、<code>DataSource</code>、<code>RowSet</code>的校验。</p>
+<p>也就意味着之前的gadget是都不能用了，要找一条新的基于<code>AutoCloseable</code>的gadget。</p>
+<p>至于后面的利用<code>FieldDeserializer</code>去拓展gadget就不在这里展开说了。</p>
+<h1 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h1><p>以我个人的分析来看，主要原因还是在于Fastjson为了维护最开始那些基础类的无限制反序列化的特性。</p>
+<p>导致即使开发人员关闭了<code>SupportAutoType</code>属性，但并不能阻止所有反序列化的情况。</p>
+<p>Fastjson内部也是通过逻辑来保证校验前的返回类不会出现恶意类的情况，但是当整个项目变大之后，相互之间的调用会使得逻辑变得复杂，从而也就出现了逻辑绕过。</p>
+<p>一次次的绕过和修复，对研究人员的代码功底要求也比较高，这种相互之间的博弈也相当精彩，值得好好学习一番。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p> <a href="https://b1ue.cn/archives/382.html" target="_blank" rel="noopener">https://b1ue.cn/archives/382.html</a> </p>
+<p> <a href="https://b1ue.cn/archives/348.html" target="_blank" rel="noopener">https://b1ue.cn/archives/348.html</a> </p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2020/07/Java中的反射/" data-toggle="tooltip" data-placement="top" title="Java中的反射">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2020/04/浅谈JNDI/" data-toggle="tooltip" data-placement="top" title="浅谈JNDI">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                          <a class="tag" href="/tags/#fastjson" title="fastjson">fastjson</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

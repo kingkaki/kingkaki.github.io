@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Java8中两个优雅的特性 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2019/12/Java8中两个优雅的特性/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                    </div>
+                    <h1>Java8中两个优雅的特性</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2019-12-16
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>算是之前写代码的时候学到的两个比较有意思的特性，也是Java8新增的两个功能，其实说到底就是减少了一些nullptr的判断和for循环的遍历，让代码变得更加优雅，可读性更高。</p>
+<ul>
+<li>Optional</li>
+<li>Stream</li>
+</ul>
+<p>主要就是如上两个特性，总结的过程中也学了一些以前不知道的特性。</p>
+<h1 id="Optional"><a href="#Optional" class="headerlink" title="Optional"></a>Optional</h1><p>先从Optional来吧，他其实是对原有的数据类型进行了一层包装，将nullptr判断的部分操作进行了一定的封装。</p>
+<p>可以先来看一些常规的操作</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    String r1 = getStrOpt().orElse(<span class="string">"default string"</span>);</span><br><span class="line">    String r2 = getStrOpt().orElseGet(() -&gt; String.valueOf(Math.random()));</span><br><span class="line">    String r3 = getStrOpt().orElseThrow(IllegalStateException::<span class="keyword">new</span>);</span><br><span class="line">    System.out.println(r1);</span><br><span class="line">    System.out.println(r2);</span><br><span class="line">    System.out.println(r3);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Optional&lt;String&gt; <span class="title">getStrOpt</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Math.random() &gt; <span class="number">0.5</span> ? Optional.of(<span class="string">"optional str"</span>) : Optional.empty();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到可以通过如下三种方式来从Optional中获取值，并为没有值的情况选择一个默认的返回情况，可以是一个default值，也可以是通过调用某个函数返回的值，以及抛出一个异常</p>
+<ul>
+<li><code>Optional.orElse</code></li>
+<li><code>Optional.orElseGet</code></li>
+<li><code>Optional.orElseThrow</code></li>
+</ul>
+<h2 id="无能为力之处"><a href="#无能为力之处" class="headerlink" title="无能为力之处"></a>无能为力之处</h2><p>但是其实它并不能化简如下的这种操作，遇到这种情况时其实和判断!=null并没有什么太多的区别。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">     String s = getStr();</span><br><span class="line">     <span class="keyword">if</span>(s != <span class="keyword">null</span>)&#123;</span><br><span class="line">         System.out.println(s);</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     Optional&lt;String&gt; sOpt = getStrOpt();</span><br><span class="line">     <span class="keyword">if</span>(sOpt.isPresent())&#123;</span><br><span class="line">         System.out.println(sOpt.get());</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">getStr</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Math.random() &gt; <span class="number">0.5</span> ? <span class="string">"str"</span> : <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Optional&lt;String&gt; <span class="title">getStrOpt</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Math.random() &gt; <span class="number">0.5</span> ? Optional.of(<span class="string">"optional str"</span>) : Optional.empty();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到要进行的操作是差不多的，并不比null判断要方便多少（或许他的isPresent让人看的更有逼格？）</p>
+<h2 id="优势"><a href="#优势" class="headerlink" title="优势"></a>优势</h2><p>那Optional的好处在于哪呢？他真正方便的地方可能在于一些链式的操作。</p>
+<p>假设下面<code>flatMap</code>、<code>getUSB</code>、<code>getVersion</code><strong>处理</strong>和<strong>返回</strong>的都是个Optional\&lt;T> 对象，就可以用如下链式操作</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">String version = computer.flatMap(Computer::getSoundcard)</span><br><span class="line">                   .flatMap(Soundcard::getUSB)</span><br><span class="line">                   .flatMap(USB::getVersion)</span><br><span class="line">                   .orElse(<span class="string">"UNKNOWN"</span>);</span><br></pre></td></tr></table></figure>
+<p>否则需要进行多次的!=null的判断比较，才能进行下一步的操作。</p>
+<p>对于一个empty的Optional，flatMap的调用之后的结果也是一个空的Optional，从而避免了nullptr的异常。</p>
+<p>假如调用函数处理的不是Optional对象，则应该调用Optional.map来进行处理</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Optional&lt;String&gt; a = getStrOpt().map(String::toUpperCase);</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>public&lt;U&gt; Optional&lt;U&gt; map(Function&lt;? super T, ? extends U&gt; mapper)</code></li>
+<li><code>public&lt;U&gt; Optional&lt;U&gt; flatMap(Function&lt;? super T, Optional&lt;U&gt;&gt; mapper)</code></li>
+</ul>
+<p>总之呢，个人感觉Optional确实解决了一部分空指针的烦恼，但也需要你的项目代码里有较多的Optional代码的支持，否则就会出现之前<code>isPresent</code>判断并没有什么优化的尴尬情况，反而让人觉得多套了一层这个Optional的麻烦。</p>
+<h1 id="Stream"><a href="#Stream" class="headerlink" title="Stream"></a>Stream</h1><p>流式操作，<code>stream</code>这是一个在<code>Collection</code>接口的方法，可以将集合以一种很优雅且性能相当高的方式进行操作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">long</span> count = words.stream()</span><br><span class="line">    .filter(w -&gt; w.length() &gt; <span class="number">12</span>)</span><br><span class="line">    .count()</span><br></pre></td></tr></table></figure>
+<p>可以很容易的看出这是从words中筛选长度大于12的字符串，并计算它的个数。</p>
+<h2 id="流的创建"><a href="#流的创建" class="headerlink" title="流的创建"></a>流的创建</h2><p>可以通过两种方式创建流</p>
+<ul>
+<li><p><code>Collection.stream()</code> − 为集合创建串行流。</p>
+</li>
+<li><p><code>Collection.parallelStream()</code> − 为集合创建并行流。</p>
+</li>
+</ul>
+<p>其实当数据量不大时，用stream完全没有问题，当数据量大到需要优化时，可以采用并行流的方式。</p>
+<p>但是并行流由于是并行的关系，所以对于遍历顺序之类的操作是无法指定的，否则也失去了并行的优势。</p>
+<p>或者通过Stream的一些静态方法</p>
+<ul>
+<li><code>Stream.of(&quot;a&quot;,&quot;b&quot;,&quot;c&quot;)</code></li>
+<li><code>Stream.generate(() -&gt; &quot;kingkk&quot;)</code>   通过一个函数生成流</li>
+<li><code>Stream.iterate(BigInterger.ZERO, n -&gt; n.add(BigInter.ONE))</code> 通过一个种子和一个函数，反复调用生成流</li>
+<li><code>Stream.empty()</code> 生成一个空流</li>
+</ul>
+<p>通过这种函数调用之类的方式，可以生成一个无限流，也就类似与Python中的yield生成器。</p>
+<p>流式操作还有几个特点</p>
+<ul>
+<li>流并不存储元素</li>
+<li>流并不会修改数据源</li>
+<li>尽可能的惰性处理（也是提升性能的一个很重要的步骤）</li>
+</ul>
+<h2 id="终结操作和中间操作"><a href="#终结操作和中间操作" class="headerlink" title="终结操作和中间操作"></a>终结操作和中间操作</h2><p>流的操作主要分为<strong>中间操作</strong>和<strong>终结操作</strong>，他们之间的区别主要在于</p>
+<ul>
+<li>中间操作：中间操作在一个流上进行操作，返回结果是一个新的流。这些操作是<strong>延迟执行</strong>的。</li>
+<li>终结操作：终结操作遍历流来产生一个结果或是副作用。在一个流上执行终结操作之后，该流被消费，<strong>无法再次被消费</strong></li>
+</ul>
+<p>其实直接看代码也很好区分一个stream上的操作是终结操作还是中间操作</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Optional&lt;T&gt; <span class="title">findAny</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function">Stream&lt;T&gt; <span class="title">filter</span><span class="params">(Predicate&lt;? <span class="keyword">super</span> T&gt; predicate)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>可以看到中间操作的返回类型都是Stream，而终结操作的返回类型是其他的结果，也就不能在进行流的链式操作了。</p>
+<p>有很多，我就列几个常用的吧</p>
+<h3 id="中间操作"><a href="#中间操作" class="headerlink" title="中间操作"></a>中间操作</h3><ul>
+<li><code>map(lamda)</code> 就是map,别问我是啥</li>
+<li><code>flatMap(lamda)</code> 将数据类型<strong>铺平</strong>之后进行map操作，类似于 <code>[[a,b,c], [d,e] ] -&gt; [func(a), func(b), func(c), func(d), func(e) ]</code></li>
+<li><code>filter(lamda)</code>  传入一个判断函数，过滤只符合条件的数据</li>
+<li><code>distinct()</code> 类似Mysql的distinct，去除重复的数据</li>
+<li><code>imit(num)</code> 截断流使其最多只包含指定数量的数据</li>
+<li><code>skip(num)</code> 返回一个新的流，并跳过原始流中的前 N 个元素。</li>
+<li><code>sorted([lamda])</code> 对流进行排序，也可以传入一个函数，按指定方式排序</li>
+<li><code>peek(lamda)</code>  产生另一个流，通常用于调试之类的操作，由于它不是终结操作，流并不会终止</li>
+<li><code>concat(stream)</code> 连接流</li>
+</ul>
+<h3 id="终结操作"><a href="#终结操作" class="headerlink" title="终结操作"></a>终结操作</h3><ul>
+<li><code>forEach(lamda)</code> 循环遍历，但不保证顺序</li>
+<li><code>forEachOrdered(lamda)</code> 顺序遍历</li>
+<li><code>max()</code>  最大值</li>
+<li><code>min()</code> 最小值</li>
+<li><code>findFirst()</code> 返回第一个元素（类型为Optional），如果不存在，则返回一个空的Optional</li>
+<li><code>findAny()</code>  返回任何一个元素（类型为Optional），和findFirst的区别在于它不要求顺序</li>
+<li><code>anyMatch(lamda)</code> 是否存在一个匹配</li>
+<li><code>allMatch(lamda)</code> 是否全部匹配</li>
+<li><code>noneMatch(lamda)</code> 是否有不匹配的</li>
+<li><code>reduce(lamda)</code> 学过map/reduce应该就知道是干啥的</li>
+<li>…</li>
+</ul>
+<h4 id="Collector"><a href="#Collector" class="headerlink" title="Collector"></a>Collector</h4><p>有时候对流进行操作之后只是想获得过滤之后的集合，就可以用</p>
+<ul>
+<li><code>toArray</code> 默认会返回一个Object[], 想指定类型的话可以使用stream.toArray(String[]::new)</li>
+</ul>
+<p>但<code>Collectors</code>提供了一个更为便捷的方式</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">stream.collect(Collectors.toList());</span><br><span class="line">stream.collect(Collectors.toSet());</span><br><span class="line">stream.collect(Collectors.toMap(Person::getName, Person::getAge))</span><br><span class="line">stream.collect(Collectors.toCollection(TreeSet::<span class="keyword">new</span>));</span><br></pre></td></tr></table></figure>
+<p>通过如上方式都可以很简单将筛选后的流转换成Set、List、或者指定数据类型等形式。</p>
+<p>甚至可以讲所有的结果以字符串的形式连接起来</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">stream.collect(Collectors.joining());</span><br><span class="line">stream.collect(Collectors.joining(<span class="string">", "</span>));</span><br></pre></td></tr></table></figure>
+<p>或者收集一个可以同时获取最大值、最小值、平均值的数据类型</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">IntSummarzingInt summary = stream.collect(Collectors.summarizingInt(String::length)); <span class="comment">// 这里的Int也可以是Double|Long</span></span><br><span class="line">summary.getAverage();</span><br><span class="line">summary.getMax();</span><br><span class="line">summary.getMin();</span><br></pre></td></tr></table></figure>
+<p>对toMap有更多的定制化的方式</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 当value的值是元素本身时</span></span><br><span class="line">people.collect(Collectors.toMap(Person::getId, Function.identity()));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 当存在key值冲突时</span></span><br><span class="line">locales.collect(</span><br><span class="line">    Collectors.toMap(</span><br><span class="line">    	Locale::getDisplayLanguage,</span><br><span class="line">        l -&gt; l.getDisplayLanguage(l),</span><br><span class="line">        (a, b) -&gt; a</span><br><span class="line">    )</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 并指定特定的数据结构</span></span><br><span class="line">locales.collect(</span><br><span class="line">    Collectors.toMap(</span><br><span class="line">    	Locale::getDisplayLanguage,</span><br><span class="line">        l -&gt; l.getDisplayLanguage(l),</span><br><span class="line">        (a, b) -&gt; a,</span><br><span class="line">        TreeMap::<span class="keyword">new</span></span><br><span class="line">    )</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>还提供了一个mysql中group by的功能</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;Integer, List&lt;Person&gt;&gt; map = people.collect(</span><br><span class="line">    Collectors.groupingBy(Person::getAge)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>如果group by之后的结果希望是一个Set</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">people.collect(</span><br><span class="line">    Collectors.groupingBy(Person::getAge, Collectors.toSet())</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>第二个当然不止可以传入<code>Collectors.toSet</code>也可以是一些</p>
+<ul>
+<li><code>Collectorss.counting()</code></li>
+<li><code>Collectors.maxBy(...)</code></li>
+<li><code>Collectors.minBy(...)</code></li>
+<li><code>Collectors.mapping(...)</code></li>
+<li>…</li>
+</ul>
+<p>之类其他下游收集器操作</p>
+<p>常用的操作就到这吧，其他的一些需要时再查阅可能会更方便一些。</p>
+<h1 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h1><p>怎么越来越像一名菜鸡Java开发的了。。。</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2020/01/从源码层面看XXE的防御/" data-toggle="tooltip" data-placement="top" title="从源码层面看XXE的防御">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2019/11/Jimple-in-Soot/" data-toggle="tooltip" data-placement="top" title="Jimple in Soot">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

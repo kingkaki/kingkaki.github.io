@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          从源码层面看XXE的防御 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2020/01/从源码层面看XXE的防御/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#Java" title="Java">Java</a>
+                        
+                          <a class="tag" href="/tags/#XXE" title="XXE">XXE</a>
+                        
+                    </div>
+                    <h1>从源码层面看XXE的防御</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2020-01-19
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>XXE的防御来说，实现方法千奇百怪（这里指的是那些基础库，像apache-poi这种解析excel的XXE，内部还是调用的那些基础库，修复方式当然只要升级对应版本即可）</p>
+<p>Owasp的修复文档 <a href="https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html" target="_blank" rel="noopener">https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html</a></p>
+<p>主要方式都是<code>setFeature</code>的方式来设置几个<code>features</code>，而且设置的都是一些无规律和章法的url常量，对于一个初学XXE的人来说，想要知道其中的原理，学习成本可能要比单纯的了解XXE要复杂的多。</p>
+<p>由于具体的XML解析实现类比较多，这里就只挑一两个来分析，比较幸运的是，他们的最底层都是调用的同一个处理XML的库，应该就是位于<code>com.sun.org.apache.xerces.internal</code>之下的代码。</p>
+<p>以下的漏洞实例代码来自 <a href="https://github.com/LeadroyaL/java-xxe-defense-demo" target="_blank" rel="noopener">https://github.com/LeadroyaL/java-xxe-defense-demo</a></p>
+<h1 id="DocumentBuilderFactory"><a href="#DocumentBuilderFactory" class="headerlink" title="DocumentBuilderFactory"></a>DocumentBuilderFactory</h1><p>一个正常的可以被攻击的实例代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();</span><br><span class="line">DocumentBuilder builder = dbf.newDocumentBuilder();</span><br><span class="line">builder.parse(ResourceUtils.getPoc1());</span><br></pre></td></tr></table></figure>
+<p>设置<code>XMLConstants.FEATURE_SECURE_PROCESSING</code>（常量的值也就是<code>http://javax.xml.XMLConstants/feature/secure-processing</code>）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">FEATURE = XMLConstants.FEATURE_SECURE_PROCESSING;</span><br><span class="line">dbf.setFeature(FEATURE, <span class="keyword">true</span>);</span><br></pre></td></tr></table></figure>
+<p>可以看到</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200112213401.png" alt></p>
+<p>或者设置<code>http://apache.org/xml/features/disallow-doctype-decl</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">FEATURE = <span class="string">"http://apache.org/xml/features/disallow-doctype-decl"</span>;</span><br><span class="line">dbf.setFeature(FEATURE, <span class="keyword">true</span>);</span><br></pre></td></tr></table></figure>
+<p>报错也换了一种方式</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200112213601.png" alt></p>
+<h2 id="secure-processing"><a href="#secure-processing" class="headerlink" title="secure-processing"></a>secure-processing</h2><p>可以先来跟一下这部分的处理逻辑，由于是对<code>DocumentBuilderFactory</code>这个<code>Factory</code>设置的feature，最后造成XXE的是工厂生成的<code>DocumentBuilder</code>，所以features变量肯定也会跟着进入<code>DocumentBuilder</code>中。</p>
+<p>跟进<code>dbf.setFeature(FEATURE, true);</code>可以看到</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (features == <span class="keyword">null</span>) &#123;</span><br><span class="line">    features = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (name.equals(XMLConstants.FEATURE_SECURE_PROCESSING)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (System.getSecurityManager() != <span class="keyword">null</span> &amp;&amp; (!value)) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> ParserConfigurationException(</span><br><span class="line">            SAXMessageFormatter.formatMessage(<span class="keyword">null</span>,</span><br><span class="line">                                              <span class="string">"jaxp-secureprocessing-feature"</span>, <span class="keyword">null</span>));</span><br><span class="line">    &#125;</span><br><span class="line">    fSecureProcess = value;</span><br><span class="line">    features.put(name, value ? Boolean.TRUE : Boolean.FALSE);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到这里只是将设置的feature存到了成员变量features中，那主要的传递逻辑就应该在<code>newDocumentBuilder</code>中</p>
+<p>可以看到生成的时候，<code>DocumentBuilderFactory</code>将自己的features等一些属性传入了<code>DocumentBuilder</code>的初始化列表中</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="keyword">new</span> DocumentBuilderImpl(<span class="keyword">this</span>, attributes, features, fSecureProcess);</span><br></pre></td></tr></table></figure>
+<p>跟到<code>DocumentBuilderImpl</code>构造函数中，一开始时是对<code>domParser</code>进行了一系列的setFeature</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">domParser = <span class="keyword">new</span> DOMParser();</span><br><span class="line">domParser.setFeature(VALIDATION_FEATURE, dbf.isValidating());</span><br><span class="line"></span><br><span class="line"><span class="comment">// "namespaceAware" == SAX Namespaces feature</span></span><br><span class="line">domParser.setFeature(NAMESPACES_FEATURE, dbf.isNamespaceAware());</span><br><span class="line"></span><br><span class="line"><span class="comment">// Set various parameters obtained from DocumentBuilderFactory</span></span><br><span class="line">domParser.setFeature(INCLUDE_IGNORABLE_WHITESPACE,</span><br><span class="line">                     !dbf.isIgnoringElementContentWhitespace());</span><br><span class="line">domParser.setFeature(CREATE_ENTITY_REF_NODES_FEATURE,</span><br><span class="line">                     !dbf.isExpandEntityReferences());</span><br><span class="line">domParser.setFeature(INCLUDE_COMMENTS_FEATURE,</span><br><span class="line">                     !dbf.isIgnoringComments());</span><br><span class="line">domParser.setFeature(CREATE_CDATA_NODES_FEATURE,</span><br><span class="line">                     !dbf.isCoalescing());</span><br><span class="line"><span class="keyword">if</span> (dbf.isXIncludeAware()) &#123;</span><br><span class="line">    domParser.setFeature(XINCLUDE_FEATURE, <span class="keyword">true</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">fSecurityPropertyMgr = <span class="keyword">new</span> XMLSecurityPropertyManager();</span><br><span class="line">domParser.setProperty(XML_SECURITY_PROPERTY_MANAGER, fSecurityPropertyMgr);</span><br><span class="line"></span><br><span class="line">fSecurityManager = <span class="keyword">new</span> XMLSecurityManager(secureProcessing);</span><br><span class="line">domParser.setProperty(SECURITY_MANAGER, fSecurityManager);</span><br></pre></td></tr></table></figure>
+<p>跟到后面可以看到设置features的部分</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (secureProcessing) &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">             * If secure processing is explicitly set on the factory, the</span></span><br><span class="line"><span class="comment">             * access properties will be set unless the corresponding</span></span><br><span class="line"><span class="comment">             * System Properties or jaxp.properties are set</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">    <span class="keyword">if</span> (features != <span class="keyword">null</span>) &#123;</span><br><span class="line">        Boolean temp = features.get(XMLConstants.FEATURE_SECURE_PROCESSING);</span><br><span class="line">        <span class="keyword">if</span> (temp != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (temp &amp;&amp; Constants.IS_JDK8_OR_ABOVE) &#123;</span><br><span class="line">                fSecurityPropertyMgr.setValue(Property.ACCESS_EXTERNAL_DTD,</span><br><span class="line">                                              State.FSP, Constants.EXTERNAL_ACCESS_DEFAULT_FSP);</span><br><span class="line">                fSecurityPropertyMgr.setValue(Property.ACCESS_EXTERNAL_SCHEMA,</span><br><span class="line">                                              State.FSP, Constants.EXTERNAL_ACCESS_DEFAULT_FSP);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line">setFeatures(features);</span><br></pre></td></tr></table></figure>
+<p>可以看到这里假如features中存在<code>XMLConstants.FEATURE_SECURE_PROCESSING</code>，就会将如下两个property设置为空</p>
+<ul>
+<li><code>Property.ACCESS_EXTERNAL_DTD</code></li>
+<li><code>Property.ACCESS_EXTERNAL_SCHEMA</code></li>
+</ul>
+<p>然后后面的<code>setFeatures(features)</code>就是将features再依次存到<code>domParser</code>中</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">setFeatures</span><span class="params">( Map&lt;String, Boolean&gt; features)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> SAXNotSupportedException, SAXNotRecognizedException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (features != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">for</span> (Map.Entry&lt;String, Boolean&gt; entry : features.entrySet()) &#123;</span><br><span class="line">            domParser.setFeature(entry.getKey(), entry.getValue());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>到这里<code>DocumentBuilder</code>初始化就算完成了。之后就进入到<code>parse</code>的环节，在<code>com/sun/org/apache/xerces/internal/parsers/XML11Configuration.java:796</code>的<code>parse()</code>中</p>
+<p>有一个比较需要注意的点，在真正的扫描节点之前，会有一个<code>resetCommon()</code>动作</p>
+<p>在这里根据feature设置了很多<code>XMLEntityManager</code>中的参数<code>com/sun/org/apache/xerces/internal/impl/XMLEntityManager.java:1486</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// sax features</span></span><br><span class="line">fValidation = componentManager.getFeature(VALIDATION, <span class="keyword">false</span>);</span><br><span class="line">fExternalGeneralEntities = componentManager.getFeature(EXTERNAL_GENERAL_ENTITIES, <span class="keyword">true</span>);</span><br><span class="line">fExternalParameterEntities = componentManager.getFeature(EXTERNAL_PARAMETER_ENTITIES, <span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// xerces features</span></span><br><span class="line">fAllowJavaEncodings = componentManager.getFeature(ALLOW_JAVA_ENCODINGS, <span class="keyword">false</span>);</span><br><span class="line">fWarnDuplicateEntityDef = componentManager.getFeature(WARN_ON_DUPLICATE_ENTITYDEF, <span class="keyword">false</span>);</span><br><span class="line">fStrictURI = componentManager.getFeature(STANDARD_URI_CONFORMANT, <span class="keyword">false</span>);</span><br><span class="line">fLoadExternalDTD = componentManager.getFeature(LOAD_EXTERNAL_DTD, <span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// xerces properties</span></span><br><span class="line">fSymbolTable = (SymbolTable)componentManager.getProperty(SYMBOL_TABLE);</span><br><span class="line">fErrorReporter = (XMLErrorReporter)componentManager.getProperty(ERROR_REPORTER);</span><br><span class="line">fEntityResolver = (XMLEntityResolver)componentManager.getProperty(ENTITY_RESOLVER, <span class="keyword">null</span>);</span><br><span class="line">fStaxEntityResolver = (StaxEntityResolverWrapper)componentManager.getProperty(STAX_ENTITY_RESOLVER, <span class="keyword">null</span>);</span><br><span class="line">fValidationManager = (ValidationManager)componentManager.getProperty(VALIDATION_MANAGER, <span class="keyword">null</span>);</span><br><span class="line">fSecurityManager = (XMLSecurityManager)componentManager.getProperty(SECURITY_MANAGER, <span class="keyword">null</span>);</span><br><span class="line">entityExpansionIndex = fSecurityManager.getIndex(Constants.JDK_ENTITY_EXPANSION_LIMIT);</span><br><span class="line"></span><br><span class="line"><span class="comment">//StAX Property</span></span><br><span class="line">fSupportDTD = <span class="keyword">true</span>;</span><br><span class="line">fReplaceEntityReferences = <span class="keyword">true</span>;</span><br><span class="line">fSupportExternalEntities = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// JAXP 1.5 feature</span></span><br><span class="line">XMLSecurityPropertyManager spm = (XMLSecurityPropertyManager) componentManager.getProperty(XML_SECURITY_PROPERTY_MANAGER, <span class="keyword">null</span>);</span><br><span class="line"><span class="keyword">if</span> (spm == <span class="keyword">null</span>) &#123;</span><br><span class="line">    spm = <span class="keyword">new</span> XMLSecurityPropertyManager();</span><br><span class="line">&#125;</span><br><span class="line">fAccessExternalDTD = spm.getValue(XMLSecurityPropertyManager.Property.ACCESS_EXTERNAL_DTD);</span><br></pre></td></tr></table></figure>
+<p>其实可以看到蛮多和XXE相关的参数<code>fSupportDTD</code>、<code>fLoadExternalDTD</code>、<code>fSupportExternalEntities</code>、<code>fAccessExternalDTD</code></p>
+<p>之后就继续回到解析XML的部分<code>fCurrentScanner.scanDocument(complete)</code></p>
+<p>可以跟到<code>com/sun/org/apache/xerces/internal/impl/XMLDocumentFragmentScannerImpl.java:436</code>这里的<code>scanDocument</code>，具体扫描的过程先不深究，跟到<code>next()</code>中开始开始解析Entity的部分</p>
+<p>代码比较多，只挑出一些比较重要的部分<code>com/sun/org/apache/xerces/internal/impl/XMLEntityManager.java:1116</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// should we skip external entities?</span></span><br><span class="line"><span class="keyword">boolean</span> external = entity.isExternal();</span><br><span class="line">...</span><br><span class="line"><span class="keyword">if</span> (external) &#123;</span><br><span class="line">    staxInputSource = resolveEntityAsPerStax(externalEntity.entityLocation);</span><br><span class="line">    <span class="comment">/** xxx:  Waiting from the EG</span></span><br><span class="line"><span class="comment">             * //simply return if there was entity resolver registered and application</span></span><br><span class="line"><span class="comment">             * //returns either XMLStreamReader or XMLEventReader.</span></span><br><span class="line"><span class="comment">             * if(staxInputSource.hasXMLStreamOrXMLEventReader()) return ;</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">    xmlInputSource = staxInputSource.getXMLInputSource() ;</span><br><span class="line">    <span class="keyword">if</span> (!fISCreatedByResolver) &#123;</span><br><span class="line">        <span class="comment">//let the not-LoadExternalDTD or not-SupportDTD process to handle the situation</span></span><br><span class="line">        <span class="keyword">if</span> (fLoadExternalDTD) &#123;</span><br><span class="line">            String accessError = SecuritySupport.checkAccess(expandedSystemId, fAccessExternalDTD, Constants.ACCESS_EXTERNAL_ALL);</span><br><span class="line">            <span class="keyword">if</span> (accessError != <span class="keyword">null</span>) &#123;</span><br><span class="line">                fErrorReporter.reportError(<span class="keyword">this</span>.getEntityScanner(),XMLMessageFormatter.XML_DOMAIN,</span><br><span class="line">                                           <span class="string">"AccessExternalEntity"</span>,</span><br><span class="line">                                           <span class="keyword">new</span> Object[] &#123; SecuritySupport.sanitizePath(expandedSystemId), accessError &#125;,</span><br><span class="line">                                           XMLErrorReporter.SEVERITY_FATAL_ERROR);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>可以看到这里就是解析外部实体的部分。如果有外部实体解析的话，就需要经过<code>SecuritySupport.checkAccess</code>的判断</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">checkAccess</span><span class="params">(String systemId, String allowedProtocols, String accessAny)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (systemId == <span class="keyword">null</span> || (allowedProtocols != <span class="keyword">null</span> &amp;&amp;</span><br><span class="line">                             allowedProtocols.equalsIgnoreCase(accessAny))) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    String protocol;</span><br><span class="line">    <span class="keyword">if</span> (systemId.indexOf(<span class="string">":"</span>)==-<span class="number">1</span>) &#123;</span><br><span class="line">        protocol = <span class="string">"file"</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        URL url = <span class="keyword">new</span> URL(systemId);</span><br><span class="line">        protocol = url.getProtocol();</span><br><span class="line">        <span class="keyword">if</span> (protocol.equalsIgnoreCase(<span class="string">"jar"</span>)) &#123;</span><br><span class="line">            String path = url.getPath();</span><br><span class="line">            protocol = path.substring(<span class="number">0</span>, path.indexOf(<span class="string">":"</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (isProtocolAllowed(protocol, allowedProtocols)) &#123;</span><br><span class="line">        <span class="comment">//access allowed</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> protocol;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到<code>allowedProtocols</code>类似于一个白名单的参数，不在白名单内部的协议将被返回</p>
+<p>动态调试可以看到，这里的<code>expandedSystemId</code>和<code>fAccessExternalDTD</code>分别是payload中的url，和空字符串</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200113115602.png" alt></p>
+<p>还记得之前<code>reset()</code>时候的一堆属性赋值么，其中就有<code>fAccessExternalDTD</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200113152015.png" alt></p>
+<p>而且之前<code>DocumentBuilderImpl</code>初始化时设置的<code>XMLConstants.FEATURE_SECURE_PROCESSING</code>会在内部演变成两个属性的值为空</p>
+<ul>
+<li><code>Property.ACCESS_EXTERNAL_DTD</code></li>
+<li><code>Property.ACCESS_EXTERNAL_SCHEMA</code></li>
+</ul>
+<p>也就是将这里安全检查时，允许的协议从<code>all</code>设置成了空，从而禁止解析外部实体。</p>
+<p>这里的异常信息也正是设置了<code>XMLConstants.FEATURE_SECURE_PROCESSING</code>之后抛出的异常。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200113140550.png" alt></p>
+<h2 id="disallow-doctype-decl"><a href="#disallow-doctype-decl" class="headerlink" title="disallow-doctype-decl"></a>disallow-doctype-decl</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">FEATURE = <span class="string">"http://apache.org/xml/features/disallow-doctype-decl"</span>; <span class="comment">// 开启可挡回显xxe和blind-xxe</span></span><br><span class="line">dbf.setFeature(FEATURE, <span class="keyword">true</span>);</span><br></pre></td></tr></table></figure>
+<p>这里前期<code>DocumentBuilderFactory</code>的内容也都是一致的，只是将feature值设存到工厂的features属性中</p>
+<p>不过这里需要细跟一下<code>domParser</code>的<code>setFeature</code>部分</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (featureId.equals(USE_ENTITY_RESOLVER2)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (state != fUseEntityResolver2) &#123;</span><br><span class="line">        fUseEntityResolver2 = state;</span><br><span class="line">        <span class="comment">// Refresh EntityResolver wrapper.</span></span><br><span class="line">        setEntityResolver(getEntityResolver());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">fConfiguration.setFeature(featureId, state);</span><br></pre></td></tr></table></figure>
+<p>这里最后对<code>XIncludeAwareParserConfiguration</code>设置feature，最后可以一直跟到<code>XMLDocumentScannerImpl</code>的setFeature</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setFeature</span><span class="params">(String featureId, <span class="keyword">boolean</span> state)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> XMLConfigurationException </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>.setFeature(featureId, state);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Xerces properties</span></span><br><span class="line">    <span class="keyword">if</span> (featureId.startsWith(Constants.XERCES_FEATURE_PREFIX)) &#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span> suffixLength = featureId.length() - Constants.XERCES_FEATURE_PREFIX.length();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (suffixLength == Constants.LOAD_EXTERNAL_DTD_FEATURE.length() &amp;&amp;</span><br><span class="line">            featureId.endsWith(Constants.LOAD_EXTERNAL_DTD_FEATURE)) &#123;</span><br><span class="line">            fLoadExternalDTD = state;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (suffixLength == Constants.DISALLOW_DOCTYPE_DECL_FEATURE.length() &amp;&amp;</span><br><span class="line">                 featureId.endsWith(Constants.DISALLOW_DOCTYPE_DECL_FEATURE)) &#123;</span><br><span class="line">            fDisallowDoctype = state;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>后面的<code>Xerces properties</code>比较有意思，简而言之就是</p>
+<p>设置了<code>http://apache.org/xml/features/nonvalidating/load-external-dtd</code>则设置<code>fLoadExternalDTD</code>为指定值（应该就是禁用DTD)</p>
+<p>设置了<code>http://apache.org/xml/features/disallow-doctype-decl</code>则设置<code>fDisallowDoctype</code>为指定值（应该就是禁用Doctype）</p>
+<p>到这里就应该差不多了，后面就是带入到<code>DocumentBuilder</code>的初始化过程中。</p>
+<p>之后parse的过程类似，在<code>com/sun/org/apache/xerces/internal/impl/XMLDocumentScannerImpl.java:824</code>的next函数中，可以看到有一系列的case语句，应该是用来区分解析的XML位置的，在解析Doctype的<code>SCANNER_STATE_DOCTYPE</code>的case分支下可以看到</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">switch</span>(fScannerState)&#123;</span><br><span class="line">    <span class="keyword">case</span> SCANNER_STATE_COMMENT: &#123;</span><br><span class="line">		...</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">case</span> SCANNER_STATE_PI: &#123;</span><br><span class="line">		...</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">case</span> SCANNER_STATE_DOCTYPE: &#123;</span><br><span class="line">        <span class="keyword">if</span> (fDisallowDoctype) &#123;</span><br><span class="line">            reportFatalError(<span class="string">"DoctypeNotAllowed"</span>, <span class="keyword">null</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (fSeenDoctypeDecl) &#123;</span><br><span class="line">            reportFatalError(<span class="string">"AlreadySeenDoctype"</span>, <span class="keyword">null</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        fSeenDoctypeDecl = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// scanDoctypeDecl() sends XNI doctypeDecl event that</span></span><br><span class="line">        <span class="comment">// in SAX is converted to startDTD() event.</span></span><br><span class="line">        <span class="keyword">if</span> (scanDoctypeDecl(fSupportDTD)) &#123;</span><br><span class="line">            ...</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到这里在一开始的部分，就对之前设置过了的<code>fDisallowDoctype</code>进行判断，如果设为false的话，就抛出异常</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200113144749.png" alt></p>
+<h2 id="其余的一些方式"><a href="#其余的一些方式" class="headerlink" title="其余的一些方式"></a>其余的一些方式</h2><p>其余的防御方式还有类似的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">FEATURE = <span class="string">"http://xml.org/sax/features/external-parameter-entities"</span>;</span><br><span class="line">dbf.setFeature(FEATURE, <span class="keyword">false</span>);</span><br><span class="line">FEATURE = <span class="string">"http://xml.org/sax/features/external-general-entities"</span>;</span><br><span class="line">dbf.setFeature(FEATURE, <span class="keyword">false</span>);</span><br></pre></td></tr></table></figure>
+<p>仔细看下之前<code>reset()</code>的代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">fExternalGeneralEntities = componentManager.getFeature(EXTERNAL_GENERAL_ENTITIES, <span class="keyword">true</span>);</span><br><span class="line">fExternalParameterEntities = componentManager.getFeature(EXTERNAL_PARAMETER_ENTITIES, <span class="keyword">true</span>);</span><br></pre></td></tr></table></figure>
+<p>再搜一下这些参数在解析时候的作用，就差不多能知道具体的原理了<code>com/sun/org/apache/xerces/internal/impl/XMLEntityManager.java:1147</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (unparsed || (general &amp;&amp; !fExternalGeneralEntities) ||</span><br><span class="line">    (parameter &amp;&amp; !fExternalParameterEntities) ||</span><br><span class="line">    !fSupportDTD || !fSupportExternalEntities) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (fEntityHandler != <span class="keyword">null</span>) &#123;</span><br><span class="line">        fResourceIdentifier.clear();</span><br><span class="line">        <span class="keyword">final</span> String encoding = <span class="keyword">null</span>;</span><br><span class="line">        fResourceIdentifier.setValues(</span><br><span class="line">            (externalEntity.entityLocation != <span class="keyword">null</span> ? externalEntity.entityLocation.getPublicId() : <span class="keyword">null</span>),</span><br><span class="line">            extLitSysId, extBaseSysId, expandedSystemId);</span><br><span class="line">        fEntityAugs.removeAllItems();</span><br><span class="line">        fEntityAugs.putItem(Constants.ENTITY_SKIPPED, Boolean.TRUE);</span><br><span class="line">        fEntityHandler.startEntity(entityName, fResourceIdentifier, encoding, fEntityAugs);</span><br><span class="line">        fEntityAugs.removeAllItems();</span><br><span class="line">        fEntityAugs.putItem(Constants.ENTITY_SKIPPED, Boolean.TRUE);</span><br><span class="line">        fEntityHandler.endEntity(entityName, fEntityAugs);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line">... <span class="comment">// 解析Doctype</span></span><br></pre></td></tr></table></figure>
+<p>可以看到在解析Doctype之前，就会对这些参数进行判断，如果设置了，最后就直接进入return逻辑，不会进入Doctype的解析。</p>
+<p>所以在设置这两个参数之后，xml的解析不会抛出任何异常提示，只是单纯的不解析外部实体。</p>
+<h1 id="XMLInputFactory"><a href="#XMLInputFactory" class="headerlink" title="XMLInputFactory"></a>XMLInputFactory</h1><p>这个XML库是用流的方式解析的XML数据，前期处理的步骤有一些小差异</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();</span><br><span class="line"><span class="comment">// "javax.xml.stream.supportDTD"</span></span><br><span class="line">xmlInputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, <span class="keyword">false</span>);</span><br><span class="line"><span class="comment">// "javax.xml.stream.isSupportingExternalEntities"</span></span><br><span class="line">xmlInputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, <span class="keyword">false</span>);</span><br><span class="line">XMLStreamReader parse = xmlInputFactory.createXMLStreamReader(ResourceUtils.getPoc1());</span><br><span class="line"><span class="keyword">while</span> (parse.hasNext()) &#123;</span><br><span class="line">    parse.next();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>一开始也是<code>setProperty</code>,将变量存在一个属性管理器中</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setProperty</span><span class="params">(String name, Object value)</span> <span class="keyword">throws</span> IllegalArgumentException </span>&#123;</span><br><span class="line">	...</span><br><span class="line">    <span class="keyword">this</span>.fPropertyManager.setProperty(name, value);</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后初始化<code>XMLStreamReader</code>来到<code>com/sun/org/apache/xerces/internal/impl/XMLStreamReaderImpl.java:181</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">XMLStreamReaderImpl</span><span class="params">(XMLInputSource inputSource, PropertyManager props)</span> <span class="keyword">throws</span>  XMLStreamException </span>&#123;</span><br><span class="line">    init(props);</span><br><span class="line">    <span class="comment">//pass the input source to document scanner impl.</span></span><br><span class="line">    setInputSource(inputSource);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>重点关注下初始化props的地方，里面有个reset，可以一直跟进到<code>com/sun/org/apache/xerces/internal/impl/XMLEntityManager.java:1431</code></p>
+<p>发现又回到了XMLEntityManager的reset函数，但是这回是另外的一个重载函数(之前的是从<code>XMLComponentManager</code>进行reset)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">reset</span><span class="params">(PropertyManager propertyManager)</span></span>&#123;</span><br><span class="line">    <span class="comment">// xerces properties</span></span><br><span class="line">    fSymbolTable = (SymbolTable)propertyManager.getProperty(Constants.XERCES_PROPERTY_PREFIX + Constants.SYMBOL_TABLE_PROPERTY);</span><br><span class="line">    fErrorReporter = (XMLErrorReporter)propertyManager.getProperty(Constants.XERCES_PROPERTY_PREFIX + Constants.ERROR_REPORTER_PROPERTY);</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        fStaxEntityResolver = (StaxEntityResolverWrapper)propertyManager.getProperty(STAX_ENTITY_RESOLVER);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (XMLConfigurationException e) &#123;</span><br><span class="line">        fStaxEntityResolver = <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    fSupportDTD = ((Boolean)propertyManager.getProperty(XMLInputFactory.SUPPORT_DTD)).booleanValue();</span><br><span class="line">    fReplaceEntityReferences = ((Boolean)propertyManager.getProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES)).booleanValue();</span><br><span class="line">    fSupportExternalEntities = ((Boolean)propertyManager.getProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES)).booleanValue();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Zephyr feature ignore-external-dtd is the opposite of Xerces' load-external-dtd</span></span><br><span class="line">    fLoadExternalDTD = !((Boolean)propertyManager.getProperty(Constants.ZEPHYR_PROPERTY_PREFIX + Constants.IGNORE_EXTERNAL_DTD)).booleanValue();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// JAXP 1.5 feature</span></span><br><span class="line">    XMLSecurityPropertyManager spm = (XMLSecurityPropertyManager) propertyManager.getProperty(XML_SECURITY_PROPERTY_MANAGER);</span><br><span class="line">    fAccessExternalDTD = spm.getValue(XMLSecurityPropertyManager.Property.ACCESS_EXTERNAL_DTD);</span><br><span class="line"></span><br><span class="line">    fSecurityManager = (XMLSecurityManager)propertyManager.getProperty(SECURITY_MANAGER);</span><br><span class="line"></span><br><span class="line">    fLimitAnalyzer = <span class="keyword">new</span> XMLLimitAnalyzer();</span><br><span class="line">    <span class="comment">//reset fEntityStorage</span></span><br><span class="line">    fEntityStorage.reset(propertyManager);</span><br><span class="line">    <span class="comment">//reset XMLEntityReaderImpl</span></span><br><span class="line">    fEntityScanner.reset(propertyManager);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// initialize state</span></span><br><span class="line">    <span class="comment">//fStandalone = false;</span></span><br><span class="line">    fEntities.clear();</span><br><span class="line">    fEntityStack.removeAllElements();</span><br><span class="line">    fCurrentEntity = <span class="keyword">null</span>;</span><br><span class="line">    fValidation = <span class="keyword">false</span>;</span><br><span class="line">    fExternalGeneralEntities = <span class="keyword">true</span>;</span><br><span class="line">    fExternalParameterEntities = <span class="keyword">true</span>;</span><br><span class="line">    fAllowJavaEncodings = <span class="keyword">true</span> ;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到这三行对于<code>XMLInputFactory</code>参数的处理</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">fSupportDTD = ((Boolean)propertyManager.getProperty(XMLInputFactory.SUPPORT_DTD)).booleanValue();</span><br><span class="line">fReplaceEntityReferences = ((Boolean)propertyManager.getProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES)).booleanValue();</span><br><span class="line">fSupportExternalEntities = ((Boolean)propertyManager.getProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES)).booleanValue();</span><br></pre></td></tr></table></figure>
+<p>设置完参数之后，就和之前差不多，来到之前跟过的XML解析的<code>scanEntityReference</code>部分。<code>com/sun/org/apache/xerces/internal/impl/XMLDocumentFragmentScannerImpl.java:1890</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//1. if the entity is external and support to external entities is not required</span></span><br><span class="line"><span class="comment">// 2. or entities should not be replaced</span></span><br><span class="line"><span class="comment">//3. or if it is built in entity reference.</span></span><br><span class="line"><span class="keyword">boolean</span> isEE = fEntityStore.isExternalEntity(name);</span><br><span class="line"><span class="keyword">if</span>((isEE &amp;&amp; !fSupportExternalEntities) || (!isEE &amp;&amp; !fReplaceEntityReferences) || foundBuiltInRefs)&#123;</span><br><span class="line">    fScannerState = SCANNER_STATE_REFERENCE;</span><br><span class="line">    <span class="keyword">return</span> ;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// start general entity</span></span><br><span class="line"><span class="keyword">if</span> (!fEntityStore.isDeclaredEntity(name)) &#123;</span><br><span class="line">    <span class="comment">//SUPPORT_DTD=false &amp;&amp; ReplaceEntityReferences should throw exception</span></span><br><span class="line">    <span class="keyword">if</span> (!fSupportDTD &amp;&amp; fReplaceEntityReferences) &#123;</span><br><span class="line">        reportFatalError(<span class="string">"EntityNotDeclared"</span>, <span class="keyword">new</span> Object[]&#123;name&#125;);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//REVISIT: one more case needs to be included: external PE and standalone is no</span></span><br><span class="line">    <span class="keyword">if</span> ( fHasExternalDTD &amp;&amp; !fStandalone) &#123;</span><br><span class="line">        <span class="keyword">if</span> (fValidation)</span><br><span class="line">            fErrorReporter.reportError(fEntityScanner, XMLMessageFormatter.XML_DOMAIN,<span class="string">"EntityNotDeclared"</span>,</span><br><span class="line">                                       <span class="keyword">new</span> Object[]&#123;name&#125;, XMLErrorReporter.SEVERITY_ERROR);</span><br><span class="line">    &#125; <span class="keyword">else</span></span><br><span class="line">        reportFatalError(<span class="string">"EntityNotDeclared"</span>, <span class="keyword">new</span> Object[]&#123;name&#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到这里对<code>fSupportExternalEntities</code>和<code>fSupportDTD</code>都进行了判断，抛出对应的异常。</p>
+<h1 id="一些总结"><a href="#一些总结" class="headerlink" title="一些总结"></a>一些总结</h1><p>虽然只分析了两种XML解析的方式，但比较庆幸的是，其余几种XML的解析库，底层调用的都是<code>com.sun.org.apache.xerces.internal</code>中xml解析的代码，还算是有一定的共性。</p>
+<p>（但个人感觉参数的设置其实还是相当冗余和混乱的，没有一个统一的规范，比如<code>XMLInputFactory</code>的参数就可以看出，在很多环节做了很多重复判断）</p>
+<p>大致可以根据防御的属性和XMLEntityManager中的注释可以做以下的分类</p>
+<p>1、sax features</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// http://javax.xml.XMLConstants/feature/secure-processing</span></span><br><span class="line">XMLConstants.FEATURE_SECURE_PROCESSING</span><br><span class="line"><span class="comment">// http://javax.xml.XMLConstants/property/accessExternalDTD</span></span><br><span class="line">XMLConstants.ACCESS_EXTERNAL_DTD</span><br><span class="line"><span class="comment">// http://javax.xml.XMLConstants/property/accessExternalStylesheet</span></span><br><span class="line">XMLConstants.ACCESS_EXTERNAL_STYLESHEET</span><br><span class="line"><span class="comment">// http://javax.xml.XMLConstants/property/accessExternalSchema</span></span><br><span class="line">XMLConstants.ACCESS_EXTERNAL_SCHEMA</span><br></pre></td></tr></table></figure>
+<p><code>FEATURE_SECURE_PROCESSING</code>相当于<code>ACCESS_EXTERNAL_DTD</code>和<code>ACCESS_EXTERNAL_SCHEMA</code>制空</p>
+<p>将外部实体中允许的协议设为空，相当于允许外部实体的加载，但是禁用协议，只允许一些常量的定义</p>
+<p>2、指定部位的解析</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// sax features</span></span><br><span class="line"><span class="comment">// http://xml.org/sax/features/external-general-entities</span></span><br><span class="line">fExternalGeneralEntities = componentManager.getFeature(EXTERNAL_GENERAL_ENTITIES, <span class="keyword">true</span>);</span><br><span class="line"><span class="comment">// http://xml.org/sax/features/external-parameter-entities</span></span><br><span class="line">fExternalParameterEntities = componentManager.getFeature(EXTERNAL_PARAMETER_ENTITIES, <span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// xerces features</span></span><br><span class="line"><span class="comment">// http://apache.org/xml/features/nonvalidating/load-external-dtd</span></span><br><span class="line">fLoadExternalDTD = componentManager.getFeature(LOAD_EXTERNAL_DTD, <span class="keyword">true</span>);</span><br></pre></td></tr></table></figure>
+<p>相当于设置XMl解析的时候，解析指定的部分，所以这种参数的设置之后也不会抛出异常</p>
+<p>3、StAX Property</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// javax.xml.stream.supportDTD</span></span><br><span class="line">fSupportDTD = ((Boolean)propertyManager.getProperty(XMLInputFactory.SUPPORT_DTD)).booleanValue();</span><br><span class="line"><span class="comment">// javax.xml.stream.isSupportingExternalEntitie</span></span><br><span class="line">fSupportExternalEntities = ((Boolean)propertyManager.getProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES)).booleanValue();</span><br><span class="line"><span class="comment">// javax.xml.stream.isReplacingEntityReferences</span></span><br><span class="line">fReplaceEntityReferences = ((Boolean)propertyManager.getProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES)).booleanValue();</span><br></pre></td></tr></table></figure>
+<p>感觉像是为XMLInput额外添加的属性，作用其实是和之前禁用的差不多，解析外部实体时会抛出异常。</p>
+<p>4、disallow-doctype-decl</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="comment">//apache.org/xml/features/disallow-doctype-decl</span></span><br></pre></td></tr></table></figure>
+<p>相当于在scanner解析的时候，做了一个判断，设置了之后则禁止Doctype的解析</p>
+<h1 id="最后的最后"><a href="#最后的最后" class="headerlink" title="最后的最后"></a>最后的最后</h1><p>算是大致搞懂了设置feature中的原理，虽然没有完整的跟完每一个的流程，但是最后的解析xml库确实是同一个，那大致原理应该也就类似，之前每个库可能前期会做很多设置，一味的跟这一部分其实没有太多意义。</p>
+<p>最后的感觉就是，这种feature的设置，感觉应该是前期设计的时候没有考虑到XXE这部分，后期对在原有基础上的修改，增加了很多的属性，和很多的if判断，弄得代码禁用的方式有些千奇百怪，没有一个统一的方式（当然只是我猜的）。而且没有文档的情况下，开发人员也很难知道要设置哪些值，分别对应那些限制。</p>
+<p>感谢能看到最后，由于个人能力有限分析的过程中有些没讲清楚，或者错误的地方欢迎各位指出：）</p>
+<h1 id="补充一些"><a href="#补充一些" class="headerlink" title="补充一些"></a>补充一些</h1><p>事后整理参数的时候发现了一个有趣的事情</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200115143410.png" alt></p>
+<p>这里的<code>fLoadExternalDTD</code>和<code>fAccessExternalDTD</code></p>
+<p>分别对应了<code>XMLConstants.FEATURE_SECURE_PROCESSING</code>和<code>http://apache.org/xml/features/nonvalidating/load-external-dtd</code></p>
+<p>所以，当如下两个feature同时开启的时候，实际上是无效的，第二个参数的false会导致跳过第一个protocol的限制。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, <span class="keyword">true</span>);</span><br><span class="line">dbf.setFeature(<span class="string">"http://apache.org/xml/features/nonvalidating/load-external-dtd"</span>, <span class="keyword">false</span>);</span><br></pre></td></tr></table></figure>
+<hr>
+
+<p><code>SAXBuilder</code>如下操作是无效的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">builder.setFeature(<span class="string">"http://xml.org/sax/features/external-general-entities"</span>, <span class="keyword">false</span>);</span><br></pre></td></tr></table></figure>
+<p>原因是没有实际上改变<code>fExternalParameterEntities</code>的值，导致这条setFeature其实毫无作用</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2020/01/gadgetinspector源码浅析/" data-toggle="tooltip" data-placement="top" title="gadgetinspector源码浅析">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2019/12/Java8中两个优雅的特性/" data-toggle="tooltip" data-placement="top" title="Java8中两个优雅的特性">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#Java" title="Java">Java</a>
+                        
+                          <a class="tag" href="/tags/#XXE" title="XXE">XXE</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

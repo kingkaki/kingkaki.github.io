@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Kubernetes基本概念和一些未授权访问 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2020/03/Kubernetes基本概念和一些未授权访问/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#k8s" title="k8s">k8s</a>
+                        
+                          <a class="tag" href="/tags/#云原生" title="云原生">云原生</a>
+                        
+                    </div>
+                    <h1>Kubernetes基本概念和一些未授权访问</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2020-03-19
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p><strong>本文不保证正确性，纯属个人入门笔记</strong></p>
+<blockquote>
+<p>Kubernetes 是一个开源容器编排引擎，用于容器化应用的自动化部署、扩展和管理 </p>
+</blockquote>
+<p>随着云时代的到来，各大厂商也都将服务部署在云上了。</p>
+<p>k8s作为Google开源的一个容器编排工具，也被国内外不少厂商实践并投入生产使用。随之也催生出了一系列CNCF的云应用，也加速了Go语言的发展。</p>
+<p>全面上云，感觉也是个发展的大趋势把，菜如我只能先了解一些基本概念吧…</p>
+<h1 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h1><h2 id="Pod"><a href="#Pod" class="headerlink" title="Pod"></a>Pod</h2><p>k8s中最小的调度以资源单元。pod是一个或一组容器的集合。</p>
+<p>同一个pod中的容器共享存储、网络、以及怎样运行这些容器的声明 。</p>
+<p>相当于一个逻辑主机，同个pod中的不同容器共享网络和上下文资源。</p>
+<p>形象来说就是同一组pod中的容器所看到的网络设备、自身的ip地址都是相同的，可以直接通过localhost进行通信。</p>
+<p>更加哲学一点的说法就是容器相当于一个进程，而Pod类似于一个进程组，这些进程会共享/同步一些资源，从而协作变成一个统一提供服务的进程组（当然，不需要多个进程的时候，这个进程组中就一个进程，也就只有一个容器）。</p>
+<h2 id="Volumne"><a href="#Volumne" class="headerlink" title="Volumne"></a>Volumne</h2><p>就是docker中的数据卷，用来管理k8s中的存储。</p>
+<p>一个volumne可以被挂载在一个或多个pod的路径中。</p>
+<p>volumne其实是一个存储层的抽象，后面实际的实现可以是一些本地存储、分布式存储、云存储之类。</p>
+<h2 id="Deployment"><a href="#Deployment" class="headerlink" title="Deployment"></a>Deployment</h2><blockquote>
+<p> Deployment 是在 Pod 这个抽象上更为上层的一个抽象，它可以定义一组 Pod 的副本数目、以及这个 Pod 的版本。 </p>
+</blockquote>
+<p>k8s会通过Contorller去维护一个Deployment的状态，例如一些pod的自动恢复，一些版本的升级与回滚。</p>
+<h2 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h2><blockquote>
+<p> Kubernetes <code>Service</code> 定义了这样一种抽象：逻辑上的一组 <code>Pod</code>，一种可以访问它们的策略 —— 通常称为微服务。 </p>
+</blockquote>
+<p>一组pod的抽象，因为对于用户来说，这一组pod都提供的是同一个服务，就可以把这些pod抽象成一个service。</p>
+<p>通过LoadBalancer等方式，相当于对内pod提供了层负载均衡代理，对外用户只要访问指定的service就能被代理到指定服务，而无需关心具体pod。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200318185347.png" alt></p>
+<h2 id="Namespace"><a href="#Namespace" class="headerlink" title="Namespace"></a>Namespace</h2><blockquote>
+<p> Namespace 是用来做一个集群内部的逻辑隔离的，它包括鉴权、资源管理等。 </p>
+</blockquote>
+<p>默认为default，例如一些部门之间的容器隔离和一些权限控制，都可以通过namespace来操作，也解决了一些命名重复的问题。</p>
+<h2 id="ReplicaSet"><a href="#ReplicaSet" class="headerlink" title="ReplicaSet"></a>ReplicaSet</h2><blockquote>
+<p>ReplicaSet 确保任何时间都有指定数量的 Pod 副本在运行。 然而，Deployment 是一个更高级的概念，它管理 ReplicaSet，并向 Pod 提供声明式的更新以及许多其他有用的功能。 </p>
+</blockquote>
+<p>ReplicaSet对应Deployment template的一个版本。</p>
+<p>由Deployment管理ReplicaSet，ReplicaSet管理具体的Pod副本。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200318202015.png" alt></p>
+<p>例如修改了Deployment中的template，升级了应用的版本，那Deployment则会生成一个新的ReplicaSet。</p>
+<p>旧的ReplicaSet删除原先的pod，新的ReplicaSet生成新的pod。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200318203025.png" alt></p>
+<h2 id="Job"><a href="#Job" class="headerlink" title="Job"></a>Job</h2><p>管理任务的控制器。</p>
+<p>Job 会创建一个或多个Pod，并确保指定数量的Pod成功终止。 </p>
+<p>可以跟踪Pod状态，及时重试，以及保证任务执行的循序关系。</p>
+<p>还有对应的CronJob，支持定时任务，可以根据<a href="https://en.wikipedia.org/wiki/Cron" target="_blank" rel="noopener">cron</a>语法进行定义</p>
+<h2 id="DaemonSet"><a href="#DaemonSet" class="headerlink" title="DaemonSet"></a>DaemonSet</h2><blockquote>
+<p> <em>DaemonSet</em> 确保全部（或者某些）节点上运行一个 Pod 的副本。当有节点加入集群时， 也会为他们新增一个 Pod 。当有节点从集群移除时，这些 Pod 也会被回收。删除 DaemonSet 将会删除它创建的所有 Pod。 </p>
+</blockquote>
+<p>例如一些日志收集、和监控的组件，都可以通过DaemonSet的方式进行创建，从而在每个节点上做一个日志收集、监控的操作。</p>
+<h2 id="API"><a href="#API" class="headerlink" title="API"></a>API</h2><h3 id="交互格式"><a href="#交互格式" class="headerlink" title="交互格式"></a>交互格式</h3><p>用户与master交互的方式有两种，一个是通过ui界面操作，还有一个就是通过kubectl进行操作。</p>
+<p>但实际上两种的本质都是通过HTTP协议进行传输，格式为JSON/YAML。</p>
+<p>例如对某个namespace的某个pod进行操作的url如下。</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="regexp">/api/</span>v1<span class="regexp">/namespaces/</span><span class="variable">$NAMESPACE</span><span class="regexp">/pods/</span><span class="variable">$NAME</span></span><br></pre></td></tr></table></figure>
+<p>又或者我们通过<code>apply -f</code>创建pod时，指定的yaml格式如下。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200318191832.png" alt></p>
+<p>里面分别对应了对这个资源描述的几个部分</p>
+<ul>
+<li>apiVersion：api的版本信息</li>
+<li>kind：资源信息</li>
+<li>metadata：定义name，以及打一些lable或者其他描述</li>
+<li>spec：期望状态，例如这里指定了container的名字、镜像信息以及对应的端口</li>
+<li>status：获取资源信息时服务端返回的信息，显示资源的状态</li>
+</ul>
+<h3 id="一些字段含义"><a href="#一些字段含义" class="headerlink" title="一些字段含义"></a>一些字段含义</h3><p>本来想整理下语法的，后来越整理越多，而且感觉很多对入门选手没太多必要，就挑了几个常见的记录下。</p>
+<p>如果想看完整的可以看  <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.17/" target="_blank" rel="noopener">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.17/</a>  ，对每一个应用都给出了对应的样例，并且介绍了每个字段的含义。</p>
+<p>1、lable</p>
+<p>一组Key/Value键值对，相当于对当前pod打上标签。</p>
+<p>通过selector我们可以选择指定标签的pod，支持一些逻辑条件。</p>
+<p>例如Deployment和Service创建时选择指定的pod，就可以通过lable来选择想要的pod。</p>
+<p>2、selector</p>
+<p>选择器，Deployment和Service创建时选择指定的pod，就可以通过matchLabels的方式选择特定lable的pod。</p>
+<p>3、replicas</p>
+<p>期望达到的pod数量。例如Deployment创建时期望达到的一个指定的pod数量。</p>
+<p>4、template</p>
+<p>描述将要被创建的pod的模板。在Deployment创建时指定其生成pod的模板。</p>
+<p>5、revisionHistoryLimit</p>
+<p>历史ReplicaSet的版本数，默认为10</p>
+<h3 id="yaml文件样例"><a href="#yaml文件样例" class="headerlink" title="yaml文件样例"></a>yaml文件样例</h3><p>对应一些具体的yaml文件可能会更好理解一些</p>
+<p>deployment.yaml</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">nginx-deployment</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">app:</span> <span class="string">nginx</span></span><br><span class="line">  <span class="attr">replicas:</span> <span class="number">2</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">nginx</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">nginx</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">nginx:1.7.9</span></span><br><span class="line">        <span class="attr">ports:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">containerPort:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+<p>service.yaml</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">my-service</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">my-service</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">nginx</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">protocol:</span> <span class="string">TCP</span></span><br><span class="line">    <span class="attr">port:</span> <span class="number">8888</span></span><br><span class="line">    <span class="attr">targetPort:</span> <span class="number">80</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">LoadBalancer</span></span><br></pre></td></tr></table></figure>
+<p>daemonset.yaml</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">DaemonSet</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">daemonset-example</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">app:</span> <span class="string">daemonset-example</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">daemonset-example</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">daemonset-example</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">ubuntu:trusty</span></span><br><span class="line">        <span class="attr">command:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">/bin/sh</span></span><br><span class="line">        <span class="attr">args:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">-c</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">&gt;-</span></span><br><span class="line">          <span class="string">while</span> <span class="string">[</span> <span class="literal">true</span> <span class="string">];</span> <span class="string">do</span></span><br><span class="line">          <span class="string">echo</span> <span class="string">"DaemonSet running on $(hostname)"</span> <span class="string">;</span></span><br><span class="line">          <span class="string">sleep</span> <span class="number">10</span> <span class="string">;</span></span><br><span class="line">          <span class="string">done</span></span><br></pre></td></tr></table></figure>
+<p>job.yaml</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">batch/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Job</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="comment"># Unique key of the Job instance</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">example-job</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">example-job</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">pi</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">perl</span></span><br><span class="line">        <span class="attr">command:</span> <span class="string">["perl"]</span></span><br><span class="line">        <span class="attr">args:</span> <span class="string">["-Mbignum=bpi",</span> <span class="string">"-wle"</span><span class="string">,</span> <span class="string">"print bpi(2000)"</span><span class="string">]</span></span><br><span class="line">      <span class="comment"># Do not restart containers after they exit</span></span><br><span class="line">      <span class="attr">restartPolicy:</span> <span class="string">Never</span></span><br></pre></td></tr></table></figure>
+<h2 id="kubectl指令"><a href="#kubectl指令" class="headerlink" title="kubectl指令"></a>kubectl指令</h2><p>kubectl是用户与master节点进行通信的cli，完整的指令文档在  <a href="https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands" target="_blank" rel="noopener">https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands</a> </p>
+<p>我就只介绍几个常见的命令操作</p>
+<p>基本的命令格式如下</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">kubectl</span> <span class="selector-attr">[command]</span> <span class="selector-attr">[TYPE]</span> <span class="selector-attr">[NAME]</span> <span class="selector-attr">[flags]</span></span><br></pre></td></tr></table></figure>
+<p>常见的command操作有</p>
+<ul>
+<li><code>create</code> : 创建资源</li>
+<li><code>get</code> ： 获取资源信息</li>
+<li><code>describe</code> ：获取特定资源的详细描述</li>
+<li><code>delete</code> ： 删除资源</li>
+</ul>
+<p>例如</p>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="built_in">get</span> nodes<span class="comment"> // 获取nodes节点信息</span></span><br><span class="line">kubectl <span class="built_in">get</span> pods<span class="comment"> // 获取pods信息</span></span><br><span class="line">kubectl <span class="built_in">get</span> deployment<span class="comment"> // 获取deployment信息</span></span><br><span class="line">kubectl <span class="built_in">get</span> services<span class="comment"> // 获取service信息</span></span><br><span class="line">kubectl describe deployment nginx-deployment<span class="comment"> // 查看deployment描述</span></span><br><span class="line">kubectl <span class="built_in">delete</span> deployment nginx-deployment<span class="comment"> // 删除指定deployment</span></span><br><span class="line">kubectl edit deployment nginx-deployment<span class="comment"> // 编辑指定deployment</span></span><br><span class="line">kubectl apply -f example-service.yaml<span class="comment"> // 使用 example-service.yaml 中的定义创建服务。</span></span><br><span class="line">kubectl exec -<span class="keyword">it</span> podname sh<span class="comment"> // 执行指定pod操作</span></span><br></pre></td></tr></table></figure>
+<p>简写风格</p>
+<p>kubectl还支持一部分简写，例如pod和pods，deployment和deployments其实是不区分的。</p>
+<p>不仅如此，还有更大幅度的简写</p>
+<ul>
+<li>pods : po</li>
+<li>namespace : ns</li>
+<li>nodes : no</li>
+<li>services : svc</li>
+<li>deployments : deploy</li>
+</ul>
+<p>输出选项</p>
+<p><code>-o</code>、<code>--ouput</code>参数 可支持格式化输出</p>
+<ul>
+<li><code>-o wide</code> 纯文本输出，但包含的信息内容更多</li>
+<li><code>-o name</code>仅输出名字</li>
+<li><code>-o yaml</code> yaml格式输出</li>
+<li><code>-o json</code> json格式输出</li>
+</ul>
+<h1 id="k8s组件"><a href="#k8s组件" class="headerlink" title="k8s组件"></a>k8s组件</h1><p>基本架构，我们主要通过cli或者web ui的方式去操控master节点（或者说是向master节点发送请求），再由master节点来总的管理我们的node节点。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200318145734.png" alt></p>
+<h2 id="Master组件"><a href="#Master组件" class="headerlink" title="Master组件"></a>Master组件</h2><p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200318145956.png" alt></p>
+<h3 id="kube-apiserver"><a href="#kube-apiserver" class="headerlink" title="kube-apiserver"></a>kube-apiserver</h3><blockquote>
+<p> 主节点上负责提供 Kubernetes API 服务的组件；它是 Kubernetes 控制面的前端。 </p>
+</blockquote>
+<p>别的组件都会与apiserver进行交互，相当于master中一个总的操作中心。</p>
+<h3 id="controller-manager"><a href="#controller-manager" class="headerlink" title="controller-manager"></a>controller-manager</h3><p>对集群状态的管理，比如一些扩缩容和一些修复之类的操作。</p>
+<p>在文档中还分为kube-controller-manager和云控制器管理器-(cloud-controller-manager)。</p>
+<h3 id="kube-scheduler"><a href="#kube-scheduler" class="headerlink" title="kube-scheduler"></a>kube-scheduler</h3><p>相当于一个调度器，对目前拥有的资源的调度。</p>
+<p>例如要创建一个pod时，scheduler就会选择一个合适的node节点来创建pod。</p>
+<h3 id="etcd"><a href="#etcd" class="headerlink" title="etcd"></a>etcd</h3><blockquote>
+<p> etcd 是兼具一致性和高可用性的键值数据库，可以作为保存 Kubernetes 所有集群数据的后台数据库。 </p>
+</blockquote>
+<p>一个分布式存储系统，存放一些k8s所需的元信息。</p>
+<p>etcd也不仅可用于k8s，也可以用于一些服务发现的场景。</p>
+<h2 id="Node组件"><a href="#Node组件" class="headerlink" title="Node组件"></a>Node组件</h2><p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200318150849.png" alt></p>
+<h3 id="kubelet"><a href="#kubelet" class="headerlink" title="kubelet"></a>kubelet</h3><blockquote>
+<p> 一个在集群中每个节点上运行的代理。它保证容器都运行在 Pod 中。 </p>
+</blockquote>
+<p>与master中的kube-apiserver做交互的组件，接受master发送的消息，然后做对应处理。</p>
+<p>个人理解相当于node中的apiserver。</p>
+<h3 id="kube-proxy"><a href="#kube-proxy" class="headerlink" title="kube-proxy"></a>kube-proxy</h3><blockquote>
+<p> kube-proxy是集群中每个节点上运行的网络代理,实现 Kubernetes Service概念的一部分。 </p>
+<p> kube-proxy 维护节点上的网络规则。这些网络规则允许从集群内部或外部的网络会话与 Pod 进行网络通信。 </p>
+</blockquote>
+<p>相当于一个流量的代理层，用于后续将一系列node节点在网络层面结合成一个总的service。</p>
+<h3 id="Container-Runtime"><a href="#Container-Runtime" class="headerlink" title="Container Runtime"></a>Container Runtime</h3><blockquote>
+<p> 容器运行环境是负责运行容器的软件。 </p>
+</blockquote>
+<p>真正实际运行容器的部分，这里的容器不仅限于Docker。</p>
+<h3 id="Addons"><a href="#Addons" class="headerlink" title="Addons"></a>Addons</h3><p>网络和存储的一些管理并不由k8s直接操作。</p>
+<p>一般会由云厂商，或者k8s的使用方来描述如果做网络与存储的操作。</p>
+<p>就可以通过插件的形式，来告诉k8s具体如何去做网络与存储之类的操作。</p>
+<p>（文档中还有提到一些ui，资源监控的插件）</p>
+<h2 id="一次pod创建过程"><a href="#一次pod创建过程" class="headerlink" title="一次pod创建过程"></a>一次pod创建过程</h2><p>可以来看下一次pod创建过程中，这些组件是如何相互协调工作的。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200318153446.png" alt></p>
+<p>1、用户通过cli或者ui向master节点提交一次pod创建的请求。</p>
+<p>2、master节点中的api-server接受到请求之后，将创建请求写入etcd中。</p>
+<p>3、scheduler通过 watch 或者叫做 notification 机制从api-server中得到一个pod需要被创建的消息。</p>
+<p>4、scheduler根据将被创建的pod资源进行一次决策，决定改pod在哪个node中被创建，并将消息发送个api-server。</p>
+<p>5、api-server将要创建的信息存入etcd中，并将创建信息发送给对应的node节点。</p>
+<p>6、node节点中的kubelet接受到创建node的消息之后，通过container runtime实际去启动容器，并调用所需的插件。</p>
+<h1 id="未授权访问利用"><a href="#未授权访问利用" class="headerlink" title="未授权访问利用"></a>未授权访问利用</h1><blockquote>
+<p>k8s的master节点上会暴露kube-apiserver，默认情况下会开启两个HTTP端口</p>
+<p>1）本地主机端口</p>
+<ul>
+<li>HTTP服务</li>
+<li>默认端口8080，修改标识–insecure-port</li>
+<li>默认IP是本地主机，修改标识—insecure-bind-address</li>
+<li>在HTTP中没有认证和授权检查</li>
+<li>主机访问受保护</li>
+</ul>
+<p>2）Secure Port</p>
+<ul>
+<li>默认端口6443，修改标识—secure-port</li>
+<li>默认IP是首个非本地主机的网络接口，修改标识—bind-address</li>
+<li>HTTPS服务。设置证书和秘钥的标识，–tls-cert-file，–tls-private-key-file</li>
+<li>认证方式，令牌文件或者客户端证书</li>
+<li>使用基于策略的授权方式</li>
+</ul>
+</blockquote>
+<p>之前也提到过，可以通过ui接口进行管理和配置k8s。如果ui接口可以被我们未授权访问的话，我们就可以利用它来搞一些事情。</p>
+<p>直接访问会返回可用的API列表</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200318230336.png" alt></p>
+<p>看别人的说法是访问<code>/ui</code>就可以到对应的dashboard界面，我这边是用minikube起的，貌似有些差异，访问的是<code>/api/v1/namespaces/kubernetes-dashboard/services/http:kubernetes-dashboard:/proxy/</code>但问题不大</p>
+<p>我们通过ui界面创建一个pod，并将本地根目录挂载到pod的/mnt目录中</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1584545246211.png" alt></p>
+<p>创建Pod的yaml<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">myapp</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">image:</span> <span class="string">nginx:1.7.9</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">container</span></span><br><span class="line">    <span class="attr">volumeMounts:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">mountPath:</span> <span class="string">/mnt</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">test-volume</span></span><br><span class="line">  <span class="attr">volumes:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">test-volume</span></span><br><span class="line">    <span class="attr">hostPath:</span></span><br><span class="line">      <span class="attr">path:</span> <span class="string">/</span></span><br></pre></td></tr></table></figure></p>
+<p>这样，过一会之后就能看到我们创建的myapp Pod以及run起来了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/15845454791.png" alt></p>
+<p>通过右上角进入Pod的shell控制台</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/15845455661.png" alt></p>
+<p>这样，进入挂载好的/mnt目录中，就是master节点的对应目录了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/15845457711.png" alt></p>
+<p>后面写cron之类的操作就不演示了。</p>
+<p>kubectl也可以通过<code>-s http://master-hostname:port</code> 的方式来连接特定的未授权访问端口。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200318233945.png" alt></p>
+<p>但是想exec执行命令时却被Forbidden了，不知道是我环境问题，还是k8s策略的原因</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200318234157.png" alt></p>
+<p>其余的未授权访问之类的还有如下，链接中也有比较详细的利用方式 <a href="https://www.freebuf.com/vuls/196993.html" target="_blank" rel="noopener">https://www.freebuf.com/vuls/196993.html</a> </p>
+<ul>
+<li>etcd 2379端口：默认通过证书认证，主要存放节点的信息，如一些token和证书。</li>
+<li>kubelet 10250端口：默认也是通过证书认证，与master节点交互的端口，如果可以利用可以直接控制该node的所有pod。</li>
+<li>docker rest-api 2375端口：其实和k8s关系不大，主要是docker服务的rest接口。</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p> <a href="https://kubernetes.io/zh/docs/home/" target="_blank" rel="noopener">https://kubernetes.io/zh/docs/home/</a> </p>
+<p> <a href="https://edu.aliyun.com/roadmap/cloudnative" target="_blank" rel="noopener">https://edu.aliyun.com/roadmap/cloudnative</a> </p>
+<p> <a href="https://www.bilibili.com/video/av85429526" target="_blank" rel="noopener">https://www.bilibili.com/video/av85429526</a> </p>
+<p> <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.17/" target="_blank" rel="noopener">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.17/</a> </p>
+<p> <a href="https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands" target="_blank" rel="noopener">https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands</a> </p>
+<p> <a href="https://www.freebuf.com/vuls/196993.html" target="_blank" rel="noopener">https://www.freebuf.com/vuls/196993.html</a> </p>
+<p> <a href="https://www.mls-tech.info/docker/k8s-installation-on-ubuntu1804/" target="_blank" rel="noopener">https://www.mls-tech.info/docker/k8s-installation-on-ubuntu1804/</a> </p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2020/04/浅谈JNDI/" data-toggle="tooltip" data-placement="top" title="浅谈JNDI">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2020/03/Tomcat中一种半通用回显方法/" data-toggle="tooltip" data-placement="top" title="Tomcat中一种半通用回显方法">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#k8s" title="k8s">k8s</a>
+                        
+                          <a class="tag" href="/tags/#云原生" title="云原生">云原生</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

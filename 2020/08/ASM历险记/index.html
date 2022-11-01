@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          ASM历险记 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2020/08/ASM历险记/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                          <a class="tag" href="/tags/#asm" title="asm">asm</a>
+                        
+                    </div>
+                    <h1>ASM历险记</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2020-08-23
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>之前就一直说着要学ASM，但每次看着一堆JVM指令就脑壳疼，前段时间算是静下心来看了一遍文档，不得不说ASM的文档写的确实很赞，和Soot简直鲜明对比。</p>
+<p>本文主要内容来自于ASM4官方文档，推荐直接看原文档，本文仅做个人学习记录，不保证正确性。</p>
+<p> <a href="https://asm.ow2.io/asm4-guide.pdf" target="_blank" rel="noopener">https://asm.ow2.io/asm4-guide.pdf</a> </p>
+<h1 id="JVM基础"><a href="#JVM基础" class="headerlink" title="JVM基础"></a>JVM基础</h1><h2 id="类结构"><a href="#类结构" class="headerlink" title="类结构"></a>类结构</h2><p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200819143808.png" alt></p>
+<p>如上就是一个类文件的大体文件结构（其中Attribute属性值似乎在注解出现之后变得没什么用处，但还是一个可选的选项）</p>
+<p>classpy可以比较直观的看到字节码文件结构，和与之对应的字节块。</p>
+<p> <a href="https://github.com/zxh0/classpy" target="_blank" rel="noopener">https://github.com/zxh0/classpy</a> </p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200819150202.png" alt></p>
+<p>在class文件中不存在package和import之类的信息，可以理解为一个语言层面提供的”语法糖”，class文件中的类名都以全限定的方式存在，又分为几种类型。</p>
+<p><strong>内部名</strong>：主要用于描述类和接口类型</p>
+<p>用<code>/</code>替代原有的<code>.</code>，如String的内部名则为<code>java/lang/String</code>。</p>
+<p><strong>类型描述符</strong>： 用于描述字段类型，除了Java中的类以外还有几个原生类型</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200819150739.png" alt></p>
+<p><strong>方法描述符</strong>：用来描述一个函数的参数和返回值（但不包括函数名）</p>
+<p>可以看到其实就是类型描述符的拼接，前面括号中为参数的描述符，括号后为返回类型的描述符</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200819150836.png" alt></p>
+<h2 id="执行模型"><a href="#执行模型" class="headerlink" title="执行模型"></a>执行模型</h2><p>Java是在线程内部执行的，每个线程都有自己的执行栈，栈由<strong>帧（Frame）</strong>组成，对应一个方法调用。</p>
+<p>一个帧（Frame）由两部分组成：<strong>本地变量（local variables）</strong>和<strong>操作数栈（operand stack）</strong></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200819151650.png" alt></p>
+<p>本地变量和操作数栈都是栈结构，其单位为slot，除了long和double类型占两个slot以外，其余Java中的值都仅占一个slot。</p>
+<p>由于long和double的存在导致不能单纯的用值的数量来判断所占slot大小，还得判断其数据类型，才能确定其最终所需的slot大小。</p>
+<p>在Java6之后，为了加快JVM的类型校验，引入了一个<strong>栈映射帧</strong>的结构，它描述了在某一执行过程中的状态，也就是某一指令前，本地变量和操作数栈中值的类型。</p>
+<p>为了节省空间，仅在跳转和异常处理的指令处设置了栈映射帧进行类型校验。</p>
+<p>也正是因为存在栈映射帧这个操作，导致后面ASM在原有代码上编织字节码时，还得考虑栈映射帧相关细节，导致整体流程变的繁琐。</p>
+<h2 id="字节码指令"><a href="#字节码指令" class="headerlink" title="字节码指令"></a>字节码指令</h2><p>完整的字节码指令很多，这里只介绍几种常见的。</p>
+<p>字节码指令有几个不成文的约定。</p>
+<p>例如<code>ILOAD</code>表述读取一个int、boolean、byte、char、short类型的局部变量，并将它的值压入操作数栈中。</p>
+<p><code>LLOAD</code>对应long类型、<code>FLOAD</code>对应float、<code>DLOAD</code>对应double类型、<code>ALOAD</code>对应Java对象</p>
+<p>因此一下用<code>xLOAD</code>来泛指这一类的操作</p>
+<p><strong>在操作数栈和局部变量见传递值的指令</strong></p>
+<p><code>xLOAD</code>：读取一个局部变量的值，并将其压入操作数栈</p>
+<p><code>xSTORE</code>：从操作数栈弹出一个值，存储至局部变量中</p>
+<p><strong>仅在操作数栈中操作的指令</strong></p>
+<p><code>POP</code>：弹出顶部栈</p>
+<p><code>DUP</code>：压入顶部栈值的副本</p>
+<p><code>SWAP</code>：交换顶部两个值</p>
+<p><code>xCONST_0</code>：压入一个常量值0</p>
+<p><code>xCONST_NULL</code>：压入一个null</p>
+<p><code>LDC</code>：压入任意 int、float、long、double、String、class常量值</p>
+<p><code>xADD</code>、<code>xSUB</code>、<code>xMUL</code>、<code>xDIV</code>、<code>xREM</code>：弹出顶部两个值，进行加减乘除取余等操作，并将结果压回栈内</p>
+<p><code>I2f</code>、<code>F2D</code>、<code>L2D</code>：弹出一个值，类型转换后重新压入栈内</p>
+<p><code>CHECKCAST t</code>：弹出一个值，引用类型转换为t之后重新压入栈内</p>
+<p><code>NEW</code>：将一个指定类型的新对象压入栈内</p>
+<p><code>GETFIELD</code>：弹出一个对象引用，并压入其指定字段的值</p>
+<p><code>PUTFIELD</code>：弹出一个值和一个对象引用，并将值存入对象的指定字段中</p>
+<p><code>INVOKExxx</code>：弹出目标对象与参数所需的对象个数，调用方法（根据xxx的不同调用不同类型的方法），并将返回值压入栈中</p>
+<p><code>xALOAD</code>：弹出一个索引和一个数组，并压入数组指定索引处的值</p>
+<p><code>xASTORE</code>：弹出一个值、一个索引、一个数组，并将数组的指定索引处存入对应值。</p>
+<p><code>IFEQ</code> 、<code>IFNE</code>、<code>IFGE</code>：从栈中弹出一个int值，这个值等于/小于/大于0则跳转至指定lable，否则正常执行下一个指令</p>
+<p><code>RETURN</code>、<code>xRETURN</code>：用于终止一个方法执行，返回对应值</p>
+<h1 id="ASM操作"><a href="#ASM操作" class="headerlink" title="ASM操作"></a>ASM操作</h1><p>asm主要有两个api，core-api和tree-api，类似于XML解析的SAX（Simple API for XML，事件驱动）和DOM（Document Object Model，基于对象）</p>
+<p>core-api也是基于事件驱动的，因此内存和性能消耗要小于tree-api，但使用可能偏复杂</p>
+<p>tree-api会在一开始将类读取至内存中，因内存和性能消耗偏大，但是可以获取整个类</p>
+<p>如下操作没有明确说明都是基于core-api的（貌似也是大家比较偏爱的一个api，不知道是出于性能考虑还是什么）</p>
+<p>ASM的运行结构可以理解为由类读取器（ClassReader）读取类，产生事件驱动，然后由多个转换器（Adapter）对读取到的事件进行转换，最后交由类编写器（ClassWriter）向指定文件中写入类。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200820173707.png" alt></p>
+<h2 id="新生成类"><a href="#新生成类" class="headerlink" title="新生成类"></a>新生成类</h2><p>可以直接通过ClassWriter生成一个任意的类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyClassWriter</span> <span class="keyword">implements</span> <span class="title">Opcodes</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        ClassWriter cw = <span class="keyword">new</span> ClassWriter(<span class="number">0</span>);</span><br><span class="line">        cw.visit(V1_8, ACC_PUBLIC + ACC_ABSTRACT + ACC_INTERFACE,</span><br><span class="line">                <span class="string">"pkg/Comparable"</span>, <span class="keyword">null</span>, <span class="string">"java/lang/Object"</span>, <span class="keyword">new</span> String[]&#123;<span class="string">"pkg/Mesurable"</span>&#125;);</span><br><span class="line">        cw.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC,</span><br><span class="line">                <span class="string">"LESS"</span>, <span class="string">"I"</span>, <span class="keyword">null</span>, -<span class="number">1</span>).visitEnd();</span><br><span class="line">        cw.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC,</span><br><span class="line">                <span class="string">"EQUAL"</span>, <span class="string">"I"</span>,</span><br><span class="line">                <span class="keyword">null</span>, <span class="number">0</span>).visitEnd();</span><br><span class="line">        cw.visitField(ACC_PUBLIC + ACC_FINAL + ACC_STATIC,</span><br><span class="line">                <span class="string">"GREATER"</span>, <span class="string">"I"</span>,</span><br><span class="line">                <span class="keyword">null</span>, <span class="number">1</span>).visitEnd();</span><br><span class="line">        cw.visitMethod(ACC_PUBLIC + ACC_ABSTRACT, <span class="string">"compareTo"</span>,</span><br><span class="line">                <span class="string">"(Ljava/lang/Object;)I"</span>, <span class="keyword">null</span>, <span class="keyword">null</span>).visitEnd();</span><br><span class="line">        cw.visitEnd();</span><br><span class="line">        Files.write(Paths.get(<span class="string">"Comparable.class"</span>), cw.toByteArray());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如上代码就生成了一个jdk1.8版本的<code>Comparable</code>接口</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200820175607.png" alt></p>
+<p><code>V1_8</code>、<code>ACC_PUBLIC</code>这些字节码常量都在<code>Opcodes</code>接口中有定义，通常只要implements这个接口即可</p>
+<p><code>ClassWriter.visit</code>的参数分别代表 版本号、访问控制权限、类名、signature、父类、接口</p>
+<p>signature这个变量是适用于泛型的，一般填null即可</p>
+<p><code>ClassWriter.visitField</code>返回一个FieldVisitor，每次调用完之后访问一次<code>visitEnd()</code>属于约定俗称的规范（尽管这里的visitEnd什么都没做），当多个Visitor协同调用时，可以正确触发对应的visitEnd中的修改。</p>
+<p>最后<code>ClassWriter.toByteArray()</code>即可获取对应的字节码数组。</p>
+<h2 id="转换类"><a href="#转换类" class="headerlink" title="转换类"></a>转换类</h2><p>通常情况，通过读取原有的class文件，在其基础上生成新的类拥有更广泛的使用场景，它的运行模型也更贴近一开始给出的转换模型。其中会通过ClassReader读取原有的字节码文件，然后交给自定义的ClassVisitor转换器进行对应的转换，最后从过ClassWriter生成对应的类。</p>
+<p>例如通过一个简单的例子，将之前生成的JDK1.8的Comparable类转换成JDK1.5的字节码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ChangeVersionAdapter</span> <span class="keyword">extends</span> <span class="title">ClassVisitor</span> <span class="keyword">implements</span> <span class="title">Opcodes</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ChangeVersionAdapter</span><span class="params">(ClassVisitor cv)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(Opcodes.ASM4, cv);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">visit</span><span class="params">(<span class="keyword">int</span> version, <span class="keyword">int</span> access, String name,</span></span></span><br><span class="line"><span class="function"><span class="params">                      String signature, String superName, String[] interfaces)</span> </span>&#123;</span><br><span class="line">        cv.visit(V1_5, access, name, signature, superName, interfaces);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">byte</span>[] b1 = Files.readAllBytes(Paths.get(<span class="string">"Comparable.class"</span>));</span><br><span class="line">        ClassWriter cw = <span class="keyword">new</span> ClassWriter(<span class="number">0</span>);</span><br><span class="line">        ClassVisitor cv = <span class="keyword">new</span> ChangeVersionAdapter(cw);</span><br><span class="line">        ClassReader cr = <span class="keyword">new</span> ClassReader(b1);</span><br><span class="line">        cr.accept(cv, <span class="number">0</span>);</span><br><span class="line">        Files.write(Paths.get(<span class="string">"Comparable2.class"</span>), cw.toByteArray());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到对应的做法其实也很简单，主要是通过重写visiti方法，在委托下层ClassVisitor时（ClassWriter本质上也是一个ClassVisitor）将原有的version版本替换成1.5的即可。</p>
+<p>这样，这个过程就被串联成了一个简单的调用链，通过ClassReader产生驱动事件，将事件传递给我们自定义的ClassVisitor，经过一些自定义转换之后，传递给下一层的ClassWriter，最后输出成字节码文件。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200821100406.png" alt></p>
+<p>在我们调用<code>ClassReader.accept</code>之后，ClassReader会依次调用对应的visitxxx方法，并将驱动事件依次向下传递，这里是直接传递给我们的转换器。因此在我们编写的转换器中也要将这个事件经过转换之后再传递给下一层的转换器，这里就是ClassWriter，最后调用ClassWriter的toByteArray即可。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200821100826.png" alt></p>
+<p>当这个转换链复杂时，可以由多个ClassReader产生事件驱动，并进行多个ClassVisitor转换器的转换，最后多个事件统一传递到ClassWriter中，也就形成了本节开头提到的复杂转换模型。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200820173707.png" alt></p>
+<p><strong>删除方法</strong></p>
+<p>删除方法的方式相对简单，只要在读取到对应方法时传递一个null给下层转换器即可。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> MethodVisitor <span class="title">visitMethod</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">    <span class="keyword">final</span> <span class="keyword">int</span> access,</span></span></span><br><span class="line"><span class="function"><span class="params">    <span class="keyword">final</span> String name,</span></span></span><br><span class="line"><span class="function"><span class="params">    <span class="keyword">final</span> String descriptor,</span></span></span><br><span class="line"><span class="function"><span class="params">    <span class="keyword">final</span> String signature,</span></span></span><br><span class="line"><span class="function"><span class="params">    <span class="keyword">final</span> String[] exceptions)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (name.equals(<span class="string">"compareTo"</span>) &amp;&amp; descriptor.equals(<span class="string">"(Ljava/lang/Object;)I"</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> cv.visitMethod(access, name, descriptor, signature, exceptions);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里删除了之前生成接口中的compareTo方法，也可以将方法名和方法描述符弄成成员变量的形式，这样就可以动态删除指定方法（方法名和方法描述符可以确定唯一的方法）。</p>
+<p><strong>添加字段</strong></p>
+<p>为了确保不重复添加字段，需要在每次<code>visitField</code>时记录访问过的字段，并在最后<code>visitEnd</code>时添加对应的字段（因为只有最后才能知道该字段是否被加载过）</p>
+<p>但其实通常用一些特征性的字符即可避免这一情况，这里从简，直接在visitEnd访问对应字段，即可完成字段的添加。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">visitEnd</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    FieldVisitor fv = cv.visitField(ACC_PUBLIC + ACC_STATIC + ACC_FINAL, <span class="string">"newField"</span>, <span class="string">"Ljava/lang/String;"</span>, <span class="keyword">null</span>, <span class="keyword">null</span>);</span><br><span class="line">    <span class="keyword">if</span> (fv != <span class="keyword">null</span>) &#123;</span><br><span class="line">       	<span class="comment">// 前面删除字段时可以知道，visitField方法可能会返回一个null</span></span><br><span class="line">        fv.visitEnd();</span><br><span class="line">    &#125;</span><br><span class="line">    cv.visitEnd();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样即可完成一个<code>newField</code>字段的添加</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200821102944.png" alt></p>
+<h2 id="生成方法"><a href="#生成方法" class="headerlink" title="生成方法"></a>生成方法</h2><p>刚才的例子都是以接口为例，一个好处就是它只提供函数声明，不提供具体的方法，但实际上我们可能更多的要生成一个可以实际运行的方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">ClassWriter cw = <span class="keyword">new</span> ClassWriter(<span class="number">0</span>);</span><br><span class="line">cw.visit(V1_8, ACC_PUBLIC, <span class="string">"pkg/Bean"</span>, <span class="keyword">null</span>, <span class="string">"java/lang/Object"</span>, <span class="keyword">null</span>);</span><br><span class="line">cw.visitField(ACC_PRIVATE, <span class="string">"f"</span>, <span class="string">"I"</span>, <span class="keyword">null</span>, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">MethodVisitor getter = cw.visitMethod(ACC_PUBLIC, <span class="string">"getF"</span>, <span class="string">"()I"</span>, <span class="keyword">null</span>, <span class="keyword">null</span>);</span><br><span class="line">getter.visitCode();</span><br><span class="line">getter.visitVarInsn(ALOAD, <span class="number">0</span>);</span><br><span class="line">getter.visitFieldInsn(GETFIELD, <span class="string">"pkg/Bean"</span>, <span class="string">"f"</span>, <span class="string">"I"</span>);</span><br><span class="line">getter.visitInsn(IRETURN);</span><br><span class="line">getter.visitMaxs(<span class="number">1</span>, <span class="number">1</span>);</span><br><span class="line">getter.visitEnd();</span><br><span class="line"></span><br><span class="line">MethodVisitor setter = cw.visitMethod(ACC_PUBLIC, <span class="string">"setF"</span>, <span class="string">"(I)V"</span>, <span class="keyword">null</span>, <span class="keyword">null</span>);</span><br><span class="line">setter.visitCode();</span><br><span class="line">setter.visitVarInsn(ILOAD, <span class="number">1</span>);</span><br><span class="line">Label label = <span class="keyword">new</span> Label();</span><br><span class="line">setter.visitJumpInsn(IFLT, label);</span><br><span class="line">setter.visitVarInsn(ALOAD, <span class="number">0</span>);</span><br><span class="line">setter.visitVarInsn(ILOAD, <span class="number">1</span>);</span><br><span class="line">setter.visitFieldInsn(PUTFIELD, <span class="string">"pkg/Bean"</span>, <span class="string">"f"</span>, <span class="string">"I"</span>);</span><br><span class="line">Label end = <span class="keyword">new</span> Label();</span><br><span class="line">setter.visitJumpInsn(GOTO, end);</span><br><span class="line">setter.visitLabel(label);</span><br><span class="line">setter.visitFrame(F_SAME, <span class="number">0</span>, <span class="keyword">null</span>, <span class="number">0</span>, <span class="keyword">null</span>);</span><br><span class="line">setter.visitTypeInsn(NEW, <span class="string">"java/lang/IllegalArgumentException"</span>);</span><br><span class="line">setter.visitInsn(DUP);</span><br><span class="line">setter.visitMethodInsn(INVOKESPECIAL, <span class="string">"java/lang/IllegalArgumentException"</span>,</span><br><span class="line">                       <span class="string">"&lt;init&gt;"</span>, <span class="string">"()V"</span>, <span class="keyword">false</span>);</span><br><span class="line">setter.visitInsn(ATHROW);</span><br><span class="line">setter.visitLabel(end);</span><br><span class="line"><span class="comment">// 指定栈映射帧</span></span><br><span class="line"><span class="comment">// 指定对应本地变量表和操作栈的类型对应关系</span></span><br><span class="line">setter.visitFrame(F_SAME, <span class="number">0</span>, <span class="keyword">null</span>, <span class="number">0</span>, <span class="keyword">null</span>);</span><br><span class="line">setter.visitInsn(RETURN);</span><br><span class="line"><span class="comment">// 指定局部变量表和操作栈</span></span><br><span class="line">setter.visitMaxs(<span class="number">2</span>, <span class="number">2</span>);</span><br><span class="line">setter.visitEnd();</span><br><span class="line"></span><br><span class="line">Files.write(Paths.get(<span class="string">"Bean.class"</span>), cw.toByteArray());</span><br></pre></td></tr></table></figure>
+<p>这里新生成了一个类<code>pkg/Bean</code>，并生成了一个成员变量<code>f</code>，这都是之前演示过的内容，重点在后面的生成两个函数。</p>
+<p>这里为<code>f</code>成员变量生成了一个getter和setter，对应的生产类如下。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200821173527.png" alt></p>
+<p><strong>setter</strong></p>
+<p>setter相对比较简单，通过<code>ClassWriter.visitMethod</code>即可获得到一个 MethodVisitor</p>
+<p>visitCode和visitEnd分别对应函数的开头和结尾，意味着可以在转换时在这里做一些额外操作。</p>
+<p>之后就是正经的函数字节码指令，每一行对应一条指令</p>
+<ul>
+<li>通过<code>ALOAD</code>从本地变量中将<code>this</code>变量压入操作数栈</li>
+<li>弹出操作数栈的<code>this</code>变量，执行<code>GETFIELD</code>指令，读取<code>f</code>字段，然后压回操作数栈</li>
+<li>弹出栈顶的<code>f</code>字段的指，通过<code>IRETURN</code>返回</li>
+</ul>
+<p>然后的visitMaxs则是用来声明本地变量表和操作数栈的大小，这里可以简单的推算出两者都为1。</p>
+<p><strong>getter</strong></p>
+<p>getter方法则略微复杂一点，加了一部分if判断。这里明显比getter中多了一些新的操作。</p>
+<p>首先来介绍lable，lable用来标记一段字节码操作，可以理解为编程中用大括号引起的一个block。</p>
+<p>lable的范围声明则是从<code>visitLabel</code>开始的，直至下一个<code>visitLabel</code>或者无操作。</p>
+<p>所以这里定义的两个lable，分别对应如下字节码</p>
+<p>lable：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">setter.visitFrame(F_SAME, <span class="number">0</span>, <span class="keyword">null</span>, <span class="number">0</span>, <span class="keyword">null</span>);</span><br><span class="line">setter.visitTypeInsn(NEW, <span class="string">"java/lang/IllegalArgumentException"</span>);</span><br><span class="line">setter.visitInsn(DUP);</span><br><span class="line">setter.visitMethodInsn(INVOKESPECIAL, <span class="string">"java/lang/IllegalArgumentException"</span>,</span><br><span class="line">                       <span class="string">"&lt;init&gt;"</span>, <span class="string">"()V"</span>, <span class="keyword">false</span>);</span><br><span class="line">setter.visitInsn(ATHROW);</span><br></pre></td></tr></table></figure>
+<p>先忽略<code>visitFrame</code>，这部分的操作就是生成一个<code>IllegalArgumentException</code>然后抛出。</p>
+<p>end：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">setter.visitFrame(F_SAME, <span class="number">0</span>, <span class="keyword">null</span>, <span class="number">0</span>, <span class="keyword">null</span>);</span><br><span class="line">setter.visitInsn(RETURN);</span><br></pre></td></tr></table></figure>
+<p>这里则是直接返回。</p>
+<p>所以整体逻辑也就比较明了了。</p>
+<p>获取第一个参数的值，小于0则跳转至lable，否则就给f成员变量赋值之后跳转到end。也就实现了逻辑语句。</p>
+<p>然后就是<code>visitFrame</code></p>
+<p>之前JVM基础中有提到，JVM会在跳转和异常处理处设置栈映射帧，对本地变量和操作数栈进行类型校验。</p>
+<p>visitFrame的函数声明：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">visitFrame</span><span class="params">(<span class="keyword">final</span> <span class="keyword">int</span> type, <span class="keyword">final</span> <span class="keyword">int</span> numLocal, <span class="keyword">final</span> Object[] local, <span class="keyword">final</span> <span class="keyword">int</span> numStack, <span class="keyword">final</span> Object[] stack)</span></span></span><br></pre></td></tr></table></figure>
+<p>第一个参数是栈映射帧的类型，<code>numLocal</code>和<code>local</code>表示局部变量的大小和类型数组，<code>numStack</code>和<code>stack</code>表示操作数栈的大小和和类型数组。</p>
+<p>可以看到，手动计算visitFrame和visitMax所需的栈映射帧、本地变量、操作数栈的大小是一件很繁琐的事情，尤其是对一个复杂的函数而言。因此ClassWriter提供了几个参数，可以帮我们自动完成这些操作，但牺牲的是一部分性能。</p>
+<ul>
+<li><code>new ClassWriter(0)</code>：不计算任何东西</li>
+<li><code>new ClassWriter(ClassWriter.COMPUTE_MAXS)</code>：自动计算本地变量和操作数栈的大小，10%性能损耗</li>
+<li><code>new ClassWriter(ClassWriter.COMPUTE_FRAMES)</code>：自动计算本地变量、操作数栈大小和所需的栈映射帧，50%性能损耗</li>
+</ul>
+<p>可以看到，比较繁琐的栈映射帧也带来了更多的性能损耗。</p>
+<h2 id="转换方法"><a href="#转换方法" class="headerlink" title="转换方法"></a>转换方法</h2><p>和转换类一样，可以在原有方法的指令基础上进行修改，添加或删除一些想要的指令操作。</p>
+<p>例如为以下函数<code>m</code>记录下运行的时间</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">C</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">m</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        Thread.sleep(<span class="number">100</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里借助了一个静态成员变量<code>timer</code>来实现这个功能，并为除了接口、构造函数的方法都添加这个计时的功能</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AddTimerAdapter</span> <span class="keyword">extends</span> <span class="title">ClassVisitor</span> <span class="keyword">implements</span> <span class="title">Opcodes</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String owner;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> isInterface;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AddTimerAdapter</span><span class="params">(ClassVisitor cv)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(ASM4, cv);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">visit</span><span class="params">(<span class="keyword">int</span> version, <span class="keyword">int</span> access, String name, String signature,</span></span></span><br><span class="line"><span class="function"><span class="params">                      String superName, String[] interfaces)</span> </span>&#123;</span><br><span class="line">        cv.visit(version, access, name, signature, superName, interfaces);</span><br><span class="line">        owner = name;</span><br><span class="line">        isInterface = (access &amp; ACC_INTERFACE) != <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> MethodVisitor <span class="title">visitMethod</span><span class="params">(<span class="keyword">int</span> access, String name, String desc,</span></span></span><br><span class="line"><span class="function"><span class="params">                                     String signature, String[] exceptions)</span> </span>&#123;</span><br><span class="line">        MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);</span><br><span class="line">        <span class="keyword">if</span> (!isInterface &amp;&amp; mv != <span class="keyword">null</span> &amp;&amp; !name.equals(<span class="string">"&lt;init&gt;"</span>)) &#123;</span><br><span class="line">            mv = <span class="keyword">new</span> AddTimerMethodAdapter(mv);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> mv;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">visitEnd</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (!isInterface) &#123;</span><br><span class="line">            FieldVisitor fv = cv.visitField(ACC_PUBLIC + ACC_STATIC, <span class="string">"timer"</span>, <span class="string">"J"</span>, <span class="keyword">null</span>, <span class="keyword">null</span>);</span><br><span class="line">            <span class="keyword">if</span> (fv != <span class="keyword">null</span>) &#123;</span><br><span class="line">                fv.visitEnd();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        cv.visitEnd();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在<code>visitMethod</code>中，将<code>ClassVisitor.visitMethod</code>返回的<code>MethodVisitor</code>传递给我们的<code>AddTimerMethodAdapter</code>，经过转换之后再return回去。</p>
+<p>在<code>visitEnd</code>时添加了<code>timer</code>静态变量。</p>
+<p>然后是<code>AddTimerMethodAdapter</code>的部分</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AddTimerMethodAdapter</span> <span class="keyword">extends</span> <span class="title">MethodVisitor</span> <span class="keyword">implements</span> <span class="title">Opcodes</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AddTimerMethodAdapter</span><span class="params">(MethodVisitor mv)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(ASM4, mv);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">visitCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        mv.visitCode();</span><br><span class="line">        mv.visitFieldInsn(GETSTATIC, owner, <span class="string">"timer"</span>, <span class="string">"J"</span>);</span><br><span class="line">        mv.visitMethodInsn(INVOKESTATIC, <span class="string">"java/lang/System"</span>,</span><br><span class="line">                           <span class="string">"currentTimeMillis"</span>, <span class="string">"()J"</span>, <span class="keyword">false</span>);</span><br><span class="line">        mv.visitInsn(LSUB);</span><br><span class="line">        mv.visitFieldInsn(PUTSTATIC, owner, <span class="string">"timer"</span>, <span class="string">"J"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">visitInsn</span><span class="params">(<span class="keyword">int</span> opcode)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> ((opcode &gt;= IRETURN &amp;&amp; opcode &lt;= RETURN) || opcode == ATHROW) &#123;</span><br><span class="line">            mv.visitFieldInsn(GETSTATIC, owner, <span class="string">"timer"</span>, <span class="string">"J"</span>);</span><br><span class="line">            mv.visitMethodInsn(INVOKESTATIC, <span class="string">"java/lang/System"</span>,</span><br><span class="line">                               <span class="string">"currentTimeMillis"</span>, <span class="string">"()J"</span>, <span class="keyword">false</span>);</span><br><span class="line">            mv.visitInsn(LADD);</span><br><span class="line">            mv.visitFieldInsn(PUTSTATIC, owner, <span class="string">"timer"</span>, <span class="string">"J"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        mv.visitInsn(opcode);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">visitMaxs</span><span class="params">(<span class="keyword">int</span> maxStack, <span class="keyword">int</span> maxLocals)</span> </span>&#123;</span><br><span class="line">        mv.visitMaxs(maxStack + <span class="number">4</span>, maxLocals);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>visitCode</code>之前介绍过是<code>MethodVisitor</code>最先访问的函数，也就相当于在函数的开头进行操作。</p>
+<p>这里将当前时间戳减去timer的值并重新赋值给了timer。</p>
+<p>然后重写<code>visitInsn</code>，在函数return和throw抛出之前插入对应代码。</p>
+<p>比较庆幸的是，这里插入的代码没有用到跳转语句，也就是说控制流图CFG没有被更改，从而无需重写计算栈映射帧的大小。</p>
+<p>但是由于引入新变量的原因，还是要改操作数栈的大小。</p>
+<p>由于<code>visitCode</code>和<code>visitInsn</code>中的代码都在一开始往操作数栈中压入了两个long类型的变量，以最坏的情况来算，这里需要额外增加4个slot的大小。（不一定非得给出最优的操作数栈大小，可以大于或等于最优值，虽然会存在一些内存浪费）</p>
+<p>最后生成的字节码文件如下</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200823152655.png" alt></p>
+<p>ASM中还提供了一些比较有用的工具来简化我们完成这个工作</p>
+<p><strong>AnalyzerAdapter</strong></p>
+<p>通过<code>AnalyzerAdapter</code>的<code>stack</code>成员变量，获取到实时的操作数栈大小，从而获取得到操作数栈的最优值（但实际不推荐使用，其效率远低于<code>COMPUTE_MAXS</code>）</p>
+<p><code>maxStack</code>为自定义的成员变量，记录最大的操作数栈大小</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">visitCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>.visitCode();</span><br><span class="line">    mv.visitFieldInsn(GETSTATIC, owner, <span class="string">"timer"</span>, <span class="string">"J"</span>);</span><br><span class="line">    mv.visitMethodInsn(INVOKESTATIC, <span class="string">"java/lang/System"</span>,</span><br><span class="line">                       <span class="string">"currentTimeMillis"</span>, <span class="string">"()J"</span>, <span class="keyword">false</span>);</span><br><span class="line">    mv.visitInsn(LSUB);</span><br><span class="line">    mv.visitFieldInsn(PUTSTATIC, owner, <span class="string">"timer"</span>, <span class="string">"J"</span>);</span><br><span class="line">    maxStack = <span class="number">4</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">visitInsn</span><span class="params">(<span class="keyword">int</span> opcode)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> ((opcode &gt;= IRETURN &amp;&amp; opcode &lt;= RETURN) || opcode == ATHROW) &#123;</span><br><span class="line">        mv.visitFieldInsn(GETSTATIC, owner, <span class="string">"timer"</span>, <span class="string">"J"</span>);</span><br><span class="line">        mv.visitMethodInsn(INVOKESTATIC, <span class="string">"java/lang/System"</span>,</span><br><span class="line">                           <span class="string">"currentTimeMillis"</span>, <span class="string">"()J"</span>, <span class="keyword">false</span>);</span><br><span class="line">        mv.visitInsn(LADD);</span><br><span class="line">        mv.visitFieldInsn(PUTSTATIC, owner, <span class="string">"timer"</span>, <span class="string">"J"</span>);</span><br><span class="line">        maxStack = Math.max(maxStack, stack.size() + <span class="number">4</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">super</span>.visitInsn(opcode);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">visitMaxs</span><span class="params">(<span class="keyword">int</span> maxStack, <span class="keyword">int</span> maxLocals)</span> </span>&#123;</span><br><span class="line">    mv.visitMaxs(Math.max(<span class="keyword">this</span>.maxStack, maxStack), maxLocals);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>或者直接利用<code>AnalyzerAdapter</code>中的方法进行指令插入，他会自动更新操作数栈和本地变量的大小，而无需重写<code>visitMaxs</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">visitCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>.visitCode();</span><br><span class="line">    <span class="keyword">super</span>.visitFieldInsn(GETSTATIC, owner, <span class="string">"timer"</span>, <span class="string">"J"</span>);</span><br><span class="line">    <span class="keyword">super</span>.visitMethodInsn(INVOKESTATIC, <span class="string">"java/lang/System"</span>,</span><br><span class="line">                          <span class="string">"currentTimeMillis"</span>, <span class="string">"()J"</span>, <span class="keyword">false</span>);</span><br><span class="line">    <span class="keyword">super</span>.visitInsn(LSUB);</span><br><span class="line">    <span class="keyword">super</span>.visitFieldInsn(PUTSTATIC, owner, <span class="string">"timer"</span>, <span class="string">"J"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">visitInsn</span><span class="params">(<span class="keyword">int</span> opcode)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> ((opcode &gt;= IRETURN &amp;&amp; opcode &lt;= RETURN) || opcode == ATHROW) &#123;</span><br><span class="line">        <span class="keyword">super</span>.visitFieldInsn(GETSTATIC, owner, <span class="string">"timer"</span>, <span class="string">"J"</span>);</span><br><span class="line">        <span class="keyword">super</span>.visitMethodInsn(INVOKESTATIC, <span class="string">"java/lang/System"</span>,</span><br><span class="line">                              <span class="string">"currentTimeMillis"</span>, <span class="string">"()J"</span>, <span class="keyword">false</span>);</span><br><span class="line">        <span class="keyword">super</span>.visitInsn(LADD);</span><br><span class="line">        <span class="keyword">super</span>.visitFieldInsn(PUTSTATIC, owner, <span class="string">"timer"</span>, <span class="string">"J"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">super</span>.visitInsn(opcode);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>LocalVariablesSorter</strong></p>
+<p>或者可以借助一个本地变量来实现计时功能，<code>LocalVariablesSorter</code>可以很简单的帮助我们生成一个本地变量，否则这个过程将变的很繁琐。</p>
+<p>通过<code>newLocal</code>函数就可以生成一个局部变量</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AddTimerMethodAdapter4</span> <span class="keyword">extends</span> <span class="title">LocalVariablesSorter</span> <span class="keyword">implements</span> <span class="title">Opcodes</span> </span>&#123;</span><br><span class="line">       <span class="keyword">private</span> <span class="keyword">int</span> time;</span><br><span class="line"></span><br><span class="line">       <span class="function"><span class="keyword">public</span> <span class="title">AddTimerMethodAdapter4</span><span class="params">(<span class="keyword">int</span> access, <span class="keyword">final</span> String desc, <span class="keyword">final</span> MethodVisitor mv)</span> </span>&#123;</span><br><span class="line">           <span class="keyword">super</span>(ASM4, access, desc, mv);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">visitCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">           mv.visitCode();</span><br><span class="line">           mv.visitMethodInsn(INVOKESTATIC, <span class="string">"java/lang/System"</span>,</span><br><span class="line">                   <span class="string">"currentTimeMillis"</span>, <span class="string">"()J"</span>, <span class="keyword">false</span>);</span><br><span class="line">           time = newLocal(Type.LONG_TYPE);</span><br><span class="line">           mv.visitVarInsn(LSTORE, time);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">visitInsn</span><span class="params">(<span class="keyword">int</span> opcode)</span> </span>&#123;</span><br><span class="line">           <span class="keyword">if</span> ((opcode &gt;= IRETURN &amp;&amp; opcode &lt;= RETURN) || opcode == ATHROW) &#123;</span><br><span class="line">               mv.visitMethodInsn(INVOKESTATIC, <span class="string">"java/lang/System"</span>,</span><br><span class="line">                       <span class="string">"currentTimeMillis"</span>, <span class="string">"()J"</span>, <span class="keyword">false</span>);</span><br><span class="line">               mv.visitVarInsn(LLOAD, time);</span><br><span class="line">               mv.visitInsn(LSUB);</span><br><span class="line">               mv.visitFieldInsn(GETSTATIC, owner, <span class="string">"timer"</span>, <span class="string">"J"</span>);</span><br><span class="line">               mv.visitInsn(LADD);</span><br><span class="line">               mv.visitFieldInsn(PUTSTATIC, owner, <span class="string">"timer"</span>, <span class="string">"J"</span>);</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">super</span>.visitInsn(opcode);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">visitMaxs</span><span class="params">(<span class="keyword">int</span> maxStack, <span class="keyword">int</span> maxLocals)</span> </span>&#123;</span><br><span class="line">           <span class="keyword">super</span>.visitMaxs(maxStack + <span class="number">4</span>, maxLocals);</span><br><span class="line">       &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样，就可以通过<code>newLocal</code>返回的opcode，在函数的所有地方调用到这个本地变量。</p>
+<p>但是还是要手动计算本地变量和操作数栈。</p>
+<p>生成的class文件</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200823153542.png" alt></p>
+<p><strong>AdviceAdapter</strong></p>
+<p><code>AdviceAdapter</code>可以很简单的在<code>RETURN</code>、<code>ATHROW</code>指令之前插入代码。可以理解为提供了一个简易的API在函数头和末尾插入想要的指令。</p>
+<p>只要重写<code>onMethodEnter</code>和<code>onMethodExit</code>方法即可（它也继承了<code>LocalVariablesSorter</code>类，因此也可以使用<code>newLocal</code>创建本地变量）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AddTimerMethodAdapter6</span> <span class="keyword">extends</span> <span class="title">AdviceAdapter</span> <span class="keyword">implements</span> <span class="title">Opcodes</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AddTimerMethodAdapter6</span><span class="params">(<span class="keyword">int</span> access, String name, String desc, MethodVisitor mv)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(ASM4, mv, access, name, desc);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onMethodEnter</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        mv.visitFieldInsn(GETSTATIC, owner, <span class="string">"timer"</span>, <span class="string">"J"</span>);</span><br><span class="line">        mv.visitMethodInsn(INVOKESTATIC, <span class="string">"java/lang/System"</span>,</span><br><span class="line">                           <span class="string">"currentTimeMillis"</span>, <span class="string">"()J"</span>, <span class="keyword">false</span>);</span><br><span class="line">        mv.visitInsn(LSUB);</span><br><span class="line">        mv.visitFieldInsn(PUTSTATIC, owner, <span class="string">"timer"</span>, <span class="string">"J"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onMethodExit</span><span class="params">(<span class="keyword">int</span> opcode)</span> </span>&#123;</span><br><span class="line">        mv.visitFieldInsn(GETSTATIC, owner, <span class="string">"timer"</span>, <span class="string">"J"</span>);</span><br><span class="line">        mv.visitMethodInsn(INVOKESTATIC, <span class="string">"java/lang/System"</span>,</span><br><span class="line">                           <span class="string">"currentTimeMillis"</span>, <span class="string">"()J"</span>, <span class="keyword">false</span>);</span><br><span class="line">        mv.visitInsn(LADD);</span><br><span class="line">        mv.visitFieldInsn(PUTSTATIC, owner, <span class="string">"timer"</span>, <span class="string">"J"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">visitMaxs</span><span class="params">(<span class="keyword">int</span> maxStack, <span class="keyword">int</span> maxLocals)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.visitMaxs(maxStack + <span class="number">4</span>, maxLocals);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="工具类"><a href="#工具类" class="headerlink" title="工具类"></a>工具类</h2><p>像前面介绍的<code>LocalVariablesSorter</code>、<code>AnalyzerAdapter</code>、<code>AdviceAdapter</code>其实都算工具类，它帮我们简化了一些常见情况下重复的操作。</p>
+<p><strong>TraceClassVisitor</strong></p>
+<p>效果类似于javap，将字节码转换成人类友好的模式，显示类成员变量、函数前面、函数中的操作指令等。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ClassReader cr = <span class="keyword">new</span> ClassReader(b1);</span><br><span class="line">ClassVisitor cv = <span class="keyword">new</span> TraceClassVisitor(<span class="keyword">new</span> PrintWriter(System.out));</span><br><span class="line">cr.accept(cv, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200823160426.png" alt></p>
+<p><strong>CheckClassAdapter</strong></p>
+<p>它会帮我们校验我们生成的类对方法的调用顺序是否恰当、参数是否有效，从而在类加载进JVM前验证类是否有效。</p>
+<p>当检测到异常时则会抛出异常，否则则正常传递给下一个ClassVisitor</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ClassReader cr = <span class="keyword">new</span> ClassReader(b1);</span><br><span class="line">ClassVisitor tcv = <span class="keyword">new</span> TraceClassVisitor(<span class="keyword">new</span> PrintWriter(System.out));</span><br><span class="line">ClassVisitor cv = <span class="keyword">new</span> CheckClassAdapter(tcv);</span><br><span class="line">cr.accept(cv, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+<p><strong>Type</strong></p>
+<p>Type中定义了很多常量，并且可以做类、内部名、类描述符、函数描述符之间的转换。</p>
+<p>输出结果在每行的注释中</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">System.out.println(Type.getDescriptor(String<span class="class">.<span class="keyword">class</span>))</span>;	<span class="comment">// Ljava/lang/String;</span></span><br><span class="line">System.out.println(Type.getInternalName(String<span class="class">.<span class="keyword">class</span>))</span>;	<span class="comment">// java/lang/String</span></span><br><span class="line"></span><br><span class="line">String desc = <span class="string">"(ILjava/lang/String;)V"</span>;</span><br><span class="line">System.out.println(Type.getReturnType(desc));			<span class="comment">// V</span></span><br><span class="line">System.out.println(Arrays.toString(Type.getArgumentTypes(desc)));	<span class="comment">// [I, Ljava/lang/String;]</span></span><br></pre></td></tr></table></figure>
+<p><strong>ASMifier</strong></p>
+<p>个人感觉比较好用的一个类，它可以将一个class文件，转换为ASM代码的格式。</p>
+<p>就相当于告诉你如何通过ASM生成这个class类。</p>
+<p>可以直接命令行调用</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -classpath asm.jar:asm-util.jar org.objectweb.asm.util.ASMifier java.lang.Runnable</span><br></pre></td></tr></table></figure>
+<p>或者直接调用其main函数</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ASMifier.main(<span class="keyword">new</span> String[]&#123;<span class="string">"D:\\p.class"</span>&#125;);</span><br></pre></td></tr></table></figure>
+<p>支持类名和class文件路径</p>
+<p>输出的结果</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> asm.sun.reflect;</span><br><span class="line"><span class="keyword">import</span> org.objectweb.asm.AnnotationVisitor;</span><br><span class="line"><span class="keyword">import</span> org.objectweb.asm.Attribute;</span><br><span class="line"><span class="keyword">import</span> org.objectweb.asm.ClassReader;</span><br><span class="line"><span class="keyword">import</span> org.objectweb.asm.ClassWriter;</span><br><span class="line"><span class="keyword">import</span> org.objectweb.asm.ConstantDynamic;</span><br><span class="line"><span class="keyword">import</span> org.objectweb.asm.FieldVisitor;</span><br><span class="line"><span class="keyword">import</span> org.objectweb.asm.Handle;</span><br><span class="line"><span class="keyword">import</span> org.objectweb.asm.Label;</span><br><span class="line"><span class="keyword">import</span> org.objectweb.asm.MethodVisitor;</span><br><span class="line"><span class="keyword">import</span> org.objectweb.asm.Opcodes;</span><br><span class="line"><span class="keyword">import</span> org.objectweb.asm.RecordComponentVisitor;</span><br><span class="line"><span class="keyword">import</span> org.objectweb.asm.Type;</span><br><span class="line"><span class="keyword">import</span> org.objectweb.asm.TypePath;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GeneratedMethodAccessor1Dump</span> <span class="keyword">implements</span> <span class="title">Opcodes</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">byte</span>[] dump () <span class="keyword">throws</span> Exception &#123;</span><br><span class="line"></span><br><span class="line">ClassWriter classWriter = <span class="keyword">new</span> ClassWriter(<span class="number">0</span>);</span><br><span class="line">FieldVisitor fieldVisitor;</span><br><span class="line">RecordComponentVisitor recordComponentVisitor;</span><br><span class="line">MethodVisitor methodVisitor;</span><br><span class="line">AnnotationVisitor annotationVisitor0;</span><br><span class="line"></span><br><span class="line">classWriter.visit(V1_5, ACC_PUBLIC, <span class="string">"sun/reflect/GeneratedMethodAccessor1"</span>, <span class="keyword">null</span>, <span class="string">"sun/reflect/MethodAccessorImpl"</span>, <span class="keyword">null</span>);</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">methodVisitor = classWriter.visitMethod(ACC_PUBLIC, <span class="string">"&lt;init&gt;"</span>, <span class="string">"()V"</span>, <span class="keyword">null</span>, <span class="keyword">null</span>);</span><br><span class="line">methodVisitor.visitCode();</span><br><span class="line">methodVisitor.visitVarInsn(ALOAD, <span class="number">0</span>);</span><br><span class="line">methodVisitor.visitMethodInsn(INVOKESPECIAL, <span class="string">"sun/reflect/MethodAccessorImpl"</span>, <span class="string">"&lt;init&gt;"</span>, <span class="string">"()V"</span>, <span class="keyword">false</span>);</span><br><span class="line">methodVisitor.visitInsn(RETURN);</span><br><span class="line">methodVisitor.visitMaxs(<span class="number">1</span>, <span class="number">1</span>);</span><br><span class="line">methodVisitor.visitEnd();</span><br><span class="line">&#125;</span><br><span class="line">&#123;</span><br><span class="line">methodVisitor = classWriter.visitMethod(ACC_PUBLIC, <span class="string">"invoke"</span>, <span class="string">"(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;"</span>, <span class="keyword">null</span>, <span class="keyword">new</span> String[] &#123; <span class="string">"java/lang/reflect/InvocationTargetException"</span> &#125;);</span><br><span class="line">methodVisitor.visitCode();</span><br><span class="line">Label label0 = <span class="keyword">new</span> Label();</span><br><span class="line">Label label1 = <span class="keyword">new</span> Label();</span><br><span class="line">Label label2 = <span class="keyword">new</span> Label();</span><br><span class="line">methodVisitor.visitTryCatchBlock(label0, label1, label2, <span class="string">"java/lang/ClassCastException"</span>);</span><br><span class="line">methodVisitor.visitTryCatchBlock(label0, label1, label2, <span class="string">"java/lang/NullPointerException"</span>);</span><br><span class="line">Label label3 = <span class="keyword">new</span> Label();</span><br><span class="line">Label label4 = <span class="keyword">new</span> Label();</span><br><span class="line">methodVisitor.visitTryCatchBlock(label1, label3, label4, <span class="string">"java/lang/Throwable"</span>);</span><br><span class="line">methodVisitor.visitVarInsn(ALOAD, <span class="number">1</span>);</span><br><span class="line">methodVisitor.visitJumpInsn(IFNONNULL, label0);</span><br><span class="line">methodVisitor.visitTypeInsn(NEW, <span class="string">"java/lang/NullPointerException"</span>);</span><br><span class="line">methodVisitor.visitInsn(DUP);</span><br><span class="line">methodVisitor.visitMethodInsn(INVOKESPECIAL, <span class="string">"java/lang/NullPointerException"</span>, <span class="string">"&lt;init&gt;"</span>, <span class="string">"()V"</span>, <span class="keyword">false</span>);</span><br><span class="line">methodVisitor.visitInsn(ATHROW);</span><br><span class="line">methodVisitor.visitLabel(label0);</span><br><span class="line">methodVisitor.visitVarInsn(ALOAD, <span class="number">1</span>);</span><br><span class="line">methodVisitor.visitTypeInsn(CHECKCAST, <span class="string">"ReflectObject"</span>);</span><br><span class="line">methodVisitor.visitVarInsn(ALOAD, <span class="number">2</span>);</span><br><span class="line">methodVisitor.visitJumpInsn(IFNULL, label1);</span><br><span class="line">methodVisitor.visitVarInsn(ALOAD, <span class="number">2</span>);</span><br><span class="line">methodVisitor.visitInsn(ARRAYLENGTH);</span><br><span class="line">methodVisitor.visitIntInsn(SIPUSH, <span class="number">0</span>);</span><br><span class="line">methodVisitor.visitJumpInsn(IF_ICMPEQ, label1);</span><br><span class="line">methodVisitor.visitTypeInsn(NEW, <span class="string">"java/lang/IllegalArgumentException"</span>);</span><br><span class="line">methodVisitor.visitInsn(DUP);</span><br><span class="line">methodVisitor.visitMethodInsn(INVOKESPECIAL, <span class="string">"java/lang/IllegalArgumentException"</span>, <span class="string">"&lt;init&gt;"</span>, <span class="string">"()V"</span>, <span class="keyword">false</span>);</span><br><span class="line">methodVisitor.visitInsn(ATHROW);</span><br><span class="line">methodVisitor.visitLabel(label1);</span><br><span class="line">methodVisitor.visitMethodInsn(INVOKEVIRTUAL, <span class="string">"ReflectObject"</span>, <span class="string">"test"</span>, <span class="string">"()V"</span>, <span class="keyword">false</span>);</span><br><span class="line">methodVisitor.visitLabel(label3);</span><br><span class="line">methodVisitor.visitInsn(ACONST_NULL);</span><br><span class="line">methodVisitor.visitInsn(ARETURN);</span><br><span class="line">methodVisitor.visitLabel(label2);</span><br><span class="line">methodVisitor.visitMethodInsn(INVOKESPECIAL, <span class="string">"java/lang/Object"</span>, <span class="string">"toString"</span>, <span class="string">"()Ljava/lang/String;"</span>, <span class="keyword">false</span>);</span><br><span class="line">methodVisitor.visitTypeInsn(NEW, <span class="string">"java/lang/IllegalArgumentException"</span>);</span><br><span class="line">methodVisitor.visitInsn(DUP_X1);</span><br><span class="line">methodVisitor.visitInsn(SWAP);</span><br><span class="line">methodVisitor.visitMethodInsn(INVOKESPECIAL, <span class="string">"java/lang/IllegalArgumentException"</span>, <span class="string">"&lt;init&gt;"</span>, <span class="string">"(Ljava/lang/String;)V"</span>, <span class="keyword">false</span>);</span><br><span class="line">methodVisitor.visitInsn(ATHROW);</span><br><span class="line">methodVisitor.visitLabel(label4);</span><br><span class="line">methodVisitor.visitTypeInsn(NEW, <span class="string">"java/lang/reflect/InvocationTargetException"</span>);</span><br><span class="line">methodVisitor.visitInsn(DUP_X1);</span><br><span class="line">methodVisitor.visitInsn(SWAP);</span><br><span class="line">methodVisitor.visitMethodInsn(INVOKESPECIAL, <span class="string">"java/lang/reflect/InvocationTargetException"</span>, <span class="string">"&lt;init&gt;"</span>, <span class="string">"(Ljava/lang/Throwable;)V"</span>, <span class="keyword">false</span>);</span><br><span class="line">methodVisitor.visitInsn(ATHROW);</span><br><span class="line">methodVisitor.visitMaxs(<span class="number">5</span>, <span class="number">3</span>);</span><br><span class="line">methodVisitor.visitEnd();</span><br><span class="line">&#125;</span><br><span class="line">classWriter.visitEnd();</span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> classWriter.toByteArray();</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当遇到一些不知道如何生成的字节码，就可以先用java的形式写好之后编译成class文件，再通过ASMifier输出结果，就可以依葫芦画瓢的生成对应操作了。</p>
+<h2 id="Tree-API"><a href="#Tree-API" class="headerlink" title="Tree-API"></a>Tree-API</h2><p>之前的操作都是基于core-api的，ASM还提供了一个tree-api，顾名思义类似于一个树的形状来解析和操作一个类，他会在最开始将所有数据读到内存中，在对内存和性能要求不那么高的情况下，tree-api能更直观的操作一个类。</p>
+<p><strong>ClassNode</strong></p>
+<p>tree-api中用ClassNode来表示一个类节点，FieldNode表示一个字段节点，MethodNode表示一个方法节点。</p>
+<p>如下就是通过ClassNode生成一个class类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">ClassWriter cw = <span class="keyword">new</span> ClassWriter(<span class="number">0</span>);</span><br><span class="line">ClassNode cn = <span class="keyword">new</span> ClassNode();</span><br><span class="line">cn.version = V1_8;</span><br><span class="line">cn.access = ACC_PUBLIC + ACC_ABSTRACT + ACC_INTERFACE;</span><br><span class="line">cn.name = <span class="string">"pkg/CompareByTreeNode"</span>;</span><br><span class="line">cn.superName = <span class="string">"java/lang/Object"</span>;</span><br><span class="line">cn.interfaces.add(<span class="string">"pkg/Mesurable"</span>);</span><br><span class="line">cn.fields.add(<span class="keyword">new</span> FieldNode(ACC_PUBLIC + ACC_FINAL + ACC_STATIC,</span><br><span class="line">                            <span class="string">"LESS"</span>, <span class="string">"I"</span>, <span class="keyword">null</span>, -<span class="number">1</span>));</span><br><span class="line">cn.fields.add(<span class="keyword">new</span> FieldNode(ACC_PUBLIC + ACC_FINAL + ACC_STATIC,</span><br><span class="line">                            <span class="string">"EQUAL"</span>, <span class="string">"I"</span>, <span class="keyword">null</span>, <span class="number">0</span>));</span><br><span class="line">cn.fields.add(<span class="keyword">new</span> FieldNode(ACC_PUBLIC + ACC_FINAL + ACC_STATIC,</span><br><span class="line">                            <span class="string">"GREATER"</span>, <span class="string">"I"</span>, <span class="keyword">null</span>, <span class="number">1</span>));</span><br><span class="line">cn.methods.add(<span class="keyword">new</span> MethodNode(ACC_PUBLIC + ACC_ABSTRACT,</span><br><span class="line">                              <span class="string">"compareTo"</span>, <span class="string">"(Ljava/lang/Object;)I"</span>, <span class="keyword">null</span>, <span class="keyword">null</span>));</span><br><span class="line">cn.accept(cw);</span><br><span class="line">Files.write(Paths.get(<span class="string">"CompareByTreeNode.class"</span>), cw.toByteArray());</span><br></pre></td></tr></table></figure>
+<p>这样，一些JDK版本、访问控制之类的参数就不是在类生成时实时要求的，可以是在类生成之后，动态添加的。</p>
+<p>同时，ClassNode是继承ClassVisitor的，所以可以仿照之前的方式，通过ClassReader将一个class文件转换成一个ClassNode。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">byte</span>[] b1 = Files.readAllBytes(Paths.get(<span class="string">"Comparable.class"</span>));</span><br><span class="line">ClassReader cr = <span class="keyword">new</span> ClassReader(b1);</span><br><span class="line">ClassNode cn = <span class="keyword">new</span> ClassNode();</span><br><span class="line">cr.accept(cn, <span class="number">0</span>);</span><br><span class="line">System.out.println(cn.name);</span><br></pre></td></tr></table></figure>
+<p><strong>MethodNode</strong></p>
+<p>如下是MethodNode的字段</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MethodNode</span> ... </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> access;</span><br><span class="line">    <span class="keyword">public</span> String name;</span><br><span class="line">    <span class="keyword">public</span> String desc;</span><br><span class="line">    <span class="keyword">public</span> String signature;</span><br><span class="line">    <span class="keyword">public</span> List&lt;String&gt; exceptions;</span><br><span class="line">    <span class="keyword">public</span> List&lt;AnnotationNode&gt; visibleAnnotations;</span><br><span class="line">    <span class="keyword">public</span> List&lt;AnnotationNode&gt; invisibleAnnotations;</span><br><span class="line">    <span class="keyword">public</span> List&lt;Attribute&gt; attrs;</span><br><span class="line">    <span class="keyword">public</span> Object annotationDefault;</span><br><span class="line">    <span class="keyword">public</span> List&lt;AnnotationNode&gt;[] visibleParameterAnnotations;</span><br><span class="line">    <span class="keyword">public</span> List&lt;AnnotationNode&gt;[] invisibleParameterAnnotations;</span><br><span class="line">    <span class="keyword">public</span> InsnList instructions;</span><br><span class="line">    <span class="keyword">public</span> List&lt;TryCatchBlockNode&gt; tryCatchBlocks;</span><br><span class="line">    <span class="keyword">public</span> List&lt;LocalVariableNode&gt; localVariables;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> maxStack;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> maxLocals;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中instructions是一个指令列表，类型为InsnList</p>
+<p><code>InstList</code>是由<code>AbstractInsnNode</code>组成的双向链表，它记录了指令之间的链接关系。</p>
+<p>因此每个<code>AbstractInsnNode</code>对象是不可以复用的，要确保每条指令对应唯一的<code>AbstractInsnNode</code>。因此一个<code>AbstractInsnNode</code>在一个<code>InstList</code>中只能出现一次，并且不能同时属于多个<code>InstList</code>。</p>
+<p><code>AbstractInsnNode</code>的子类则是<code>xxxInstNode</code>，也对应core-api中<code>visitXxxInsn</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200823173200.png" alt></p>
+<p>生成方法主要也是在这个instructions上添加对应的<code>InsnNode</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">ClassNode cn = <span class="keyword">new</span> ClassNode();</span><br><span class="line">cn.version = V1_8;</span><br><span class="line">cn.access = ACC_PUBLIC;</span><br><span class="line">cn.name = <span class="string">"pkg/Bean"</span>;</span><br><span class="line">cn.superName = <span class="string">"java/lang/Object"</span>;</span><br><span class="line">cn.fields.add(<span class="keyword">new</span> FieldNode(ACC_PRIVATE, <span class="string">"f"</span>, <span class="string">"I"</span>, <span class="keyword">null</span>, <span class="number">0</span>));</span><br><span class="line"></span><br><span class="line">MethodNode mn = <span class="keyword">new</span> MethodNode(ACC_PUBLIC, <span class="string">"setF"</span>, <span class="string">"(I)V"</span>, <span class="keyword">null</span>, <span class="keyword">null</span>);</span><br><span class="line">InsnList il = mn.instructions;</span><br><span class="line">LabelNode label = <span class="keyword">new</span> LabelNode();</span><br><span class="line">LabelNode end = <span class="keyword">new</span> LabelNode();</span><br><span class="line">il.add(<span class="keyword">new</span> VarInsnNode(ILOAD, <span class="number">1</span>));</span><br><span class="line">il.add(<span class="keyword">new</span> JumpInsnNode(IFLT, label));</span><br><span class="line">il.add(<span class="keyword">new</span> VarInsnNode(ALOAD, <span class="number">0</span>));</span><br><span class="line">il.add(<span class="keyword">new</span> VarInsnNode(ILOAD, <span class="number">1</span>));</span><br><span class="line">il.add(<span class="keyword">new</span> FieldInsnNode(PUTFIELD, <span class="string">"pkg/BeanNode"</span>, <span class="string">"f"</span>, <span class="string">"I"</span>));</span><br><span class="line">il.add(<span class="keyword">new</span> JumpInsnNode(GOTO, end));</span><br><span class="line">il.add(label);</span><br><span class="line">il.add(<span class="keyword">new</span> FrameNode(F_SAME, <span class="number">0</span>, <span class="keyword">null</span>, <span class="number">0</span>, <span class="keyword">null</span>));</span><br><span class="line">il.add(<span class="keyword">new</span> TypeInsnNode(NEW, <span class="string">"java/lang/IllegalArgumentException"</span>));</span><br><span class="line">il.add(<span class="keyword">new</span> InsnNode(DUP));</span><br><span class="line">il.add(<span class="keyword">new</span> MethodInsnNode(INVOKESPECIAL,</span><br><span class="line">                          <span class="string">"java/lang/IllegalArgumentException"</span>, <span class="string">"&lt;init&gt;"</span>, <span class="string">"()V"</span>));</span><br><span class="line">il.add(<span class="keyword">new</span> InsnNode(ATHROW));</span><br><span class="line">il.add(end);</span><br><span class="line">il.add(<span class="keyword">new</span> FrameNode(F_SAME, <span class="number">0</span>, <span class="keyword">null</span>, <span class="number">0</span>, <span class="keyword">null</span>));</span><br><span class="line">il.add(<span class="keyword">new</span> InsnNode(RETURN));</span><br><span class="line">mn.maxStack = <span class="number">2</span>;</span><br><span class="line">mn.maxLocals = <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">cn.methods.add(mn);</span><br><span class="line">ClassWriter cw = <span class="keyword">new</span> ClassWriter(<span class="number">0</span>);</span><br><span class="line">cn.accept(cw);</span><br><span class="line">Files.write(Paths.get(<span class="string">"BeanNode.class"</span>), cw.toByteArray());</span><br></pre></td></tr></table></figure>
+<p>这样就可以生成一个和之前用core-api生成过一样的<code>setF</code>函数</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200823174513.png" alt></p>
+<p>然后方法的转换其实相比core-api会更加直观，只要for循环<code>instructions</code>变量，读取所有的<code>InstNode</code>，对想要的<code>InstNode</code>进行对应操作即可。</p>
+<h1 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h1><p>相当于对字节码的基础知识和ASM中基础的操作都介绍了一遍。还有一些关于泛型、注解之类的操作，自认为暂时用不上，需要时再学即可。</p>
+<p>不得不说ASM设计的还是很精妙小巧的，它更贴近于字节码底层，它能以极低的内存成本提供提高的处理性能，也能做到对字节码数据近乎百分百的解析。core-api更面向工程，对性能和内存的要求比较高，而tree-api个人感觉则更适合用来做字节码分析用。</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2020/11/从MethodHandle到InvokeDynamic指令/" data-toggle="tooltip" data-placement="top" title="从MethodHandle到InvokeDynamic指令">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2020/08/CVE-2020-14644分析与gadget的一些思考/" data-toggle="tooltip" data-placement="top" title="CVE-2020-14644分析与gadget的一些思考">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                          <a class="tag" href="/tags/#asm" title="asm">asm</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

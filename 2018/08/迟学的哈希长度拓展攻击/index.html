@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          迟学的哈希长度扩展攻击 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/08/迟学的哈希长度拓展攻击/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#加解密" title="加解密">加解密</a>
+                        
+                    </div>
+                    <h1>迟学的哈希长度扩展攻击</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-08-04
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本来这个哈希长度扩展攻击应该在一年前刷实验吧的时候就应该解决的。<br>但是由于那时候实在看不懂，再加上有点偷懒，就把这部分给跳了<br>时隔一年，在学习中偶尔有碰到这个（虽然不是很多），感觉没有想象中那么鸡肋，就决定重新捡起来学习一下  </p>
+<p>不过，就算过了一年，发现依旧是那么菜，看了一整天的分析博客，才勉强理清逻辑  </p>
+<h1 id="攻击的用途和原理"><a href="#攻击的用途和原理" class="headerlink" title="攻击的用途和原理"></a>攻击的用途和原理</h1><h2 id="用途"><a href="#用途" class="headerlink" title="用途"></a>用途</h2><p>感觉这个还是很重要的，更多时候需要知道的是怎么用，在什么环境下才能利用这种漏洞  </p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">在 $hash = md5($secret.$key) 中已知 $hash 和 $key 以及 $secret 的长度时  </span><br><span class="line">可以找到另一个 $_hash 和 $_key 使得 $_hash = md5($secrect.$_key) 成立</span><br></pre></td></tr></table></figure>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>网上有很多，也很清楚的分析了md5加密的过程，我这里就不赘述<br>贴几个感觉比较好的博客<br><a href="http://seaii-blog.com/index.php/2017/05/12/56.html" target="_blank" rel="noopener">http://seaii-blog.com/index.php/2017/05/12/56.html</a><br><a href="http://archimesan.me/2017/12/23/hash长度扩展攻击/" target="_blank" rel="noopener">http://archimesan.me/2017/12/23/hash长度扩展攻击/</a><br><a href="http://blog.chinaunix.net/uid-27070210-id-3255947.html" target="_blank" rel="noopener">http://blog.chinaunix.net/uid-27070210-id-3255947.html</a>  </p>
+<p>具体的payload构造过程下面通过一个ctf的题目来引入</p>
+<h1 id="实验吧中的ctf题"><a href="#实验吧中的ctf题" class="headerlink" title="实验吧中的ctf题"></a>实验吧中的ctf题</h1><p>代码如下<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">$flag = <span class="string">"XXXXXXXXXXXXXXXXXXXXXXX"</span>;</span><br><span class="line">$secret = <span class="string">"XXXXXXXXXXXXXXX"</span>; <span class="comment">// This secret is 15 characters long for security!</span></span><br><span class="line"></span><br><span class="line">$username = $_POST[<span class="string">"username"</span>];</span><br><span class="line">$password = $_POST[<span class="string">"password"</span>];</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (!<span class="keyword">empty</span>($_COOKIE[<span class="string">"getmein"</span>])) &#123;</span><br><span class="line">    <span class="keyword">if</span> (urldecode($username) === <span class="string">"admin"</span> &amp;&amp; urldecode($password) != <span class="string">"admin"</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> ($COOKIE[<span class="string">"getmein"</span>] === md5($secret . urldecode($username . $password))) &#123;</span><br><span class="line">            <span class="keyword">echo</span> <span class="string">"Congratulations! You are a registered user.\n"</span>;</span><br><span class="line">            <span class="keyword">die</span> (<span class="string">"The flag is "</span>. $flag);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">die</span> (<span class="string">"Your cookies don't match up! STOP HACKING THIS SITE."</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">die</span> (<span class="string">"You are not an admin! LEAVE."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">setcookie(<span class="string">"sample-hash"</span>, md5($secret . urldecode(<span class="string">"admin"</span> . <span class="string">"admin"</span>)), time() + (<span class="number">60</span> * <span class="number">60</span> * <span class="number">24</span> * <span class="number">7</span>));</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">empty</span>($_COOKIE[<span class="string">"source"</span>])) &#123;</span><br><span class="line">    setcookie(<span class="string">"source"</span>, <span class="number">0</span>, time() + (<span class="number">60</span> * <span class="number">60</span> * <span class="number">24</span> * <span class="number">7</span>));</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> ($_COOKIE[<span class="string">"source"</span>] != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">""</span>; <span class="comment">// This source code is outputted here</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>题目的大意为：<br>已知 <code>md5($secret . urldecode(&quot;admin&quot; . &quot;admin&quot;))</code><br>在不知道$secret的情况下，获取到另外一个<code>md5($secret . urldecode(&quot;admin&quot; . $password))</code>的哈希值  </p>
+<p>正好满足哈希长度扩展攻击的要求，并且也给了<code>$secret</code>的长度为15  </p>
+<p>构造payload的方式如下：<br>在一开始的<code>md5($secret.&quot;admin&quot;.&quot;admin&quot;)</code>中，一共有25个字节，转化成比特就是200个比特长度<br>通过padding之后变成了<br><figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">admin<span class="symbol">%80</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%c8</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span><span class="symbol">%00</span></span><br></pre></td></tr></table></figure></p>
+<p><code>%80</code>为结束符,<code>%c8</code>是数据长度，也就是200的十六进制表示。利用%00补充完56个字节，然后剩下的8个字节用来表示数据长度  </p>
+<p>这样计算完之后的md5值也可以从<code>$_COOKIE</code>中获取也就是<code>571580b26c65f306376d4f64e53cb5c7</code><br>通过高低位互换之后的链变量为<br><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">s1</span>=<span class="number">0</span>xb2801557</span><br><span class="line"><span class="attr">s2</span>=<span class="number">0</span>x06f3656c</span><br><span class="line"><span class="attr">s3</span>=<span class="number">0</span>x644f6d37</span><br><span class="line"><span class="attr">s4</span>=<span class="number">0</span>xc7b53ce5</span><br></pre></td></tr></table></figure></p>
+<p>上一轮的链变量将给下一轮使用<br>这样就可以在后面添加任意数据，在已知上一轮的链变量之后，就可以推导出下一轮加密后的结果  </p>
+<p>这里从github中拿来的一个md5python实现（在学习的时候实在不是很喜欢用HashPump这些工具，还是看代码实在点）<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># @Author: King kaki</span></span><br><span class="line"><span class="comment"># @Date:   2018-08-04 12:40:11</span></span><br><span class="line"><span class="comment"># @Last Modified by:   King kaki</span></span><br><span class="line"><span class="comment"># @Last Modified time: 2018-08-04 19:07:27</span></span><br><span class="line"><span class="keyword">import</span> math</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">F = <span class="keyword">lambda</span> x, y, z: ((x &amp; y) | ((~x) &amp; z))</span><br><span class="line">G = <span class="keyword">lambda</span> x, y, z: ((x &amp; z) | (y &amp; (~z)))</span><br><span class="line">H = <span class="keyword">lambda</span> x, y, z: (x ^ y ^ z)</span><br><span class="line">I = <span class="keyword">lambda</span> x, y, z: (y ^ (x | (~z)))</span><br><span class="line">L = <span class="keyword">lambda</span> x, n: (((x &lt;&lt; n) | (x &gt;&gt; (<span class="number">32</span> - n))) &amp; (<span class="number">0xffffffff</span>))</span><br><span class="line">shi_1 = (<span class="number">7</span>, <span class="number">12</span>, <span class="number">17</span>, <span class="number">22</span>) * <span class="number">4</span></span><br><span class="line">shi_2 = (<span class="number">5</span>, <span class="number">9</span>, <span class="number">14</span>, <span class="number">20</span>) * <span class="number">4</span></span><br><span class="line">shi_3 = (<span class="number">4</span>, <span class="number">11</span>, <span class="number">16</span>, <span class="number">23</span>) * <span class="number">4</span></span><br><span class="line">shi_4 = (<span class="number">6</span>, <span class="number">10</span>, <span class="number">15</span>, <span class="number">21</span>) * <span class="number">4</span></span><br><span class="line">m_1 = (<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>)</span><br><span class="line">m_2 = (<span class="number">1</span>, <span class="number">6</span>, <span class="number">11</span>, <span class="number">0</span>, <span class="number">5</span>, <span class="number">10</span>, <span class="number">15</span>, <span class="number">4</span>, <span class="number">9</span>, <span class="number">14</span>, <span class="number">3</span>, <span class="number">8</span>, <span class="number">13</span>, <span class="number">2</span>, <span class="number">7</span>, <span class="number">12</span>)</span><br><span class="line">m_3 = (<span class="number">5</span>, <span class="number">8</span>, <span class="number">11</span>, <span class="number">14</span>, <span class="number">1</span>, <span class="number">4</span>, <span class="number">7</span>, <span class="number">10</span>, <span class="number">13</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">6</span>, <span class="number">9</span>, <span class="number">12</span>, <span class="number">15</span>, <span class="number">2</span>)</span><br><span class="line">m_4 = (<span class="number">0</span>, <span class="number">7</span>, <span class="number">14</span>, <span class="number">5</span>, <span class="number">12</span>, <span class="number">3</span>, <span class="number">10</span>, <span class="number">1</span>, <span class="number">8</span>, <span class="number">15</span>, <span class="number">6</span>, <span class="number">13</span>, <span class="number">4</span>, <span class="number">11</span>, <span class="number">2</span>, <span class="number">9</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">T</span><span class="params">(i)</span>:</span></span><br><span class="line">	<span class="keyword">return</span> (int(<span class="number">4294967296</span> * abs(math.sin(i)))) &amp; <span class="number">0xffffffff</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">shift</span><span class="params">(shift_list)</span>:</span></span><br><span class="line">	shift_list = [shift_list[<span class="number">3</span>], shift_list[<span class="number">0</span>], shift_list[<span class="number">1</span>], shift_list[<span class="number">2</span>]]</span><br><span class="line">	<span class="keyword">return</span> shift_list</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">fun</span><span class="params">(fun_list, f, m, shi)</span>:</span></span><br><span class="line">	count = <span class="number">0</span></span><br><span class="line">	<span class="keyword">global</span> Ti_count</span><br><span class="line">	<span class="keyword">while</span> count &lt; <span class="number">16</span>:</span><br><span class="line">		xx = int(fun_list[<span class="number">0</span>], <span class="number">16</span>) + f(int(fun_list[<span class="number">1</span>], <span class="number">16</span>), int(fun_list[<span class="number">2</span>], <span class="number">16</span>), int(fun_list[<span class="number">3</span>], <span class="number">16</span>)) + int(m[count], <span class="number">16</span>) + T(Ti_count)</span><br><span class="line">		xx &amp;= <span class="number">0xffffffff</span></span><br><span class="line">		ll = L(xx, shi[count])</span><br><span class="line">		fun_list[<span class="number">0</span>] = hex((int(fun_list[<span class="number">1</span>], <span class="number">16</span>) + ll) &amp; <span class="number">0xffffffff</span>)</span><br><span class="line">		fun_list = shift(fun_list)</span><br><span class="line">		count += <span class="number">1</span></span><br><span class="line">		Ti_count += <span class="number">1</span></span><br><span class="line">	<span class="keyword">return</span> fun_list</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gen_m16</span><span class="params">(order, ascii_list, f_offset)</span>:</span></span><br><span class="line">	ii = <span class="number">0</span></span><br><span class="line">	m16 = [<span class="number">0</span>] * <span class="number">16</span></span><br><span class="line">	f_offset *= <span class="number">64</span></span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> order:</span><br><span class="line">		i *= <span class="number">4</span></span><br><span class="line">		m16[ii] = <span class="string">'0x'</span> + <span class="string">''</span>.join((ascii_list[i + f_offset] + ascii_list[i + <span class="number">1</span> + f_offset] + ascii_list[i + <span class="number">2</span> + f_offset] + ascii_list[i + <span class="number">3</span> + f_offset]).split(<span class="string">'0x'</span>))</span><br><span class="line">		ii += <span class="number">1</span></span><br><span class="line">	<span class="keyword">for</span> ind <span class="keyword">in</span> range(len(m16)):</span><br><span class="line">		m16[ind] = reverse_hex(m16[ind])</span><br><span class="line">	<span class="keyword">return</span> m16</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">reverse_hex</span><span class="params">(hex_str)</span>:</span></span><br><span class="line">	hex_str = hex_str[<span class="number">2</span>:]</span><br><span class="line">	<span class="keyword">if</span> len(hex_str) &lt; <span class="number">8</span>:</span><br><span class="line">		hex_str = <span class="string">'0'</span> * (<span class="number">8</span> - len(hex_str)) + hex_str</span><br><span class="line">	hex_str_list = []</span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>, len(hex_str), <span class="number">2</span>):</span><br><span class="line">		hex_str_list.append(hex_str[i:i + <span class="number">2</span>])</span><br><span class="line">	hex_str_list.reverse()</span><br><span class="line">	hex_str_result = <span class="string">'0x'</span> + <span class="string">''</span>.join(hex_str_list)</span><br><span class="line">	<span class="keyword">return</span> hex_str_result</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">show_result</span><span class="params">(f_list)</span>:</span></span><br><span class="line">	result = <span class="string">''</span></span><br><span class="line">	f_list1 = [<span class="number">0</span>] * <span class="number">4</span></span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> f_list:</span><br><span class="line">		f_list1[f_list.index(i)] = reverse_hex(i)[<span class="number">2</span>:]</span><br><span class="line">		result += f_list1[f_list.index(i)]</span><br><span class="line">	<span class="keyword">return</span> result</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">padding</span><span class="params">(input_m, msg_lenth=<span class="number">0</span>)</span>:</span></span><br><span class="line">	ascii_list = list(map(hex, map(ord, input_m)))</span><br><span class="line">	msg_lenth += len(ascii_list) * <span class="number">8</span></span><br><span class="line">	ascii_list.append(<span class="string">'0x80'</span>)</span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> range(len(ascii_list)):</span><br><span class="line">		<span class="keyword">if</span> len(ascii_list[i]) &lt; <span class="number">4</span>:</span><br><span class="line">			ascii_list[i] = <span class="string">'0x'</span> + <span class="string">'0'</span> + ascii_list[i][<span class="number">2</span>:]</span><br><span class="line">	<span class="keyword">while</span> (len(ascii_list) * <span class="number">8</span> + <span class="number">64</span>) % <span class="number">512</span> != <span class="number">0</span>:</span><br><span class="line">		ascii_list.append(<span class="string">'0x00'</span>)</span><br><span class="line">	msg_lenth_0x = hex(msg_lenth)[<span class="number">2</span>:]</span><br><span class="line">	msg_lenth_0x = <span class="string">'0x'</span> + msg_lenth_0x.rjust(<span class="number">16</span>, <span class="string">'0'</span>)</span><br><span class="line">	msg_lenth_0x_big_order = reverse_hex(msg_lenth_0x)[<span class="number">2</span>:]</span><br><span class="line">	msg_lenth_0x_list = []</span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>, len(msg_lenth_0x_big_order), <span class="number">2</span>):</span><br><span class="line">		msg_lenth_0x_list.append(<span class="string">'0x'</span> + msg_lenth_0x_big_order[i: i + <span class="number">2</span>])</span><br><span class="line">	ascii_list.extend(msg_lenth_0x_list)</span><br><span class="line">	<span class="keyword">return</span> ascii_list</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">md5</span><span class="params">(input_m)</span>:</span></span><br><span class="line">	<span class="keyword">global</span> Ti_count</span><br><span class="line">	Ti_count = <span class="number">1</span></span><br><span class="line">	abcd_list = [<span class="string">'0x67452301'</span>, <span class="string">'0xefcdab89'</span>, <span class="string">'0x98badcfe'</span>, <span class="string">'0x10325476'</span>]</span><br><span class="line">	ascii_list = padding(input_m)</span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>, len(ascii_list) // <span class="number">64</span>):</span><br><span class="line">		aa, bb, cc, dd = abcd_list</span><br><span class="line">		order_1 = gen_m16(m_1, ascii_list, i)</span><br><span class="line">		order_2 = gen_m16(m_2, ascii_list, i)</span><br><span class="line">		order_3 = gen_m16(m_3, ascii_list, i)</span><br><span class="line">		order_4 = gen_m16(m_4, ascii_list, i)</span><br><span class="line">		abcd_list = fun(abcd_list, F, order_1, shi_1)</span><br><span class="line">		abcd_list = fun(abcd_list, G, order_2, shi_2)</span><br><span class="line">		abcd_list = fun(abcd_list, H, order_3, shi_3)</span><br><span class="line">		abcd_list = fun(abcd_list, I, order_4, shi_4)</span><br><span class="line">		output_a = hex((int(abcd_list[<span class="number">0</span>], <span class="number">16</span>) + int(aa, <span class="number">16</span>)) &amp; <span class="number">0xffffffff</span>)</span><br><span class="line">		output_b = hex((int(abcd_list[<span class="number">1</span>], <span class="number">16</span>) + int(bb, <span class="number">16</span>)) &amp; <span class="number">0xffffffff</span>)</span><br><span class="line">		output_c = hex((int(abcd_list[<span class="number">2</span>], <span class="number">16</span>) + int(cc, <span class="number">16</span>)) &amp; <span class="number">0xffffffff</span>)</span><br><span class="line">		output_d = hex((int(abcd_list[<span class="number">3</span>], <span class="number">16</span>) + int(dd, <span class="number">16</span>)) &amp; <span class="number">0xffffffff</span>)</span><br><span class="line">		abcd_list = [output_a, output_b, output_c, output_d]</span><br><span class="line">		Ti_count = <span class="number">1</span></span><br><span class="line">		print(ascii_list)</span><br><span class="line">	<span class="keyword">return</span> show_result(abcd_list)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># md5-Length Extension Attack: 计算 md5(message + padding + suffix), res = md5(message), len_m = len(message)</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">md5_lea</span><span class="params">(suffix, res, len_m)</span>:</span></span><br><span class="line">	<span class="keyword">global</span> Ti_count</span><br><span class="line">	Ti_count = <span class="number">1</span></span><br><span class="line">	abcd_list = []</span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>, <span class="number">32</span>, <span class="number">8</span>):</span><br><span class="line">		abcd_list.append(reverse_hex(<span class="string">'0x'</span> + res[i: i + <span class="number">8</span>]))</span><br><span class="line">	ascii_list = padding(suffix, (len_m + <span class="number">72</span>) // <span class="number">64</span> * <span class="number">64</span> * <span class="number">8</span>)  <span class="comment"># len(message + padding) * 8</span></span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>, len(ascii_list) // <span class="number">64</span>):</span><br><span class="line">		aa, bb, cc, dd = abcd_list</span><br><span class="line">		order_1 = gen_m16(m_1, ascii_list, i)</span><br><span class="line">		order_2 = gen_m16(m_2, ascii_list, i)</span><br><span class="line">		order_3 = gen_m16(m_3, ascii_list, i)</span><br><span class="line">		order_4 = gen_m16(m_4, ascii_list, i)</span><br><span class="line">		abcd_list = fun(abcd_list, F, order_1, shi_1)</span><br><span class="line">		abcd_list = fun(abcd_list, G, order_2, shi_2)</span><br><span class="line">		abcd_list = fun(abcd_list, H, order_3, shi_3)</span><br><span class="line">		abcd_list = fun(abcd_list, I, order_4, shi_4)</span><br><span class="line">		output_a = hex((int(abcd_list[<span class="number">0</span>], <span class="number">16</span>) + int(aa, <span class="number">16</span>)) &amp; <span class="number">0xffffffff</span>)</span><br><span class="line">		output_b = hex((int(abcd_list[<span class="number">1</span>], <span class="number">16</span>) + int(bb, <span class="number">16</span>)) &amp; <span class="number">0xffffffff</span>)</span><br><span class="line">		output_c = hex((int(abcd_list[<span class="number">2</span>], <span class="number">16</span>) + int(cc, <span class="number">16</span>)) &amp; <span class="number">0xffffffff</span>)</span><br><span class="line">		output_d = hex((int(abcd_list[<span class="number">3</span>], <span class="number">16</span>) + int(dd, <span class="number">16</span>)) &amp; <span class="number">0xffffffff</span>)</span><br><span class="line">		abcd_list = [output_a, output_b, output_c, output_d]</span><br><span class="line">		Ti_count = <span class="number">1</span></span><br><span class="line">	<span class="comment"># print(ascii_list)</span></span><br><span class="line">	<span class="keyword">return</span> show_result(abcd_list)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">	print(md5_lea(<span class="string">'kingkk'</span>,<span class="string">'571580b26c65f306376d4f64e53cb5c7'</span>,<span class="number">15</span>))</span><br></pre></td></tr></table></figure></p>
+<p>可以求出<code>$sercet.admin%80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%c8%00%00%00%00%00%00%00kingkk</code><br>的md5值为<code>b2395ce21d43a1b269acfefd59f4446e</code><br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/迟学的哈希长度拓展攻击/1.png" alt><br>成功获得flag<br>主要就是利用了将上一轮的链变量给下一轮使用，使得可以在末尾添加数据，获得相应的md5值，而不需要知道前面具体的值  </p>
+<h1 id="自动化利用工具"><a href="#自动化利用工具" class="headerlink" title="自动化利用工具"></a>自动化利用工具</h1><p>自己写了个自动化生成payload的脚本<a href="https://github.com/kingkaki/Exploit-scripts/blob/master/hash-length-extension/hash-extension.py" target="_blank" rel="noopener">https://github.com/kingkaki/Exploit-scripts/blob/master/hash-length-extension/hash-extension.py</a><br>能自动遍历出前缀1-30的payload,这里前面一共有25个值，所以取25生成的payload即可<br>想便利更多值的修改下for循环即可</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/08/docker-笔记/" data-toggle="tooltip" data-placement="top" title="docker 笔记">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/07/Typecho反序列化漏洞复现/" data-toggle="tooltip" data-placement="top" title="Typecho反序列化漏洞复现">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#加解密" title="加解密">加解密</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

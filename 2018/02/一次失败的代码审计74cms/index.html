@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          一次失败的代码审计-74cms - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/02/一次失败的代码审计74cms/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                    </div>
+                    <h1>一次失败的代码审计-74cms</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-02-02
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>哎，弄得有点头大。。弄了一整个下午，虽然还是失败了，但还是记录一下吧   emmm，一开始，想从user这个文件夹下入手，大体瞟了下那些基础的类文件，当然没看全， 然后配合seay的代码审计工具，发现了一个点 <strong>74cms\user\connect_qq_client.php</strong></p>
+<p>elseif ($act==’login_go’)<br>{</p>
+<pre><code>$\_SESSION\[&quot;openid&quot;\] = trim($\_GET\[&apos;openid&apos;\]); 
+$\_SESSION\[&quot;accessToken&quot;\] = trim($\_GET\[&apos;accessToken&apos;\]);
+if (empty($_SESSION\[&quot;openid&quot;\]))
+{
+    showmsg(&apos;登录失败！openid获取不到&apos;,0);
+}
+else
+{
+    require\_once(QISHI\_ROOT_PATH.&apos;include/mysql.class.php&apos;);
+    $db = new mysql($dbhost,$dbuser,$dbpass,$dbname);
+    unset($dbhost,$dbuser,$dbpass,$dbname);
+    require\_once(QISHI\_ROOT\_PATH.&apos;include/fun\_user.php&apos;);
+    var\_dump($\_SESSION\[&quot;openid&quot;\]);
+    $user=get\_user\_inqqopenid($_SESSION\[&quot;openid&quot;\]);
+    ……
+</code></pre><p>重点为加粗的两句，发现$user是根据$_SESSION[“openid”]来的，然而$_SESSION[“openid”]是直接从$_GET[‘openid’]上获取（仅加了个trim函数），然后跟进get_user_inqqopenid（）这个函数看看 <strong>74cms\include\fun_user.php</strong><br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">get_user_inqqopenid</span><span class="params">($openid)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">global</span> $db;</span><br><span class="line">	<span class="keyword">if</span> (<span class="keyword">empty</span>($openid))</span><br><span class="line">	&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	$sql = <span class="string">"select * from "</span>.table(<span class="string">'members'</span>).<span class="string">" where qq_openid = '&#123;$openid&#125;' LIMIT 1"</span>;</span><br><span class="line">	<span class="keyword">return</span> $db-&gt;getone($sql);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>啊哈，$openid直接传入了sql语句，没有做什么过滤。当时就有点开心，然后去找下调用这个函数的页面<br>哎。。好像页面被改的有点改不回来了，最后调试的输出页面就如下面<br>输入如下url： <a href="http://localhost/74cms/user/connect\_qq\_client.php?act=login_go&amp;openid=1" target="_blank" rel="noopener">http://localhost/74cms/user/connect\_qq\_client.php?act=login_go&amp;openid=1</a><br><img src="http://blog.kingkk.com/wp-content/uploads/2018/02/1f73e77372d7a9413db2b40f492e4419.png" alt> 试着注入，发现过滤了很多关键字。。<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/02/67b0c76abf397d575f95d00cb990cbe9.png" alt> 最后找到一个没过滤的payload<br><figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openid=<span class="number">1</span>%df' || ascii(substr((user()),<span class="number">1</span>,<span class="number">1</span>))&gt;<span class="number">10</span> limit <span class="number">1</span>%<span class="number">23</span></span><br></pre></td></tr></table></figure></p>
+<p>然而。。。 <img src="http://blog.kingkk.com/wp-content/uploads/2018/02/737cc5c9d89b36d986618b989eac2627.png" alt><br>语句都是没问题的，可是返回的却是两个false 把语句放入数据库执行也是OK的<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/02/a5e942d0b0e7c78988750bc46da32da8.png" alt><br>当时就是很懵逼的，各种输出变量，调试，最后找到了问题的原因 在执行mysql_fetch_array的时候，貌似自动检测单引号前面的字符是否为宽字节，是的话就不允许通过<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/02/918c4f8a17e2d3e86d298e6e30bd6a0d.png" alt><br>然后把那个宽字节的字改成别的话 <img src="http://blog.kingkk.com/wp-content/uploads/2018/02/deb2ab1fc55d1ac7cf4cc59e8a6a1055.png" alt><br>万脸懵逼，而且那个$_GET也是，至今没找到过滤函数 整整弄了一个下午。。。哎，有点头大  </p>
+<hr>
+<p>  来个分割线，昨天问了下大佬，今天大佬指点了几句，果然大佬还是大佬 重新回到那个connect_qq_client.php的页面 文件一开头就有如下的包含语句</p>
+<p>require_once(dirname(__FILE__).’/../include/plus.common.inc.php’);</p>
+<p>跟进这个<strong>plus.common.inc.php</strong>文件，果然对$_GET以及$_POST等获得的数据一开始就做了处理</p>
+<p>if (!empty($_GET))<br>{<br>$_GET = addslashes_deep($_GET);<br>}<br>if (!empty($_POST))<br>{<br>$_POST = addslashes_deep($_POST);<br>}<br>$_COOKIE = addslashes_deep($_COOKIE);<br>$_REQUEST = addslashes_deep($_REQUEST);</p>
+<p>找下<strong>addslashes_deep</strong>这个函数的定义 <strong>common.fun.php</strong>下</p>
+<p>function addslashes_deep($value)<br>{<br>    if (empty($value))<br>    {<br>        return $value;<br>    }<br>    else<br>    {<br>        if (!get_magic_quotes_gpc())<br>        {<br>        $value=is_array($value) ? array_map(‘addslashes_deep’, $value) : mystrip_tags(addslashes($value));<br>        }<br>        else<br>        {<br>        $value=is_array($value) ? array_map(‘addslashes_deep’, $value) : mystrip_tags($value);<br>        }<br>        return $value;<br>    }<br>}</p>
+<p>返回的是个<strong>mystrip_tags</strong>这个过滤后的值，再继续跟进去看看把</p>
+<p>function <strong>mystrip_tags</strong>($string)<br>{<br>    $string = new_html_special_chars($string);<br>    $string = remove_xss($string);<br>    return $string;<br>}<br>function <strong>new_html_special_chars</strong>($string) {<br>    $string = str_replace(array(‘&amp;’, ‘“‘, ‘&lt;’, ‘&gt;’), array(‘&amp;’, ‘“‘, ‘&lt;’, ‘&gt;’), $string);<br>    $string = strip_tags($string);<br>    return $string;<br>}<br>function <strong>remove_xss</strong>($string) {<br>    $string = preg_replace(‘/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S’, ‘’, $string);</p>
+<pre><code>$parm1 = Array(&apos;javascript&apos;, &apos;union&apos;,&apos;vbscript&apos;, &apos;expression&apos;, &apos;applet&apos;, &apos;xml&apos;, &apos;blink&apos;, &apos;link&apos;, &apos;script&apos;, &apos;embed&apos;, &apos;object&apos;, &apos;iframe&apos;, &apos;frame&apos;, &apos;frameset&apos;, &apos;ilayer&apos;, &apos;layer&apos;, &apos;bgsound&apos;, &apos;title&apos;, &apos;base&apos;);
+
+$parm2 = Array(&apos;onabort&apos;, &apos;onactivate&apos;, &apos;onafterprint&apos;, &apos;onafterupdate&apos;, &apos;onbeforeactivate&apos;, &apos;onbeforecopy&apos;, &apos;onbeforecut&apos;, &apos;onbeforedeactivate&apos;, &apos;onbeforeeditfocus&apos;, &apos;onbeforepaste&apos;, &apos;onbeforeprint&apos;, &apos;onbeforeunload&apos;, &apos;onbeforeupdate&apos;, &apos;onblur&apos;, &apos;onbounce&apos;, &apos;oncellchange&apos;, &apos;onchange&apos;, &apos;onclick&apos;, &apos;oncontextmenu&apos;, &apos;oncontrolselect&apos;, &apos;oncopy&apos;, &apos;oncut&apos;, &apos;ondataavailable&apos;, &apos;ondatasetchanged&apos;, &apos;ondatasetcomplete&apos;, &apos;ondblclick&apos;, &apos;ondeactivate&apos;, &apos;ondrag&apos;, &apos;ondragend&apos;, &apos;ondragenter&apos;, &apos;ondragleave&apos;, &apos;ondragover&apos;, &apos;ondragstart&apos;, &apos;ondrop&apos;, &apos;onerror&apos;, &apos;onerrorupdate&apos;, &apos;onfilterchange&apos;, &apos;onfinish&apos;, &apos;onfocus&apos;, &apos;onfocusin&apos;, &apos;onfocusout&apos;, &apos;onhelp&apos;, &apos;onkeydown&apos;, &apos;onkeypress&apos;, &apos;onkeyup&apos;, &apos;onlayoutcomplete&apos;, &apos;onload&apos;, &apos;onlosecapture&apos;, &apos;onmousedown&apos;, &apos;onmouseenter&apos;, &apos;onmouseleave&apos;, &apos;onmousemove&apos;, &apos;onmouseout&apos;, &apos;onmouseover&apos;, &apos;onmouseup&apos;, &apos;onmousewheel&apos;, &apos;onmove&apos;, &apos;onmoveend&apos;, &apos;onmovestart&apos;, &apos;onpaste&apos;, &apos;onpropertychange&apos;, &apos;onreadystatechange&apos;, &apos;onreset&apos;, &apos;onresize&apos;, &apos;onresizeend&apos;, &apos;onresizestart&apos;, &apos;onrowenter&apos;, &apos;onrowexit&apos;, &apos;onrowsdelete&apos;, &apos;onrowsinserted&apos;, &apos;onscroll&apos;, &apos;onselect&apos;, &apos;onselectionchange&apos;, &apos;onselectstart&apos;, &apos;onstart&apos;, &apos;onstop&apos;, &apos;onsubmit&apos;, &apos;onunload&apos;,&apos;style&apos;,&apos;href&apos;,&apos;action&apos;,&apos;location&apos;,&apos;background&apos;,&apos;src&apos;,&apos;poster&apos;);
+
+$parm3 = Array(&apos;alert&apos;,&apos;sleep&apos;,&apos;load_file&apos;,&apos;confirm&apos;,&apos;prompt&apos;,&apos;benchmark&apos;,&apos;select&apos;,&apos;update&apos;,&apos;insert&apos;,&apos;delete&apos;,&apos;alter&apos;,&apos;drop&apos;,&apos;truncate&apos;,&apos;script&apos;,&apos;eval&apos;,&apos;outfile&apos;,&apos;dumpfile&apos;);
+
+$parm = array_merge($parm1, $parm2, $parm3); 
+
+for ($i = 0; $i &lt; sizeof($parm); $i++) { 
+    $pattern = &apos;/&apos;; 
+    for ($j = 0; $j &lt; strlen($parm\[$i\]); $j++) { if ($j &gt; 0) { 
+            $pattern .= &apos;(&apos;; 
+            $pattern .= &apos;(&amp;#\[x|X\]0(\[9\]\[a\]\[b\]);?)?&apos;; 
+            $pattern .= &apos;|((\[9\]\[10\]\[13\]);?)?&apos;; 
+            $pattern .= &apos;)?&apos;; 
+        }
+        $pattern .= $parm\[$i\]\[$j\]; 
+    }
+    $pattern .= &apos;/i&apos;;
+    $string = preg_replace($pattern, &apos;****&apos;, $string); 
+}
+return $string;
+</code></pre><p>}</p>
+<p>嗯，这也就解释了为什么sql语句的很多关键字会被过滤，哎，原来之前输出的值就是已经被过滤了的$_GET参数，怪不得一直不对 至于宽字符注入不了的话，我查看了下mysql.log文件。不知道为什么wamp默认是没开的，所以以前也一直找不到，顺带这里提一下如何查看sql.log文件<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; **SHOW VARIABLES LIKE <span class="string">'%general_log%'</span>;**</span><br><span class="line">+------------------+----------------------------------------------------------------------+</span><br><span class="line">| Variable_name    | Value                                                                |</span><br><span class="line">+------------------+----------------------------------------------------------------------+</span><br><span class="line">| general_log      | ON                                                                   |</span><br><span class="line">| general\_log\_file | D:\\Program Files\\wamp\\bin\\mysql\\mysql5.6.17\\data\\DESKTOP-S9PSGAM.log |</span><br><span class="line">+------------------+----------------------------------------------------------------------+</span><br></pre></td></tr></table></figure></p>
+<p>就可以看到文件的开启状态和log文件位置，开启的方式</p>
+<p><strong>SET GLOBAL general_log = ‘ON’;</strong></p>
+<p>然后看下日志文件</p>
+<p>180203 21:33:41 23 Connect root@localhost on<br>   23 Query SET NAMES gbk<br>   23 Query SET sql_mode = ‘’<br>   23 Query <strong>SET character_set_connection=gbk, character_set_results=gbk, character_set_client=binary</strong><br>   23 Init DB 74cms<br>   23 Query select <em> from qs_crons WHERE (nextrun&lt;1517664821 OR nextrun=0) AND available=1 LIMIT 1<br>   24 Connect root@localhost on<br>   24 Query SET NAMES gbk<br>   24 Query SET sql_mode = ‘’<br>   24 Query SET character_set_connection=gbk, character_set_results=gbk, character_set_client=binary<br>   24 Init DB 74cms<br>   23 Quit<br>   24 Query **select </em> from qs_members where qq_openid = ‘1xDf\‘ or 1=1 limit 1’ LIMIT 1**<br>   24 Quit</p>
+<p>重点就是加粗那两句，我猜应该是设置了<strong>character_set_client=binary</strong> 的原因，导致虽然编码是gbk但是依然无法宽字节注入，从sql的语句中也能看出来，那个反斜线并没有被吃掉 emm具体原因的话，网上是那么说的，具体原理，暂时没找到。。</p>
+<p>解决方法：就是在初始化连接和字符集之后，使用SETcharacter_set_client=binary来设定客户端的字符集是二进制的。如：</p>
+<p>mysql_query(”SET character_set_client=binary”);</p>
+<p>总之，这是一个目前广泛使用的防止宽字节注入的方式，再具体也就不深究了 总之，这个注入思路，到这里可以算是gg了，单引号目前是逃不出来了     虽然过程有点曲折，但也算学到了一些，那些common.inc.php之类的文件还是要好好去看看</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/02/令人头大的crlf注入/" data-toggle="tooltip" data-placement="top" title="令人头大的CRLF注入">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/01/php之mvc框架/" data-toggle="tooltip" data-placement="top" title="php之MVC框架">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

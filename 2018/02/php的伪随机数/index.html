@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          php的伪随机数 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/02/php的伪随机数/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                    </div>
+                    <h1>php的伪随机数</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-02-07
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>之前打CTF的时候就有一道题，一个关键的点就是预测随机数，根据前一次给的随机数，预测出下一次的随机数。今天在看《白帽子》的时候就重点看了下，就顺便记录一下  </p>
+<h3 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h3><p>php里两个重要的随机函数，</p>
+<ul>
+<li><strong>rand()   //不指定参数时，范围0-32767</strong></li>
+<li><strong>md_rand()   //不指定参数时，范围0-2^32-1</strong></li>
+<li><strong>srand()   //给rand()函数播种</strong></li>
+<li><strong>mt_srand()  //给mt_srand()函数播种</strong></li>
+</ul>
+<p>php是基于C开发的，C中生成随机数时，需要自己去一个种子，相同的种子产生的随机数是相同的，php中也一样</p>
+<blockquote>
+<p>自 PHP 4.2.0 起，不再需要用 <strong>srand()</strong> 或 mt_srand() 给随机数发生器播种 ，因为现在是由系统自动完成的 ————取自php官方手册</p>
+</blockquote>
+<pre><code>看如下例子，在给mt_rand函数播下一个固定值时 ![](http://blog.kingkk.com/wp-content/uploads/2018/02/fd7dd919da74099e400efcdaef764b77.png) 无论刷新，还是换不同浏览器打开，都是相同的随机数，而且接下来几次的变化也都相同，从而产生了可预测性
+</code></pre><h4 id="所以，当seed一定时，接下来几次的随机数是固定的"><a href="#所以，当seed一定时，接下来几次的随机数是固定的" class="headerlink" title="所以，当seed一定时，接下来几次的随机数是固定的"></a>所以，当seed一定时，接下来几次的随机数是固定的</h4><p>我记得之前那题的播种时取一个0-99999的随机数进行播种，本地测试代码如下 <strong>test.php</strong></p>
+<p>&lt;?php<br> $seed = rand(0,99999);<br> echo “seed is :”.$seed.”<br>“;<br> mt_srand($seed);<br> echo mt_rand().”<br>“;<br> echo mt_rand().”<br>“;<br> echo mt_rand().”<br>“;<br> echo mt_rand().”<br>“;<br> echo mt_rand().”<br>“;<br> echo mt_rand().”<br>“;<br> echo mt_rand().”<br>“;<br> echo mt_rand().”<br>“;<br>?&gt;</p>
+<p>取一次的输出情况 <img src="http://blog.kingkk.com/wp-content/uploads/2018/02/d646246566e64d322c5e681d3f2d15a5.png" alt> 在我们可以知道第一个随机数(1240422887)时，从而求出seed，进而预测接下来的随机数，代码如下 <strong>1.php</strong></p>
+<p> &lt;?php</p>
+<p>function get_seed($rand_num){<br>    for($i=0;$i&lt;100000;$i++){<br>        mt_srand($i);<br>        if(mt_rand()==$rand_num){<br>            return $i;<br>        }<br>    }<br>    return False;<br> }</p>
+<p> $rand_num = 1240422887;<br> $seed = get_seed($rand_num);<br> echo “the seed is:”.$seed.”<br>“;<br> mt_srand($seed);<br> echo mt_rand().”<br>“;<br> echo mt_rand().”<br>“;<br> echo mt_rand().”<br>“;<br> echo mt_rand().”<br>“;<br> echo mt_rand().”<br>“;<br> echo mt_rand().”<br>“;<br> echo mt_rand().”<br>“;<br> echo mt_rand().”<br>“;</p>
+<p>?&gt;</p>
+<p>访问这个1.php <img src="http://blog.kingkk.com/wp-content/uploads/2018/02/f7756b5a9bd1c934777ac39d061835f8.png" alt> 成功求出了所播的seed，也预测了接下来的值  </p>
+<hr>
+<p>这里刻意缩小了seed的范围，然而在php4.2之后，是不需要手动赋值的，这时系统赋予的seed值范围是在0-2^32（32位服务器上） 爆破时间应该也不算特别长，特地测试了一下，我在本地电脑上100000跑的话0.687s，2147483648的话，emmm大概四个小时，换成性能好的计算机的话，可能能快很多，总之，时间没有长的那么可怕。</p>
+<hr>
+<p>下面演示下正紧的渗透测试环节，这里需要两个页面，test.php和test2.php。 test.php用来播种，test2.php用来产生随机数，访问时要保重keep-alive，这样才能保证种子至始至终都是同一个   首先  访问test.php获得seed并播种，然后执行模拟业务处理，转跳至具体业务处理页面test2.php</p>
+<p>&lt;?php<br> mt_srand((double)microtime()*1000000);<br> header(“Location: <a href="http://localhost/code/test2.php&quot;)" target="_blank" rel="noopener">http://localhost/code/test2.php&quot;)</a>;<br>?&gt;</p>
+<p>test2.php中获取到生成的随机数值 <img src="http://blog.kingkk.com/wp-content/uploads/2018/02/47ff1716d2d1dd94ee3caf479980acb1.png" alt> 此时，就可以通过之前的函数求出seed，并预测接下来，其余未重新播种的业务将产生的随机数 <img src="http://blog.kingkk.com/wp-content/uploads/2018/02/c16997d537dab151be279dfad0e127eb.png" alt> 刷新几次test2.php页面，验证下 <img src="http://blog.kingkk.com/wp-content/uploads/2018/02/ae75cef8d1402a16d7c2eecf5d3a7a6d.png" alt><img src="http://blog.kingkk.com/wp-content/uploads/2018/02/010e4e2552c8028e677a7cd2c9707e7e.png" alt><img src="http://blog.kingkk.com/wp-content/uploads/2018/02/325874b632179796018e436fe2026a5b.png" alt> bingo，成功的预测到了将要生成的随机数</p>
+<h5 id="注意："><a href="#注意：" class="headerlink" title="注意："></a><strong>注意：</strong></h5><p>要保持keep-alive的连接，不然这个进程断掉了，种子就不是之前test.php中的那个了 我这是用firefox的插件，增加了keep-alive的头部 其次，若是后面被重新播种，就得重新计算     假如不是人工播种的话，应该也是可以求出那个seed，只是范围变大了很多，需要耗费的时间增加，并且这一切也要建立在keep-alive的基础上（未验证，机子太渣）    </p>
+<hr>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>这样的可预测性，导致了所谓的随机数不够随机，并非正真的随机数，而是个伪随机</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/02/python函数参数/" data-toggle="tooltip" data-placement="top" title="Python-函数参数">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/02/令人头大的crlf注入/" data-toggle="tooltip" data-placement="top" title="令人头大的CRLF注入">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

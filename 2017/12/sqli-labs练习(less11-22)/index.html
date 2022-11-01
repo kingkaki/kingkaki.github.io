@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          sqli-labs练习（less11-22） - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2017/12/sqli-labs练习(less11-22)/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                    </div>
+                    <h1>sqli-labs练习（less11-22）</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2017-12-14
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>之前less1-10的主要通过get注入，less11-20几乎通过POST注入</p>
+<h3 id="less-11"><a href="#less-11" class="headerlink" title="less-11"></a>less-11</h3><p>先检测出是post方式提交的数据（最简单的方法就看有没有增加参数嘛） 然后可以通过抓包或者审查元素的方式获取到post的参数，如下三个</p>
+<ul>
+<li>uname=1</li>
+<li>passwd=1</li>
+<li>submit=Submit</li>
+</ul>
+<p>然后就可以去构造然后去post发包啦 首先在uname字段构造个万能密码，然后通过#注释后面的内容 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/812f47dda83bb6f2db8c90ac2e0855fd.png" alt> 或者也可以尝试闭合后面的引号 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/2c3b30334ec87f172d21dddf134aafa7.png" alt> 可以看到，登录失败了，原因在于or语句之后还有一句and语句，因为并没有password=1这个字段，所以该语句为假，返回为空。 至于网上说的and优先级比or高的说法其实并不认同，个人认为两者运算优先级应当是相同的，在没有括号的情况下严格按照从左至右的顺序进行判断，也可以测试得出 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/ceec7a095e9ed737e9861a6097a4b152.png" alt> 然后就有两种方式可以注入：</p>
+<ul>
+<li>在uname字段注释后面内容然后进行注入</li>
+<li>在passwd字段注释后面内容，或者构造or永真语句。</li>
+</ul>
+<p>具体注入方法和之前类似，就不赘述 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/622bde285122550c995c6342c29afd96.png" alt>  </p>
+<h3 id="less-12"><a href="#less-12" class="headerlink" title="less-12"></a>less-12</h3><p>进行简单的测试，发现双引号引起报错，并且 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/ef68cac5200acbc84a3905c74891cbe9.png" alt> 闭合括号与双引号即可， 然后和之前一样，开始注入就行了（这里正好前面没有uname=1和passwd=1的字段，所以刚好就返回union select的这一行字段） <img src="http://www.kingkk.com/wp-content/uploads/2017/12/0b7c92657b3320ee2a2b99d8c3b7c732.png" alt>  </p>
+<h3 id="less-13"><a href="#less-13" class="headerlink" title="less-13"></a>less-13</h3><p>单引号测试，报错 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/c0ad3fe79e73d14f94360ce24087df26.png" alt> 闭合下括号，即可，但是，不显示数据。。。 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/03520e48c2325d3e07e5c2753dad65f3.png" alt> 没办法了，布尔盲注吧，至少比基于时间稍微快点。附上payload <code>passwd=1&#39;) or ascii(substr((select database()),1,1))&gt;10 #</code>    </p>
+<h3 id="less-14"><a href="#less-14" class="headerlink" title="less-14"></a>less-14</h3><p>一样了，闭合用双引号即可 payload:<code>passwd=1&quot; or ascii(substr((select database()),1,1))&lt;10 #</code>  </p>
+<h3 id="less-15"><a href="#less-15" class="headerlink" title="less-15"></a>less-15</h3><p>没有sql报错语句，只能通过加入永真语句，然后观察登录与否来判断 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/ef69ceb31209ea50e2ff5891afac06b2.png" alt> ok,单引号注入 然后继续布尔盲注： <code>passwd=1&#39; or ascii(substr((select database()),1,1))&gt;10#</code>    </p>
+<h3 id="less-16"><a href="#less-16" class="headerlink" title="less-16"></a>less-16</h3><p>测试<code>passwd=1&quot;)or 1=1#</code>登录成功， 然后，也一样了，布尔大法 <code>passwd=1&quot;)or ascii(substr((select database()),1,1))&lt;10#</code>    </p>
+<h3 id="less-17"><a href="#less-17" class="headerlink" title="less-17"></a>less-17</h3><p>这个就有类点类似于一个修改密码的选框 输入指定的username，以及要更新的password，通过update语句，更新数据库中的password中对应username的password字段。反正这个也是看了别人写的才看懂的把。 先分析下源码。<img src="http://www.kingkk.com/wp-content/uploads/2017/12/8c0edcf52402c7126f0f53764beefc6c.png" alt>这里对uname做了较为严格的过滤，注入只好从passwd入手 这里就要涉及到另一个函数updatexml，虽然这个函数与xml有关，但其实使用它注入时并不怎么需要了解xml的知识，只是通过输入错误的第二个参数，然后报错返回我们需要的数据结果即可(还有个前提，要提前知道某个用户名存在，就猜测admin了..) <code>passwd=a &#39; or 1=updatexml(1,concat(0x2a2a2a2a2a,(select database())),1)#</code>测试了下，0x2a2a2a中2a的个数为基数时数据才显示完整，具体原因不知==、 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/6f90bc5e193dca8e590425aa78499c37.png" alt> 这样即可通过xpath的报错，来获取想要的数据（tips:第一个参数一定要加，否则报错不会把数据呈现出来，第三个参数随意） 然后按照老套路注入，然后到最后获取数据的时候，会出现一个小问题 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/279807dc6bc377328bfedfba583595e4.png" alt> 说是不能获取同一列中的数据，然后参考了下别的大佬的方法（具体原理不是很懂） 把sql语句改为<code>select password from (select password from users where username=&#39;admin&#39;)a</code> 就是说在加一层select 然后再给他随便取一个别名即可 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/4237a7294f98e5b9b97e4311f0b5469e.png" alt> 其实感觉假如不怕费时的话还是盲注大法好，不过就是会毁数据库。。不过这也算多学了一招，但是条件也比较苛刻，必须有报错语句返回    </p>
+<h3 id="less-18"><a href="#less-18" class="headerlink" title="less-18"></a>less-18</h3><p>这道题的本意应该是让我们通过已经登录的身份，然后在对uagent字段进行注入，因为源码中uname和passwd都进行了过滤 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/8ac549564be742ce5fca62524a5c69c1.png" alt> 研究下sql语句 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/0ed3f95b44b72f39ca099929f8a83d28.png" alt> 本来想用burpsuite抓包的，但是不知道为什么我这burpsuite无法往localhost发送数据包，然后自己用python随手写一个脚本来发包把， 先附上payload：<code>Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:56.0) Gecko/20100101 Firefox/56.0 **&#39;or updatexml(0,concat(0x2a2a2a,version()),0),&#39;0&#39;,&#39;0&#39;) # **</code>（后面两个’0’，以及一个括号是为了闭合语句的，不然会报sql错误） <img src="http://www.kingkk.com/wp-content/uploads/2017/12/4963a23fa5d0222a4e4d8643075249b8.png" alt>然后能愉快的看到数据了，然后就修改那个version部分来读数据吧。 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/7ea32f6136f80e1bc24a8f00cb06ffee.png" alt>    </p>
+<h3 id="less-19"><a href="#less-19" class="headerlink" title="less-19"></a>less-19</h3><p>登录进去之后会显示你的referer信息，大概意思就是说通过http头中referer进行注入 观察下sql语句，<img src="http://www.kingkk.com/wp-content/uploads/2017/12/f0da8518998283c01fb9e420a9ebcb5e.png" alt> 然后开始注入，本来是想用hackbar自带的referer进行注入的，后来发现好像会转义你的单引号等字节，所以还是用了py <img src="http://www.kingkk.com/wp-content/uploads/2017/12/35859111319eebf7297d2288f8c63af7.png" alt> 和之前的基本差不多，就是把注入点改了下 再介绍下另一个函数extractvalue，其实目的和使用方法与updatexml差不多，只是参数变成了两个 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/88b21e03e1a4b253be51aa640bf82d2a.png" alt>      </p>
+<h3 id="less-20"><a href="#less-20" class="headerlink" title="less-20"></a>less-20</h3><p>分析下源码 大概意思就是说，你第一次登录之后会帮你设置一个uname的cookie，然后保存你的信息。然后只要这个cookie存在，就显示你的信息。 这里依旧uname和passwd都被过滤了，唯一一个点就是<img src="http://www.kingkk.com/wp-content/uploads/2017/12/3066851b8fe84cece1595d8c757e4c50.png" alt>这个cookie值 然后修改cookie中uname的值进行注入 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/ef9feac935e8fa037c85e1346873bdc7.png" alt>    </p>
+<h3 id="less-21"><a href="#less-21" class="headerlink" title="less-21"></a>less-21</h3><p>这里对uname的值进行了一次base64的加密，于是，只要改一下之前的payload（闭合个括号）在用base64加密一下即可 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/e73458ca6f787b63276c9babdecef044.png" alt>    </p>
+<h3 id="less-22"><a href="#less-22" class="headerlink" title="less-22"></a>less-22</h3><p>感觉没什么好讲的，变成双引号闭合而已 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/6a9e6cfae0859176d3aeb304b739064c.png" alt>  </p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这里主要修改了注入的点，比如POST数据,http头，以及cookie，不过感觉更麻烦的就是黑盒测试，不清楚到底哪里是注入点，以及改如何闭合语句，感觉还是需要多加锻炼。 终于也算把基础的刷完了，了解了注入的大概思路，后面就继续进阶advanced injection吧，学习些更骚气的姿势         最后，感谢 <a href="http://blog.csdn.net/u012763794/article/details/51361152" target="_blank" rel="noopener">http://blog.csdn.net/u012763794/article/details/51361152</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2017/12/sqli-labs练习(less23-38)/" data-toggle="tooltip" data-placement="top" title="sqli-labs练习（less23-38）">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2017/12/sqli-labs练习(less1-10)/" data-toggle="tooltip" data-placement="top" title="sqli-labs练习（less1-10）">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

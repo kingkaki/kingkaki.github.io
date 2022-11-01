@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/page/5/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Page Header -->
+<header class="intro-header" style="background-image: url('/img/home-bg.jpg')">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 ">
+                <div class="site-heading">
+                    <h1>Kingkk&#39;s Blog</h1>
+                    <!--<hr class="small">-->
+                    <span class="subheading">菜的要死</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+<!-- Main Content -->
+<div class="container">
+    <div class="row">
+        
+
+<!-- USE SIDEBAR -->
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-1
+                col-md-8 col-md-offset-1
+                col-sm-12
+                col-xs-12
+                post-container
+            ">
+            
+                <!-- Main Content -->
+
+
+<div class="post-preview">
+
+    <a href="/2018/08/xss知识点小记/">
+        <h2 class="post-title">
+            xss知识点小记
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            前言最近在学习xss，记录一些比较重要的知识点。有时能从根本上解决一些问题的疑惑
+同源策略同源策略可以说是浏览器安全中最最基础也最为重要的部分了。同源策略限制了资源的任意加载，限制恶意请求。
+何为同源这个估计大家都比熟悉，简单的来说就是如下三点
+
+协议相同（http/https）
+端口相同
+host相同
+
+
+请求过程跨域请求在html中的不同位置都会有发生，主要分为如下三类
+Cross-or......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-08-23
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/08/网鼎杯writeup-web/">
+        <h2 class="post-title">
+            网鼎杯writeup-web
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            前言感觉又是一对web狗极度不友好的比赛，一开始网络环境都是奔溃的，正紧能做题已经是最后两个半小时了。第二道题还是最后一个半小时放出来的，相当难受了。（i春秋真的可以升级下服务器了。。。
+不过spider这道反日爬虫的题目感觉还是很有意思的，加上最近刚学的xss和redis，决定还是好好复现一下
+spider题目给了提示说是动态爬虫，一开始对这个不是很了解，大意应该就是自带js解析，类似于浏......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-08-21
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/08/xss练习记录/">
+        <h2 class="post-title">
+            xss练习记录
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            前言由于各种原因吧，之前也没好好学过xss，就知道简单的闭合弹个窗什么的，趁暑假有时候，系统的学习一下xss。毕竟xss也是web安全的一个重头戏。而且看完一叶飘零师傅的文章，感觉xss比我之前想象的要强的多，也可以达到很强的破坏力。
+就先和刷sqllibs一样吧，做一些题目练手。
+prompt.mllevel 0比较简单了，没做什么过滤和防护，闭合双引号就能逃逸出来了
+
+level 1做了......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-08-19
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/08/redis未授权访问与ssrf利用/">
+        <h2 class="post-title">
+            redis未授权访问与ssrf利用
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            Redis未授权访问About Redis简介redis是一种key-value键值对的非关系型数据库，默认运行在6379端口
+它启动时不会像apache一样，以一种www-data低权限身份运行。而是以运行者的身份，例如用root权限直接运行redis时，redis的权限就是root权限
+其次它的默认配置是无需密码的，也就造成了默认的未授权访问
+redis还支持本地存储，也就导致了任意文件......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-08-17
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/08/Flask-debug-pin安全问题/">
+        <h2 class="post-title">
+            Flask debug pin安全问题
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            前言之前在国赛决赛的时候看到p0师傅提到的关于Flask debug模式下，配合任意文件读取，造成的任意代码执行。那时候就很感兴趣，无奈后来事情有点多，一直没来得及研究。今天把这个终于把这个问题复现了一下
+主要就是利用Flask在debug模式下会生成一个Debugger PIN
+12345kingkk@ubuntu:~/Code/flask$ python3 app.py  * Runni......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-08-10
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/08/docker-笔记/">
+        <h2 class="post-title">
+            docker 笔记
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            前言上学期寒假开始就稍微了解了下docker，无奈用的不是很多，也不是很懂
+后来被强制性要求使用了几次docker（不得不说，安装配置问题一直令我很头大），就也算勉强能起来一个服务了
+用了几次之后就决定系统的总结一下docker的使用，因为只是一些总结，更多的只是针对于我个人用的，不官方，不权威，不系统
+Docker的三大概念镜像（Images）
+Docker 镜像是一个特殊的文件系统，除了......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-08-09
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/08/迟学的哈希长度拓展攻击/">
+        <h2 class="post-title">
+            迟学的哈希长度扩展攻击
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            前言本来这个哈希长度扩展攻击应该在一年前刷实验吧的时候就应该解决的。但是由于那时候实在看不懂，再加上有点偷懒，就把这部分给跳了时隔一年，在学习中偶尔有碰到这个（虽然不是很多），感觉没有想象中那么鸡肋，就决定重新捡起来学习一下  
+不过，就算过了一年，发现依旧是那么菜，看了一整天的分析博客，才勉强理清逻辑  
+攻击的用途和原理用途感觉这个还是很重要的，更多时候需要知道的是怎么用，在什么环境下才......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-08-04
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/07/Typecho反序列化漏洞复现/">
+        <h2 class="post-title">
+            Typecho反序列化漏洞复现
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            前言之前一直就听过这个漏洞，影响还是蛮大的。但是之前一直没有时间复现。最近想着没有搞过这个类型的漏洞，恰好这里有一个活生生的案例，就把php反序列化总结了下，分析了下这个漏洞。看完分析文章，我只想说，流批。叫我就算告诉我这有漏洞我也找不到触发链。orz  
+漏洞分析漏洞发生在install.php中。直接搜索unserialize关键字就能找到，大约283行的样子1$config = uns......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-07-21
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/07/php反序列化漏洞/">
+        <h2 class="post-title">
+            php反序列化漏洞
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            序列化与反序列化目的和意义
+序列化：把对象转换为字节序列的过程。反序列化：把字节序列恢复为对象的过程。
+
+其目的是为了将一个对象通过可保存的字节方式存储起来这样就可以将学列化字节存储到数据库或者文本当中，当需要的时候再通过反序列化获取  
+类的序列化在反序列化对象之后，需要当前作用域中存在该类的定义，否则php无法将类对应到指定类12$ser = 'O:6:"kingkk":1:&#123;......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-07-20
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/07/简析XXE/">
+        <h2 class="post-title">
+            简析XXE
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            XML更详细的XML介绍 https://blog.csdn.net/com_ma/article/details/73277535
+个人理解XML是一种较为通用的数据交互格式，在json出现之前较为流行，近几年逐渐被json所替代。XML的格式类似于html，是html的超集。用于标记数据，大多数编程语言也内置了对XML的处理  
+XML格式主要由XML声明、文档类型定义(DTD)、文档元......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-07-19
+    </p>
+
+</div>
+<hr>
+
+
+
+<!-- Pager -->
+
+<ul class="pager">
+    
+        <li class="previous">
+            <a href="/page/4/">&larr; Newer Posts</a>
+        </li>
+    
+    
+        <li class="next">
+            <a href="/page/6/">Older Posts &rarr;</a>
+        </li>
+    
+</ul>
+
+
+
+                <!-- 如果开启评论功能 -->
+                
+
+            </div>
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-3 col-lg-offset-0
+                col-md-3 col-md-offset-0
+                col-sm-12
+                col-xs-12
+                sidebar-container
+            ">
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#php" title="php" rel="4">php</a>
+                            
+                        
+                            
+                            <a href="/tags/#代码审计" title="代码审计" rel="4">代码审计</a>
+                            
+                        
+                            
+                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="3">漏洞分析</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#java" title="java" rel="16">java</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#writeup" title="writeup" rel="6">writeup</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#语法分析" title="语法分析" rel="2">语法分析</a>
+                            
+                        
+                            
+                            <a href="/tags/#Java" title="Java" rel="2">Java</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#反序列化" title="反序列化" rel="4">反序列化</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#ctf" title="ctf" rel="2">ctf</a>
+                            
+                        
+                            
+                            <a href="/tags/#XXE" title="XXE" rel="3">XXE</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#weblogic" title="weblogic" rel="3">weblogic</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#python" title="python" rel="2">python</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#k8s" title="k8s" rel="2">k8s</a>
+                            
+                        
+                            
+                            <a href="/tags/#云原生" title="云原生" rel="4">云原生</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#docker" title="docker" rel="2">docker</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#vulnhub" title="vulnhub" rel="2">vulnhub</a>
+                            
+                        
+                            
+                            <a href="/tags/#练习记录" title="练习记录" rel="4">练习记录</a>
+                            
+                        
+                            
+                            <a href="/tags/#渗透测试" title="渗透测试" rel="2">渗透测试</a>
+                            
+                        
+                            
+                            <a href="/tags/#xss" title="xss" rel="2">xss</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Short About -->
+                <section class="visible-md visible-lg">
+                    <hr><h5><a href="/about/">ABOUT ME</a></h5>
+                    <div class="short-about">
+
+                        
+                            <img src="/img/avatar.jpg" />
+                        
+
+                        
+
+                        <!-- SNS Link -->
+                        <ul class="list-inline">
+                            
+                            
+                            
+
+                            
+
+                            
+
+                            
+                                <li>
+                                    <a target="_blank"  href="https://github.com/kingkaki">
+                                        <span class="fa-stack fa-lg">
+                                            <i class="fa fa-circle fa-stack-2x"></i>
+                                            <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                        </span>
+                                    </a>
+                                </li>
+                            
+                            
+                            
+                            
+                        </ul>
+                    </div>
+                </section>
+                
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+        
+    </div>
+</div>
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

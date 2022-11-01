@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          XXE防御笔记 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2019/07/XXE防御笔记/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#XXE" title="XXE">XXE</a>
+                        
+                    </div>
+                    <h1>XXE防御笔记</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2019-07-21
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>官方防御手册<br><figure class="highlight avrasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">https:</span>//cheatsheetseries.owasp<span class="meta">.org</span>/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html</span><br></pre></td></tr></table></figure></p>
+<h1 id="DocumentBuilder"><a href="#DocumentBuilder" class="headerlink" title="DocumentBuilder"></a>DocumentBuilder</h1><p><code>javax.xml.parsers.DocumentBuilderFactory</code></p>
+<p>禁用外部实体</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();</span><br><span class="line">String FEATURE = <span class="keyword">null</span>;</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="comment">// This is the PRIMARY defense. If DTDs (doctypes) are disallowed, almost all </span></span><br><span class="line">    <span class="comment">// XML entity attacks are prevented</span></span><br><span class="line">    FEATURE = <span class="string">"http://apache.org/xml/features/disallow-doctype-decl"</span>;</span><br><span class="line">    dbf.setFeature(FEATURE, <span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// If you can't completely disable DTDs, then at least do the following</span></span><br><span class="line">    FEATURE = <span class="string">"http://xml.org/sax/features/external-general-entities"</span>;</span><br><span class="line">    dbf.setFeature(FEATURE, <span class="keyword">false</span>);</span><br><span class="line"></span><br><span class="line">    FEATURE = <span class="string">"http://xml.org/sax/features/external-parameter-entities"</span>;</span><br><span class="line">    dbf.setFeature(FEATURE, <span class="keyword">false</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Disable external DTDs as well</span></span><br><span class="line">    FEATURE = <span class="string">"http://apache.org/xml/features/nonvalidating/load-external-dtd"</span>;</span><br><span class="line">    dbf.setFeature(FEATURE, <span class="keyword">false</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// and these as well, per Timothy Morgan's 2014 paper: "XML Schema, DTD, and Entity Attacks"</span></span><br><span class="line">    dbf.setXIncludeAware(<span class="keyword">false</span>);</span><br><span class="line">    dbf.setExpandEntityReferences(<span class="keyword">false</span>);</span><br><span class="line">&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br><span class="line">DocumentBuilder safebuilder = dbf.newDocumentBuilder();</span><br></pre></td></tr></table></figure>
+<p>以上是官方推荐的修复方式，最主要的是第一条feature</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"http://apache.org/xml/features/disallow-doctype-decl"</span><span class="comment">;</span></span><br></pre></td></tr></table></figure>
+<p>也就是XXE攻击失败时经常跳出来的一条语句</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20190719145802.png" alt></p>
+<p>以下为个人理解</p>
+<blockquote>
+<p> 如果没有特殊需求其实只要开启<code>http://apache.org/xml/features/disallow-doctype-decl</code>这一条，就可以禁止外部实体加载。</p>
+<p>如果还是有加载外部实体的需求，就可以开启如下几条</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&gt; <span class="comment">// 禁止加载外部实体</span></span><br><span class="line">&gt; FEATURE = <span class="string">"http://xml.org/sax/features/external-general-entities"</span>;</span><br><span class="line">&gt; dbf.setFeature(FEATURE, <span class="keyword">false</span>);</span><br><span class="line">&gt; </span><br><span class="line">&gt; <span class="comment">// 禁止加载参数实体</span></span><br><span class="line">&gt; FEATURE = <span class="string">"http://xml.org/sax/features/external-parameter-entities"</span>;</span><br><span class="line">&gt; dbf.setFeature(FEATURE, <span class="keyword">false</span>);</span><br><span class="line">&gt; </span><br><span class="line">&gt; <span class="comment">// 禁用外部dtd</span></span><br><span class="line">&gt; FEATURE = <span class="string">"http://apache.org/xml/features/nonvalidating/load-external-dtd"</span>;</span><br><span class="line">&gt; dbf.setFeature(FEATURE, <span class="keyword">false</span>);</span><br><span class="line">&gt; </span><br><span class="line">&gt; dbf.setXIncludeAware(<span class="keyword">false</span>);</span><br><span class="line">&gt; dbf.setExpandEntityReferences(<span class="keyword">false</span>);</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>还看到有一种feature，貌似是一种安全的XML加载方式，禁止了http、file等一些协议的加载，具体没深究</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">FEATURE = <span class="string">"http://javax.xml.XMLConstants/feature/secure-processing"</span>;</span><br><span class="line">dbf.setFeature(FEATURE, <span class="keyword">true</span>);</span><br></pre></td></tr></table></figure>
+<p>需要注意的是，<strong>设置feature是需要在</strong><code>DocumentBuilder safebuilder = dbf.newDocumentBuilder();</code><strong>之前</strong></p>
+<p>如果在这之后进行操作，还是会存在XXE漏洞。错误示例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();</span><br><span class="line">DocumentBuilder builder = dbf.newDocumentBuilder();</span><br><span class="line">String FEATURE = <span class="keyword">null</span>;</span><br><span class="line">FEATURE = <span class="string">"http://javax.xml.XMLConstants/feature/secure-processing"</span>;</span><br><span class="line">dbf.setFeature(FEATURE, <span class="keyword">true</span>);</span><br><span class="line">FEATURE = <span class="string">"http://apache.org/xml/features/disallow-doctype-decl"</span>;</span><br><span class="line">dbf.setFeature(FEATURE, <span class="keyword">true</span>);</span><br><span class="line">FEATURE = <span class="string">"http://xml.org/sax/features/external-parameter-entities"</span>;</span><br><span class="line">dbf.setFeature(FEATURE, <span class="keyword">false</span>);</span><br><span class="line">FEATURE = <span class="string">"http://xml.org/sax/features/external-general-entities"</span>;</span><br><span class="line">dbf.setFeature(FEATURE, <span class="keyword">false</span>);</span><br><span class="line">FEATURE = <span class="string">"http://apache.org/xml/features/nonvalidating/load-external-dtd"</span>;</span><br><span class="line">dbf.setFeature(FEATURE, <span class="keyword">false</span>);</span><br><span class="line">dbf.setXIncludeAware(<span class="keyword">false</span>);</span><br><span class="line">dbf.setExpandEntityReferences(<span class="keyword">false</span>);</span><br><span class="line">builder.parse(ResourceUtils.getPoc1());</span><br></pre></td></tr></table></figure>
+<p>这样的操作是无效的。</p>
+<h1 id="SAXParserFactory-amp-DOM4J"><a href="#SAXParserFactory-amp-DOM4J" class="headerlink" title="SAXParserFactory &amp; DOM4J"></a>SAXParserFactory &amp; DOM4J</h1><p>这两个的防御方式也是和<code>DocumentBuilder</code>一样的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">SAXParserFactory spf = SAXParserFactory.newInstance();</span><br><span class="line"><span class="comment">// 如果没有特殊需求之开启下面这一句就够了</span></span><br><span class="line">spf.setFeature(<span class="string">"http://apache.org/xml/features/disallow-doctype-decl"</span>, <span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 如果不想完全禁用外部实体，可以设置如下，同理于DocumentBuilder</span></span><br><span class="line">spf.setFeature(<span class="string">"http://xml.org/sax/features/external-general-entities"</span>, <span class="keyword">false</span>);</span><br><span class="line">spf.setFeature(<span class="string">"http://xml.org/sax/features/external-parameter-entities"</span>, <span class="keyword">false</span>);</span><br><span class="line">spf.setFeature(<span class="string">"http://apache.org/xml/features/nonvalidating/load-external-dtd"</span>, <span class="keyword">false</span>);</span><br><span class="line">SAXParser parser = spf.newSAXParser();</span><br><span class="line">parser.parse(ResourceUtils.getPoc1(), (HandlerBase) <span class="keyword">null</span>);</span><br></pre></td></tr></table></figure>
+<p>调用方式也是和之前一样，不能颠倒，先<code>setFeature</code>再<code>newSAXParser</code></p>
+<h1 id="XMLInputFactory"><a href="#XMLInputFactory" class="headerlink" title="XMLInputFactory"></a>XMLInputFactory</h1><p>防御方式</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">XMLInputFactory xmlInputFactory = XMLInputFactory.newFactory();</span><br><span class="line"><span class="comment">// XMLInputFactory.SUPPORT_DTD = "javax.xml.stream.supportDTD"</span></span><br><span class="line">xmlInputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, <span class="keyword">false</span>);</span><br><span class="line"><span class="comment">// XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES = "javax.xml.stream.isSupportingExternalEntities"</span></span><br><span class="line">xmlInputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, <span class="keyword">false</span>);</span><br><span class="line">XMLStreamReader parse = xmlInputFactory.createXMLStreamReader(ResourceUtils.getPoc1());</span><br><span class="line"><span class="keyword">while</span> (parse.hasNext()) &#123;</span><br><span class="line">    parse.next();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当设置了防御参数之后，就不会去解析外部实体的内容</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20190719174543.png" alt></p>
+<h1 id="TransformerFactory-amp-Validator-amp-SchemaFactory-amp-SAXTransformerFactory"><a href="#TransformerFactory-amp-Validator-amp-SchemaFactory-amp-SAXTransformerFactory" class="headerlink" title="TransformerFactory &amp; Validator &amp;  SchemaFactory &amp;  SAXTransformerFactory"></a>TransformerFactory &amp; Validator &amp;  SchemaFactory &amp;  SAXTransformerFactory</h1><p>修复方式都类似，都是设置<code>XMLConstants.ACCESS_EXTERNAL_DTD</code>和<code>XMLConstants.ACCESS_EXTERNAL_SCHEMA</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String ACCESS_EXTERNAL_DTD = <span class="string">"http://javax.xml.XMLConstants/property/accessExternalDTD"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String ACCESS_EXTERNAL_STYLESHEET = <span class="string">"http://javax.xml.XMLConstants/property/accessExternalStylesheet"</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String ACCESS_EXTERNAL_SCHEMA = <span class="string">"http://javax.xml.XMLConstants/property/accessExternalSchema"</span>;</span><br></pre></td></tr></table></figure>
+<p>修复后的错误提示也都是一致的</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20190719175948.png" alt></p>
+<p>每种修复方式都有设置<code>XMLConstants.ACCESS_EXTERNAL_DTD</code></p>
+<p>但<code>XMLConstants.ACCESS_EXTERNAL_STYLESHEET</code>和<code>XMLConstants.ACCESS_EXTERNAL_SCHEMA</code>根据不同场景开启</p>
+<h2 id="TransformerFactory"><a href="#TransformerFactory" class="headerlink" title="TransformerFactory"></a>TransformerFactory</h2><p><code>javax.xml.transform.TransformerFactory</code></p>
+<p>这里是<code>ACCESS_EXTERNAL_STYLESHEET</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">TransformerFactory tf = TransformerFactory.newInstance();</span><br><span class="line">tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, <span class="string">""</span>);</span><br><span class="line">tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, <span class="string">""</span>);</span><br><span class="line">StreamSource source = <span class="keyword">new</span> StreamSource(ResourceUtils.getPoc1());</span><br><span class="line">tf.newTransformer().transform(source, <span class="keyword">new</span> DOMResult());</span><br></pre></td></tr></table></figure>
+<h2 id="Validator"><a href="#Validator" class="headerlink" title="Validator"></a>Validator</h2><p><code>javax.xml.validation.Validator</code></p>
+<p>这里是<code>ACCESS_EXTERNAL_SCHEMA</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">SchemaFactory factory = SchemaFactory.newInstance(<span class="string">"http://www.w3.org/2001/XMLSchema"</span>);</span><br><span class="line">Schema schema = factory.newSchema();</span><br><span class="line">Validator validator = schema.newValidator();</span><br><span class="line">validator.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, <span class="string">""</span>);</span><br><span class="line">validator.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, <span class="string">""</span>);</span><br><span class="line">StreamSource source = <span class="keyword">new</span> StreamSource(ResourceUtils.getPoc1());</span><br><span class="line">validator.validate(source);</span><br></pre></td></tr></table></figure>
+<h2 id="SchemaFactory"><a href="#SchemaFactory" class="headerlink" title="SchemaFactory"></a>SchemaFactory</h2><p><code>javax.xml.validation.SchemaFactory</code></p>
+<p>这里是<code>ACCESS_EXTERNAL_SCHEMA</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SchemaFactory factory = SchemaFactory.newInstance(<span class="string">"http://www.w3.org/2001/XMLSchema"</span>);</span><br><span class="line">factory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, <span class="string">""</span>);</span><br><span class="line">factory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, <span class="string">""</span>);</span><br><span class="line">StreamSource source = <span class="keyword">new</span> StreamSource(ResourceUtils.getPoc1());</span><br><span class="line">Schema schema = factory.newSchema(source);</span><br></pre></td></tr></table></figure>
+<h2 id="SAXTransformerFactory"><a href="#SAXTransformerFactory" class="headerlink" title="SAXTransformerFactory"></a>SAXTransformerFactory</h2><p><code>javax.xml.transform.sax.SAXTransformerFactory</code></p>
+<p>这里是<code>ACCESS_EXTERNAL_STYLESHEET</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SAXTransformerFactory sf = (SAXTransformerFactory) SAXTransformerFactory.newInstance();</span><br><span class="line">sf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, <span class="string">""</span>);</span><br><span class="line">sf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, <span class="string">""</span>);</span><br><span class="line">StreamSource source = <span class="keyword">new</span> StreamSource(ResourceUtils.getPoc1());</span><br><span class="line">sf.newTransformerHandler(source);</span><br></pre></td></tr></table></figure>
+<h1 id="XMLReader"><a href="#XMLReader" class="headerlink" title="XMLReader"></a>XMLReader</h1><p><code>org.xml.sax.XMLReader</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">XMLReader reader = XMLReaderFactory.createXMLReader();</span><br><span class="line">reader.setFeature(<span class="string">"http://apache.org/xml/features/disallow-doctype-decl"</span>, <span class="keyword">true</span>);</span><br><span class="line"><span class="comment">// This may not be strictly required as DTDs shouldn't be allowed at all, per previous line.</span></span><br><span class="line">reader.setFeature(<span class="string">"http://apache.org/xml/features/nonvalidating/load-external-dtd"</span>, <span class="keyword">false</span>);</span><br><span class="line">reader.setFeature(<span class="string">"http://xml.org/sax/features/external-general-entities"</span>, <span class="keyword">false</span>);</span><br><span class="line">reader.setFeature(<span class="string">"http://xml.org/sax/features/external-parameter-entities"</span>, <span class="keyword">false</span>);</span><br><span class="line">reader.parse(<span class="keyword">new</span> InputSource(ResourceUtils.getPoc1()));</span><br></pre></td></tr></table></figure>
+<p>和之前的<code>DocumentBuilder</code>是一样的，假如开启了第一句之后，后面的其实是可以省去的。</p>
+<h1 id="SAXReader"><a href="#SAXReader" class="headerlink" title="SAXReader"></a>SAXReader</h1><p><code>org.dom4j.io.SAXReader</code></p>
+<p>这里比较特殊，<strong>需要将三个防御全部开启</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SAXReader saxReader = <span class="keyword">new</span> SAXReader();</span><br><span class="line">saxReader.setFeature(<span class="string">"http://apache.org/xml/features/disallow-doctype-decl"</span>, <span class="keyword">true</span>);</span><br><span class="line">saxReader.setFeature(<span class="string">"http://xml.org/sax/features/external-general-entities"</span>, <span class="keyword">false</span>);</span><br><span class="line">saxReader.setFeature(<span class="string">"http://xml.org/sax/features/external-parameter-entities"</span>, <span class="keyword">false</span>);</span><br><span class="line">saxReader.read(ResourceUtils.getPoc1());</span><br></pre></td></tr></table></figure>
+<p>在文档中特地标注了这样一句话</p>
+<blockquote>
+<p>Based on testing, if you are missing one of these, you can still be vulnerable to an XXE attack. </p>
+</blockquote>
+<p>如果少了其中一句，还是会存在XXE攻击，至于具体的利用方法，emmm，目前暂未深究。</p>
+<h1 id="SAXBuilder"><a href="#SAXBuilder" class="headerlink" title="SAXBuilder"></a>SAXBuilder</h1><p><code>org.jdom2.input.SAXBuilder</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SAXBuilder builder = <span class="keyword">new</span> SAXBuilder();</span><br><span class="line">builder.setFeature(<span class="string">"http://apache.org/xml/features/disallow-doctype-decl"</span>, <span class="keyword">true</span>);</span><br><span class="line">builder.setFeature(<span class="string">"http://xml.org/sax/features/external-general-entities"</span>, <span class="keyword">false</span>);</span><br><span class="line">builder.setFeature(<span class="string">"http://xml.org/sax/features/external-parameter-entities"</span>, <span class="keyword">false</span>);</span><br><span class="line">Document doc = builder.build(ResourceUtils.getPoc2());</span><br></pre></td></tr></table></figure>
+<p>关于这个，测试的话，仅开启后面两个是没用的。<strong>需要将三个选项全部开启</strong>。</p>
+<h1 id="JAXB-Unmarshaller-amp-XPathExpression"><a href="#JAXB-Unmarshaller-amp-XPathExpression" class="headerlink" title="JAXB Unmarshaller &amp; XPathExpression"></a>JAXB Unmarshaller &amp; XPathExpression</h1><p>这两个操作都不支持直接的设置禁用外部实体，它不能单独安全地配置，因此必须首先通过另一个安全的XML解析器解析不受信任的数据。 </p>
+<h2 id="JAXB-Unmarshaller"><a href="#JAXB-Unmarshaller" class="headerlink" title="JAXB Unmarshaller"></a>JAXB Unmarshaller</h2><p><code>javax.xml.bind.Unmarshaller</code>先生成安全的<code>SAXParserFactory</code>，再通过它来生成安全的<code>Unmarshaller</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Disable XXE</span></span><br><span class="line">SAXParserFactory spf = SAXParserFactory.newInstance();</span><br><span class="line">spf.setFeature(<span class="string">"http://xml.org/sax/features/external-general-entities"</span>, <span class="keyword">false</span>);</span><br><span class="line">spf.setFeature(<span class="string">"http://xml.org/sax/features/external-parameter-entities"</span>, <span class="keyword">false</span>);</span><br><span class="line">spf.setFeature(<span class="string">"http://apache.org/xml/features/nonvalidating/load-external-dtd"</span>, <span class="keyword">false</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//Do unmarshall operation</span></span><br><span class="line">Source xmlSource = <span class="keyword">new</span> SAXSource(spf.newSAXParser().getXMLReader(), </span><br><span class="line">                                <span class="keyword">new</span> InputSource(<span class="keyword">new</span> StringReader(xml)));</span><br><span class="line">JAXBContext jc = JAXBContext.newInstance(Object<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">Unmarshaller um = jc.createUnmarshaller();</span><br><span class="line">um.unmarshal(xmlSource);</span><br></pre></td></tr></table></figure>
+<p>或者其实这样也是可以的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">SAXParserFactory spf = SAXParserFactory.newInstance();</span><br><span class="line">Source xmlSource = <span class="keyword">new</span> SAXSource(spf.newSAXParser().getXMLReader(), </span><br><span class="line">                                <span class="keyword">new</span> InputSource(<span class="keyword">new</span> StringReader(xml)));</span><br><span class="line">xmlReader.setFeature(<span class="string">"http://javax.xml.XMLConstants/feature/secure-processing"</span>, <span class="keyword">true</span>);</span><br><span class="line">xmlReader.setFeature(<span class="string">"http://apache.org/xml/features/disallow-doctype-decl"</span>, <span class="keyword">true</span>);</span><br><span class="line">xmlReader.setFeature(<span class="string">"http://apache.org/xml/features/nonvalidating/load-external-dtd"</span>, <span class="keyword">false</span>);</span><br><span class="line">xmlReader.setFeature(<span class="string">"http://xml.org/sax/features/external-general-entities"</span>, <span class="keyword">false</span>);</span><br><span class="line">xmlReader.setFeature(<span class="string">"http://xml.org/sax/features/external-parameter-entities"</span>, <span class="keyword">false</span>);</span><br><span class="line">JAXBContext jc = JAXBContext.newInstance(Object<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">Unmarshaller um = jc.createUnmarshaller();</span><br><span class="line">um.unmarshal(xmlSource);</span><br></pre></td></tr></table></figure>
+<p>然而其实还存在一种默认的写法，但是不会被日，<strong>无需开启防御选项</strong>（感觉正常人应该都是用这种写法的吧）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Class tClass = Some<span class="class">.<span class="keyword">class</span></span>;</span><br><span class="line">JAXBContext context = JAXBContext.newInstance(tClass);</span><br><span class="line">Unmarshaller um = context.createUnmarshaller();</span><br><span class="line">Object o = um.unmarshal(ResourceUtils.getPoc1());</span><br><span class="line">tClass.cast(o);</span><br></pre></td></tr></table></figure>
+<h2 id="XPathExpression"><a href="#XPathExpression" class="headerlink" title="XPathExpression"></a>XPathExpression</h2><p><code>javax.xml.xpath.XPathExpression</code>，与<code>Unmarshaller</code>类似</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">DocumentBuilderFactory df = DocumentBuilderFactory.newInstance();</span><br><span class="line">df.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, <span class="string">""</span>);</span><br><span class="line">df.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, <span class="string">""</span>);</span><br><span class="line"></span><br><span class="line">XPathFactory xpathFactory = XPathFactory.newInstance();</span><br><span class="line">XPath xpath = xpathFactory.newXPath();</span><br><span class="line">XPathExpression expr = xpath.compile(<span class="string">"/person"</span>);</span><br><span class="line">DocumentBuilder builder = df.newDocumentBuilder();</span><br><span class="line">String result = expr.evaluate( builder.parse(ResourceUtils.getPoc1()));</span><br></pre></td></tr></table></figure>
+<h1 id="XMLDecoder"><a href="#XMLDecoder" class="headerlink" title="XMLDecoder"></a>XMLDecoder</h1><p><code>java.beans.XMLDecoder</code></p>
+<p>无解，等死吧，有解的话weblogic也就没那么多事了。</p>
+<h1 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h1><p>不同的xml解析器的防御方式不尽相同，但大致可以分为如下几种。</p>
+<p>也可以根据当前XXE的报错来知道大概是使用了哪种防御方式。</p>
+<h2 id="setFeature"><a href="#setFeature" class="headerlink" title="setFeature"></a>setFeature</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">xmlReader.setFeature(<span class="string">"http://javax.xml.XMLConstants/feature/secure-processing"</span>, <span class="keyword">true</span>);</span><br><span class="line">xmlReader.setFeature(<span class="string">"http://apache.org/xml/features/disallow-doctype-decl"</span>, <span class="keyword">true</span>);</span><br><span class="line">xmlReader.setFeature(<span class="string">"http://apache.org/xml/features/nonvalidating/load-external-dtd"</span>, <span class="keyword">false</span>);</span><br><span class="line">xmlReader.setFeature(<span class="string">"http://xml.org/sax/features/external-general-entities"</span>, <span class="keyword">false</span>);</span><br><span class="line">xmlReader.setFeature(<span class="string">"http://xml.org/sax/features/external-parameter-entities"</span>, <span class="keyword">false</span>);</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20190719145802.png" alt></p>
+<h2 id="XMLConstants"><a href="#XMLConstants" class="headerlink" title="XMLConstants"></a>XMLConstants</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">df.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, <span class="string">""</span>);</span><br><span class="line">df.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, <span class="string">""</span>);</span><br><span class="line">df.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, <span class="string">""</span>);</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20190719175948.png" alt></p>
+<h2 id="XMLInputFactory-1"><a href="#XMLInputFactory-1" class="headerlink" title="XMLInputFactory"></a>XMLInputFactory</h2><p>这个比较小众</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">xmlInputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, <span class="keyword">false</span>);</span><br><span class="line">xmlInputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, <span class="keyword">false</span>);</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20190719174543.png" alt></p>
+<h2 id="防御策略"><a href="#防御策略" class="headerlink" title="防御策略"></a>防御策略</h2><p>由于一些需要开启全部选项才能防御的，而有些只要开启其中一部分选项就能进行防御。</p>
+<p>面对这种情况，作为防御方，我们可以采取<code>security default</code>原则，让开发者尽可能的开启全部防御选项。</p>
+<p>至于其他一些第三方库，比如<code>org.apache.poi</code>这种，则也是在内部调用了<code>SAXReader</code>这些库，并且没有设置禁用DTD。对于这种只需要升级到最新的版本即可解决。</p>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><ul>
+<li><a href="https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html" target="_blank" rel="noopener">https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html</a>  官方文档</li>
+<li><a href="http://www.leadroyal.cn/?p=562" target="_blank" rel="noopener">http://www.leadroyal.cn/?p=562</a>  大哥博客</li>
+<li><a href="https://github.com/LeadroyaL/java-xxe-defense-demo" target="_blank" rel="noopener">https://github.com/LeadroyaL/java-xxe-defense-demo</a> 测试代码</li>
+</ul>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2019/07/Fastjson反序列化漏洞-1-2-24-1-2-48/" data-toggle="tooltip" data-placement="top" title="Fastjson反序列化漏洞 1.2.24-1.2.48">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2019/05/Jackson-databind-反序列化分析/" data-toggle="tooltip" data-placement="top" title="Jackson-databind 反序列化分析">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#XXE" title="XXE">XXE</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

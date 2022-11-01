@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          sqli-labs练习（less23-38） - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2017/12/sqli-labs练习(less23-38)/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                    </div>
+                    <h1>sqli-labs练习（less23-38）</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2017-12-17
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h3 id="less-23"><a href="#less-23" class="headerlink" title="less-23"></a>less-23</h3><p>常规的单引号测试，出错 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/12c4c1430998a89b64074988c09851fe.png" alt> 然后用#闭合，好像不行。。。编码一下。。好像也不行。。。试一下–+。。怎么还是不行。。。 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/21fae53becf20d4641ff9c9aea9a97b0.png" alt> 查看源码之后发现，把注释符都改为空了，而不难发现之前的报错语句都是一样的 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/0867143cf0bc40ff04b228806fec6844.png" alt> 于是可以用 or ‘1’=’1闭合 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/5bff698b90434565d5fd5f665806b6b4.png" alt> 这个没问题，可是好像获取不到数据。。于是得换一种注释方式（要提前测试字段数） <img src="http://www.kingkk.com/wp-content/uploads/2017/12/2544862e6c33d041b37e6695d04cd1be.png" alt> 然后就可以开始提取数据了 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/3c72e7aabb25fca70d03c7aedd7472e1.png" alt> 还发现一种注入姿势，好像再多用一个单引号把后面引起来也可以，这样也可以执行 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/7687d6f9427c3123f81a01e89cef3342.png" alt> 因为这里后面的语句是limit 0,1 对返回也没什么影响，所以是可以那么做 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/babf93d225499f934cfa739cc0e5564d.png" alt>    </p>
+<h3 id="less-24"><a href="#less-24" class="headerlink" title="less-24"></a>less-24</h3><p>一个完整的登录、修改、创建用户的网站 还是去审计下代码把。发现过滤还是蛮严格的 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/6169ddca1950849227be196c99d3e6bf.png" alt> <img src="http://www.kingkk.com/wp-content/uploads/2017/12/d9121aea61808219c5ad1a60b2547aac.png" alt> 最后，pass_change中貌似有一个参数可以利用 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/48999e59429a52345ab4989756079135.png" alt> session和cookie不一样，它保存在服务器端，不能直接进行修改，但是没事，可以创建一个这样包含sql注入语句的用户名，先审查下注入语句 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/1c05714c2869927cbc0569d150a37ca8.png" alt> 那应该注册一个admin’ #这样的用户名，先试试把，登录进入，然后改密码 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/be6ecddadab9b0edfcc41aabd6ff1c22.png" alt> 看来思路没错 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/4da68fece45b5de116185c8f27b2da80.png" alt>    </p>
+<h3 id="less-25"><a href="#less-25" class="headerlink" title="less-25"></a>less-25</h3><p>题目很明显地说明了过滤了or和and，从报错中也能看出来，这样的话，那大不了就不用呗 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/f838726354a239642c882b16b8cd42a1.png" alt> 看了下别人的思路。。他们貌似是用or ‘1’=’1绕过的，那也就跟着学一手吧 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/63fb028e1525600992c4acf81f4ea20f.png" alt>开启了大小写匹配，那么大小写的话估计是绕不过了 第一种的话是利用算术运算符了</p>
+<h3 id><a href="#" class="headerlink" title></a><img src="http://www.kingkk.com/wp-content/uploads/2017/12/c276605d65c79baa2f22df7e12045512.png" alt></h3><p>用&amp;&amp;的时候注意下要url编码 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/077e1317fe393a44e095bb396dcd93e3.png" alt> 第二种方法就双写oorr,anandd,这种</p>
+<h3 id="-1"><a href="#-1" class="headerlink" title></a><img src="http://www.kingkk.com/wp-content/uploads/2017/12/507aaee4ee51e902be3a06a3c5cf844b.png" alt></h3><h3 id="less-25a"><a href="#less-25a" class="headerlink" title="less-25a"></a>less-25a</h3><p>和上面一样，就是关了报错，而且没有引号引起来了 不过感觉没有报错，有点不是很清楚改怎么判断是双引号还是单引号还是没有引号这种了倒是      </p>
+<h3 id="less-26"><a href="#less-26" class="headerlink" title="less-26"></a>less-26</h3><p>这里就有点酷炫 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/7f9475981636fd911b420b046bbe40e2.png" alt> 貌似是过滤了空格，然后试一下常用的替代空格的多行注释/**/貌似也不行。 无奈看了下源码，过滤了蛮多东西的还是 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/b7cb0f743394db72a96272a065252f0d.png" alt> 学着大佬写了个脚本尝试了下，什么字节能代替空格，脚本如下</p>
+<p>#encoding=utf8<br>from time import time<br>import requests </p>
+<p>url = ‘<a href="http://localhost/sqli-labs-master/Less-26/&#39;" target="_blank" rel="noopener">http://localhost/sqli-labs-master/Less-26/&#39;</a></p>
+<p>def to_hex(i):<br>    h = hex(i)[2:]<br>    if len(h)&lt;2:<br>        h = ‘0’+h<br>    h = ‘%’+h<br>    return h</p>
+<p>def main():<br>    for i in xrange(0,256):<br>        url = “<a href="http://localhost/sqli-labs-master/Less-26/?id=1&#39;union{0}select{0}1,2,3" target="_blank" rel="noopener">http://localhost/sqli-labs-master/Less-26/?id=1&#39;union{0}select{0}1,2,3</a> ‘“.format(to_hex(i))<br>        r = requests.get(url)<br>        if ‘Dumb’ in r.text:<br>            print to_hex(i)</p>
+<p>if __name__ == ‘__main__‘:<br>    main()</p>
+<p>写脚本的时候出现过一个问题，就是不能将id参数通过params的方式传入，貌似会将其进行url编码，导致注入不了，只能直接跟在url的后面 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/4f29902ae75ee89de1486602b61f471a.png" alt>跑出来就一个吧，那就用这个代替空格就好了 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/00efc8a6db36b1e026225a96c7aa8e6e.png" alt>    </p>
+<h3 id="less-26a"><a href="#less-26a" class="headerlink" title="less-26a"></a>less-26a</h3><p>和前面一个类似，就是闭合的方式不一样， 附上payload <code>?id=1&#39;) union%a0select%a01,2,3 || &#39;1&#39;=(&#39;1</code> <img src="http://www.kingkk.com/wp-content/uploads/2017/12/92d83288f8df63154f597f5c5bd7be78.png" alt> 这里貌似因为括号的原因，直接再多用一个引号的方式不行 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/8eb86cd7358162ca1136bcb8121fbbc0.png" alt> 对比下之前可以的语句</p>
+<h3 id="-2"><a href="#-2" class="headerlink" title></a><img src="http://www.kingkk.com/wp-content/uploads/2017/12/0cbdbd8a4ec7447ed33fad0f02b256b5.png" alt></h3><h3 id="less-27"><a href="#less-27" class="headerlink" title="less-27"></a>less-27</h3><p>这里说明一下判断过滤什么符号的方式把，就直接把怀疑要过滤的符号放到可以执行的参数之前，如下 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/1353a539ea7a30f59e067b193de197b8.png" alt> 返回结果和只输入一个1时一样，就表示被过滤 这里就很惨了union、select都被过滤了，看了下源码 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/1725920e2cd1710912df6b3c190052f3.png" alt> 好像没有开启i大小写匹配模式，那就可以大小写混合绕过 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/490c6b743dbc9ec43b5b288e60edaea6.png" alt> 不得不说这个%a0还是蛮好用的    </p>
+<h3 id="less-27a"><a href="#less-27a" class="headerlink" title="less-27a"></a>less-27a</h3><p>和之前好像差不多，payload: <code>?id=55&quot;unIOn%a0selEct%a01,2,3 &quot;</code> <img src="http://www.kingkk.com/wp-content/uploads/2017/12/4d0b164dd8c61dfda171f598047359f5.png" alt>    </p>
+<h3 id="less-28"><a href="#less-28" class="headerlink" title="less-28"></a>less-28</h3><p>这里遇到一个问题，直接加引号注释的方式，在遇到括号的时候会这个样子 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/8cc76416670201996bce0d1ff6085e7a.png" alt> 所以当两个引号能注释成功时，并不能判定有没有括号，果然自己发现的方法还是有些缺陷，用 or ‘1’=’1这种貌似就不会这样 附上上payload： <code>?id=55&#39;)union%a0select%a01,(select%a0password%a0from%a0users%a0limit%a00,1),(3)%a0or &#39;1&#39;=(&#39;1</code> （select与union之间要有空格，or前面也要有空格，反正不知道的话就多加几个好了） <img src="http://www.kingkk.com/wp-content/uploads/2017/12/749cd04a0755a94cf039859e3e91c7d1.png" alt>    </p>
+<h3 id="less-28a"><a href="#less-28a" class="headerlink" title="less-28a"></a>less-28a</h3><p><img src="http://www.kingkk.com/wp-content/uploads/2017/12/e604629a1a75d301d6ae0f7851500648.png" alt> 过滤了union select的组合，那就只能盲注入了 改一下less-7的脚本就行了 把id的值改一下即可<code>&quot;1&#39; and ascii(substr(({2}),{1},1))&gt;{0} and &#39;1&#39;=&#39;1&quot;.format(x,i,sql)</code>     由于借鉴博客的那位大佬不更了，后面的都是自己写的，可能有点粗糙</p>
+<h3 id="less-29"><a href="#less-29" class="headerlink" title="less-29"></a>less-29</h3><p>不是很懂题目什么意思，好像直接绕过就行 payload: <code>?id=aa&#39;union select 1,(select password from users limit 0,1),3 %23</code> <img src="http://www.kingkk.com/wp-content/uploads/2017/12/afb9090a2593656b20dab27ed89374f9.png" alt> 后来发现，好像除了index.php,还多了hacked.php、login.php两个页面，不妨先进login看看 测试下单引号 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/643a5d18639f4357b1dc82a333431e5a.png" alt> 貌似被waf拦了下来，而且跳转到了hacked.php页面，那就来分析下这个waf吧 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/a09978287493a4cfd1b14a56073fab25.png" alt> $_SERVER[‘QUERY_STRING’]这个函数取得就是这一部分 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/fa1608d7d6befc2ed555b107e2fc65e3.png" alt> 然后传到java_implimentation这个函数里进行处理 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/56635b3ac8752b52b65286fda1026be5.png" alt> 单纯的切片操作，通过&amp;将传入的参数分离，然后前两个值为id的然后将后面的内容返回 返回后交给whirelist函数处理 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/40fd24380ef6508f5d60beee47d89a0d.png" alt> 若不是纯数字，就跳转到hacked.php页面 这样的话java_implimentation这个函数对于参数的处理过于粗糙，就可以构造这样以一个payload: <code>?idd32&amp;id=-1&#39; union select 1,2,3 or &#39;1&#39;=&#39;1</code>来绕过这个waf 只要前两个值为id,第三个之后纯数字即可 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/81ef4f4cdb98f8f85b3eb11ae7298623.png" alt>    </p>
+<h3 id="less-30"><a href="#less-30" class="headerlink" title="less-30"></a>less-30</h3><p>无waf的页面把29的单引号改成双引号即可 payload: <code>?id=aa&quot;union select 1,(select password from users limit 0,1),3 %23</code> <img src="http://www.kingkk.com/wp-content/uploads/2017/12/67312c3352f2a95e28f0aeefaf3f97b2.png" alt> 进login.php 和猜想的一样，也是改引号即可 payload: <code>?idd32&amp;id=-1&quot; union select 1,2,3 or &#39;1&#39;=&quot;1</code> <img src="http://www.kingkk.com/wp-content/uploads/2017/12/eb921b6df7e5539f914f9170393db14d.png" alt>  </p>
+<h3 id="less-31"><a href="#less-31" class="headerlink" title="less-31"></a>less-31</h3><p>测试了下双引号，然后报错 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/5db6e83f77dab0a1129933b8c6873b7f.png" alt> 根据报错闭合括号就行 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/394a123dc8843bd0294041e080dfe794.png" alt> 那么这样的话login.php也同理 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/71222bff781c717c94abcb3bf1ce48e7.png" alt>      </p>
+<h3 id="less-32"><a href="#less-32" class="headerlink" title="less-32"></a>less-32</h3><p>加入单引号测试时，发现将单引号转义 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/f6ba3381e5ae8daace6a228b6e0425b4.png" alt> 查看下源码 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/748d59221fd7e48a8e49a11a8bbd2cd9.png" alt> 其实自己看着也有点晕，反正意思就是说通过正则匹配，将单引号’ 双引号” 反斜杠\ 都在加一个反斜杠进行转义 \‘ \“ \\ 这样的话，试试宽字节注入 宽字节注入原理，就是通过unicode编码的原理，根据前两位的值判断接下来字节的大小，这样就可以将转义后的反斜杠\一并纳入字符中，使其消失转义的功能，通俗的说法就是吃掉一个反斜杠\ <img src="http://www.kingkk.com/wp-content/uploads/2017/12/3301442d6eb0cada489ffc54b5d55083.png" alt> 报错了，那就表示有效，那就继续 附上payload: <code>?id=-1%df&#39;union select 1,2,3%23</code> <img src="http://www.kingkk.com/wp-content/uploads/2017/12/e02dbb03a931237abac88bca06de25fc.png" alt>    </p>
+<h3 id="less-33"><a href="#less-33" class="headerlink" title="less-33"></a>less-33</h3><p>payload和之前的一样 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/23fb5a3f98092dda8d2f581f50c08d86.png" alt> 看了下源码，<img src="http://www.kingkk.com/wp-content/uploads/2017/12/f18e433fb558c570a24f4ea48a8d87c3.png" alt>其实这个过滤的方式和上一个差不多  </p>
+<h3 id="less-34"><a href="#less-34" class="headerlink" title="less-34"></a>less-34</h3><p>利用宽字节在post里注入，原理其实都一样 <a href="http://blog.csdn.net/u012763794/article/details/51457142" target="_blank" rel="noopener"><img src="http://www.kingkk.com/wp-content/uploads/2017/12/94c97f7509f5e8d62d68acb957af4817.png" alt></a>    </p>
+<h3 id="less-35"><a href="#less-35" class="headerlink" title="less-35"></a>less-35</h3><p>测试一下，发现好像不需要引号，那就连宽字节都不用了？可能没懂出题人意思 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/275ac365bb17e1637ca38b03246bc12d.png" alt>    </p>
+<h3 id="less-36"><a href="#less-36" class="headerlink" title="less-36"></a>less-36</h3><p>好像和之前一样？ <img src="http://www.kingkk.com/wp-content/uploads/2017/12/1d2721f5115de2cd69b09fb0f10d19b7.png" alt> 看了下源码，这里是通过mysql_real_escape_string这个函数过滤的 php官方手册对这个函数的解释是</p>
+<p><strong>mysql_real_escape_string()</strong> 调用mysql库的函数 mysql_real_escape_string, 在以下字符前添加反斜杠: <em>\x00</em>, <em>\n</em>, <em>\r</em>, __, _’_, _”_ 和 <em>\x1a</em>.</p>
+<p>为了安全起见，在像MySQL传送查询前，必须调用这个函数（除了少数例外情况）。</p>
+<p>但是这个函数依旧可以用宽字节吃掉转义的反斜杠    </p>
+<h3 id="less-37"><a href="#less-37" class="headerlink" title="less-37"></a>less-37</h3><p>还是在post里面使用宽字节吃掉反斜杠 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/d14cbc108854ee4eae7a41e26527881a.png" alt>      </p>
+<h3 id="less-38"><a href="#less-38" class="headerlink" title="less-38"></a>less-38</h3><p>一样的意思 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/4731f0000686116081870f66ad17599e.png" alt>         这里主要用了三个函数过滤 preg_replace（），addslashes()，mysql_real_escape_string() 都可以通过宽字节进行绕过，所以在写代码的时候光用这三个函数是远远不够的 不过宽字节貌似只有在gbk字符集下才能使用，所以在传入sql之前会进行字符集的指定<img src="http://www.kingkk.com/wp-content/uploads/2017/12/66d75caef81eb13a41c85be45f77d745.png" alt> 否则的话 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/d7226981d9331e207304e4721c53b639.png" alt>           依旧感谢 <a href="http://blog.csdn.net/u012763794/article/details/51457142" target="_blank" rel="noopener">http://blog.csdn.net/u012763794/article/details/51457142</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2017/12/进入期末准备/" data-toggle="tooltip" data-placement="top" title="进入期末准备">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2017/12/sqli-labs练习(less11-22)/" data-toggle="tooltip" data-placement="top" title="sqli-labs练习（less11-22）">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

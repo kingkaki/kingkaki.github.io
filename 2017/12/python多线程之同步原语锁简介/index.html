@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Python 多线程之同步原语--锁与信号量简介 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2017/12/python多线程之同步原语锁简介/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                    </div>
+                    <h1>Python 多线程之同步原语--锁与信号量简介</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2017-12-07
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>锁<br>-</p>
+<p>先介绍一下锁引入的原因以及锁的主要是为了结尾哪一类的问题。先看如下的试例：</p>
+<p>#encoding=utf8<br>from atexit import register<br>from random import randrange<br>from threading import Thread, currentThread<br>from time import sleep, ctime</p>
+<p>class CleanOutputSet(set): #重载了__str__方法的set<br>    def __str__(self):<br>        return ‘,’.join(x for x in self)</p>
+<p>loops = (randrange(2,5) for x in xrange(randrange(2,5)))<br>remaining = CleanOutputSet()  #剩余进程的列表</p>
+<p>def loop(nsec):<br>    myname = currentThread().name<br>    remaining.add(myname)<br>    print ‘[%s] started %s ‘%(ctime(),myname)<br>    sleep(nsec)<br>    remaining.remove(myname)<br>    print ‘[%s] completed %s (%d secs)’%(ctime(),myname,nsec)<br>    print ‘(remaining:%s)’%(remaining or ‘NONE’)  #remaining不为空则打印remaining,否则打印‘NONE’</p>
+<p>def main():<br>    for pause in loops:        #创建并启动所有进程<br>        Thread(target=loop,args=(pause,)).start() </p>
+<p>@register<br>def _atexit():<br>    print ‘all DONE at:’,ctime()</p>
+<p>if __name__ == ‘__main__‘:<br>    main()</p>
+<p>简单介绍一下上面代码，主要目的就是为了随机生成2-4个线程，每个线程随机执行2-4秒，然后每个线程结束后打印剩下的线程。 执行之后的一次结果如下：</p>
+<p>[Thu Dec 07 21:04:47 2017] started Thread-1<br>[Thu Dec 07 21:04:47 2017] started Thread-2<br>[Thu Dec 07 21:04:47 2017] started Thread-3<br>[Thu Dec 07 21:04:49 2017] completed Thread-1 (2 secs)<br>(remaining:Thread-3,Thread-2)<br>[Thu Dec 07 21:04:51 2017] completed Thread-3 (4 secs)[Thu Dec 07 21:04:51 2017] completed Thread-2 (4 secs)</p>
+<p>(remaining:NONE)(remaining:NONE)</p>
+<p>all DONE at: Thu Dec 07 21:04:51 2017</p>
+<p>可以很明显的发现Thread-3与Thread-2同时结束并打印出了提示语句，并且同时对remaining这个集合进行remove以及打印的操作。 导致了打印语句出现在了同一排，并且两个换行符号同时打印出来，而且所打印的remaining集合都为空  </p>
+<h5 id="这就涉及到了一个问题，两线程在同时修改一个变量"><a href="#这就涉及到了一个问题，两线程在同时修改一个变量" class="headerlink" title="这就涉及到了一个问题，两线程在同时修改一个变量"></a>这就涉及到了一个问题，<strong>两线程在同时修改一个变量</strong></h5><p>这时，也就引出了<strong>锁</strong>的概念。<strong>用以防止多个线程同时进入临界区</strong>。 用threading中的Lock函数，对上面的代码进行改进，得到如下代码</p>
+<p>#encoding=utf8<br>from atexit import register<br>from random import randrange<br>from threading import Thread, currentThread, Lock<br>from time import sleep, ctime<br>lock = Lock()</p>
+<p>class CleanOutputSet(set):<br>    def __str__(self):<br>        return ‘,’.join(x for x in self)</p>
+<p>loops = (randrange(2,5) for x in xrange(randrange(2,5)))<br>remaining = CleanOutputSet()  </p>
+<p>def loop(nsec):<br>    myname = currentThread().name<br>    <strong>lock.acquire()</strong><br>    remaining.add(myname)<br>    print ‘[%s] started %s ‘%(ctime(),myname)<br>    <strong>lock.release()</strong>     sleep(nsec)<br>    <strong>lock.acquire()</strong>     remaining.remove(myname)<br>    print ‘[%s] completed %s (%d secs)’%(ctime(),myname,nsec)<br>    print ‘(remaining:%s)’%(remaining or ‘NONE’)<br>    <strong>lock.release()</strong></p>
+<p>def main():<br>    for pause in loops:<br>        Thread(target=loop,args=(pause,)).start() </p>
+<p>@register<br>def _atexit():<br>    print ‘all DONE at:’,ctime()</p>
+<p>if __name__ == ‘__main__‘:<br>    main()</p>
+<p>通过对输入框以及对集合操作的上锁，即使多次运行该程序，也不会出现之前在多线程处理同一块数据的问题</p>
+<p>[Thu Dec 07 21:16:37 2017] started Thread-1<br>[Thu Dec 07 21:16:37 2017] started Thread-2<br>[Thu Dec 07 21:16:37 2017] started Thread-3<br>[Thu Dec 07 21:16:39 2017] completed Thread-3 (2 secs)<br>(remaining:Thread-2,Thread-1)<br>[Thu Dec 07 21:16:40 2017] completed Thread-2 (3 secs)<br>(remaining:Thread-1)<br>[Thu Dec 07 21:16:41 2017] completed Thread-1 (4 secs)<br>(remaining:NONE)<br>all DONE at: Thu Dec 07 21:16:41 2017</p>
+<p><strong>tips:</strong> 这里更推荐大家使用python2.5及之后版本推出的<strong>上下文管理器</strong>对锁进行操作。 也只需将</p>
+<p> <strong>lock.acquire()</strong><br> remaining.remove(myname)<br> print ‘[%s] completed %s (%d secs)’%(ctime(),myname,nsec)<br> print ‘(remaining:%s)’%(remaining or ‘NONE’)<br> <strong>lock.release()</strong></p>
+<p>改成</p>
+<p><strong>with lock:</strong><br>  remaining.remove(myname)<br>  print ‘[%s] completed %s (%d secs)’%(ctime(),myname,nsec)<br>  print ‘(remaining:%s)’%(remaining or ‘NONE’)</p>
+<p>以减少上锁（acquire）以及解锁（release）的重复操作，也使代码更加易懂    </p>
+<h2 id="信号量"><a href="#信号量" class="headerlink" title="信号量"></a>信号量</h2><p>信号量的产生主要用于多线程之间竞争有限个资源的情况。 相当于一个计数器，记录着实时资源的个数，当资源个数为0时，便无法使用该资源，当资源个数超过最大值时，也无法往其中加载资源。 如下为一个糖果机示例，糖果意味着资源，糖果的购买与填充，相当于资源的使用与返回。购买与填充同时使用着糖果这个资源池。</p>
+<p>#encoding=utf8<br>from atexit import register<br>from random import randrange<br>from threading import BoundedSemaphore, Lock, Thread<br>from time import sleep, ctime</p>
+<p>lock = Lock()<br>MAX = 5<br>candytray = BoundedSemaphore(MAX)  #设置资源计数器，计数器的值不会超过设定的MAX</p>
+<p>def refill():<br>    with lock:<br>        print ‘Refilling candy…’,<br>        try:<br>            candytray.release()  #尝试从资源池中释放一个资源<br>        except ValueError:<br>            print ‘full,skipping’<br>        else:<br>            print ‘OK’</p>
+<p>def buy():<br>    with lock:<br>        print ‘Buying candy…’,<br>        if candytray.acquire(False): #检测资源是否被消耗完，传入Flase,时调用不阻塞（默认阻塞），可以直接进入else语句<br>            print ‘OK’<br>        else:<br>            print ‘empty, skipping’</p>
+<p>def producer(loops):<br>    for i in xrange(loops):<br>        refill()<br>        sleep(randrange(3))</p>
+<p>def consumer(loops):<br>    for i in xrange(loops):<br>        buy()<br>        sleep(randrange(3))</p>
+<p>def main():<br>    print ‘starting at:’,ctime()<br>    nloops = randrange(2,6)<br>    print ‘THE CANDY MACHINE (full with {0} bars)!’.format(MAX)<br>    Thread(target=consumer,args=(randrange(nloops,nloops+MAX+2),)).start()         </p>
+<pre><code>                #创建购买该糖果线程（为了出现糖果为空，购买次数应尽量大于填充次数）
+Thread(target=producer,args=(nloops,)).start()      #创建填充糖果线程
+</code></pre><p>@register<br>def _atexit():<br>    print ‘all DONE at:’,ctime()</p>
+<p>if __name__ == ‘__main__‘:<br>    main()</p>
+<p>其中一次运行结果如下</p>
+<p>starting at: Sat Dec 09 16:23:46 2017<br>THE CANDY MACHINE (full with 5 bars)!<br>Buying candy… OK<br>Buying candy… OK<br>Buying candy… OK<br>Refilling candy… OK<br>Buying candy… OK<br>Buying candy… OK<br>Refilling candy… OK<br>Buying candy… OK<br>Refilling candy… OK<br>Buying candy… OK<br>Refilling candy… OK<br>Refilling candy… OK<br>all DONE at: Sat Dec 09 16:23:54 2017</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2017/12/python用queuequeue模块来实现多线程间通信/" data-toggle="tooltip" data-placement="top" title="Python 用Queue/queue模块来实现多线程间通信">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2017/12/python-threading模块中thread类简介/" data-toggle="tooltip" data-placement="top" title="Python threading模块中Thread类简介">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

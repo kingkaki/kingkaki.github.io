@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          2018 0ctf-ezdoor分析 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/04/2018-0ctf-ezdoor分析/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                    </div>
+                    <h1>2018 0ctf-ezdoor分析</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-04-06
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这道题主要是利用了php的缓存技术——opcache，本意应该是上传一个特制的.bin文件，覆盖缓存文件，导致文件覆盖。<br>还有一种解法是一种比较清奇，至今不是很懂的骚操作。总之，很强👍  </p>
+<h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><p>来到首页，可以看到源码<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line">error_reporting(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">$dir = <span class="string">'sandbox/'</span> . sha1($_SERVER[<span class="string">'REMOTE_ADDR'</span>]) . <span class="string">'/'</span>;</span><br><span class="line"><span class="keyword">if</span>(!file_exists($dir))&#123;</span><br><span class="line">  mkdir($dir);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span>(!file_exists($dir . <span class="string">"index.php"</span>))&#123;</span><br><span class="line">  touch($dir . <span class="string">"index.php"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">clear</span><span class="params">($dir)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">if</span>(!is_dir($dir))&#123;</span><br><span class="line">    unlink($dir);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">foreach</span> (scandir($dir) <span class="keyword">as</span> $file) &#123;</span><br><span class="line">    <span class="keyword">if</span> (in_array($file, [<span class="string">"."</span>, <span class="string">".."</span>])) &#123;</span><br><span class="line">      <span class="keyword">continue</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    unlink($dir . $file);</span><br><span class="line">  &#125;</span><br><span class="line">  rmdir($dir);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">switch</span> ($_GET[<span class="string">"action"</span>] ?? <span class="string">""</span>) &#123;</span><br><span class="line">  <span class="keyword">case</span> <span class="string">'pwd'</span>:</span><br><span class="line">    <span class="keyword">echo</span> $dir;</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">  <span class="keyword">case</span> <span class="string">'phpinfo'</span>:</span><br><span class="line">    <span class="keyword">echo</span> file_get_contents(<span class="string">"phpinfo.txt"</span>);</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">  <span class="keyword">case</span> <span class="string">'reset'</span>:</span><br><span class="line">    clear($dir);</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">  <span class="keyword">case</span> <span class="string">'time'</span>:</span><br><span class="line">    <span class="keyword">echo</span> time();</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">  <span class="keyword">case</span> <span class="string">'upload'</span>:</span><br><span class="line">    <span class="keyword">if</span> (!<span class="keyword">isset</span>($_GET[<span class="string">"name"</span>]) || !<span class="keyword">isset</span>($_FILES[<span class="string">'file'</span>])) &#123;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ($_FILES[<span class="string">'file'</span>][<span class="string">'size'</span>] &gt; <span class="number">100000</span>) &#123;</span><br><span class="line">      clear($dir);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    $name = $dir . $_GET[<span class="string">"name"</span>];</span><br><span class="line">    <span class="keyword">if</span> (preg_match(<span class="string">"/[^a-zA-Z0-9.\/]/"</span>, $name) ||</span><br><span class="line">      stristr(pathinfo($name)[<span class="string">"extension"</span>], <span class="string">"h"</span>)) &#123;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    move_uploaded_file($_FILES[<span class="string">'file'</span>][<span class="string">'tmp_name'</span>], $name);</span><br><span class="line">    $size = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">foreach</span> (scandir($dir) <span class="keyword">as</span> $file) &#123;</span><br><span class="line">      <span class="keyword">if</span> (in_array($file, [<span class="string">"."</span>, <span class="string">".."</span>])) &#123;</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      $size += filesize($dir . $file);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> ($size &gt; <span class="number">100000</span>) &#123;</span><br><span class="line">      clear($dir);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">  <span class="keyword">case</span> <span class="string">'shell'</span>:</span><br><span class="line">    ini_set(<span class="string">"open_basedir"</span>, <span class="string">"/var/www/html/$dir:/var/www/html/flag"</span>);</span><br><span class="line">    <span class="keyword">include</span> $dir . <span class="string">"index.php"</span>;</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">  <span class="keyword">default</span>:</span><br><span class="line">    highlight_file(<span class="keyword">__FILE__</span>);</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>大致意思就是，可以上传一个后缀名不含‘p’的文件，可以运行的文件为index.php。<br>还有一些可以查看时间戳，沙箱路径，清理文件的功能。<br>大体思路就是，通过上传，控制index.php文件，读取flag目录下的文件，从而获取flag。</p>
+<hr>
+<p>可以先查看以下phpinfo。可以看到开启了opcache缓存技术<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/59877c27f3fb0bf7a0580a6545d075af.png" alt> </p>
+<p>开启file_cache之后，在apache上运行的文件都会在/tmp/cache（配置文件中自我指定）<br>下生成对应文件目录下的bin文件。 具体关于opcache的file_cache攻击原理可以参考如下文章<br><a href="http://gosecure.net/2016/04/27/binary-webshell-through-opcache-in-php-7/" target="_blank" rel="noopener">http://gosecure.net/2016/04/27/binary-webshell-through-opcache-in-php-7/</a><br>或者一些国内的译文 <a href="https://www.exehack.net/3272.html" target="_blank" rel="noopener">https://www.exehack.net/3272.html</a><br>控制缓存文件文件主要需要获得两个参数，<strong>timestamp</strong>以及<strong>opcache_id</strong> <strong>timestamp </strong>.bin文件建立时的时间戳（需要与源文件最后更改的时间戳一致时，才能运行.bin，否则会重新生成）<br><strong>opcache_id</strong>主要是根据php_version、zend_extension_id、zend_bin_id这三个参数计算得出的。（</p>
+<p>这三个参数都可以从phpinfo中获取） 计算公式：</p>
+<p>system_id = hashlib.md5((php_version+zend_extension_id+zend_bin_id).encode(‘utf8’)).hexdigest()</p>
+<p><strong>System ID</strong> : 7badddeddbd076fe8352e80d8ddf3e73<br><strong>获取时间戳</strong>：获取reset时会暂时删除index.php文件，再次访问就会重新生成，即可获得此时的时间戳<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line">print(requests.get(<span class="string">'http://202.120.7.217:9527/index.php?action=time'</span>).text)</span><br><span class="line">print(requests.get(<span class="string">'http://202.120.7.217:9527/index.php?action=reset'</span>).text)</span><br><span class="line">print(requests.get(<span class="string">'http://202.120.7.217:9527/index.php?action=time'</span>).text)</span><br></pre></td></tr></table></figure></p>
+<p>为了准确，当第一次输出和第二次输出的时间戳相等时，即是准确时间<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/2d99a593c91fbae94aaf697f0eab7114.png" alt><br>其余的字节码，需要通过在本地模拟一个类似的opcache file_cache缓存机制来获取<br>这里不做过多介绍（tips:/tmp/cache目录需要自己提前创建，而且一些文件夹可能没有权限，用户无法访问，自行赋予权限）</p>
+<hr>
+<p>将生成的index.php.bin文件在本地用二进制编辑器打开<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/83c513e6e3c465034d71d68ad6008ba1.png" alt><br>这时候可以借助一个opcache的项目，来对文件进行分析 <a href="https://github.com/GoSecure/php7-opcache-override" target="_blank" rel="noopener">https://github.com/GoSecure/php7-opcache-override</a><br>导入对应的模板，再运行<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/9723c390f4a94fcc10da19eb853eff51.png" alt><br>主要需要修改的就是这两个参数，改成我们之前计算好的数据<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/fe62148acc2a7643b9ed98132e8fa853.png" alt><br>另存为一个shell.bin</p>
+<hr>
+<p>编写对应的upload.html文件，上传shell.bin文件</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">form</span> <span class="attr">action</span>=<span class="string">"http://202.120.7.217:9527/?action=upload&amp;name=../../../../../tmp/cache/7badddeddbd076fe8352e80d8ddf3e73/var/www/html/sandbox/e46d53933685bb7ffd339c5f0fda1c8055302d5f/index.php.bin"</span> <span class="attr">method</span>=<span class="string">"post"</span> <span class="attr">enctype</span>=<span class="string">"multipart/form-data"</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"file"</span> <span class="attr">name</span>=<span class="string">"file"</span> /&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"submit"</span> <span class="attr">value</span>=<span class="string">"upload"</span> /&gt;</span></span><br><span class="line"> <span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>成功覆盖<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/6ad9d6426dd9fe1183e04522ca5f5e0d.png" alt><br>后面就可以尝试去读取一些数据（官方将一些特定函数禁用了，因此只能用一些特定的函数）<br>获取/var/www/html/flag下的目录<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/3e342b8719723ec362c935ff400fd332.png" alt><br>读取文件内容（是个二进制流文件，防止乱码可以通过base64加密一下）<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/8fa3203277c5337447997f780273bfdc.png" alt><br>然后写入文件，然后是一些字节码，好像是进行逆向分析把，在通过一些解密计算，得出flag（web狗表示到这已经是极限了）  </p>
+<hr>
+<h1 id="另一种骚操作"><a href="#另一种骚操作" class="headerlink" title="另一种骚操作"></a>另一种骚操作</h1><p>然后还有看到一个杭电大佬，在上传文件的路径上，通过一种奇异的方式绕过了，虽然不是很清楚原理，但是还是想记录一下 原文如下<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/2811d18bdeb616b57a15d0130973c63e.png" alt><br>这样，就不需要那么复杂的上传.bin文件进行覆盖，也不需要获得timestamp、opcache等一系列乱七八糟的东西，就可以直接覆盖index.php文件<br>（假如题意是这样的话，也就完全不用opcache，以及提供time,phpinfo这些东西了）</p>
+<p> 这种绕过的大体思路就是:</p>
+<p>通过一个不存在文件夹，再返回其上层文件，获取文件时就可以无视后面的/.获取文件，但是解析时依旧会以最后的.当作文件名<br>造成判断文件名和操纵文件产生差异</p>
+<p>附上一些截图把</p>
+<p><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/d7ca48bd628d817518001653bfd50adc.png" alt><br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/bbbb860a022b1c56f3853b5d74e61c34.png" alt><br>而且这个x文件夹一定要不存在，存在时依旧无法绕过。。 对这个目录文件的一些解析<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/a1294d6d595bb849727dcc4c55b173ba.png" alt><br>后缀名为空，文件名为. 从而就绕过了后缀名含’p’的字母，然后又能覆盖到对应的文件 具体原理，目前网上好像没找到相关信息，希望以后能看下具体的原理  </p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>研究了整整一天，思路很骚气，0ctf的题目质量实在是高，怕是清明那几道web都消化不完…  </p>
+<hr>
+<p>更新一下，看到了一个介绍关于 <code>x/../index.php/.</code>  绕过的原理介绍的文章<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/04/2811d18bdeb616b57a15d0130973c63e.png" alt><br>丢一下链接 <a href="http://pupiles.com/%E7%94%B1%E4%B8%80%E9%81%93ctf%E9%A2%98%E5%BC%95%E5%8F%91%E7%9A%84%E6%80%9D%E8%80%83.html" target="_blank" rel="noopener">http://pupiles.com/%E7%94%B1%E4%B8%80%E9%81%93ctf%E9%A2%98%E5%BC%95%E5%8F%91%E7%9A%84%E6%80%9D%E8%80%83.html</a><br>里面讲的很详细了，这里我就自己总结概括一下 <code>index/.</code>  时，操作文件流的文件可以进行文件的创建（但不能覆盖），以及绕过后缀名 <code>x/../index.php/.</code><br>则可以进行文件的创建、覆盖，以及绕过后缀名的一些检测 在<code>file_get_contents</code>以及<code>move_uploaded_file</code>这类需要打开文件流的函数时<br>文件名非标准格式时（例如包含相对路径等），php要对文件名进行一些处理 其中就用到了<code>tsrm_realpath</code> 这个函数，会对去除文件名后面的 /. 将其转化为一个标准路径<br>然后调用<code>lstat</code>函数，去判定文件是否存在<br>存在，则不写入文件（具体原理可以看链接中的源码分析）<br>不存在，则调用write函数进行文件写入 然而利用  <code>x/../index.php/.</code>这样的文件名时<br>会判定改文件不存在，绕过了<code>lstat</code>函数 从而继续调用write函数，进行写文件，从而导致文件覆盖</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/04/2018-0ctf-easy-ums分析/" data-toggle="tooltip" data-placement="top" title="2018 0ctf-easy ums分析">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/03/rpo攻击/" data-toggle="tooltip" data-placement="top" title="RPO攻击">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

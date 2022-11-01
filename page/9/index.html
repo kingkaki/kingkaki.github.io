@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/page/9/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Page Header -->
+<header class="intro-header" style="background-image: url('/img/home-bg.jpg')">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 ">
+                <div class="site-heading">
+                    <h1>Kingkk&#39;s Blog</h1>
+                    <!--<hr class="small">-->
+                    <span class="subheading">菜的要死</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+<!-- Main Content -->
+<div class="container">
+    <div class="row">
+        
+
+<!-- USE SIDEBAR -->
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-1
+                col-md-8 col-md-offset-1
+                col-sm-12
+                col-xs-12
+                post-container
+            ">
+            
+                <!-- Main Content -->
+
+
+<div class="post-preview">
+
+    <a href="/2018/01/短期代码审计学习计划/">
+        <h2 class="post-title">
+            短期代码审计学习计划
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            前段时间学完那些linux基础之后，想着可以重点攻击web安全这块主业了。因为之前看乌云镜像，然后在自己本地也搭建了一个，然后也看了蛮多的漏洞详情。 然而，自己开始渗透的时候，仿佛完全是两码事，找不到攻击点，只能瞎试，见个get参数就试着sql跑下，然后就被ban了，看见输入框就试试alert(/xss/)，然并卵。。。虽然其中有一次无疑挖了个xss，但还是感觉纯属就是碰运气 于是，感觉无力......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-01-30
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/01/python2、3的兼容并切换/">
+        <h2 class="post-title">
+            Python2、3的兼容并切换
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            如今，python3已经逐渐在替代以及成为未来Python的一个大势所趋，然而由于时间问题，python2又是许多好用的，前人所开发的语言，一时半会儿又丢弃不了。所以经常会出现python2、python3都需要的场景，一直更换环境变量，总是会很麻烦。其实python官方也有考虑到这个问题，所以还是有办法同时切换python2、3的，只是需要一些小小的操作
+首先要将Python2、3都添加进......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-01-21
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/01/python-web环境搭建/">
+        <h2 class="post-title">
+            Python web环境搭建
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            安装pipcentos6.x版本的话
+yum install python-pip.noarch
+centos7.x版本
+yum install python2-pip
+安装virtualenv用于独立每个python环境
+pip install virtualenv
+创建virtualenv
+virtualenv pythonweb
+切换virtualenv
+[root@localhost......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-01-21
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/01/java-web环境搭建/">
+        <h2 class="post-title">
+            java web环境搭建
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            系统环境centos6.5
+安装java包yum install java-1.8.0-openjdk*
+有点大，等一下就好了，好像有点简单啊。。 检验下是否安装完毕
+[root@localhost ~]# java -versionopenjdk version “1.8.0_161”OpenJDK Runtime Environment (build 1.8.0_161-b14)Open......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-01-20
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/01/php5-6安装/">
+        <h2 class="post-title">
+            php5.6 安装
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            一开始想试着装下php7.0的，后来编译安装搞得有点头大，转向5.6了，直接开始吧 由于yum中自带的时php5.3，要重新配置下yum源
+配置yum源追加CentOS 6.5的epel及remi源。
+# rpm -Uvh http://ftp.iij.ad.jp/pub/linux/fedora/epel/6/x86_64/epel-release-6-8.noarch.rpm# rpm ......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-01-20
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/01/git安装与操作/">
+        <h2 class="post-title">
+            Git 安装与操作
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            不得不说，在大一开始就听说有github那么一个牛逼的社区平台，后来也在上面借鉴过许多大佬们的源码，也十分感谢各位优秀的行业人员的无私奉献。不过，至今为止，个人还是不会使用git命令，就连之前上传代码什么的也仅仅只是通过网页点击的方式，没有感到一丝便利的地方。因此，决定好好学习一下git的操作。  
+Git 安装其实不能再简单了 centos下
+yum install git
+windows......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-01-19
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/01/redis缓存服务搭建/">
+        <h2 class="post-title">
+            Redis 缓存服务搭建
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            安装 Redis1、从官网获取下载连接 http://download.redis.io/releases/redis-4.0.6.tar.gz 并通过wget方式下载,并解压
+wget http://download.redis.io/releases/redis-4.0.6.tar.gztar -xzvf redis-4.0.6.tar.gz
+2、安装依赖包
+yum install gc......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-01-19
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/01/mysql搭建/">
+        <h2 class="post-title">
+            Mysql搭建
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            Mysql安装1、由于我是CentOs6.5的版本，直接用yum就可以了
+yum install mysql-server
+假如是CentOs7及以上的版本，默认数据库为mariadb，要先移除mariadb，然后再进行安装
+yum remove mariadb-libs.x86_64     #版本号视具体版本而定wget http://dev.mysql.com/get/mysql57-......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-01-18
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/01/webserver搭建/">
+        <h2 class="post-title">
+            Webserver 搭建
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            emm因为在先前的学习中，发现对linux许多操作与配置极其不熟练，各种百度谷歌，还不一定弄得对，所以最近想系统学习下linux的操作，那就先从webserver服务开始。废话不多说，直接上吧。
+环境：
+CentOs 6.5
+Apache 2.2.15
+虚拟机
+
+tips:要想虚拟机上运行的服务可以在电脑本机上能够访问，需要设置为桥接模式  
+Apache1、安装apache :
+yum i......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-01-18
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2018/01/生无所息/">
+        <h2 class="post-title">
+            生无所息
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            考试终于考完了，考试成绩也出来了，还算考的可以把，比上学期稍微好一点。期末考阶段已经过去，那接下来就是重要的寒假了。我们寒假大概能有一个月多二十天的样子，快抵上一个短点的暑假了，接下来的任务当然是疯狂的学习学习加学习。在寝室宅了大半个个月，偶尔看下书，刷点题，打打游戏，但是那些东西哪有学习这些知识有趣列。 
+停止学习和更新博客也有大半个月了，接下来的时间应该会经常更新，记录一些自己学习历程上......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by kingkk on
+        2018-01-16
+    </p>
+
+</div>
+<hr>
+
+
+
+<!-- Pager -->
+
+<ul class="pager">
+    
+        <li class="previous">
+            <a href="/page/8/">&larr; Newer Posts</a>
+        </li>
+    
+    
+        <li class="next">
+            <a href="/page/10/">Older Posts &rarr;</a>
+        </li>
+    
+</ul>
+
+
+
+                <!-- 如果开启评论功能 -->
+                
+
+            </div>
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-3 col-lg-offset-0
+                col-md-3 col-md-offset-0
+                col-sm-12
+                col-xs-12
+                sidebar-container
+            ">
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#php" title="php" rel="4">php</a>
+                            
+                        
+                            
+                            <a href="/tags/#代码审计" title="代码审计" rel="4">代码审计</a>
+                            
+                        
+                            
+                            <a href="/tags/#漏洞分析" title="漏洞分析" rel="3">漏洞分析</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#java" title="java" rel="16">java</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#writeup" title="writeup" rel="6">writeup</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#语法分析" title="语法分析" rel="2">语法分析</a>
+                            
+                        
+                            
+                            <a href="/tags/#Java" title="Java" rel="2">Java</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#反序列化" title="反序列化" rel="4">反序列化</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#ctf" title="ctf" rel="2">ctf</a>
+                            
+                        
+                            
+                            <a href="/tags/#XXE" title="XXE" rel="3">XXE</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#weblogic" title="weblogic" rel="3">weblogic</a>
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#python" title="python" rel="2">python</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#k8s" title="k8s" rel="2">k8s</a>
+                            
+                        
+                            
+                            <a href="/tags/#云原生" title="云原生" rel="4">云原生</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#docker" title="docker" rel="2">docker</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#vulnhub" title="vulnhub" rel="2">vulnhub</a>
+                            
+                        
+                            
+                            <a href="/tags/#练习记录" title="练习记录" rel="4">练习记录</a>
+                            
+                        
+                            
+                            <a href="/tags/#渗透测试" title="渗透测试" rel="2">渗透测试</a>
+                            
+                        
+                            
+                            <a href="/tags/#xss" title="xss" rel="2">xss</a>
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Short About -->
+                <section class="visible-md visible-lg">
+                    <hr><h5><a href="/about/">ABOUT ME</a></h5>
+                    <div class="short-about">
+
+                        
+                            <img src="/img/avatar.jpg" />
+                        
+
+                        
+
+                        <!-- SNS Link -->
+                        <ul class="list-inline">
+                            
+                            
+                            
+
+                            
+
+                            
+
+                            
+                                <li>
+                                    <a target="_blank"  href="https://github.com/kingkaki">
+                                        <span class="fa-stack fa-lg">
+                                            <i class="fa fa-circle fa-stack-2x"></i>
+                                            <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                        </span>
+                                    </a>
+                                </li>
+                            
+                            
+                            
+                            
+                        </ul>
+                    </div>
+                </section>
+                
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+        
+    </div>
+</div>
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

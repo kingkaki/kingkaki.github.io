@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Jackson-databind 反序列化分析 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2019/05/Jackson-databind-反序列化分析/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                    </div>
+                    <h1>Jackson-databind 反序列化分析</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2019-05-23
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="Jackson基础操作"><a href="#Jackson基础操作" class="headerlink" title="Jackson基础操作"></a>Jackson基础操作</h1><p>主要功能就是在java类与json字符串中间进行序列化与反序列化的操作。</p>
+<h2 id="序列化与反序列化"><a href="#序列化与反序列化" class="headerlink" title="序列化与反序列化"></a>序列化与反序列化</h2><p>java bean</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> Integer age;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">getAge</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAge</span><span class="params">(Integer age)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Person&#123;"</span> +</span><br><span class="line">                <span class="string">"name='"</span> + name + <span class="string">'\''</span> +</span><br><span class="line">                <span class="string">", age="</span> + age +</span><br><span class="line">                <span class="string">'&#125;'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>序列化</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception</span>&#123;</span><br><span class="line">    Person p = <span class="keyword">new</span> Person();</span><br><span class="line">    p.setAge(<span class="number">20</span>);</span><br><span class="line">    p.setName(<span class="string">"kingkk"</span>);</span><br><span class="line"></span><br><span class="line">    ObjectMapper mapper = <span class="keyword">new</span> ObjectMapper();</span><br><span class="line">    String json = mapper.writeValueAsString(p);</span><br><span class="line">    System.out.println(json);</span><br><span class="line">    <span class="comment">// &#123;"name":"kingkk","age":20&#125;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>反序列化</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ObjectMapper mapper = <span class="keyword">new</span> ObjectMapper();</span><br><span class="line"></span><br><span class="line">String json = <span class="string">"&#123;\"name\":\"kingkk\",\"age\":20&#125;"</span>;</span><br><span class="line"></span><br><span class="line">System.out.println(mapper.readValue(json, Person<span class="class">.<span class="keyword">class</span>))</span>;</span><br><span class="line"><span class="comment">// Person&#123;name='kingkk', age=20&#125;</span></span><br></pre></td></tr></table></figure>
+<p>这也就是最基础的json序列化与反序列化操作</p>
+<p>当然，这样简单的demo是没有什么安全问题的，问题出在于一些可选配置上</p>
+<h1 id="DefaultTyping"><a href="#DefaultTyping" class="headerlink" title="DefaultTyping"></a>DefaultTyping</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">enum</span> DefaultTyping &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * This value means that only properties that have</span></span><br><span class="line"><span class="comment">         * &#123;<span class="doctag">@link</span> java.lang.Object&#125; as declared type (including</span></span><br><span class="line"><span class="comment">         * generic types without explicit type) will use default</span></span><br><span class="line"><span class="comment">         * typing.</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">    JAVA_LANG_OBJECT,</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * Value that means that default typing will be used for</span></span><br><span class="line"><span class="comment">         * properties with declared type of &#123;<span class="doctag">@link</span> java.lang.Object&#125;</span></span><br><span class="line"><span class="comment">         * or an abstract type (abstract class or interface).</span></span><br><span class="line"><span class="comment">         * Note that this does &lt;b&gt;not&lt;/b&gt; include array types.</span></span><br><span class="line"><span class="comment">         *&lt;p&gt;</span></span><br><span class="line"><span class="comment">         * Since 2.4, this does NOT apply to &#123;<span class="doctag">@link</span> TreeNode&#125; and its subtypes.</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">    OBJECT_AND_NON_CONCRETE,</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * Value that means that default typing will be used for</span></span><br><span class="line"><span class="comment">         * all types covered by &#123;<span class="doctag">@link</span> #OBJECT_AND_NON_CONCRETE&#125;</span></span><br><span class="line"><span class="comment">         * plus all array types for them.</span></span><br><span class="line"><span class="comment">         *&lt;p&gt;</span></span><br><span class="line"><span class="comment">         * Since 2.4, this does NOT apply to &#123;<span class="doctag">@link</span> TreeNode&#125; and its subtypes.</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">    NON_CONCRETE_AND_ARRAYS,</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * Value that means that default typing will be used for</span></span><br><span class="line"><span class="comment">         * all non-final types, with exception of small number of</span></span><br><span class="line"><span class="comment">         * "natural" types (String, Boolean, Integer, Double), which</span></span><br><span class="line"><span class="comment">         * can be correctly inferred from JSON; as well as for</span></span><br><span class="line"><span class="comment">         * all arrays of non-final types.</span></span><br><span class="line"><span class="comment">         *&lt;p&gt;</span></span><br><span class="line"><span class="comment">         * Since 2.4, this does NOT apply to &#123;<span class="doctag">@link</span> TreeNode&#125; and its subtypes.</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">    NON_FINAL</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>默认情况下，<code>mapper.enableDefaultTyping()</code>什么参数都不加时，会默认调用<code>OBJECT_AND_NON_CONCRETE</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> ObjectMapper <span class="title">enableDefaultTyping</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> enableDefaultTyping(DefaultTyping.OBJECT_AND_NON_CONCRETE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>重点说下<code>OBJECT_AND_NON_CONCRETE</code>这个参数</p>
+<p>考虑如下这一种情况，序列化的对象的成员变量中，数据类型是一个 抽象类/接口 （或者直接看代码来的易懂点</p>
+ <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> Integer age;</span><br><span class="line">    <span class="keyword">private</span> Cls cls;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// getter setter toString</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Cls1</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> String name=<span class="string">"cls1"</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// getter setter toString</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Cls</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这时候对这个类进行反序列化的时候，可以看到是无法进行反序列化的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Person p = <span class="keyword">new</span> Person();</span><br><span class="line">p.setAge(<span class="number">20</span>);</span><br><span class="line">p.setName(<span class="string">"kingkk"</span>);</span><br><span class="line">p.setCls(<span class="keyword">new</span> Cls1());</span><br><span class="line"></span><br><span class="line">ObjectMapper mapper = <span class="keyword">new</span> ObjectMapper();</span><br><span class="line"></span><br><span class="line">String json = mapper.writeValueAsString(p);</span><br><span class="line">System.out.println(json);</span><br><span class="line"><span class="comment">// &#123;"name":"kingkk","age":20,"cls":&#123;"name":"cls1"&#125;&#125;</span></span><br><span class="line"></span><br><span class="line">System.out.println(mapper.readValue(json, Person<span class="class">.<span class="keyword">class</span>))</span>;</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Jackson-databind-反序列化分析/1.png" alt></p>
+<p>大意就是说由于<code>Cls</code>这个变量是一个抽象类，所以反序列化失败。因为jackson也不知道要反序列化它的哪一个实现。</p>
+<p>这时候就需要开启<code>enableDefaultTyping</code>，对数据类型进行指定</p>
+<p>将上面的代码加一条<code>mapper.enableDefaultTyping();</code>，就可以看到反序列化成功了</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Person p = <span class="keyword">new</span> Person();</span><br><span class="line">p.setAge(<span class="number">20</span>);</span><br><span class="line">p.setName(<span class="string">"kingkk"</span>);</span><br><span class="line">p.setCls(<span class="keyword">new</span> Cls1());</span><br><span class="line"></span><br><span class="line">ObjectMapper mapper = <span class="keyword">new</span> ObjectMapper();</span><br><span class="line">mapper.enableDefaultTyping();</span><br><span class="line">String json = mapper.writeValueAsString(p);</span><br><span class="line">System.out.println(json);</span><br><span class="line"><span class="comment">// &#123;"name":"kingkk","age":20,"cls":["cls.Cls1",&#123;"name":"cls1"&#125;]&#125;</span></span><br><span class="line"></span><br><span class="line">System.out.println(mapper.readValue(json, Person<span class="class">.<span class="keyword">class</span>))</span>;</span><br><span class="line"><span class="comment">// Person&#123;name='kingkk', age=20, cls=Cls1&#123;name='cls1'&#125;&#125;</span></span><br></pre></td></tr></table></figure>
+<p>比较两次序列化后的json字符串，可以看到，多了指定的数据类型。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">未开启enableDefaultTyping <span class="comment">// &#123;"name":"kingkk","age":20,"cls":&#123;"name":"cls1"&#125;&#125;</span></span><br><span class="line">开启了enableDefaultTyping <span class="comment">// &#123;"name":"kingkk","age":20,"cls":["cls.Cls1",&#123;"name":"cls1"&#125;]&#125;</span></span><br></pre></td></tr></table></figure>
+<p>jackson也就可以根据数据类型去自动反序列化 出对应的类</p>
+<p>那假如有一个<code>Cls2</code>，将传入的json字符串变成<code>{&quot;name&quot;:&quot;kingkk&quot;,&quot;age&quot;:20,&quot;cls&quot;:[&quot;cls.Cls2&quot;,{&quot;name&quot;:&quot;cls2&quot;}]}</code>是否也可以反序列化出对应的类呢，显然是可以的。</p>
+<p>修改下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">String json = <span class="string">"&#123;\"name\":\"kingkk\",\"age\":20,\"cls\":[\"cls.Cls1\",&#123;\"name\":\"cls1\"&#125;]&#125;"</span>;</span><br><span class="line">String json2 = <span class="string">"&#123;\"name\":\"kingkk\",\"age\":20,\"cls\":[\"cls.Cls2\",&#123;\"name\":\"cls2\"&#125;]&#125;"</span>;</span><br><span class="line"></span><br><span class="line">System.out.println(mapper.readValue(json, Person<span class="class">.<span class="keyword">class</span>))</span>;</span><br><span class="line"><span class="comment">//Person&#123;name='kingkk', age=20, cls=Cls1&#123;name='cls1'&#125;&#125;</span></span><br><span class="line"></span><br><span class="line">System.out.println(mapper.readValue(json2, Person<span class="class">.<span class="keyword">class</span>))</span>;</span><br><span class="line"><span class="comment">//Person&#123;name='kingkk', age=20, cls=Cls2&#123;name='cls2'&#125;&#125;</span></span><br></pre></td></tr></table></figure>
+<p>那假如将数据类型<code>Cls</code>改成<code>Object</code>呢？是否就可以反序列化出任意类？</p>
+<p>修改下<code>Person</code>类型</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> Integer age;</span><br><span class="line">    <span class="keyword">private</span> Object cls;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// getter setter toString</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>假设此时有一个存在危险函数的类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Vuln</span> </span>&#123;</span><br><span class="line">    String cmd;</span><br><span class="line"></span><br><span class="line">    Vuln()&#123;</span><br><span class="line">        System.out.println(<span class="string">"init"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getCmd</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"get"</span>);</span><br><span class="line">        <span class="keyword">return</span> cmd;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setCmd</span><span class="params">(String cmd)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"set"</span>);</span><br><span class="line">        <span class="keyword">this</span>.cmd = cmd;</span><br><span class="line">        Runtime.getRuntime().exec(cmd);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>尝试去反序列化这个<code>Vuln</code>类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ObjectMapper mapper = <span class="keyword">new</span> ObjectMapper();</span><br><span class="line">mapper.enableDefaultTyping();</span><br><span class="line"></span><br><span class="line">String json = <span class="string">"&#123;\"name\":\"kingkk\",\"age\":20,\"cls\":[\"vuln.Vuln\",&#123;\"cmd\":\"calc\"&#125;]&#125;"</span>;</span><br><span class="line"></span><br><span class="line">System.out.println(mapper.readValue(json, Person<span class="class">.<span class="keyword">class</span>))</span>;</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Jackson-databind-反序列化分析/2.png" alt></p>
+<p>可以看到是可以反序列化到任意类的，而且当<code>setter</code>或构造函数中存在危险函数时也会自动触发。</p>
+<h1 id="CVE-2017-7525"><a href="#CVE-2017-7525" class="headerlink" title="CVE-2017-7525"></a>CVE-2017-7525</h1><p>显然，实际代码中开发也几乎不可能写出那样不靠谱的<code>Vuln</code>类，也为了寻找一种更为通用的反序列化链，也就是所说的Gadget</p>
+<p><code>CVE-2017-7525</code>中就是利用JDK7u21的<code>com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl</code>作为Gadget。</p>
+<p>具体的触发流程我也没具体跟进了，总的原理和之前<code>Vuln</code>类中的原理类似。</p>
+<p>触发的调节为</p>
+<ul>
+<li>jackson databind 2.7.10 及2.8.9以下版本</li>
+<li>开启了<code>enableDefaultTyping</code></li>
+<li>类中存在<code>Object</code>类型的成员变量，或者想要反序列化类的抽象类/接口？</li>
+</ul>
+<p>在这篇文章中也了解到<a href="http://www.leadroyal.cn/?p=630" target="_blank" rel="noopener">http://www.leadroyal.cn/?p=630</a></p>
+<p>当java bean的字段上加上了</p>
+<ul>
+<li><code>@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)</code></li>
+<li><code>@JsonTypeInfo(use = JsonTypeInfo.Id.MANIMAL_CLASS)</code></li>
+</ul>
+<p>两个注解时，即使没有开启<code>enableDefaultTyping</code>也可以进行指定类的反序列化。亲测有效。</p>
+<h2 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h2><p>至于漏洞的修补比较惊讶的是基于黑名单的修复，仅仅限制了可以反序列化的类，导致之前的Poc失效。</p>
+<p><a href="https://github.com/FasterXML/jackson-databind/commit/60d459cedcf079c6106ae7da2ac562bc32dcabe1" target="_blank" rel="noopener">https://github.com/FasterXML/jackson-databind/commit/60d459cedcf079c6106ae7da2ac562bc32dcabe1</a></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Jackson-databind-反序列化分析/3.png" alt></p>
+<p>也就意味着只要找到新的Gadget就还是可以利用这个洞（咋感觉比之前Weblogic XMLDecoder的修复还要不靠谱！</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p><a href="http://www.leadroyal.cn/?p=594" target="_blank" rel="noopener">http://www.leadroyal.cn/?p=594</a></p>
+<p><a href="http://www.leadroyal.cn/?p=616" target="_blank" rel="noopener">http://www.leadroyal.cn/?p=616</a></p>
+<p><a href="http://www.leadroyal.cn/?p=630" target="_blank" rel="noopener">http://www.leadroyal.cn/?p=630</a></p>
+<p><a href="https://github.com/vulhub/vulhub/tree/master/jackson/CVE-2017-7525" target="_blank" rel="noopener">https://github.com/vulhub/vulhub/tree/master/jackson/CVE-2017-7525</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2019/07/XXE防御笔记/" data-toggle="tooltip" data-placement="top" title="XXE防御笔记">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2019/05/Weblogic-XMLDecoder反序列化学习/" data-toggle="tooltip" data-placement="top" title="Weblogic XMLDecoder反序列化学习">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

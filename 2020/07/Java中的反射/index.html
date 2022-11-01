@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Java中的反射 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2020/07/Java中的反射/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                    </div>
+                    <h1>Java中的反射</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2020-07-19
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>个人对反射的理解就是在运行时动态去获取、操作Java程序，反射赋予了Java这门静态语言动态执行的能力。<br>反射的对象是在JVM中运行时的方法、属性、构造函数。<br>在现代化Java框架中都不可避免的运用到了反射，赋予程序更好的动态执行能力。<br>过于随意的反射操作也会带来一些安全隐患，比如反序列化中知名的cc链、weblogic中的coherence链，以及tomcat中rmi工厂类的绕过payload，都是由于其过于动态的反射执行（不过也不全是反射的问题，它们也只是漏洞利用中的一环）。<br>由于其可以动态执行函数，且不受private等修饰符限制等特点，一些webshell绕过，执行恶意payload时也经常会用到反射。<br>如下就是一个反射调用<code>Runtime.exec</code>的例子，本文会尝试从Java源码的角度去学习下反射是如何执行的（native方法暂时略过）。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Method m = Runtime.class.getDeclaredMethod("exec", String.class);</span><br><span class="line">m.invoke(Runtime.getRuntime(), <span class="string">"calc"</span>);</span><br></pre></td></tr></table></figure></p>
+<h1 id="权限校验"><a href="#权限校验" class="headerlink" title="权限校验"></a>权限校验</h1><p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1595150739981_1.png" alt><br>首先来到Method的invoke方法中，会首先校验Method的override值，这个值是从AccessibleObject中继承下来的。<br>Field、Method、Constructor三个类都继承了AccessibleObject。<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1595150739981_2.png" alt><br>我们在对private方法进行invoke前会对其进行setAccessible操作，其实就是改变了这个override值。</p>
+<p>随后通过<code>Reflection.quickCheckMemberAccess</code>进行一次快速的权限校验，实际就是判断其是否是public。<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1595150739981_3.png" alt><br>如果不通过，则会进入进一步的权限检测，会先通过<code>Reflection.getCallerClass</code>获取其调用者，这是一个native方法，由于C/C++功底极烂的原因，这篇文章中涉及cpp源码的部分就不深入。</p>
+<p>随后在进行一次快速的权限校验，主要是对函数修饰符和调用者caller进行一些判断。<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1595150739981_9.png" alt><br>如果都不通过，则会进行一次慢检查。<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1595150739361_5.png" alt><br>其核心在<code>Reflection.verifyMemberAccess</code>中，主要是对函数修饰符、所在包、子父类关系进行判断。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">verifyMemberAccess</span><span class="params">(Class&lt;?&gt; var0, Class&lt;?&gt; var1, Object var2, <span class="keyword">int</span> var3)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">boolean</span> var4 = <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">boolean</span> var5 = <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">if</span> (var0 == var1) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (!Modifier.isPublic(getClassAccessFlags(var1))) &#123;</span><br><span class="line">            var5 = isSameClassPackage(var0, var1);</span><br><span class="line">            var4 = <span class="keyword">true</span>;</span><br><span class="line">            <span class="keyword">if</span> (!var5) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (Modifier.isPublic(var3)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">boolean</span> var6 = <span class="keyword">false</span>;</span><br><span class="line">            <span class="keyword">if</span> (Modifier.isProtected(var3) &amp;&amp; isSubclassOf(var0, var1)) &#123;</span><br><span class="line">                var6 = <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (!var6 &amp;&amp; !Modifier.isPrivate(var3)) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!var4) &#123;</span><br><span class="line">                    var5 = isSameClassPackage(var0, var1);</span><br><span class="line">                    var4 = <span class="keyword">true</span>;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (var5) &#123;</span><br><span class="line">                    var6 = <span class="keyword">true</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (!var6) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (Modifier.isProtected(var3)) &#123;</span><br><span class="line">                    Class var7 = var2 == <span class="keyword">null</span> ? var1 : var2.getClass();</span><br><span class="line">                    <span class="keyword">if</span> (var7 != var0) &#123;</span><br><span class="line">                        <span class="keyword">if</span> (!var4) &#123;</span><br><span class="line">                            var5 = isSameClassPackage(var0, var1);</span><br><span class="line">                            var4 = <span class="keyword">true</span>;</span><br><span class="line">                        &#125;</span><br><span class="line"></span><br><span class="line">                        <span class="keyword">if</span> (!var5 &amp;&amp; !isSubclassOf(var7, var0)) &#123;</span><br><span class="line">                            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h1 id="MethodAccessor"><a href="#MethodAccessor" class="headerlink" title="MethodAccessor"></a>MethodAccessor</h1><p>权限校验通过之后，回到<code>Method.invoke</code>中，会去获取对应<code>MethodAccessor</code>，再调用<code>MethodAccessor</code>的<code>invoke</code>方法<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200717174559.png" alt><br>所以，实际上<code>Method</code>的<code>invoke</code>反射，是委托给<code>MethodAccessor</code>来进行处理的。</p>
+<h2 id="MethodAccessor的实现"><a href="#MethodAccessor的实现" class="headerlink" title="MethodAccessor的实现"></a>MethodAccessor的实现</h2><p><code>MethodAccessor</code>实际上是一个接口，其拥有两个具体实现（<code>MethodAccessorImpl</code>只是一个抽象实现）<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1595150739508_8.png" alt></p>
+<ul>
+<li><code>DelegatingMethodAccessorImpl</code></li>
+<li><code>NativeMethodAccessorImpl</code></li>
+</ul>
+<p>然而实际上还有另外一个<code>GeneratedMethodAccessor</code>，它是由Java动态生成的<code>MethodAccessor</code>，它们之间的对应关系如下。<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1595150739010_3.png" alt><br>所以实际上真正执行反射方法的应该是<code>NativeMethodAccessor</code>和<code>GeneratedMethodAccessor</code>，它们直接有一些差异，我直接引用下大佬们的。</p>
+<blockquote>
+<p>就像注释里说的，实际的MethodAccessor实现有两个版本，一个是Java版本，一个是native版本，两者各有特点。初次启动时Method.invoke()和Constructor.newInstance()方法采用native方法要比Java方法快3-4倍，而启动后native方法又要消耗额外的性能而慢于Java方法。也就是说，Java实现的版本在初始化时需要较多时间，但长久来说性能较好；native版本正好相反，启动时相对较快，但运行时间长了之后速度就比不过Java版了。这是HotSpot的优化方式带来的性能特性，同时也是许多虚拟机的共同点：跨越native边界会对优化有阻碍作用，它就像个黑箱一样让虚拟机难以分析也将其内联，于是运行时间长了之后反而是托管版本的代码更快些。</p>
+</blockquote>
+<p>简单来说就是最开始时<code>NativeMethodAccessor</code>的性能较快，而后续由于JVM虚拟机优化的原因，<code>GeneratedMethodAccessor</code>的性能会更加，因此Java中会设置一定策略，使其最开始是用<code>NativeMethodAccessor</code>进行反射，当同一个方法的反射执行次数到达一定阈值时，转为<code>GeneratedMethodAccessor</code>进行反射。</p>
+<h2 id="Method的root节点"><a href="#Method的root节点" class="headerlink" title="Method的root节点"></a>Method的root节点</h2><p>在<code>acquireMethodAccessor</code>获取<code>MethodAccessor</code>的代码中，会先尝试从<code>root</code>中读取对应的<code>MethodAccessor</code>，如果为null，则通过<code>reflectionFactory</code>生成一个对应的<code>MethodAccessor</code>。<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1595150739335_5.png" alt></p>
+<p>先来看下这个root是什么呢?<br>通过debug可以看到，实际上<code>root</code>也是一个和当前Method相同类型的Method，但指向的并不是同一个实例。<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1595150740322_10.png" alt></p>
+<p>实际上每个Java方法都有一个唯一的<code>Method</code>对象作为<code>root</code>对象。我们获取到的<code>Method</code>实际上只是这个<code>root</code>的一个副本。这样就可以将<code>MethodAccessor</code>作用在这个<code>root</code>上，并被我们获取到的每一个副本所复用。<br>第一次调用反射时<code>root</code>的<code>methodAccessor</code>属性为空，需要通过<code>reflectionFactory.newMethodAccessor</code>去获取对应实例。</p>
+<p>默认情况下，<code>newMethodAccessor</code>中会生成<code>DelegatingMethodAccessorImpl</code>和<code>NativeMethodAccessorImpl</code>，并对两者进行了相互之间的关系绑定（DelegatingMethodAccessorImpl是由<code>NativeMethodAccessorImpl</code>实例化来的，并且将<code>NativeMethodAccessorImpl</code>的<code>parent</code>属性设置为了<code>DelegatingMethodAccessorImpl</code>）<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">NativeMethodAccessorImpl var2 = <span class="keyword">new</span> NativeMethodAccessorImpl(var1);</span><br><span class="line">DelegatingMethodAccessorImpl var3 = <span class="keyword">new</span> DelegatingMethodAccessorImpl(var2);</span><br><span class="line">var2.setParent(var3);</span><br><span class="line"><span class="keyword">return</span> var3;</span><br></pre></td></tr></table></figure></p>
+<p>前面也提到过，<code>DelegatingMethodAccessorImpl</code>其实只是一个中间代理层，所以这里也就意味着其会调用<code>NativeMethodAccessorImpl</code>进行方法反射。<br>到此，获取到了进行反射的<code>MethodAccessor</code>，并将其设置为<code>Method</code>的<code>root</code>节点的属性。</p>
+<h2 id="MethodAccessor-invoke"><a href="#MethodAccessor-invoke" class="headerlink" title="MethodAccessor.invoke"></a>MethodAccessor.invoke</h2><p>可以看到<code>DelegatingMethodAccessorImpl</code>将反射委派给了之前生成的<code>NativeMethodAccessorImpl</code>。<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1595152554261_2.png" alt></p>
+<p><code>NativeMethodAccessorImpl</code>中会设置一个计数器，每次调用时计数+1，当超过一定阈值时，就会通过<code>MethodAccessorGenerator</code>生成<code>GeneratedMethodAccessor</code>，此后每次<code>DelegatingMethodAccessorImpl</code>的invoke则会委派给生成的<code>GeneratedMethodAccessor</code>。<br>这个阈值是<code>ReflectionFactory</code>中的一个常量，默认为15。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object var1, Object[] var2)</span> <span class="keyword">throws</span> IllegalArgumentException, InvocationTargetException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (++<span class="keyword">this</span>.numInvocations &gt; ReflectionFactory.inflationThreshold() &amp;&amp; !ReflectUtil.isVMAnonymousClass(<span class="keyword">this</span>.method.getDeclaringClass())) &#123;</span><br><span class="line">        MethodAccessorImpl var3 = (MethodAccessorImpl)(<span class="keyword">new</span> MethodAccessorGenerator()).generateMethod(<span class="keyword">this</span>.method.getDeclaringClass(), <span class="keyword">this</span>.method.getName(), <span class="keyword">this</span>.method.getParameterTypes(), <span class="keyword">this</span>.method.getReturnType(), <span class="keyword">this</span>.method.getExceptionTypes(), <span class="keyword">this</span>.method.getModifiers());</span><br><span class="line">        <span class="keyword">this</span>.parent.setDelegate(var3);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> invoke0(<span class="keyword">this</span>.method, var1, var2);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>至于之后的invoke0，则是native的部分，这里暂不展开了。</p>
+<h1 id="MethodAccessorGenerator"><a href="#MethodAccessorGenerator" class="headerlink" title="MethodAccessorGenerator"></a>MethodAccessorGenerator</h1><p>那<code>MethodAccessorGenerator</code>又是如何生成<code>GeneratedMethodAccessor</code>的呢。<br>可以跟到<code>MethodAccessorGenerator</code>的<code>generate</code>方法中<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> MagicAccessorImpl <span class="title">generate</span><span class="params">(<span class="keyword">final</span> Class&lt;?&gt; var1, String var2, Class&lt;?&gt;[] var3, Class&lt;?&gt; var4, Class&lt;?&gt;[] var5, <span class="keyword">int</span> var6, <span class="keyword">boolean</span> var7, <span class="keyword">boolean</span> var8, Class&lt;?&gt; var9)</span> </span>&#123;</span><br><span class="line">    ByteVector var10 = ByteVectorFactory.create();</span><br><span class="line">    <span class="keyword">this</span>.asm = <span class="keyword">new</span> ClassFileAssembler(var10);</span><br><span class="line">    <span class="keyword">this</span>.declaringClass = var1;</span><br><span class="line">    <span class="keyword">this</span>.parameterTypes = var3;</span><br><span class="line">    <span class="keyword">this</span>.returnType = var4;</span><br><span class="line">    <span class="keyword">this</span>.modifiers = var6;</span><br><span class="line">    <span class="keyword">this</span>.isConstructor = var7;</span><br><span class="line">    <span class="keyword">this</span>.forSerialization = var8;</span><br><span class="line">    <span class="keyword">this</span>.asm.emitMagicAndVersion();</span><br><span class="line">    <span class="keyword">short</span> var11 = <span class="number">42</span>;</span><br><span class="line">    <span class="keyword">boolean</span> var12 = <span class="keyword">this</span>.usesPrimitiveTypes();</span><br><span class="line">    <span class="keyword">if</span> (var12) &#123;</span><br><span class="line">        var11 = (<span class="keyword">short</span>)(var11 + <span class="number">72</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (var8) &#123;</span><br><span class="line">        var11 = (<span class="keyword">short</span>)(var11 + <span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    var11 += (<span class="keyword">short</span>)(<span class="number">2</span> * <span class="keyword">this</span>.numNonPrimitiveParameterTypes());</span><br><span class="line">    <span class="keyword">this</span>.asm.emitShort(add(var11, (<span class="keyword">short</span>)<span class="number">1</span>));</span><br><span class="line">    <span class="keyword">final</span> String var13 = generateName(var7, var8);</span><br><span class="line">    <span class="keyword">this</span>.asm.emitConstantPoolUTF8(var13);</span><br><span class="line">    <span class="keyword">this</span>.asm.emitConstantPoolClass(<span class="keyword">this</span>.asm.cpi());</span><br><span class="line">    <span class="keyword">this</span>.thisClass = <span class="keyword">this</span>.asm.cpi();</span><br><span class="line">    <span class="keyword">if</span> (var7) &#123;</span><br><span class="line">        <span class="keyword">if</span> (var8) &#123;</span><br><span class="line">            <span class="keyword">this</span>.asm.emitConstantPoolUTF8(<span class="string">"sun/reflect/SerializationConstructorAccessorImpl"</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">this</span>.asm.emitConstantPoolUTF8(<span class="string">"sun/reflect/ConstructorAccessorImpl"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">this</span>.asm.emitConstantPoolUTF8(<span class="string">"sun/reflect/MethodAccessorImpl"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.asm.emitConstantPoolClass(<span class="keyword">this</span>.asm.cpi());</span><br><span class="line">    <span class="keyword">this</span>.superClass = <span class="keyword">this</span>.asm.cpi();</span><br><span class="line">    <span class="keyword">this</span>.asm.emitConstantPoolUTF8(getClassName(var1, <span class="keyword">false</span>));</span><br><span class="line">    <span class="keyword">this</span>.asm.emitConstantPoolClass(<span class="keyword">this</span>.asm.cpi());</span><br><span class="line">    <span class="keyword">this</span>.targetClass = <span class="keyword">this</span>.asm.cpi();</span><br><span class="line">    <span class="keyword">short</span> var14 = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span> (var8) &#123;</span><br><span class="line">        <span class="keyword">this</span>.asm.emitConstantPoolUTF8(getClassName(var9, <span class="keyword">false</span>));</span><br><span class="line">        <span class="keyword">this</span>.asm.emitConstantPoolClass(<span class="keyword">this</span>.asm.cpi());</span><br><span class="line">        var14 = <span class="keyword">this</span>.asm.cpi();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.asm.emitConstantPoolUTF8(var2);</span><br><span class="line">    <span class="keyword">this</span>.asm.emitConstantPoolUTF8(<span class="keyword">this</span>.buildInternalSignature());</span><br><span class="line">    <span class="keyword">this</span>.asm.emitConstantPoolNameAndType(sub(<span class="keyword">this</span>.asm.cpi(), (<span class="keyword">short</span>)<span class="number">1</span>), <span class="keyword">this</span>.asm.cpi());</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.isInterface()) &#123;</span><br><span class="line">        <span class="keyword">this</span>.asm.emitConstantPoolInterfaceMethodref(<span class="keyword">this</span>.targetClass, <span class="keyword">this</span>.asm.cpi());</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (var8) &#123;</span><br><span class="line">        <span class="keyword">this</span>.asm.emitConstantPoolMethodref(var14, <span class="keyword">this</span>.asm.cpi());</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">this</span>.asm.emitConstantPoolMethodref(<span class="keyword">this</span>.targetClass, <span class="keyword">this</span>.asm.cpi());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.targetMethodRef = <span class="keyword">this</span>.asm.cpi();</span><br><span class="line">    <span class="keyword">if</span> (var7) &#123;</span><br><span class="line">        <span class="keyword">this</span>.asm.emitConstantPoolUTF8(<span class="string">"newInstance"</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">this</span>.asm.emitConstantPoolUTF8(<span class="string">"invoke"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.invokeIdx = <span class="keyword">this</span>.asm.cpi();</span><br><span class="line">    <span class="keyword">if</span> (var7) &#123;</span><br><span class="line">        <span class="keyword">this</span>.asm.emitConstantPoolUTF8(<span class="string">"([Ljava/lang/Object;)Ljava/lang/Object;"</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">this</span>.asm.emitConstantPoolUTF8(<span class="string">"(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.invokeDescriptorIdx = <span class="keyword">this</span>.asm.cpi();</span><br><span class="line">    <span class="keyword">this</span>.nonPrimitiveParametersBaseIdx = add(<span class="keyword">this</span>.asm.cpi(), (<span class="keyword">short</span>)<span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> var15 = <span class="number">0</span>; var15 &lt; var3.length; ++var15) &#123;</span><br><span class="line">        Class var16 = var3[var15];</span><br><span class="line">        <span class="keyword">if</span> (!isPrimitive(var16)) &#123;</span><br><span class="line">            <span class="keyword">this</span>.asm.emitConstantPoolUTF8(getClassName(var16, <span class="keyword">false</span>));</span><br><span class="line">            <span class="keyword">this</span>.asm.emitConstantPoolClass(<span class="keyword">this</span>.asm.cpi());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.emitCommonConstantPoolEntries();</span><br><span class="line">    <span class="keyword">if</span> (var12) &#123;</span><br><span class="line">        <span class="keyword">this</span>.emitBoxingContantPoolEntries();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.asm.cpi() != var11) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> InternalError(<span class="string">"Adjust this code (cpi = "</span> + <span class="keyword">this</span>.asm.cpi() + <span class="string">", numCPEntries = "</span> + var11 + <span class="string">")"</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">this</span>.asm.emitShort((<span class="keyword">short</span>)<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">this</span>.asm.emitShort(<span class="keyword">this</span>.thisClass);</span><br><span class="line">        <span class="keyword">this</span>.asm.emitShort(<span class="keyword">this</span>.superClass);</span><br><span class="line">        <span class="keyword">this</span>.asm.emitShort((<span class="keyword">short</span>)<span class="number">0</span>);</span><br><span class="line">        <span class="keyword">this</span>.asm.emitShort((<span class="keyword">short</span>)<span class="number">0</span>);</span><br><span class="line">        <span class="keyword">this</span>.asm.emitShort((<span class="keyword">short</span>)<span class="number">2</span>);</span><br><span class="line">        <span class="keyword">this</span>.emitConstructor();</span><br><span class="line">        <span class="keyword">this</span>.emitInvoke();</span><br><span class="line">        <span class="keyword">this</span>.asm.emitShort((<span class="keyword">short</span>)<span class="number">0</span>);</span><br><span class="line">        var10.trim();</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">byte</span>[] var17 = var10.getData();</span><br><span class="line">        <span class="keyword">return</span> (MagicAccessorImpl)AccessController.doPrivileged(<span class="keyword">new</span> PrivilegedAction&lt;MagicAccessorImpl&gt;() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> MagicAccessorImpl <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="keyword">return</span> (MagicAccessorImpl)ClassDefiner.defineClass(var13, var17, <span class="number">0</span>, var17.length, var1.getClassLoader()).newInstance();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (IllegalAccessException | InstantiationException var2) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> InternalError(var2);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>大致可以知道是通过asm的技术，动态生成字节码，技术细节就先暂不深究。<br>暂时以<code>Runtime.exec</code>的反射为例，看下动态生成的字节码大体长啥样。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GeneratedMethodAccessor1</span> <span class="keyword">extends</span> <span class="title">MethodAccessorImpl</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">GeneratedMethodAccessor1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object var1, Object[] var2)</span> <span class="keyword">throws</span> InvocationTargetException </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (var1 == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            Runtime var10000;</span><br><span class="line">            String var10001;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                var10000 = (Runtime)var1;</span><br><span class="line">                <span class="keyword">if</span> (var2.length != <span class="number">1</span>) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                var10001 = (String)var2[<span class="number">0</span>];</span><br><span class="line">            &#125; <span class="keyword">catch</span> (NullPointerException | ClassCastException var4) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(var4.toString());</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> var10000.exec(var10001);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Throwable var3) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> InvocationTargetException(var3);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，是直接将反射的调用转换成了Java代码层面的<code>Runtime.exec</code>执行。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>最后，借用一下参考中的图，反射的执行流程大致如下。<br>1、权限检查<br>2、通过反射工厂生成对应的MethodAccessor，并赋值给root节点<br>3、少量反射时直接通过native方法进行反射调用<br>4、当反射超过一定阈值时（15次），则会通过asm的方式动态生成字节码，后续的invoke调用都会直接转换java method的方式进行调用。<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1595153420481_3.png" alt></p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p><a href="https://www.sczyh30.com/posts/Java/java-reflection-2/" target="_blank" rel="noopener">https://www.sczyh30.com/posts/Java/java-reflection-2/</a><br><a href="http://rui0.cn/archives/1112" target="_blank" rel="noopener">http://rui0.cn/archives/1112</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2020/08/CVE-2020-14644分析与gadget的一些思考/" data-toggle="tooltip" data-placement="top" title="CVE-2020-14644分析与gadget的一些思考">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2020/06/浅谈下Fastjson的autotype绕过/" data-toggle="tooltip" data-placement="top" title="浅谈下Fastjson的autotype绕过">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Git 安装与操作 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/01/git安装与操作/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                    </div>
+                    <h1>Git 安装与操作</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-01-19
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>不得不说，在大一开始就听说有github那么一个牛逼的社区平台，后来也在上面借鉴过许多大佬们的源码，也十分感谢各位优秀的行业人员的无私奉献。不过，至今为止，个人还是不会使用git命令，就连之前上传代码什么的也仅仅只是通过网页点击的方式，没有感到一丝便利的地方。因此，决定好好学习一下git的操作。  </p>
+<h3 id="Git-安装"><a href="#Git-安装" class="headerlink" title="Git 安装"></a>Git 安装</h3><p>其实不能再简单了 <strong>centos下</strong></p>
+<p>yum install git</p>
+<p><strong>windows下</strong> 去官网下载git的程序安装即可  </p>
+<h3 id="Git-设置姓名、邮箱"><a href="#Git-设置姓名、邮箱" class="headerlink" title="Git 设置姓名、邮箱"></a>Git 设置姓名、邮箱</h3><p>对于git 来说，每台机器都要自保家门，说出你的名字和邮箱，否则在后面难以继续操作</p>
+<p> git config –global user.name “Your Name”<br> git config –global user.email “<a href="mailto:email@example.com" target="_blank" rel="noopener">email@example.com</a>“</p>
+<p>注意<code>git config</code>命令的<code>--global</code>参数，用了这个参数，表示你这台机器上所有的Git仓库都会使用这个配置，当然也可以对某个仓库指定不同的用户名和Email地址。  </p>
+<h3 id="工作区与暂存区"><a href="#工作区与暂存区" class="headerlink" title="工作区与暂存区"></a>工作区与暂存区</h3><p>无耻的拿了一下廖大神的网站上来，不得不说，讲的很详细，就不再写一遍了 <a href="https://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/0013745374151782eb658c5a5ca454eaa451661275886c6000" target="_blank" rel="noopener">https://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000/0013745374151782eb658c5a5ca454eaa451661275886c6000</a>  </p>
+<h3 id="基础常用操作"><a href="#基础常用操作" class="headerlink" title="基础常用操作"></a>基础常用操作</h3><h4 id="新建版本库"><a href="#新建版本库" class="headerlink" title="新建版本库"></a>新建版本库</h4><p>1、在本地新建一个文件夹</p>
+<p>mkdir test</p>
+<p>2、切换到对应目录，并将该目录变成git可以管理的仓库</p>
+<p>cd test<br>git init</p>
+<h4 id="添加文件到仓库"><a href="#添加文件到仓库" class="headerlink" title="添加文件到仓库"></a>添加文件到仓库</h4><p>例如我们在版本库的文件夹中创建了 read.md test.txt 两个文件，现在我们想把他们确认添加到git仓库中 1、add 文件修改添加到暂存区</p>
+<p>git add read.md test.txt</p>
+<p>git add -A</p>
+<p>git add 文件名   也可以通过 git add -A 或者 git add –all 添加全部更新 2、commit 把暂存区的所有内容提交到当前分支</p>
+<p>git commit -m “writea a readme and test file”</p>
+<p>git commit -m 备注  </p>
+<h4 id="查看仓库当前状态"><a href="#查看仓库当前状态" class="headerlink" title="查看仓库当前状态"></a>查看仓库当前状态</h4><p>git status</p>
+<p>该命令告诉我们从上一次commit之后到现在，仓库的更改状况（是否被修改等）  </p>
+<h4 id="查看具体的修改内容"><a href="#查看具体的修改内容" class="headerlink" title="查看具体的修改内容"></a>查看具体的修改内容</h4><p>git diff</p>
+<p>git diff readme.md</p>
+<p>可以制定查看某个文件的修改内容，也可以查看全部的修改内容  </p>
+<h4 id="查看历史版本"><a href="#查看历史版本" class="headerlink" title="查看历史版本"></a>查看历史版本</h4><p>git log</p>
+<p>git log –pretty=oneline</p>
+<p>会显示各个版本的id号，以及备注 用第二种方式可以单行输出，稍微直观一些  </p>
+<h4 id="回退之前的版本"><a href="#回退之前的版本" class="headerlink" title="回退之前的版本"></a>回退之前的版本</h4><p>首先，Git必须知道当前版本是哪个版本，在Git中，用HEAD表示当前版本，也就是最新的提交，上一个版本就是HEAD^，上上一个版本就是HEAD^^，当然往上100个版本写100个^比较容易数不过来，所以写成HEAD~100<br>git reset –hard HEAD^</p>
+<p>这样之后，就可以回退到之前的版本  </p>
+<h4 id="取消回退，还原至未更新前版本"><a href="#取消回退，还原至未更新前版本" class="headerlink" title="取消回退，还原至未更新前版本"></a>取消回退，还原至未更新前版本</h4><p>取消回退可能没有回退那么简单，它有一个重要的参数就是commit id，就是我们之前git log看到的id，但是回退后将无法查看之前的id 1、查看之前版本commit id</p>
+<p>[root@localhost test]# git reflog<br>0449a59 HEAD@{0}: HEAD^: updating HEAD<br>96f69f4 HEAD@{1}: commit: second commit</p>
+<p>会显示所有的commit id，找到你所对应的id号 2、reset回退</p>
+<p>git reset –hard 96f69f4</p>
+<p>后面的参数即为之前的commit id 这样就可以取消之前的回退，退至指定位置  </p>
+<h4 id="撤销修改"><a href="#撤销修改" class="headerlink" title="撤销修改"></a>撤销修改</h4><h6 id="丢弃工作区的内容（未add）"><a href="#丢弃工作区的内容（未add）" class="headerlink" title="丢弃工作区的内容（未add）"></a>丢弃工作区的内容（未add）</h6><p>git checkout – read.md</p>
+<p>git checkout – 文件名</p>
+<h6 id="丢弃暂存区的内容-add但未commit"><a href="#丢弃暂存区的内容-add但未commit" class="headerlink" title="丢弃暂存区的内容(add但未commit)"></a>丢弃暂存区的内容(add但未commit)</h6><p>git reset HEAD read.md<br>git checkout – read.md</p>
+<p>git reset HEAD 文件名 git checkout – 文件名  </p>
+<h4 id="删除文件"><a href="#删除文件" class="headerlink" title="删除文件"></a>删除文件</h4><p>当我们在本地通过rm -rf test.txt删除了文件之后需要同步到版本库中，这里就会与之前有些不同 1、git rm</p>
+<p>git rm test.txt</p>
+<p>2、提交</p>
+<p>git commit -m “drop test.txt”</p>
+<p>假如是误删，则可以通过checkout 的方式恢复</p>
+<p>checkout – test.txt</p>
+<h3 id="Git-绑定ssh-key"><a href="#Git-绑定ssh-key" class="headerlink" title="Git 绑定ssh key"></a>Git 绑定ssh key</h3><p>绑定ssh key 的目的是为了让本地主机授权执行远程代码库的git操作命令。因此在操作之前，应设置 ssh key 1、在centos中，切换到~/.ssh 目录中，生成ssh公钥和私钥</p>
+<p>cd  ~/.ssh/<br>ssh-keygen</p>
+<p>2、然后进入，github的设置页面，新建一个ssh key <img src="http://blog.kingkk.com/wp-content/uploads/2018/01/74ed16a9a3ad011022cb8a1bfe20441c.png" alt> 3、将之前生成的公钥内容放入其中 <img src="http://blog.kingkk.com/wp-content/uploads/2018/01/8757d82c8747c22cd2b4562d86136092.png" alt>  </p>
+<h3 id="关联本地库"><a href="#关联本地库" class="headerlink" title="关联本地库"></a>关联本地库</h3><p>1、先在github中任意新建一个测试版本库，并找到对应的git地址 <img src="http://blog.kingkk.com/wp-content/uploads/2018/01/3ee5bead3b40dc51f43a30edf2837a09.png" alt> 2、关联绑定</p>
+<p>git remote add origin <a href="mailto:git@github.com" target="_blank" rel="noopener">git@github.com</a>:kingkaki/test.git</p>
+<p>这样就可以将远程的库与本地的库相互关联绑定 3、推送本地内容</p>
+<p>git push -u origin master</p>
+<p>-u 参数仅需在第一次推送时添加即可    </p>
+<h4 id="克隆仓库"><a href="#克隆仓库" class="headerlink" title="克隆仓库"></a>克隆仓库</h4><p>1、依旧是要获取之前的ssh地址  <a href="mailto:git@github.com" target="_blank" rel="noopener">git@github.com</a>:kingkaki/py_script.git 2、git clone</p>
+<p>git clone <a href="mailto:git@github.com" target="_blank" rel="noopener">git@github.com</a>:kingkaki/py_script.git</p>
+<p>即可以将远程库克隆到本地进行操作    </p>
+<h3 id="Git-分支（branch）"><a href="#Git-分支（branch）" class="headerlink" title="Git 分支（branch）"></a>Git 分支（branch）</h3><h5 id="查看分支：git-branch"><a href="#查看分支：git-branch" class="headerlink" title="查看分支：git branch"></a>查看分支：<code>git branch</code></h5><p>[root@localhost test]# git branch<br>* master</p>
+<p>git的主分支为master    *表示当前分支</p>
+<h5 id="创建分支：git-branch-lt-name-gt"><a href="#创建分支：git-branch-lt-name-gt" class="headerlink" title="创建分支：git branch &lt;name&gt;"></a>创建分支：<code>git branch &lt;name&gt;</code></h5><p>[root@localhost test]# git branch dev<br>[root@localhost test]# git branch<br> dev<br>* master</p>
+<p>可以看到新后多了一个 dev分支 创建+切换分支：<code>git checkout -b &lt;name&gt;</code>  </p>
+<h5 id="切换分支：git-checkout-lt-name-gt"><a href="#切换分支：git-checkout-lt-name-gt" class="headerlink" title="切换分支：git checkout &lt;name&gt;"></a>切换分支：<code>git checkout &lt;name&gt;</code></h5><p>git checkout dev</p>
+<p>切换到dev分支</p>
+<h5 id="合并某分支到当前分支：git-merge-lt-name-gt"><a href="#合并某分支到当前分支：git-merge-lt-name-gt" class="headerlink" title="合并某分支到当前分支：git merge &lt;name&gt;"></a>合并某分支到当前分支：<code>git merge &lt;name&gt;</code></h5><p>git merge master</p>
+<p>将master分支与当前分支合并  </p>
+<h5 id="删除分支：git-branch-d-lt-name-gt"><a href="#删除分支：git-branch-d-lt-name-gt" class="headerlink" title="删除分支：git branch -d &lt;name&gt;"></a>删除分支：<code>git branch -d &lt;name&gt;</code></h5><p>[root@localhost test]# git branch -d master<br>Deleted branch master (was 5fa0562).</p>
+<p>成功删除dev分支  </p>
+<h5 id="保存分支信息合并"><a href="#保存分支信息合并" class="headerlink" title="保存分支信息合并"></a>保存分支信息合并</h5><p>git merge –no-ff -m “merge with no-ff” dev</p>
+<p>在合并的同时，加上<strong>–no-ff</strong> 参数    </p>
+<h4 id="暂存工作区"><a href="#暂存工作区" class="headerlink" title="暂存工作区"></a>暂存工作区</h4><p>当当前工作区操作至一半时，想去执行别的操作，就需要暂时将工作区的工作暂存着</p>
+<p>git stash</p>
+<h5 id="查看暂存的工作区"><a href="#查看暂存的工作区" class="headerlink" title="查看暂存的工作区"></a>查看暂存的工作区</h5><p>[root@localhost test]# git stash list<br>stash@{0}: WIP on dev: 228c5e1 test brach</p>
+<p>就可以看到当前暂存的工作区</p>
+<h5 id="还原暂存的工作区"><a href="#还原暂存的工作区" class="headerlink" title="还原暂存的工作区"></a>还原暂存的工作区</h5><p><code>**git stash apply**</code>恢复，但是恢复后，stash内容并不删除，需要用<code>git stash drop</code>来删除 <strong><code>git stash pop</code></strong>恢复后 stash内容删除      </p>
+<h3 id="Git-标签"><a href="#Git-标签" class="headerlink" title="Git 标签"></a>Git 标签</h3><h5 id="新建标签"><a href="#新建标签" class="headerlink" title="新建标签"></a>新建标签</h5><p>命令<code>git tag &lt;name&gt;</code>用于新建一个标签，默认为<code>HEAD</code>，也可以指定一个commit id</p>
+<p>git tag v1.0<br>git tag v0.9 0449a59</p>
+<p>为当前版本打上v1.0标签，为id为0449a59的打上v0.9标签</p>
+<h5 id="查看所有标签git-tag"><a href="#查看所有标签git-tag" class="headerlink" title="查看所有标签git tag"></a>查看所有标签<code>git tag</code></h5><p>[root@localhost test]# git tag<br>list<br>v0.9<br>v1.0</p>
+<h5 id="删除本地标签-git-tag-d-lt-tagname-gt"><a href="#删除本地标签-git-tag-d-lt-tagname-gt" class="headerlink" title="删除本地标签 git tag -d &lt;tagname&gt;"></a>删除本地标签 <code>git tag -d &lt;tagname&gt;</code></h5><p>[root@localhost test]# git tag -d list<br>Deleted tag ‘list’ (was 228c5e1)</p>
+<h5 id="推送本地标签-git-push-origin-lt-tagname-gt"><a href="#推送本地标签-git-push-origin-lt-tagname-gt" class="headerlink" title="推送本地标签 git push origin &lt;tagname&gt;"></a>推送本地标签 <code>git push origin &lt;tagname&gt;</code></h5><h5 id="推送全部未推送过的标签-git-push-origin-tags"><a href="#推送全部未推送过的标签-git-push-origin-tags" class="headerlink" title="推送全部未推送过的标签 git push origin --tags"></a>推送全部未推送过的标签 <code>git push origin --tags</code></h5><h5 id="删除远程标签-git-push-origin-refs-tags-lt-tagname-gt"><a href="#删除远程标签-git-push-origin-refs-tags-lt-tagname-gt" class="headerlink" title="删除远程标签 git push origin :refs/tags/&lt;tagname&gt;"></a>删除远程标签 <code>git push origin :refs/tags/&lt;tagname&gt;</code></h5><h3 id="gitignore文件"><a href="#gitignore文件" class="headerlink" title=".gitignore文件"></a>.gitignore文件</h3><p>当你不想把本地所有的文件都提交到库时，比如一些配置密码文件之类，这时候可以建立一个.gitignore文件，忽略掉那些你不想上传的文件 网上的忽略文件原则</p>
+<ol>
+<li>忽略操作系统自动生成的文件，比如缩略图等；</li>
+<li>忽略编译生成的中间文件、可执行文件等，也就是如果一个文件是通过另一个文件自动生成的，那自动生成的文件就没必要放进版本库，比如Java编译产生的<code>.class</code>文件；</li>
+<li>忽略你自己的带有敏感信息的配置文件，比如存放口令的配置文件。</li>
+</ol>
+<p>还有网上大神写好的模板。真是太良心了。。<a href="https://github.com/github/gitignore" target="_blank" rel="noopener">https://github.com/github/gitignore</a> 还有廖大神的一个简单的python版本,可以参考一下</p>
+<p># Windows:<br>Thumbs.db<br>ehthumbs.db<br>Desktop.ini</p>
+<p># Python:<br><em>.py[cod]
+</em>.so<br><em>.egg
+</em>.egg-info<br>dist<br>build</p>
+<p># My configurations:<br>db.ini<br>deploy_key_rsa</p>
+<p>最后记得将该.gitignore文件也提交到git</p>
+<h5 id="强制添加至git-无视-gitignore文件）git-add-f-lt-filename-gt"><a href="#强制添加至git-无视-gitignore文件）git-add-f-lt-filename-gt" class="headerlink" title="强制添加至git(无视.gitignore文件）git add -f &lt;filename&gt;"></a>强制添加至git(无视.gitignore文件）<code>git add -f &lt;filename&gt;</code></h5><h5 id="检查-gitignore文件-git-check-ignore"><a href="#检查-gitignore文件-git-check-ignore" class="headerlink" title="检查.gitignore文件 git check-ignore"></a>检查.gitignore文件 <code>git check-ignore</code></h5><p>发现.gitignore写错时，可以用该命令来检查</p>
+<p>$ git check-ignore -v App.class<br>.gitignore:3:*.class App.class</p>
+<hr>
+<p>最后，就是多实践吧，先多操作，用熟练了一个就好了 主要命令应该就</p>
+<ul>
+<li>git add filename</li>
+<li>git commit -m “xxxx”</li>
+<li>git clone xxxxxxxx</li>
+<li>git push origin master</li>
+</ul>
+<p>或者再加两个</p>
+<ul>
+<li>git diff</li>
+<li>git status</li>
+</ul>
+<p>最后，多使用，并在此感谢廖雪峰的教程</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/01/php5-6安装/" data-toggle="tooltip" data-placement="top" title="php5.6 安装">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/01/redis缓存服务搭建/" data-toggle="tooltip" data-placement="top" title="Redis 缓存服务搭建">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

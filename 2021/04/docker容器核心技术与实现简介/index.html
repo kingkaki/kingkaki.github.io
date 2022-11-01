@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          docker容器核心技术与实现简介 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2021/04/docker容器核心技术与实现简介/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#云原生" title="云原生">云原生</a>
+                        
+                          <a class="tag" href="/tags/#虚拟化" title="虚拟化">虚拟化</a>
+                        
+                    </div>
+                    <h1>docker容器核心技术与实现简介</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2021-04-10
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="Namespaces"><a href="#Namespaces" class="headerlink" title="Namespaces"></a>Namespaces</h1><p>namespace是linux提供的一种操作系统级别的资源隔离。</p>
+<p><a href="https://man7.org/linux/man-pages/man7/namespaces.7.html" target="_blank" rel="noopener">https://man7.org/linux/man-pages/man7/namespaces.7.html</a></p>
+<p>命名空间是被不断完善加入到linux内核当中的，这里介绍几个常用的namespace（runc里会多一个Cgroup namespace）</p>
+<ul>
+<li>UTS(CLONE_NEWUTS)：主要用于hostname的隔离</li>
+<li>User(CLONE_NEWUSER)：User ID和group IDs的隔离</li>
+<li>PID(CLONE_NEWPID)：进程id的隔离</li>
+<li>Mount(CLONE_NEWNS)：挂载点的隔离</li>
+<li>Network(CLONE_NEWNET)：网络设备、栈、端口等信息的隔离</li>
+<li>IPC(CLONE_NEWIPC)：系统进程间通信的一些资源（System V IPC、 POSIX message queues ）</li>
+</ul>
+<p>go中通过设置cmd的SysProcAttr参数，即可设置进程的namespaces。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cmd.SysProcAttr = &amp;syscall.SysProcAttr&#123;</span><br><span class="line">    Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS |</span><br><span class="line">    syscall.CLONE_NEWNET | syscall.CLONE_NEWIPC,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过这种方式我们也就可以创建一个命名空间隔离的进程，但是这里和docker的容器还是有一些差距，比如pid为1的进程不是本身，以及进程文件系统等信息。</p>
+<p>以下以mydocker同时也是runc中做法为例。</p>
+<p>1、先通过创建一个新的命名空间隔离的进程，运行<code>/proc/self/exe</code>（也就是当前程序本身）的init方法</p>
+<p>2、init进程挂载自己的procfs到当前<code>/proc</code>目录，以及tmpfs当当前<code>/dev</code>目录</p>
+<p>3、init进程通过系统调用<code>syscall.Exec</code>执行要运行的容器命令</p>
+<p>挂载procfs让进程只能看到当前pid namespace的进程信息</p>
+<p>挂载tmpfs到<code>/dev</code>目录让进程无法看到宿主机上挂载的设备信息</p>
+<p>系统调用<code>syscall.Exec</code>让当前pid为1的进程为自己本身。</p>
+<h1 id="Cgroup"><a href="#Cgroup" class="headerlink" title="Cgroup"></a>Cgroup</h1><p>Control groups，控制组，也是linux内核级别的资源控制，这里的资源指的是内存、cpu核心数、cpu时间分片等资源。</p>
+<p><a href="https://man7.org/linux/man-pages/man7/cgroups.7.html" target="_blank" rel="noopener">https://man7.org/linux/man-pages/man7/cgroups.7.html</a></p>
+<p>cgroup是一个层级的树状结构，linux以虚拟文件系统的方式对起进行展示。</p>
+<p>通过<code>cat /proc/self/mountinfo | grep memory</code>就可以看到当前进程内存挂载的cgroup路径。（通常都是在<code>/sys/fs/cgroup/</code>目录下）</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20210407205650.png" alt></p>
+<p>这里的memory就是一个cgroup的subsystem，默认有如下几个subsystem</p>
+<ul>
+<li>devices </li>
+<li>memory</li>
+<li>cpu</li>
+<li>cpuacct</li>
+<li>cpuset</li>
+<li>blkio</li>
+<li>perf_event</li>
+<li>freezer</li>
+<li>hugetlb</li>
+<li>pids</li>
+</ul>
+<p>当我们要限制memory资源时，只需要在<code>/sys/fs/cgroup/memory/docker/{container-id}/memory.limit_in_bytes</code>文件中输入要限制的内存大小（如100m），然后在<code>/sys/fs/cgroup/memory/docker/{container-id}/tasks</code>中追加进程的pid即可。</p>
+<p>tasks中的所有进程都会被限制成100m内存大小的限制。</p>
+<p>因此在之前的init进程创建后，在对应的cgroup中设置对应的资源限制，以及当前进程的pid，即完成了容器的cgroup资源限制。</p>
+<h1 id="Image"><a href="#Image" class="headerlink" title="Image"></a>Image</h1><p>其实通过docker pull下来的image都是一个个完整的文件系统，通过如下方式我们就可以获取一个busybox的镜像</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker pull busybox</span><br><span class="line">docker run -d busybox top -b </span><br><span class="line">docker <span class="built_in">export</span> - o busybox.tar &#123;container-id&#125;</span><br></pre></td></tr></table></figure>
+<p>这个busybox.tar中就是一个简易且完整的文件系统，只要将当前的rootfs切换到这个文件系统中，容器则有了自己的rootfs。</p>
+<p>这里默认通过<code>pivot_root</code>这个系统调用进行rootfs的切换</p>
+<p><a href="https://man7.org/linux/man-pages/man2/pivot_root.2.html" target="_blank" rel="noopener">https://man7.org/linux/man-pages/man2/pivot_root.2.html</a></p>
+<p>通过如下方式就可以将我们的rootfs挂载到指定的文件系统中（例如busybox解压后的目录），容器也就有了自己独立的文件系统。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 重新挂载了一遍当前rootfs</span></span><br><span class="line">syscall.Mount(root, root, <span class="string">"bind"</span>, syscall.MS_BIND|syscall.MS_REC, <span class="string">""</span>)</span><br><span class="line"><span class="comment">// 通过系统调用切换rootfs到root中，并且将原来的rootfs挂载到pivotDir目录</span></span><br><span class="line">syscall.PivotRoot(root, pivotDir)</span><br><span class="line"><span class="comment">// 切换到根目录，因为当前还在老的rootfs目录中</span></span><br><span class="line">syscall.Chdir(<span class="string">"/"</span>)</span><br><span class="line"><span class="comment">// unmount老的rootfs</span></span><br><span class="line">syscall.Unmount(pivotDir, syscall.MNT_DETACH)</span><br><span class="line"><span class="comment">// 删除老的rootfs</span></span><br><span class="line">os.Remove(pivotDir)</span><br></pre></td></tr></table></figure>
+<p>这里顺带提一嘴，我看了下runc的实现，默认也是通过<code>pivot_root</code>的方式。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20210407212102.png" alt></p>
+<p>但是当rootfs是ramfs格式时，<code>pivot_root</code>是不支持的，需要通过如下方式进行切换根目录。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount(rootfs, <span class="string">"/"</span>, NULL, MS_MOVE, NULL);</span><br></pre></td></tr></table></figure>
+<h1 id="UnionFS"><a href="#UnionFS" class="headerlink" title="UnionFS"></a>UnionFS</h1><p>即联合文件系统，通俗来讲就是将几个只读目录和一个可写目录联合挂载到同一个目录，在联合挂载的目录上呈现的文件是那几个只读和一个可写目录的“叠加”状态。</p>
+<p>linux有多种联合文件系统驱动，docker最初默认采用的是aufs，后续更改为overlay2，当然还支持一些例如 devicemapper 、 zfs 、vfs之类的文件驱动。</p>
+<p>以aufs为例，通过如下方式即可将busybox目录作为只读目录，writeLayer做为可写目录挂载到mnt目录中。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount -t aufs -o <span class="built_in">dirs</span>=./writerLayer:./busybox none ./mnt</span><br></pre></td></tr></table></figure>
+<p>此时，在mnt上对文件进行修改操作时，会将修改后的内容拷贝一份到writeLayer目录中。</p>
+<p>当对mnt上的文件进行删除操作时，writerLayer中会生成一个<code>.wh.{filename}</code> 的文件，标记filename文件被删除。</p>
+<p>从而保证了容器上对文件的操作不会影响到镜像目录，而是只将增量保存在了writerLayer目录中，当容器被删除时，只要删除对应的writeLayer目录即可。</p>
+<p>docker中这三个目录也分别有如下对应关系，只是通常一个容器镜像可能由多个layers只读层联合而成。</p>
+<ul>
+<li><code>/var/lib/docker/aufs/mnt</code>：docker实际挂载的目录</li>
+<li><code>/var/lib/docker/aufs/layers</code>：只读镜像层</li>
+<li><code>/var/lib/docker/aufs/diff</code>：可写层</li>
+</ul>
+<p>顺带说一下volume数据卷，其实所谓数据卷其实也就是新生成了一个目录然后被联合挂载到了mnt中的指定目录，只是这个目录到时候会被保留下来。</p>
+<h1 id="Network"><a href="#Network" class="headerlink" title="Network"></a>Network</h1><p>到目前为止，其实只差给容器“插上网线”，一个容器的基础功能其实就大差不离了。</p>
+<p>这里介绍一下docker默认的桥接模式网络，主要会涉及veth、bridge、iptables这些概念。</p>
+<p>首先需要创建一个bridge网桥</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">la := netlink.NewLinkAttrs()</span><br><span class="line">la.Name = bridgeName</span><br><span class="line">br := &amp;netlink.Bridge&#123;la, <span class="literal">nil</span>, <span class="literal">nil</span>, <span class="literal">nil</span>&#125;</span><br><span class="line">netlink.LinkAdd(br);</span><br></pre></td></tr></table></figure>
+<p>然后设置这个bridge的ip（192.168.0.1），以及其路由表（192.168.0.0/24）</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ipNet, _ := netlink.ParseIPNet(rawIP) <span class="comment">// 192.168.0.1/24</span></span><br><span class="line">addr := &amp;netlink.Addr&#123;ipNet, <span class="string">""</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="literal">nil</span>, <span class="literal">nil</span>, <span class="number">0</span>, <span class="number">0</span>&#125;</span><br><span class="line">netlink.AddrAdd(iface, addr) <span class="comment">// iface即是bridge设备</span></span><br></pre></td></tr></table></figure>
+<p>然后在宿主机设置如下iptables命令。即设置nat表，POSTROUTING链（用于转换源地址），当来源地址是<code>192.168.0.0/24</code>这个网段，并且不是从testbridge这个网卡中流出去的数据时（避免转发网段内通信），将源地址转换成宿主机的ip地址。 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -A POSTROUTING -s 192.168.0.0/24 ! -o testbridge -j MASQUERADE</span><br></pre></td></tr></table></figure>
+<p>此时查看<code>ifconfig testbridge</code>就可以看到生成的这个网桥设备</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/getImage.png" alt></p>
+<p><code>iptables -t nat -vnL POSTROUTING</code>也可以看到testbridge的转发规则。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/ksjdaf832ng.png" alt></p>
+<p>目前为止网桥设备已经准备好了，接下来就是为容器安上网卡</p>
+<p>这里需要创建一对veth，一端连至bridge</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">la := netlink.NewLinkAttrs()</span><br><span class="line">la.Name = endpoint.ID[:<span class="number">5</span>]</span><br><span class="line">la.MasterIndex = br.Attrs().Index  <span class="comment">// link a peer to bridge</span></span><br></pre></td></tr></table></figure>
+<p> 另一端配置成container的veth（虽然现在还没给容器安上）,即容器的网卡 </p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">endpoint.Device = netlink.Veth&#123;</span><br><span class="line">    LinkAttrs: la,</span><br><span class="line">    PeerName:  <span class="string">"cif-"</span> + endpoint.ID[:<span class="number">5</span>],</span><br><span class="line">&#125;</span><br><span class="line">netlink.LinkAdd(&amp;endpoint.Device)</span><br><span class="line">netlink.LinkSetUp(&amp;endpoint.Device)</span><br></pre></td></tr></table></figure>
+<p>然后就是把另一端的veth设备放入容器的network namespace中，由于容器的network namespace是隔离的，因此启用veth的话需要先进入对应的命名空间。</p>
+<p>顺便提下，这里setns操作只是改变当前线程的命名空间，但是go的调度模型可能会将goroutine调度到别的线程上，所以这里要通过<code>runtime.LockOSThread()</code>锁定下goroutine所在的线程。</p>
+<p>进入容器的网络命名空间之后，就可以启用这张网卡，以及loopback本地环回网卡。最后设置路由表将本地所有流量都指向这个veth的网络设备。</p>
+<p>目前为止，容器就拥有了和宿主机、bridge网段内容器、以及外网通信的能力。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1617694028243_5.png" alt></p>
+<p>最后就是端口映射，我们只需要在本地的iptables中设置，将本地的80端口的tcp流量都转发到容器的80端口，即完成了本地端口和容器端口的映射。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -A PREROUTING -p tcp -m tcp --dport 80 -j DNAT --to-destination &#123;container-ip&#125;:80</span><br></pre></td></tr></table></figure>
+<p>此时监听容器中的80端口，即可就接收到发往宿主机80端口上的数据。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/1617712911460_8.png" alt></p>
+<h1 id="其他一些功能"><a href="#其他一些功能" class="headerlink" title="其他一些功能"></a>其他一些功能</h1><h2 id="daemon"><a href="#daemon" class="headerlink" title="daemon"></a>daemon</h2><p>即让容器进程独立运行，其实也比较简单，进程<code>Start</code>之后不要<code>Wait</code>它结束，等父进程退出之后，子进程就会变成孤儿进程，从而被init进程所接管。</p>
+<p>但自己跑的时候 有个小坑，就是在goland中运行时，父进程退出了子进程也会跟着一起退出，换成在terminal中运行即可了。</p>
+<h2 id="exec"><a href="#exec" class="headerlink" title="exec"></a>exec</h2><p>当容器进程以daemon方式运行时，如何再进入到容器内部呢。</p>
+<p>通过setns这个系统调用就可以将当前线程放入到对应的namespace。</p>
+<p> <a href="https://man7.org/linux/man-pages/man2/setns.2.html" target="_blank" rel="noopener">https://man7.org/linux/man-pages/man2/setns.2.html</a></p>
+<p>还是之前那个go默认多进程+多线程调度模型的原因，导致运行时无法有确定的线程，这里runc中也采用了cgo的方式，通过cgo+<code>__attribute__((constructor))</code>，然后程序再最开始导入这个包时则会运行这个C代码，即在go环境初始完毕之前运行，从而保证了当前线程是一个确定的单线程。</p>
+<p> <a href="https://golang.org/pkg/cmd/cgo/" target="_blank" rel="noopener">https://golang.org/pkg/cmd/cgo/</a> </p>
+<p>然后就是在进入init进程前在环境变量中设置container的pid以及要exec的命令等信息。</p>
+<p>进入init进程后，通过C的<code>__attribute__((constructor))</code>在go环境初始化前取出环境变量中的信息，然后<code>setns(fd(/proc/container_pid/ns/*))</code>进入container的命名空间，最后直接system调用要执行的命令即可。</p>
+<p>不过这之后可能会出现<code>go build</code>编译不通过的情况，加入 <code>-gcflags all=-N</code>参数即可 </p>
+<h2 id="stop"><a href="#stop" class="headerlink" title="stop"></a>stop</h2><p>这个其实比较简单，因为容器在宿主机上看来只是一个进程而已，因此只要向进程发送<code>SIGTERM</code>信号，然后等待进程退出即可。</p>
+<h2 id="pipe"><a href="#pipe" class="headerlink" title="pipe"></a>pipe</h2><p>runc中的要执行的系统命令参数不是直接通过传参的方式传入init进程然后运行的，而是创建了一个pipe。</p>
+<p>把这个writepipe保留在主进程中，启动init进程之后在往writepipe中写入要传入的命令。</p>
+<p>而readpipe则通过如下方式设置为init进程文件描述符为3的文件（0、1、2分别已被标准输入、标准输出、错误输出预定）</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmd.ExtraFiles = []*os.File&#123;readPipe&#125;</span><br></pre></td></tr></table></figure>
+<p>然后init进程在执行完挂载的操作之后，再读取当前文件描述符为3的文件中的命令参数信息并执行。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p><a href="https://github.com/xianlubird/mydocker" target="_blank" rel="noopener">https://github.com/xianlubird/mydocker</a></p>
+<p><a href="https://github.com/opencontainers/runc" target="_blank" rel="noopener">https://github.com/opencontainers/runc</a></p>
+<p><a href="https://github.com/opencontainers/runc/tree/master/libcontainer" target="_blank" rel="noopener">https://github.com/opencontainers/runc/tree/master/libcontainer</a></p>
+<p><a href="https://man7.org/linux/man-pages/man7/namespaces.7.html" target="_blank" rel="noopener">https://man7.org/linux/man-pages/man7/namespaces.7.html</a></p>
+<p><a href="https://man7.org/linux/man-pages/man7/cgroups.7.html" target="_blank" rel="noopener">https://man7.org/linux/man-pages/man7/cgroups.7.html</a></p>
+<p><a href="https://man7.org/linux/man-pages/man2/setns.2.html" target="_blank" rel="noopener">https://man7.org/linux/man-pages/man2/setns.2.html</a></p>
+<p><a href="https://man7.org/linux/man-pages/man2/pivot_root.2.html" target="_blank" rel="noopener">https://man7.org/linux/man-pages/man2/pivot_root.2.html</a> </p>
+<p><a href="https://draveness.me/docker/" target="_blank" rel="noopener">https://draveness.me/docker/</a></p>
+<p><a href="https://golang.org/pkg/cmd/cgo/" target="_blank" rel="noopener">https://golang.org/pkg/cmd/cgo/</a> </p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2021/06/runc容器逃逸漏洞分析（CVE-2021-30465）/" data-toggle="tooltip" data-placement="top" title="runc容器逃逸漏洞分析（CVE-2021-30465）">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2021/01/配置不当导致的容器逃逸/" data-toggle="tooltip" data-placement="top" title="配置不当导致的容器逃逸">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#云原生" title="云原生">云原生</a>
+                        
+                          <a class="tag" href="/tags/#虚拟化" title="虚拟化">虚拟化</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

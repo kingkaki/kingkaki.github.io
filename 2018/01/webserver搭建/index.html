@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Webserver 搭建 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/01/webserver搭建/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                    </div>
+                    <h1>Webserver 搭建</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-01-18
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>emm因为在先前的学习中，发现对linux许多操作与配置极其不熟练，各种百度谷歌，还不一定弄得对，所以最近想系统学习下linux的操作，那就先从webserver服务开始。废话不多说，直接上吧。</p>
+<h4 id="环境："><a href="#环境：" class="headerlink" title="环境："></a>环境：</h4><ul>
+<li>CentOs 6.5</li>
+<li>Apache 2.2.15</li>
+<li>虚拟机</li>
+</ul>
+<p>tips:要想虚拟机上运行的服务可以在电脑本机上能够访问，需要设置为桥接模式  </p>
+<h3 id="Apache"><a href="#Apache" class="headerlink" title="Apache"></a>Apache</h3><p>1、安装apache :</p>
+<p>yum install httpd</p>
+<p>2、如果防火墙是开着的，为了方便这里就直接把防火墙关了</p>
+<p>service iptales stop</p>
+<p>3、找到httpd.conf配置文件修改如下内容（默认路劲为<code>/etc/httpd/conf/httpd.conf</code>）</p>
+<p>#ServerName <a href="http://www.example.com:80" target="_blank" rel="noopener">www.example.com:80</a>  –&gt;  ServerName localhost:80</p>
+<p>4、启动apache</p>
+<p>service httpd start</p>
+<p>这时候在主机访问一下，应该就可以进入apche的默认页面了    </p>
+<h3 id="Apache虚拟主机"><a href="#Apache虚拟主机" class="headerlink" title="Apache虚拟主机"></a>Apache虚拟主机</h3><p>1、打开httpd.conf文件，找到<code>virtual host being defined</code> 这一行 2、在其下面加入类似如下格式（也可以改用Include方式）<br><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">&lt;VirtualHost *:80&gt;</span></span><br><span class="line">    <span class="attribute"><span class="nomarkup">ServerName</span></span> test1.centos.com</span><br><span class="line">    <span class="attribute"><span class="nomarkup">DocumentRoot</span></span> /var/www/html/test1</span><br><span class="line">    <span class="section">&lt;Directory "/var/www/html/test1"&gt;</span></span><br><span class="line">        <span class="attribute"><span class="nomarkup">Options</span></span> Indexes FollowSymLinks</span><br><span class="line">        <span class="attribute">AllowOverride</span> None </span><br><span class="line">    <span class="section">&lt;/Directory&gt;</span></span><br><span class="line"><span class="section">&lt;/VirtualHost&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="section">&lt;VirtualHost *:80&gt;</span></span><br><span class="line">    <span class="attribute"><span class="nomarkup">ServerName</span></span> test2.centos.com</span><br><span class="line">    <span class="attribute"><span class="nomarkup">DocumentRoot</span></span> /var/www/html/test2</span><br><span class="line">    <span class="section">&lt;Directory "/var/www/html/test2"&gt;</span></span><br><span class="line">        <span class="attribute"><span class="nomarkup">Options</span></span> Indexes FollowSymLinks</span><br><span class="line">        <span class="attribute">AllowOverride</span> None</span><br><span class="line">    <span class="section">&lt;/Directory&gt;</span></span><br><span class="line"><span class="section">&lt;/VirtualHost&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>3、将#NameVirtualHost *:80的注释去掉（否则貌似只能配置一个虚拟主机）<br><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-id">#NameVirtualHost</span> *<span class="selector-pseudo">:80</span> <span class="selector-tag">--</span>&gt;  <span class="selector-tag">NameVirtualHost</span> *<span class="selector-pseudo">:80</span></span><br></pre></td></tr></table></figure></p>
+<p>4、关闭防火墙（或者设置下80端口，我这嫌麻烦直接关闭了）<br><figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service iptables <span class="built_in">stop</span></span><br></pre></td></tr></table></figure></p>
+<p>5、重启apache<br><figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">service httpd restart</span></span><br></pre></td></tr></table></figure></p>
+<p>6、修改本机host文件，加入类似如下语句（假如是外网ip，直接设置ip解析）<br><figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">192.168.1.104</span> test1.centos.com</span><br><span class="line"><span class="number">192.168.1.104</span> test2.centos.com</span><br></pre></td></tr></table></figure></p>
+<p>接下来，应就可以解析到不同网站了<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/01/79a87f70562ec1bae26e9c8b97430651.png" alt><br><img src="http://blog.kingkk.com/wp-content/uploads/2018/01/828b9b1e0e9d39222b96019245e2671a.png" alt><br>而且我现在还没搞懂怎么将目录弄到别的目录，而且很多设置按照教程了也是不对的，很多还是自己一点一点碎片化的搜出来的，而且有些也跟版本有关。以后在细细琢磨吧，现在弄的有点头大。    </p>
+<h3 id="Apache-伪静态"><a href="#Apache-伪静态" class="headerlink" title="Apache 伪静态"></a>Apache 伪静态</h3><p>1、在http.conf中加载rewrite_module模块，我这里是默认加载了的，加入没有的话就自行加载一下</p>
+<p>LoadModule rewrite_module modules/mod_rewrite.so</p>
+<p>2、在虚拟主机的配置块下的 <strong><directory>标签下</directory></strong>，加入如下语句（大意为将psp结尾的网页导向index.html）<br><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">&lt;IfModule mod_rewrite.c&gt;</span></span><br><span class="line">    <span class="attribute"><span class="nomarkup">RewriteEngine</span></span> <span class="literal">On</span></span><br><span class="line">    <span class="attribute"><span class="nomarkup">RewriteRule</span></span> ^(.*).psp$ index.html</span><br><span class="line"><span class="section">&lt;/IfModule&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>3、重启httpd即可</p>
+<p>service httpd restart</p>
+<p><img src="http://blog.kingkk.com/wp-content/uploads/2018/01/ffd363238a4307af8664f05563f03f66.png" alt>  </p>
+<h3 id="Nginx-安装"><a href="#Nginx-安装" class="headerlink" title="Nginx 安装"></a>Nginx 安装</h3><p>1、由于yum中没有内置nginx,所以不能通过yum方式下载安装，只能去官网下载安装包<a href="https://nginx.org/download/" target="_blank" rel="noopener">https://nginx.org/download/</a> 2、通过wget下载安装包，没有wget的可以通过yum下载一个（这里下载的是1.10.1版本）<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget -c https:<span class="regexp">//</span>nginx.org<span class="regexp">/download/</span>nginx-<span class="number">1.10</span>.<span class="number">1</span>.tar.gz</span><br></pre></td></tr></table></figure></p>
+<p>3、解压</p>
+<p>tar -xzvf nginx-1.10.1.tar.gz</p>
+<p>4、下载一些依赖环境<br><figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">yum <span class="keyword">install</span> gcc-c++ </span><br><span class="line"></span><br><span class="line">yum -y <span class="keyword">install</span> pcre*  </span><br><span class="line"></span><br><span class="line">yum -y <span class="keyword">install</span> openssl*</span><br></pre></td></tr></table></figure></p>
+<p>5、进入解压后文件夹，并配置安装目录<br><figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">cd</span> nginx-1.10.1</span><br><span class="line"><span class="string">./configure</span> <span class="params">--prefix=/usr/local/nginx</span></span><br></pre></td></tr></table></figure></p>
+<p>6、编译安装<br><figure class="highlight gauss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">make</span></span><br><span class="line"><span class="built_in">make</span> install</span><br></pre></td></tr></table></figure></p>
+<p>7、切换目录并启动</p>
+<p>cd /usr/local/nginx/sbin<br>./nginx</p>
+<p><img src="http://blog.kingkk.com/wp-content/uploads/2018/01/98b4d5d6d42100ba4dacfc6090a963af.png" alt><br>为了日后使用的方便，可以将其添加进系统服务，便可以通过service进行操作 1<br>、新建文件<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim <span class="regexp">/etc/i</span>nit.d<span class="regexp">/nginx</span></span><br></pre></td></tr></table></figure></p>
+<p>2、加入如下内容</p>
+<p>#!/bin/sh<br>#<br># nginx - this script starts and stops the nginx daemon<br>#<br># chkconfig:   - 85 15<br># description: Nginx is an HTTP(S) server, HTTP(S) reverse  </p>
+<h1 id="proxy-and-IMAP-POP3-proxy-server"><a href="#proxy-and-IMAP-POP3-proxy-server" class="headerlink" title="proxy and IMAP/POP3 proxy server"></a>proxy and IMAP/POP3 proxy server</h1><p># processname: nginx<br># config:      /etc/nginx/nginx.conf<br># config:      /etc/sysconfig/nginx<br># pidfile:     /var/run/nginx.pid </p>
+<p># Source function library.<br>. /etc/rc.d/init.d/functions</p>
+<p># Source networking configuration.<br>. /etc/sysconfig/network</p>
+<p># Check that networking is up.<br>[ “$NETWORKING” = “no” ] &amp;&amp; exit 0</p>
+<p># 这里要根据实际情况修改<br>nginx=”/usr/local/nginx/sbin.nginx”<br>prog=$(basename $nginx)</p>
+<p># 这里要根据实际情况修改<br>NGINX_CONF_FILE=”/usr/local/nginx/conf/nginx.conf”</p>
+<p>[ -f /etc/sysconfig/nginx ] &amp;&amp; . /etc/sysconfig/nginx </p>
+<p>lockfile=/var/lock/subsys/nginx </p>
+<p>start() {<br>    [ -x $nginx ] || exit 5<br>    [ -f $NGINX_CONF_FILE ] || exit 6<br>    echo -n $”Starting $prog: “<br>    daemon $nginx -c $NGINX_CONF_FILE<br>    retval=$?<br>    echo<br>    [ $retval -eq 0 ] &amp;&amp; touch $lockfile<br>    return $retval<br>}</p>
+<p>stop() {<br>    echo -n $”Stopping $prog: “<br>    killproc $prog -QUIT<br>    retval=$?<br>    echo<br>    [ $retval -eq 0 ] &amp;&amp; rm -f $lockfile<br>    return $retval<br>    killall -9 nginx<br>}</p>
+<p>restart() {<br>    configtest || return $?<br>    stop<br>    sleep 1<br>    start<br>}</p>
+<p>reload() {<br>    configtest || return $?<br>    echo -n $”Reloading $prog: “<br>    killproc $nginx -HUP<br>    RETVAL=$?<br>    echo<br>}</p>
+<p>force_reload() {<br>    restart<br>}</p>
+<p>configtest() {<br>    $nginx -t -c $NGINX_CONF_FILE<br>}</p>
+<p>rh_status() {<br>    status $prog<br>}</p>
+<p>rh_status_q() {<br>    rh_status &gt;/dev/null 2&gt;&amp;1<br>}</p>
+<p>case “$1” in<br>    start)<br>        rh_status_q &amp;&amp; exit 0<br>        $1<br>        ;;<br>    stop)<br>        rh_status_q || exit 0<br>        $1<br>        ;;<br>    restart|configtest)<br>        $1<br>        ;;<br>    reload)<br>        rh_status_q || exit 7<br>        $1<br>        ;;<br>    force-reload)<br>        force_reload<br>        ;;<br>    status)<br>        rh_status<br>        ;;<br>    condrestart|try-restart)<br>        rh_status_q || exit 0<br>        ;;<br>    *)<br>      echo $”Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload|configtest}”<br>        exit 2<br>esac</p>
+<p>3、然后就可以和之前一样，通过service的方式对ningx进行操作    </p>
+<h3 id="Nignx-配置虚拟主机"><a href="#Nignx-配置虚拟主机" class="headerlink" title="Nignx 配置虚拟主机"></a>Nignx 配置虚拟主机</h3><p>1、找到并打开conf目录下的nginx.conf文件（我这路径为<code>/usr/local/nginx/conf</code>） </p>
+<p>2、在http的大框下写入如下语句<br><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">server</span> &#123;</span><br><span class="line">   <span class="attribute">listen</span> <span class="number">80</span>;</span><br><span class="line">   <span class="attribute">server_name</span> www.centos.com;    <span class="comment">#网址</span></span><br><span class="line">   <span class="attribute">root</span> /data/www;                <span class="comment">#网页文件路径</span></span><br><span class="line">   <span class="attribute">index</span> index.html index.htm;    <span class="comment">#起始页面</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>3、修改本机的host文件 4、重新加载nginx</p>
+<p>service nginx reload</p>
+<p><img src="http://blog.kingkk.com/wp-content/uploads/2018/01/37d213d49754184b08b6894fd0a13326.png" alt> 此处也可以改用include的方式，在conf目录下新建vhost文件夹 在其中新建.conf文件，并加入之前的语句 在nginx中的http范围下<code>include vhost/*.conf;</code>      </p>
+<h3 id="Nginx-伪静态"><a href="#Nginx-伪静态" class="headerlink" title="Nginx 伪静态"></a>Nginx 伪静态</h3><p>1、在先前的虚拟主机配置块中加入如下语句（大意为将.psp结尾的文件指向index.html）<br><figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">location</span> <span class="title">/ &#123;</span></span><br><span class="line"><span class="title">    rewrite</span> ^(.*)\\.psp$ /index.html;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>2、重加载nginx</p>
+<p>service nginx reload</p>
+<p>加载成功 <img src="http://blog.kingkk.com/wp-content/uploads/2018/01/ccddd4d0b4460fa405caa94eac3aaa6a.png" alt>    </p>
+<h3 id="Nginx-反向代理"><a href="#Nginx-反向代理" class="headerlink" title="Nginx 反向代理"></a>Nginx 反向代理</h3><p>1、最简单的方式，在之前虚拟主机的配置中，加入如下语句<br><figure class="highlight roboconf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">location / &#123;</span><br><span class="line">      <span class="attribute">proxy_pass http</span>://www<span class="variable">.kingkk</span><span class="variable">.com</span>;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>2、重新加载nginx<br><figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">service nginx reload</span></span><br></pre></td></tr></table></figure></p>
+<p>成功反向代理到我的个人博客了<br><img src="http://blog.kingkk.com/wp-content/uploads/2018/01/5b6c17ab366f89e0a67e0a668bd23dcb.png" alt><br>麻烦一点的话就是 将添加的语句改为<br><figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">location</span> <span class="title">/ &#123;</span></span><br><span class="line"><span class="title">     proxy_pass</span> http://kingkk_host;   <span class="comment">#在此处将其取一个别名</span></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后再在其他地方写入<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">upstream kingkk_hosts&#123;</span><br><span class="line">    <span class="built_in"> server </span>www.kingkk.com;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以做到将两者分离，使代码简洁易懂    </p>
+<h3 id="Nginx-负载均衡"><a href="#Nginx-负载均衡" class="headerlink" title="Nginx 负载均衡"></a>Nginx 负载均衡</h3><p>1、在之前反向代理的基础上 设置upstream kingkk_hosts<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">upstream kingkk_hosts&#123;</span><br><span class="line">   <span class="built_in"> server </span>127.0.0.1:80;</span><br><span class="line">   <span class="built_in"> server </span>www.kingkk.com;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>2、重新加载服务<br><figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">service nginx reload</span></span><br></pre></td></tr></table></figure></p>
+<p><img src="http://blog.kingkk.com/wp-content/uploads/2018/01/63388be8d695c03915f82afc19e8889a.png" alt><br><img src="http://blog.kingkk.com/wp-content/uploads/2018/01/468c79de21974f81d033d5e64ee82db5.png" alt><br>不断刷新页面就可以发现在这两页面之间来回切换，也就意味着来回向这两个服务器请求资源   还可以设置权重，默认权重为1：1：1…<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">upstream kingkk_hosts&#123;</span><br><span class="line">  <span class="built_in"> server </span>127.0.0.1:80 <span class="attribute">weight</span>=3;</span><br><span class="line">  <span class="built_in"> server </span>www.kingkk.com <span class="attribute">weight</span>=1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>就可以达到3：1的这样一个切换效果</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/01/mysql搭建/" data-toggle="tooltip" data-placement="top" title="Mysql搭建">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/01/生无所息/" data-toggle="tooltip" data-placement="top" title="生无所息">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

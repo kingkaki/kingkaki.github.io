@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          docker 笔记 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/08/docker-笔记/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#配置" title="配置">配置</a>
+                        
+                          <a class="tag" href="/tags/#安装" title="安装">安装</a>
+                        
+                          <a class="tag" href="/tags/#docker" title="docker">docker</a>
+                        
+                    </div>
+                    <h1>docker 笔记</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-08-09
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>上学期寒假开始就稍微了解了下docker，无奈用的不是很多，也不是很懂</p>
+<p>后来被强制性要求使用了几次docker（不得不说，安装配置问题一直令我很头大），就也算勉强能起来一个服务了</p>
+<p>用了几次之后就决定系统的总结一下docker的使用，因为只是一些总结，更多的只是针对于我个人用的，不官方，不权威，不系统</p>
+<h1 id="Docker的三大概念"><a href="#Docker的三大概念" class="headerlink" title="Docker的三大概念"></a>Docker的三大概念</h1><h2 id="镜像（Images）"><a href="#镜像（Images）" class="headerlink" title="镜像（Images）"></a>镜像（Images）</h2><blockquote>
+<p>Docker 镜像是一个特殊的文件系统，除了提供容器运行时所需的程序、库、资源、配置等文件外，还包含了一些为运行时准备的一些配置参数（如匿名卷、环境变量、用户等）。镜像不包含任何动态数据，其内容在构建之后也不会被改变。 </p>
+</blockquote>
+<p>可以通过<code>docker ps</code> 来查看本机当中的镜像</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/docker-笔记/1.png" alt></p>
+<h2 id="容器（Container-）"><a href="#容器（Container-）" class="headerlink" title="容器（Container ）"></a>容器（Container ）</h2><p><code>容器</code>和<code>镜像</code>的关系类似于<code>实例</code>与<code>类</code>之间的关系</p>
+<p>一个镜像可以起多个容器，并指定不同的参数</p>
+<p>可以通过<code>docker ps</code>查看当前运行的容器</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/docker-笔记/2.png" alt></p>
+<h2 id="仓库（Repository-）"><a href="#仓库（Repository-）" class="headerlink" title="仓库（Repository ）"></a>仓库（Repository ）</h2><p>概念类似于git的仓库，我们可以从docker官方的仓库dockerhub中获取我们想要的镜像</p>
+<p>利用<code>&lt;仓库名&gt;:&lt;标签&gt;</code>的形式来获取指定仓库中的镜像，例如<code>ubuntu:16.04</code>获取16.04版本的ubuntu</p>
+<p>也可以将自己做好的镜像push到个人仓库中，供大家使用</p>
+<h1 id="Dockerfile"><a href="#Dockerfile" class="headerlink" title="Dockerfile"></a>Dockerfile</h1><p>构建一个镜像一般使用Dockerfile来定制</p>
+<p>类似于写入一个docker的配置文件，就可以根据配置的文件来生产特质的docker镜像</p>
+<h2 id="样例"><a href="#样例" class="headerlink" title="样例"></a>样例</h2><p>下面是一个dockerfile的样例</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 第一行写跟第1点中一样的基本镜像</span></span><br><span class="line"><span class="keyword">FROM</span> ubuntu:<span class="number">14.04</span></span><br><span class="line"><span class="comment"># 这里可以写上你的姓名/昵称</span></span><br><span class="line"><span class="keyword">MAINTAINER</span> yourname</span><br><span class="line"><span class="comment"># 这里可以写上你的制作时间</span></span><br><span class="line"><span class="keyword">ENV</span> REFRESHED_AT <span class="number">2018</span>-<span class="number">01</span>-<span class="number">01</span></span><br><span class="line"><span class="comment"># 使用utf-8编码</span></span><br><span class="line"><span class="keyword">ENV</span> LANG C.UTF-<span class="number">8</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 先写 修改源/更新 【如果必须的话】</span></span><br><span class="line"><span class="comment"># 替换源（这里可用sed或者直接COPY一个完整的sources.list来替换）</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> sed -i <span class="string">'s/http:\/\/archive.ubuntu.com\/ubuntu\//http:\/\/mirrors.163.com\/ubuntu\//g'</span> /etc/apt/sources.list</span></span><br><span class="line"><span class="comment"># 进行更新</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> apt-get update -y</span></span><br><span class="line"><span class="comment"># 将环境变量设置为非交互的 【这个看个人】</span></span><br><span class="line"><span class="keyword">ENV</span> DEBIAN_FRONTEND noninteractive</span><br><span class="line"></span><br><span class="line"><span class="comment"># 再写 各种安装</span></span><br><span class="line"><span class="comment"># 如 安装mysql</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> apt-get -y install mysql-server</span></span><br><span class="line"><span class="comment"># 安装apache2</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> apt-get -yqq install apache2</span></span><br><span class="line"><span class="comment"># 安装php5</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> apt-get -yqq install php5 libapache2-mod-php5</span></span><br><span class="line"><span class="comment"># 安装php扩展</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> apt-get install -yqq php5-mysql php5-curl php5-gd php5-intl php-pear php5-imagick php5-imap php5-mcrypt php5-memcache php5-ming php5-ps php5-pspell php5-recode php5-snmp php5-sqlite php5-tidy php5-xmlrpc php5-xsl</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 再 修改一些配置</span></span><br><span class="line"><span class="comment"># 对于文件中的替换字符串，多使用sed命令</span></span><br><span class="line"><span class="comment"># 例如去掉apache2的列目录漏洞</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> sed -i <span class="string">'s/Options Indexes FollowSymLinks/Options None/'</span> /etc/apache2/apache2.conf</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 然后才是复制文件，不推荐挂载卷</span></span><br><span class="line"><span class="comment"># ADD会自动解压压缩包，而COPY不会</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> html.tgz /var/www</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 剩下一些操作（权限要控制好）</span></span><br><span class="line"><span class="comment"># 例如修改某个文件的所有者</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> chown root:root /var/www/html/x.php</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># start.sh为开机启动脚本，里面包含容器开启后要启动的命令</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> start.sh /root/start.sh</span></span><br><span class="line"><span class="comment"># 加上执行权限</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> chmod +x /root/start.sh</span></span><br><span class="line"><span class="comment"># 使用ENTRYPOINT而不使用CMD（CMD容易受run命令最后的命令给影响）</span></span><br><span class="line"><span class="keyword">ENTRYPOINT</span><span class="bash"> <span class="built_in">cd</span> /root; ./start.sh</span></span><br><span class="line"><span class="comment"># WEB开放端口默认为80，一般为一个，若有特殊情况，请写明</span></span><br><span class="line"><span class="keyword">EXPOSE</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+<p>里面注释也给的很清楚，就不做画蛇添足的解释了，然后来具体解释下一些命令</p>
+<h2 id="一些前置知识"><a href="#一些前置知识" class="headerlink" title="一些前置知识"></a>一些前置知识</h2><h3 id="docker-commit"><a href="#docker-commit" class="headerlink" title="docker commit"></a>docker commit</h3><p>dockerfile中的每一条命令都会创建新的一层，然后执行命令，最后执行一次<code>docker commit</code>保存这一层的修改，构成新的一层镜像。后面层的镜像都是在前一层的基础上进行改动</p>
+<p>例如如下命令就会创建三层docker镜像，这样没有什么意义，并且浪费资源。而且最大的层数是有限制的</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">RUN</span><span class="bash"> apt-get install -y php5-mysql </span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> apt-get install -y php5-curl </span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> apt-get install -y php5-gd</span></span><br></pre></td></tr></table></figure>
+<p>正确的写法应该将改动合并到一条命令中</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">RUN</span><span class="bash"> apt-get install -y php5-mysql php5-curl php5-gd</span></span><br></pre></td></tr></table></figure>
+<p>还有一种情况就是我们想运行/var/www/html下的install.php文件</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">RUN</span><span class="bash"> <span class="built_in">cd</span> /var/www/html</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> php install.php</span></span><br></pre></td></tr></table></figure>
+<p>会发现其实根本没有运行这一条执行，因为新建的一层镜像执行目录又回归到了home目录中，所以前一个<code>cd</code>命令可以说是无效的</p>
+<p>正确的写法</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">RUN</span><span class="bash"> <span class="built_in">cd</span> /var/www/html &amp;&amp; php install.php</span></span><br></pre></td></tr></table></figure>
+<h3 id="容器就是进程"><a href="#容器就是进程" class="headerlink" title="容器就是进程"></a>容器就是进程</h3><p>这里先简单介绍一下CMD命令，其是用于启动容器时执行一些命令，一个dockerfile中只能有一个CMD命令，其用法如下</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">shell</span><span class="bash"> 格式：CMD &lt;命令&gt;</span></span><br><span class="line">exec 格式：<span class="keyword">CMD</span><span class="bash"> [<span class="string">"可执行文件"</span>, <span class="string">"参数1"</span>, <span class="string">"参数2"</span>...]</span></span><br></pre></td></tr></table></figure>
+<p>如</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CMD</span><span class="bash"> <span class="built_in">echo</span> <span class="string">"hello world!"</span></span></span><br><span class="line"><span class="keyword">CMD</span><span class="bash"> [<span class="string">"echo"</span>,<span class="string">"hello word!"</span>] <span class="comment"># 注意要用双引号</span></span></span><br></pre></td></tr></table></figure>
+<p>如果是用第一种，也就是shell格式时，在实际的执行过程中，会变成如下命令</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CMD</span><span class="bash"> [<span class="string">"sh"</span>,<span class="string">"-c"</span>,<span class="string">"echo hello world!"</span>]</span></span><br></pre></td></tr></table></figure>
+<p>然后就是docker中比较重要的两个概念</p>
+<blockquote>
+<p>Docker 不是虚拟机，容器中的应用都应该以前台执行，而不是像虚拟机、物理机里面那样，用 upstart/systemd 去启动后台服务，容器内没有后台服务的概念。 </p>
+</blockquote>
+<blockquote>
+<p>对于容器而言，其启动程序就是容器应用进程，容器就是为了主进程而存在的，主进程退出，容器就失去了存在的意义，从而退出，其它辅助进程不是它需要关心的东西。 </p>
+</blockquote>
+<p>比如之前我将CMD命令写为</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CMD</span><span class="bash"> service apache2 start</span></span><br></pre></td></tr></table></figure>
+<p>可是真正运行的时候就会发现刚运行起来，容器就结束了</p>
+<p>这就是因为在真正执行的时候这条命令被解释成了<code>CMD [&quot;sh&quot;,&quot;-c&quot;,&quot;service apache2 start&quot;]</code></p>
+<p>实际上的主进程是<code>sh</code>，当<code>service apache2 start</code>命令结束之后，<code>sh</code>也就结束了。整个docker容器也跟随主进程的结束而一同结束了</p>
+<p>写成如下格式即可</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CMD</span><span class="bash"> [<span class="string">"/usr/sbin/apache2ctl"</span>, <span class="string">"-D"</span>, <span class="string">"FOREGROUND"</span>]</span></span><br></pre></td></tr></table></figure>
+<h2 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h2><p>主要介绍几个常用的，更详细的可以见官方文档</p>
+<h3 id="FROM"><a href="#FROM" class="headerlink" title="FROM"></a>FROM</h3><p>指定基础镜像。想要定制一个镜像就需要以另一个镜像为基础</p>
+<p>docker官方提供了相当多的基础镜像，ubuntu、centos、debian，各种版本都有</p>
+<p>以ubuntu16.04为基础镜像</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> ubuntu:<span class="number">16.04</span></span><br></pre></td></tr></table></figure>
+<h3 id="RUN"><a href="#RUN" class="headerlink" title="RUN"></a>RUN</h3><p>用于执行命令，一般有如下两种格式</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">shell</span><span class="bash"> 格式：RUN &lt;命令&gt;</span></span><br><span class="line">exec 格式 ：<span class="keyword">RUN</span><span class="bash"> [<span class="string">"可执行文件"</span>, <span class="string">"参数1"</span>, <span class="string">"参数2"</span>...]</span></span><br></pre></td></tr></table></figure>
+<h3 id="CMD"><a href="#CMD" class="headerlink" title="CMD"></a>CMD</h3><p>前面介绍过，格式和RUN一样，用于容器的启动命令</p>
+<p>由于有时启动时需要执行较多的命令，而又只能执行一次CMD命令。一种较为通用的解决方法就是将命令写入start.sh中，CMD只要执行start.sh即可</p>
+<h3 id="COPY"><a href="#COPY" class="headerlink" title="COPY"></a>COPY</h3><p>复制文件，将本地的文件复制到docker镜像中</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">COPY</span><span class="bash"> www /var/www/html</span></span><br></pre></td></tr></table></figure>
+<p>将本目录下www文件夹放到/var/www/html中</p>
+<h3 id="ADD"><a href="#ADD" class="headerlink" title="ADD"></a>ADD</h3><p>更为高级的复制命令</p>
+<p>若是压缩包会进行解压后进行复制，若是url则会去下载这个链接的文件后进行复制</p>
+<p>格式和COPY一样</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ADD</span><span class="bash"> html.tgz /var/www</span></span><br></pre></td></tr></table></figure>
+<h3 id="ENV"><a href="#ENV" class="headerlink" title="ENV"></a>ENV</h3><p>用于设置环境变量</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ENV</span> &lt;key&gt; &lt;value&gt;</span><br><span class="line"><span class="keyword">ENV</span> &lt;key1&gt;=&lt;value1&gt; &lt;key2&gt;=&lt;value2&gt;...</span><br></pre></td></tr></table></figure>
+<p>个人习惯于设置成非交互模式的</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ENV</span> DEBIAN_FRONTEND noninteractive</span><br></pre></td></tr></table></figure>
+<h3 id="WORKDIR"><a href="#WORKDIR" class="headerlink" title="WORKDIR"></a>WORKDIR</h3><p>指定工作目录，意为所执行的命令都是在当前目录下执行的</p>
+<p>将工作目录切换到www目录下</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">WORKDIR</span><span class="bash"> /var/www/html</span></span><br></pre></td></tr></table></figure>
+<h3 id="EXPOSE"><a href="#EXPOSE" class="headerlink" title="EXPOSE"></a>EXPOSE</h3><p>声明端口，相当于当前容器暴露出这几个端口</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">EXPOSE</span> &lt;端口<span class="number">1</span>&gt; [&lt;端口<span class="number">2</span>&gt;...]</span><br></pre></td></tr></table></figure>
+<p>一般作为web服务器会暴露80端口</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">EXPOSE</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+<h1 id="容器操作"><a href="#容器操作" class="headerlink" title="容器操作"></a>容器操作</h1><h2 id="启动容器"><a href="#启动容器" class="headerlink" title="启动容器"></a>启动容器</h2><p>主要是<code>docker run</code>命令，然后添加一些执行的参数</p>
+<h3 id="直接运行"><a href="#直接运行" class="headerlink" title="直接运行"></a>直接运行</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run <span class="tag">&lt;<span class="name">镜像名</span>&gt;</span> <span class="tag">&lt;<span class="name">命令</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这样就能指定镜像运行，并且在运行时指定命令（会覆盖CMD命令）</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root<span class="variable">@ubuntu</span><span class="symbol">:/home/kingkk</span><span class="comment"># docker run ubuntu:16.04 echo "hello world!"</span></span><br><span class="line">hello world!</span><br></pre></td></tr></table></figure>
+<p>当程序运行结束后，容器也会随之退出</p>
+<h3 id="进入终端"><a href="#进入终端" class="headerlink" title="进入终端"></a>进入终端</h3><figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">run</span> -<span class="keyword">it</span> &lt;镜像名&gt; bash</span><br></pre></td></tr></table></figure>
+<p>运行一个容器，并进入其bash终端</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root<span class="variable">@ubuntu</span><span class="symbol">:/home/kingkk</span><span class="comment"># docker run -it ubuntu:16.04 bash</span></span><br><span class="line">root<span class="variable">@a580f7a50a57</span><span class="symbol">:/</span><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<h3 id="后台运行"><a href="#后台运行" class="headerlink" title="后台运行"></a>后台运行</h3><p>更多时候使用docker是为了起一个服务，如web服务，我们更希望他在后台运行</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="keyword">run</span><span class="bash"> -d -p 本机端口:容器端口 &lt;镜像名&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这也就可以在后台运行一个容器，<code>-d</code>为在后台运行，<code>-p</code>表示端口映射</p>
+<p>不过要确保主进程一直在运行，否则会因为主进程的退出，容器也会退出</p>
+<p>可以通过<code>docker ps</code>查看正在运行的容器，及其一些信息</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/docker-笔记/3.png" alt></p>
+<h3 id="进入容器"><a href="#进入容器" class="headerlink" title="进入容器"></a>进入容器</h3><figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it &lt;容器ID&gt; /bin/bash</span><br></pre></td></tr></table></figure>
+<p>这样就可以进入正在运行的容器当中</p>
+<figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@<span class="symbol">ubuntu:</span>/home/kingkk<span class="comment"># docker exec -it 7eb8 /bin/bash</span></span><br><span class="line">root@<span class="number">7e</span><span class="symbol">b822f6277f:</span>/<span class="comment"># ls</span></span><br><span class="line">bin   dev  <span class="class"><span class="keyword">lib</span>    <span class="title">media</span>  <span class="title">opt</span>   <span class="title">root</span>  <span class="title">sbin</span>  <span class="title">sys</span>  <span class="title">usr</span>  <span class="title">boot</span></span></span><br><span class="line">etc  home  lib64  mnt    proc  run   srv   tmp  var</span><br></pre></td></tr></table></figure>
+<h2 id="终止容器"><a href="#终止容器" class="headerlink" title="终止容器"></a>终止容器</h2><p>终止就比较简单了</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="keyword">stop</span> &lt;容器<span class="keyword">ID</span>&gt;</span><br></pre></td></tr></table></figure>
+<p>这样就终止了一个正在运行的容器，终止成功并返回容器ID<br><figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root<span class="variable">@ubuntu</span><span class="symbol">:/home/kingkk</span><span class="comment"># docker stop 7eb8</span></span><br><span class="line"><span class="number">7</span>eb8</span><br></pre></td></tr></table></figure></p>
+<h1 id="一个完整的示例"><a href="#一个完整的示例" class="headerlink" title="一个完整的示例"></a>一个完整的示例</h1><p>首先根据之前的样例中的Dockerfile写出一个完整的lamp的系统</p>
+<ul>
+<li>ubuntu 16.04</li>
+<li>php 7.0.30</li>
+<li>mysql 5.7.23</li>
+<li>apache2</li>
+</ul>
+<p>建立了个docker目录，目录结构如下</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">root@ubuntu:/home/kingkk/docker/test<span class="comment"># tree ./</span></span><br><span class="line">./</span><br><span class="line">├── Dockerfile</span><br><span class="line">├── start.sh</span><br><span class="line">└── www</span><br><span class="line">    └── index.php</span><br></pre></td></tr></table></figure>
+<p>文件内容如下</p>
+<p>Dockderfile</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> ubuntu:<span class="number">16.04</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">MAINTAINER</span> kingkk</span><br><span class="line"></span><br><span class="line"><span class="keyword">ENV</span> REFRESHED_AT <span class="number">2018</span>-<span class="number">08</span>-<span class="number">09</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">ENV</span> LANG C.UTF-<span class="number">8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> sed -i <span class="string">'s/http:\/\/archive.ubuntu.com\/ubuntu\//http:\/\/mirrors.163.com\/ubuntu\//g'</span> /etc/apt/sources.list</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> apt-get update -y</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">ENV</span> DEBIAN_FRONTEND noninteractive</span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> apt-get -y install mysql-server</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> apt-get -yqq install apache2</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> apt-get -yqq install php libapache2-mod-php</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> apt-get install -yqq php-mysql php-curl php-gd php-intl php-pear php-imagick php-imap php-mcrypt php-memcache php-pspell php-recode php-snmp php-tidy php-xmlrpc php-xsl</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> <span class="built_in">echo</span> <span class="string">"ServerName localhost:80"</span> &gt;&gt; /etc/apache2/apache2.conf</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> rm -rf /var/www/html/index.html</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> sed -i <span class="string">'s/Options Indexes FollowSymLinks/Options None/'</span> /etc/apache2/apache2.conf</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> ./www /var/www/html</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> start.sh /root/start.sh</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> chmod +x /root/start.sh</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">ENTRYPOINT</span><span class="bash"> <span class="built_in">cd</span> /root; ./start.sh</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">EXPOSE</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+<p> start.sh</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/bin/bash</span></span><br><span class="line">sleep <span class="number">1</span></span><br><span class="line"></span><br><span class="line">find /var/lib/mysql -type f -exec touch &#123;&#125; \; &amp;&amp; service mysql start</span><br><span class="line"></span><br><span class="line">mysqladmin -u root password <span class="string">"kingkk"</span></span><br><span class="line">mysql -uroot -pkingkk -e <span class="string">"CREATE DATABASE IF NOT EXISTS kingkk"</span></span><br><span class="line"></span><br><span class="line">/usr/sbin/apache2ctl -D FOREGROUND</span><br></pre></td></tr></table></figure>
+<p>index.php</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$servername = <span class="string">"localhost"</span>;</span><br><span class="line">$username = <span class="string">"root"</span>;</span><br><span class="line">$password = <span class="string">"kingkk"</span>;</span><br><span class="line"> </span><br><span class="line">$conn = <span class="keyword">new</span> mysqli($servername, $username, $password);</span><br><span class="line"> </span><br><span class="line"><span class="keyword">if</span> ($conn-&gt;connect_error) &#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">"连接失败: "</span> . $conn-&gt;connect_error);</span><br><span class="line">&#125; </span><br><span class="line">phpinfo();</span><br></pre></td></tr></table></figure>
+<p>然后在当前目录生成test镜像</p>
+<figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">docker</span> <span class="keyword">build </span>-t test .</span><br></pre></td></tr></table></figure>
+<p>等待运行结束后<code>docker images</code>即可查看到新生成的镜像</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/docker-笔记/4.png" alt></p>
+<p>运行test镜像</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="keyword">run</span><span class="bash"> -d -p 8888:80 <span class="built_in">test</span></span></span><br></pre></td></tr></table></figure>
+<p><code>docker ps</code>就能查看到正在运行的容器状态</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/docker-笔记/5.png" alt></p>
+<p>访问一下</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/docker-笔记/6.png" alt></p>
+<p>OK 运行成功</p>
+<h1 id="一些常见问题"><a href="#一些常见问题" class="headerlink" title="一些常见问题"></a>一些常见问题</h1><p>有时候启动不了可能还需要安装<code>sudo apt-get install docker.io</code></p>
+<p>会涉及到很多权限问题，需要切换成root权限来执行。无法获得root权限就要将用户添加到docker用户组</p>
+<p>容器名和镜像名都可以用哈希值（或者哈希的一部分）代替</p>
+<p>使用过windows和linux上的docker，windows上会出现一些小问题，如<code>\r\n</code>和<code>\n</code>,而且和虚拟机啊不能共存。所以推荐在linux上用docker。（mac没钱买不起。。。</p>
+<p>可以更新下docker源，会提示很多速度</p>
+<p>在测试部署的时候可以使用-v参数</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p <span class="number">80</span>:<span class="number">80</span> -v .<span class="regexp">/www:/</span>var<span class="regexp">/www/</span>html<span class="regexp">/  imagename</span></span><br></pre></td></tr></table></figure>
+<p>相当于将当前目录下www目录和容器中/var/www/html/目录相关联，当你本地文件发生变化时，容器中的文件也会随之变化</p>
+<p>有时候会多出很多\&lt;none>镜像，这种镜像被称为悬空镜像，可以用<code>docker image prune</code>删除</p>
+<h1 id="Reference-Link"><a href="#Reference-Link" class="headerlink" title="Reference Link"></a>Reference Link</h1><p><a href="https://yeasy.gitbooks.io/docker_practice" target="_blank" rel="noopener">https://yeasy.gitbooks.io/docker_practice</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/08/Flask-debug-pin安全问题/" data-toggle="tooltip" data-placement="top" title="Flask debug pin安全问题">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/08/迟学的哈希长度拓展攻击/" data-toggle="tooltip" data-placement="top" title="迟学的哈希长度扩展攻击">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#配置" title="配置">配置</a>
+                        
+                          <a class="tag" href="/tags/#安装" title="安装">安装</a>
+                        
+                          <a class="tag" href="/tags/#docker" title="docker">docker</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

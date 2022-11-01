@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          xss知识点小记 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/08/xss知识点小记/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#xss" title="xss">xss</a>
+                        
+                    </div>
+                    <h1>xss知识点小记</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-08-23
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近在学习xss，记录一些比较重要的知识点。有时能从根本上解决一些问题的疑惑</p>
+<h1 id="同源策略"><a href="#同源策略" class="headerlink" title="同源策略"></a>同源策略</h1><p>同源策略可以说是浏览器安全中最最基础也最为重要的部分了。同源策略限制了资源的任意加载，限制恶意请求。</p>
+<h2 id="何为同源"><a href="#何为同源" class="headerlink" title="何为同源"></a>何为同源</h2><p>这个估计大家都比熟悉，简单的来说就是如下三点</p>
+<ul>
+<li>协议相同（http/https）</li>
+<li>端口相同</li>
+<li>host相同</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss知识点小记/1.png" alt></p>
+<h2 id="请求过程"><a href="#请求过程" class="headerlink" title="请求过程"></a>请求过程</h2><p>跨域请求在html中的不同位置都会有发生，主要分为如下三类</p>
+<h3 id="Cross-origin-embedding"><a href="#Cross-origin-embedding" class="headerlink" title="Cross-origin embedding"></a>Cross-origin embedding</h3><p>嵌入资源，比如一些图片、视频、字体、css、js资源等</p>
+<p>这种嵌入式的资源是可以跨域访问的</p>
+<h3 id="Cross-origin-write"><a href="#Cross-origin-write" class="headerlink" title="Cross-origin write"></a>Cross-origin write</h3><p>例如form表单的提交，以及一些link的重定向</p>
+<p>这种情况下是不会受到同源策略的影响，表单数据，以及链接地址也是可以发往任何域的</p>
+<h3 id="Cross-origin-read"><a href="#Cross-origin-read" class="headerlink" title="Cross-origin read"></a>Cross-origin read</h3><p>例如利用ajax发送http请求，获取页面数据</p>
+<p>这种情况下是严格受到同源策略的限制</p>
+<blockquote>
+<p>需要强调的一点是，跨站请求的失败，并非是请求没有发起，而是请求已经发送到服务器，服务器也已经返回数据。只是在返回时被浏览器给拦截了</p>
+</blockquote>
+<h2 id="CORS"><a href="#CORS" class="headerlink" title="CORS"></a>CORS</h2><p>为了获取一些非同域的数据，于是有了<code>CORS</code>策略，来允许跨域资源的访问，对跨域的资源进行了一些限制</p>
+<p>主要是通过一系列<code>Access-Control-xxxx</code>格式的http头来完成这一项任务</p>
+<h3 id="simple-request"><a href="#simple-request" class="headerlink" title="simple request"></a>simple request</h3><p><code>simple request</code>主要是依据<code>Access-Control-Allow-Origin</code> 头来判别允许加载的源</p>
+<p>例如当发起这样一段ajax请求时</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">xmlhttp</span>=new XMLHttpRequest();</span><br><span class="line">xmlhttp.<span class="attribute">onreadystatechange</span>=function()</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">if</span> (xmlhttp.<span class="attribute">readyState</span>==4 &amp;&amp; xmlhttp.<span class="attribute">status</span>==200)</span><br><span class="line">&#123;</span><br><span class="line">	document.body.append(xmlhttp.response);</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">xmlhttp.open(<span class="string">"GET"</span>,<span class="string">"http://192.168.85.128"</span>);</span><br><span class="line">xmlhttp.send();</span><br></pre></td></tr></table></figure>
+<p>由于对方服务器未设置相应的CORS头部，导致被同源策略阻拦，无法获取对应的数据</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss知识点小记/2.png" alt></p>
+<p>在远程服务器上利用php发送一段<code>Access-Control-Allow-Origin</code>头，让所有源的请求可以获得该响应数据</p>
+<figure class="highlight lisp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">header('Access-Control-Allow-Origin<span class="symbol">:*</span>')<span class="comment">;</span></span><br></pre></td></tr></table></figure>
+<p>当返回的响应带上这个头之后，浏览器就可获取到返回的信息</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss知识点小记/3.png" alt></p>
+<h3 id="preflight-request"><a href="#preflight-request" class="headerlink" title="preflight request"></a>preflight request</h3><p>不符合以下要求的，会触发一个<code>preflight</code>机制（搬运。。</p>
+<ul>
+<li>GET 请求</li>
+<li>HEAD 请求</li>
+<li>Content-Type 为指定值的 POST 请求，包括<code>text/plain</code>，<code>multipart/form-data</code>以及<code>application/x-www-form-urlencode</code></li>
+<li>HTTP 首部字段不能包含下列以外的值： <ul>
+<li>Accept</li>
+<li>Accept-Language</li>
+<li>Content-Language</li>
+<li>Content-Type</li>
+<li>DPR</li>
+<li>Downlink</li>
+<li>Save-Data</li>
+<li>Viewport-Width</li>
+<li>Width</li>
+</ul>
+</li>
+</ul>
+<p>该机制会在请求前发送一个<code>OPTIONS</code>检查，询问跨域相关信息</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">OPTIONS</span> <span class="string">/resources/post-here/</span> HTTP/1.1</span><br><span class="line"><span class="attribute">Host</span>: bar.other</span><br><span class="line"><span class="attribute">User-Agent</span>: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.1b3pre) Gecko/20081130 Minefield/3.1b3pre</span><br><span class="line"><span class="attribute">Accept</span>: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span><br><span class="line"><span class="attribute">Accept-Language</span>: en-us,en;q=0.5</span><br><span class="line"><span class="attribute">Accept-Encoding</span>: gzip,deflate</span><br><span class="line"><span class="attribute">Accept-Charset</span>: ISO-8859-1,utf-8;q=0.7,*;q=0.7</span><br><span class="line"><span class="attribute">Connection</span>: keep-alive</span><br><span class="line"><span class="attribute">Origin</span>: http://foo.example</span><br><span class="line"><span class="attribute">Access-Control-Request-Method</span>: POST</span><br><span class="line"><span class="attribute">Access-Control-Request-Headers</span>: X-TEST, Content-Type</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">HTTP/1.1 <span class="number">200</span> OK</span><br><span class="line"><span class="attribute">Date</span>: Mon, 01 Dec 2008 01:15:39 GMT</span><br><span class="line"><span class="attribute">Server</span>: Apache/2.0.61 (Unix)</span><br><span class="line"><span class="attribute">Access-Control-Allow-Origin</span>: http://foo.example</span><br><span class="line"><span class="attribute">Access-Control-Allow-Methods</span>: POST, GET, OPTIONS</span><br><span class="line"><span class="attribute">Access-Control-Allow-Headers</span>: X-TEST, Content-Type</span><br><span class="line"><span class="attribute">Access-Control-Max-Age</span>: 86400</span><br><span class="line"><span class="attribute">Vary</span>: Accept-Encoding, Origin</span><br><span class="line"><span class="attribute">Content-Encoding</span>: gzip</span><br><span class="line"><span class="attribute">Content-Length</span>: 0</span><br><span class="line"><span class="attribute">Keep-Alive</span>: timeout=2, max=100</span><br><span class="line"><span class="attribute">Connection</span>: Keep-Alive</span><br><span class="line"><span class="attribute">Content-Type</span>: text/plain</span><br></pre></td></tr></table></figure>
+<p>请求方发送了两个CORS头部</p>
+<ul>
+<li>Access-Control-Request-Method: POST   询问是否可以使用POST传输</li>
+<li>Access-Control-Request-Headers: X-TEST, Content-Type   询问是否允许自定义头部</li>
+</ul>
+<p>服务器也响应了四个CORS头部</p>
+<ul>
+<li>Access-Control-Allow-Origin: <a href="http://foo.example" target="_blank" rel="noopener">http://foo.example</a>  允许该源请求数据</li>
+<li>Access-Control-Allow-Methods: POST, GET, OPTIONS  允许的请求方式</li>
+<li>Access-Control-Allow-Headers: X-TEST, Content-Type   允许的自定义头部</li>
+<li>Access-Control-Max-Age: 86400  有效时间</li>
+</ul>
+<h1 id="浏览器解码"><a href="#浏览器解码" class="headerlink" title="浏览器解码"></a>浏览器解码</h1><p>主要是为了解决为何有时候可以使用html绕过，以及一些标签优先级问题</p>
+<h2 id="HTML五类元素"><a href="#HTML五类元素" class="headerlink" title="HTML五类元素"></a>HTML五类元素</h2><h3 id="空元素-Void-elements"><a href="#空元素-Void-elements" class="headerlink" title="空元素(Void elements)"></a>空元素(Void elements)</h3><p>如<code>&lt;area&gt;</code>,<code>&lt;br&gt;</code>,<code>&lt;base&gt;</code>等等</p>
+<p>不能容纳任何内容，因为不存在闭合标签，从而没有内容可以容纳至其中</p>
+<h3 id="原始文本元素-Raw-text-elements"><a href="#原始文本元素-Raw-text-elements" class="headerlink" title="原始文本元素(Raw text elements)"></a>原始文本元素(Raw text elements)</h3><p>有<code>&lt;script&gt;</code>和<code>&lt;style&gt;</code> 可以容纳文本</p>
+<h3 id="RCDATA元素-RCDATA-elements"><a href="#RCDATA元素-RCDATA-elements" class="headerlink" title="RCDATA元素(RCDATA elements)"></a>RCDATA元素(RCDATA elements)</h3><p>有<code>&lt;textarea&gt;</code>和<code>&lt;title&gt;</code> 可以容纳文本和字符引用</p>
+<h3 id="外部元素-Foreign-elements"><a href="#外部元素-Foreign-elements" class="headerlink" title="外部元素(Foreign elements)"></a>外部元素(Foreign elements)</h3><p>例如MathML命名空间或者SVG命名空间的元素</p>
+<p>可以容纳文本、字符引用、CDATA段、其他元素和注释</p>
+<h3 id="基本元素-Normal-elements"><a href="#基本元素-Normal-elements" class="headerlink" title="基本元素(Normal elements)"></a>基本元素(Normal elements)</h3><p>即除了以上4种元素以外的元素，可以容纳文本、字符引用、其他元素和注释</p>
+<h2 id="解析顺序"><a href="#解析顺序" class="headerlink" title="解析顺序"></a>解析顺序</h2><p>浏览器的解码顺序为</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">html解码 ==&gt; javascript解码 ==&gt; url解码</span><br></pre></td></tr></table></figure>
+<p>正是由于这个原因，导致在<code>script</code>标签中，只要遇到<code>&lt;/script&gt;</code>标签就会进行闭合</p>
+<p>在加载完html代码之后，浏览器会先对整个html代码进行一次解析，在解析中会进入几个不同的状态</p>
+<ul>
+<li><code>&lt;</code>字符前 ： Data state</li>
+<li><code>&lt;</code>字符时 ：Tag open state</li>
+<li>找到标签名： Tag name state</li>
+<li>属性名 ：before attribute name state</li>
+<li>属性值 ： Data state</li>
+<li><code>&gt;</code>字符时 ： 重新进入Date state</li>
+</ul>
+<p>每遇到一个新的标签就会记录一个token，当一个标签完结的时候，就会释放掉那个token</p>
+<p>在RCDATA元素标签中，会进入一种<code>RCDATA</code>状态，只认得<code>&lt;/textarea&gt;</code>、<code>&lt;title&gt;</code><br>从而在“<code>&lt;textarea&gt;</code>”和“<code>&lt;title&gt;</code>”的内容中不会创建标签，就不会有脚本能够执行。</p>
+<p><code>svg</code>外部标签，在解析它的时候，由于其支持xml协议，从而，<code>svg</code>还会对其内部数据进行一次xml解码，也就导致了<code>svg</code>标签内部可以使用html编码</p>
+<p>因此HTML编码只有在如下几种情况下可以使用</p>
+<ul>
+<li><p>Data state</p>
+<ul>
+<li><p>在标签外部</p>
+</li>
+<li><p>在属性值时</p>
+</li>
+</ul>
+</li>
+<li>svg标签内部</li>
+</ul>
+<h1 id="CSP（Content-Security-Policy）"><a href="#CSP（Content-Security-Policy）" class="headerlink" title="CSP（Content Security Policy）"></a>CSP（Content Security Policy）</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><blockquote>
+<p>Content Security Policy （CSP）内容安全策略，是一个附加的安全层，有助于检测并缓解某些类型的攻击，包括跨站脚本（XSS）和数据注入攻击。</p>
+<p>CSP的特点就是他是在浏览器层面做的防护，是和同源策略同一级别，除非浏览器本身出现漏洞，否则不可能从机制上绕过。</p>
+<p>CSP只允许被认可的JS块、JS文件、CSS等解析，只允许向指定的域发起请求。</p>
+</blockquote>
+<p>CSP不仅限制了js的引入，还限制了个各种静态文件资源的的引入。在默认情况下甚至限制了内联js的执行（就是在<code>&lt;script&gt;</code>标签中的js代码</p>
+<p>CSP的从一定程度上<strong>缓解</strong>了XSS的危害，但由于其较强的限制性，网站要做较为详细的配置，若是配置不当，依旧容易引起XSS</p>
+<p>启用</p>
+<p>有两种启用的方式</p>
+<p>1、 发送一个<code>CSP</code>的http头</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">header(<span class="string">"Content-Security-Policy: default-src 'self'; script-src 'self' https://www.kingkk.com;"</span>);</span><br></pre></td></tr></table></figure>
+<p>2、在meta标签种添加</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">"Content-Security-Policy"</span> <span class="attr">content</span>=<span class="string">"default-src 'self'; script-src 'self' https://www.kingkk.com;"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>可以自定义限制不同资源的加载</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss知识点小记/5.png" alt></p>
+<p>加载策略（注意一些有引号和一些没引号的区别）</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss知识点小记/4.png" alt></p>
+<p>例如之前的那个范例种的CSP策略</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">header(<span class="string">"Content-Security-Policy: default-src 'self'; script-src 'self' https://www.kingkk.com;"</span>);</span><br></pre></td></tr></table></figure>
+<p>就意为<code>script</code>标签只允许加载本站，以及<code>https://www.kingkk.com</code>上的资源，其余的<code>css</code>、<code>img</code>之类的资源只允许加载本站的</p>
+<p>例如服务上的一端代码</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> header(<span class="string">"Content-Security-Policy: default-src 'self' "</span>); <span class="meta">?&gt;</span></span><br><span class="line">&lt;img src=<span class="string">"https://www.kingkk.com/2018/08/xss%E7%9F%A5%E8%AF%86%E7%82%B9%E5%B0%8F%E8%AE%B0/1.png"</span>&gt;</span><br></pre></td></tr></table></figure>
+<p>访问时够看到chrome中的报错</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss知识点小记/6.png" alt></p>
+<p>需要添加指定CSP源才能添加远程服务器的资源</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">header(<span class="string">"Content-Security-Policy: default-src 'self'; script-src 'self'; img-src 'self' https://www.kingkk.com "</span>)</span><br></pre></td></tr></table></figure>
+<p>才能正确加载出资源</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss知识点小记/7.png" alt></p>
+<h2 id="nonce-script"><a href="#nonce-script" class="headerlink" title="nonce script"></a>nonce script</h2><p>由于默认是会限制内联脚本的执行，然而实际当中内联脚本又是必不可少的，于是推出了一种<code>nonce</code>属性</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">header(<span class="string">"Content-Security-Policy: default-src 'self'; script-src 'nonce-&#123;random-str&#125;' "</span>);</span><br></pre></td></tr></table></figure>
+<p>只有当<code>script</code>标签中<code>nonce</code>属性值和CSP中的<code>nonce</code>属性值一样才能执行内联脚本</p>
+<figure class="highlight dust"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="xml"><span class="tag">&lt;<span class="name">script</span> <span class="attr">nonce</span>=<span class="string">"</span></span></span><span class="template-variable">&#123;random-str&#125;</span><span class="xml"><span class="tag"><span class="string">"</span>&gt;</span>alert(1)<span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br></pre></td></tr></table></figure>
+<p>这个随机数值需要由后端随机生成。从而减少内联script的xss危害</p>
+<p>例如一段这样的代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php </span><br><span class="line">header(&quot;Content-Security-Policy: default-src &apos;self&apos;; script-src &apos;self&apos;&quot;);</span><br><span class="line">?&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">	alert(/xss/);</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>可以看到默认是进制这种内联方式的代码的</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss知识点小记/8.png" alt></p>
+<p>一种解决方式就是在<code>script-src</code>后面添加<code>&#39;unsafe-inline&#39;</code></p>
+<p>还有就是利用<code>nonce</code>标签，只有值相同的script标签才能执行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php </span><br><span class="line">function random_string( $length = 8 ) &#123; </span><br><span class="line">  $chars = &apos;abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789&apos;; </span><br><span class="line">  $password = &apos;&apos;; </span><br><span class="line">  for($i = 0; $i &lt; $length; $i++)</span><br><span class="line">  &#123; </span><br><span class="line">    $password .= $chars[ mt_rand(0, strlen($chars) - 1) ]; </span><br><span class="line">  &#125; </span><br><span class="line">  return $password; </span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line">$random = random_string(12);</span><br><span class="line"></span><br><span class="line">header(&quot;Content-Security-Policy: default-src &apos;self&apos;; script-src &apos;self&apos; &apos;nonce-$random&apos; &quot;);</span><br><span class="line">?&gt;</span><br><span class="line">&lt;script nonce=&lt;?php echo $random; ?&gt;&gt;</span><br><span class="line">	alert(/xss/);</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>这样就可以成功弹窗</p>
+<p>但当这个两个值不匹配时</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">nonce</span>=<span class="string">13456</span>&gt;</span></span><br><span class="line"><span class="javascript">	alert(<span class="regexp">/xss/</span>);</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>就可以看到控制台的报错信息</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/xss知识点小记/10.png" alt></p>
+<p>由于这个值每次是随机产生的，构造的难度极大提升，从而能较为有效的抵御xss</p>
+<h1 id="Reference-Link"><a href="#Reference-Link" class="headerlink" title="Reference Link"></a>Reference Link</h1><p><a href="http://pupiles.com/xss.html" target="_blank" rel="noopener">http://pupiles.com/xss.html</a></p>
+<p><a href="https://lightless.me/archives/review-SOP.html" target="_blank" rel="noopener">https://lightless.me/archives/review-SOP.html</a></p>
+<p><a href="https://www.hackersb.cn/hacker/85.html" target="_blank" rel="noopener">https://www.hackersb.cn/hacker/85.html</a></p>
+<p><a href="https://paper.seebug.org/423/#0x02-cspcontent-security-policy" target="_blank" rel="noopener">https://paper.seebug.org/423/#0x02-cspcontent-security-policy</a></p>
+<p><a href="http://www.ruanyifeng.com/blog/2016/09/csp.html" target="_blank" rel="noopener">http://www.ruanyifeng.com/blog/2016/09/csp.html</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/09/weblogic漏洞练习/" data-toggle="tooltip" data-placement="top" title="weblogic漏洞练习">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/08/网鼎杯writeup-web/" data-toggle="tooltip" data-placement="top" title="网鼎杯writeup-web">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#xss" title="xss">xss</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

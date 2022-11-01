@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Python 正则表达式 特殊符号和字符 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2017/12/正则表达式特殊符号和字符/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                    </div>
+                    <h1>Python 正则表达式 特殊符号和字符</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2017-12-04
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h4 id="择一匹配符号："><a href="#择一匹配符号：" class="headerlink" title="择一匹配符号：  |"></a>择一匹配符号：  |</h4><p>In [18]: bt = ‘bat|bet|bit’   #匹配 bat或bet或bit</p>
+<p>In [19]: m = re.match(bt,’bat’)</p>
+<p>In [20]: if m is not None: print m.group()<br>bat</p>
+<p>In [21]: m = re.match(bt,’bot’)  #匹配失败</p>
+<p>In [22]: if m is not None: print m.group()</p>
+<p>In [23]: m = re.search(bt,’he bit me’)</p>
+<p>In [24]: if m is not None: print m.group()<br>bit</p>
+<h4 id="匹配任意单个字符（包括空格，除了换行符-n-："><a href="#匹配任意单个字符（包括空格，除了换行符-n-：" class="headerlink" title="匹配任意单个字符（包括空格，除了换行符\n)：."></a>匹配任意单个字符（包括空格，除了换行符\n)：.</h4><p>In [25]: anyend = ‘.end’</p>
+<p>In [26]: m = re.match(anyend,’bend’) #匹配任意字符</p>
+<p>In [28]: if m is not None:print m.group()<br>bend</p>
+<p>In [29]: m = re.match(anyend,’end’)  #不匹配无字符</p>
+<p>In [30]: if m is not None:print m.group()</p>
+<p>In [31]: m = re.match(anyend,’\nend’)   #不匹配换行</p>
+<p>In [32]: if m is not None:print m.group()</p>
+<p>In [33]: m = re.match(anyend,’ end’)  #匹配‘ ’</p>
+<p>In [34]: if m is not None:print m.group()<br> end  #end前有一个空格‘ ’</p>
+<p>tip:若想搜索真正的点号可以通过  \  转义  </p>
+<h4 id="创建字符集"><a href="#创建字符集" class="headerlink" title="创建字符集:  [ ]"></a>创建字符集:  [ ]</h4><p>例如：[abc]匹配a或b或c中任意一个字符</p>
+<p>In [35]: m = re.match(‘[cr][23][dp][o2]‘,’r2d2’)  #匹配成功</p>
+<p>In [36]: if m is not None: print m.group()<br>r2d2</p>
+<p>In [37]: m = re.match(‘[cr][23][dp][o2]‘,’c3do’)</p>
+<p>In [38]: if m is not None: print m.group()<br>c3do</p>
+<p>In [39]: m = re.match(‘[cr][23][dp][o2]‘,’c3eo’)  #匹配失败</p>
+<p>In [40]: if m is not None: print m.group()</p>
+<h4 id="分组"><a href="#分组" class="headerlink" title="分组"></a>分组</h4><p>In [41]: m = re.match(‘(\w\w\w)-(\d\d\d)’,’abc-123’)</p>
+<p>In [42]: m.group()<br>Out[42]: ‘abc-123’</p>
+<p>In [43]: m.group(1)  #子组1<br>Out[43]: ‘abc’</p>
+<p>In [44]: m.group(2)  #子组2<br>Out[44]: ‘123’</p>
+<p>In [45]: m.groups()  #全部子组，存放与元组中<br>Out[45]: (‘abc’, ‘123’)</p>
+<p>group()通常用于显示所有匹配部分，但也可以用于取各个子组 groups()可以用来获取一个包含所有匹配字符串的元组</p>
+<p>In [47]: m = re.match(‘ab’,’ab’) #不存在子组</p>
+<p>In [48]: m.group()<br>Out[48]: ‘ab’</p>
+<p>In [49]: m.groups() #不存在子组时无法匹配<br>Out[49]: ()</p>
+<p>In [51]: m = re.match(‘(ab)’,’ab’)  #一个子组</p>
+<p>In [52]: m.group()<br>Out[52]: ‘ab’</p>
+<p>In [53]: m.group(1)<br>Out[53]: ‘ab’</p>
+<p>In [54]: m.groups()<br>Out[54]: (‘ab’,)</p>
+<p>In [55]: m = re.match(‘(a(b))’,’ab’) #两个嵌套子组</p>
+<p>In [56]: m.group()<br>Out[56]: ‘ab’</p>
+<p>In [57]: m.group(1)<br>Out[57]: ‘ab’</p>
+<p>In [58]: m.group(2)<br>Out[58]: ‘b’</p>
+<p>In [59]: m.groups()<br>Out[59]: (‘ab’, ‘b’)</p>
+<h4 id="匹配起始结尾、边界单词"><a href="#匹配起始结尾、边界单词" class="headerlink" title="匹配起始结尾、边界单词"></a>匹配起始结尾、边界单词</h4><p>例：(tips该操作符多用于search而不是match)</p>
+<ul>
+<li>^form    匹配以form作为起始的字符串</li>
+<li>form$    匹配以form为结尾的字符串</li>
+<li>^form$   等价于匹配单个form字符串</li>
+<li>\b   匹配边界字符串</li>
+<li>\B    匹配非边界字符串</li>
+</ul>
+<p>In [81]: m = re.search(‘^is’,’is a dog’)</p>
+<p>In [82]: if m is not None: print m.group()<br>is</p>
+<p>In [83]: m = re.search(‘is$’,’is a dog’)</p>
+<p>In [84]: if m is not None: print m.group()</p>
+<p>In [85]: m = re.search(‘^dog$’,’is a dog’)  #  ^ $一起时必须完全匹配</p>
+<p>In [86]: if m is not None: print m.group()</p>
+<p>In [89]: m = re.search(‘^is a dog$’,’is a dog’)</p>
+<p>In [90]: if m is not None: print m.group()<br>is a dog</p>
+<p>前后出现空格或者换行时都属于\b的边界匹配</p>
+<p>In [91]: m = re.search(r’\bdog’,’is a dog’)   #匹配空格作为边界</p>
+<p>In [92]: if m is not None: print m.group()<br>dog</p>
+<p>In [93]: m = re.search(r’\bdog’,’is a\ndog’)  #匹配换行符作为边界</p>
+<p>In [94]: if m is not None: print m.group()<br>dog</p>
+<p>In [95]: m = re.search(r’\bog’,’is a dog’)   #匹配失败</p>
+<p>In [96]: if m is not None: print m.group()</p>
+<p>In [97]: m = re.search(r’\Bog’,’is a dog’)  #\B匹配非边界字符串</p>
+<p>In [98]: if m is not None: print m.group()<br>og</p>
+<p>  <strong>tips:使用r’xxx’的原始字符串避免正则匹配时的转义</strong>  </p>
+<h4 id="脱字符"><a href="#脱字符" class="headerlink" title="脱字符 ^"></a>脱字符 ^</h4><p>直接使用表示匹配字符串的起始部分 紧跟在左括号右边表示不匹配给定字符集，例如</p>
+<ul>
+<li>[^\n] 不匹配换行符</li>
+<li>[^aeiou]不匹配元音字符</li>
+</ul>
+<p>In [11]: re.findall(‘[^aeiou]‘,’abcdefg’)<br>Out[11]: [‘b’, ‘c’, ‘d’, ‘f’, ‘g’]</p>
+<h4 id="拓展符号"><a href="#拓展符号" class="headerlink" title="拓展符号"></a>拓展符号</h4><h5 id="iLmsux-用以标记并实现某些功能："><a href="#iLmsux-用以标记并实现某些功能：" class="headerlink" title="**(?iLmsux)**用以标记并实现某些功能："></a><code>**(?iLmsux)**</code>用以标记并实现某些功能：</h5><h6 id="re-I-IGNORECASE-忽略大小写的匹配"><a href="#re-I-IGNORECASE-忽略大小写的匹配" class="headerlink" title="re.I/IGNORECASE (忽略大小写的匹配)"></a>re.I/IGNORECASE (忽略大小写的匹配)</h6><p>In [5]: re.findall(r’<strong>(?i)</strong>yes’,’Yes?yes.Yes!!’)   #以(?i)形式表示<br>Out[5]: [‘Yes’, ‘yes’, ‘Yes’]</p>
+<p>In [9]: re.findall(r’(?i)th\w+’,’The?tHoEs.tHat!!’)  #匹配th开头且忽略大小写<br>Out[9]: [‘The’, ‘tHoEs’, ‘tHat’]</p>
+<h6 id="re-M-MULTILINE（进行跨行搜索）"><a href="#re-M-MULTILINE（进行跨行搜索）" class="headerlink" title="re.M/MULTILINE（进行跨行搜索）"></a>re.M/MULTILINE（进行跨行搜索）</h6><p>In [10]: re.findall(r’<strong>(?m)</strong>(^th[\w ]+)’,”””   #匹配th开头的段落<br> …: this is first line,<br> …: another line,<br> …: that line,it’s the best<br> …: “””)<br>Out[10]: [‘this is first line’, ‘that line’]</p>
+<h6 id="re-S-DOTALL-使点号-可以用来表示换行符-n"><a href="#re-S-DOTALL-使点号-可以用来表示换行符-n" class="headerlink" title="re.S/DOTALL (使点号 . 可以用来表示换行符\n)"></a>re.S/DOTALL (使点号 . 可以用来表示换行符\n)</h6><p>In [12]: re.findall(r’<strong>(?s)</strong>(th.+)’,”””  #成功匹配到\n<br> …: this is first line,<br> …: another line,<br> …: that line,it’s the best<br> …: “””)<br>Out[12]: [“this is first line,\nanother line,\nthat line,it’s the best\n”]</p>
+<h6 id="re-X-VERBOSE-抑制正则表达式中的空白符，以创建更易读的正则表达式"><a href="#re-X-VERBOSE-抑制正则表达式中的空白符，以创建更易读的正则表达式" class="headerlink" title="re.X/VERBOSE (抑制正则表达式中的空白符，以创建更易读的正则表达式)"></a>re.X/VERBOSE (抑制正则表达式中的空白符，以创建更易读的正则表达式)</h6><p>tips:空格符可用[ ]等字符类代替，并且可以在正则中通过井号#来注释</p>
+<p>In [68]: re.search(r’’’(?x)<br> …:     \((\d{3})\)     #区号<br> …:     [ ]         #空白符<br> …:     (\d{3})     #前缀<br> …:     -         #横线<br> …:     (\d{4})     #终点数字’’’,<br> …: ‘(800) 555-1212’).groups()<br>Out[68]: (‘800’, ‘555’, ‘1212’)</p>
+<p>  <strong><code>（?:）</code>对正则表达式进行分组，但不保存改分组</strong> 常用于需要对改分组进行+*等操作，但又不需要将改分组提取的情况</p>
+<p>In [11]: m=re.match(r’http://(?:\w+\.)*(\w+\.com)’,’<a href="http://code.google.com&#39;" target="_blank" rel="noopener">http://code.google.com&#39;</a>) </p>
+<pre><code>#使用(?:)时，groups中并未出现code
+</code></pre><p>In [12]: m.groups()<br>Out[12]: (‘google.com’,)</p>
+<p>In [13]: m=re.match(r’http://(\w+\.)*(\w+\.com)’,’<a href="http://code.google.com&#39;" target="_blank" rel="noopener">http://code.google.com&#39;</a>)</p>
+<pre><code>#未使用(?:)时，groups中出现code
+</code></pre><p>In [14]: m.groups()<br>Out[14]: (‘code.’, ‘google.com’)</p>
+<p>In [2]: re.findall(r’http://(?:\w+\.)*(\w+\.com)’,<br> …: ‘<a href="http://google.com" target="_blank" rel="noopener">http://google.com</a> <a href="http://www.google.com" target="_blank" rel="noopener">http://www.google.com</a> <a href="http://code.google.com&#39;" target="_blank" rel="noopener">http://code.google.com&#39;</a>)     #仅提取域名<br>Out[2]: [‘google.com’, ‘google.com’, ‘google.com’]</p>
+<h5 id="P-lt-name-gt-使用自定义表示符，而并非1至N递增"><a href="#P-lt-name-gt-使用自定义表示符，而并非1至N递增" class="headerlink" title="(?P&lt;name&gt;) 使用自定义表示符，而并非1至N递增"></a><code>(?P&lt;name&gt;)</code> 使用自定义表示符，而并非1至N递增</h5><p>（?P=name）用以引用前面的标记匹配。但必须是完全匹配，不是正则匹配。 用\g<name>来使用该分组</name></p>
+<p>In [32]: print re.sub(r’(?P<first>\d{3})-(?P<second>\d{4})-(?P<third>\d{4})’,<br> …: ‘\g<second>-\g<third>-\g<first>‘,’111-2222-3333’)    #分别用first,seond,third标记三个分组，并进行替换<br>2222-3333-111</first></third></second></third></second></first></p>
+<p>In [35]: print re.sub(r’(?P<first>\d{3})-(?P<second>\d{4})-<strong>(?P=second)</strong>‘,<br> …: ‘\g<second>-\g<second>-\g<first>‘,’111-2222-2222’)   #还可以用（?P=name）用以引用前面的标记匹配<br>2222-2222-111</first></second></second></second></first></p>
+<p>In [41]: re.search(r’(?P<first>\d{3})-(?P<second>\d{4})-(?P<third>\d{4})’,’111-2222-3333’).groupdict()<br>Out[41]: {‘first’: ‘111’, ‘second’: ‘2222’, ‘third’: ‘3333’}   #使用groupdict方法，返回一个字典</third></second></first></p>
+<h5 id="（-）正向前视匹配断言"><a href="#（-）正向前视匹配断言" class="headerlink" title="（?=）正向前视匹配断言"></a><code>（?=）</code>正向前视匹配断言</h5><p><img src="http://www.kingkk.com/wp-content/uploads/2017/12/PDTTFBVHJT5@X@EW@64.png" alt> 所谓的前视，就是往正则匹配方向的前方，我们所谓的后方进行判断。通过添加一些判断条件，使匹配更加精准。 匹配后续内容等于（？=）中内容的字符串</p>
+<p>In [53]: re.findall(r’\w+(<a href="mailto:?=@google.com" target="_blank" rel="noopener">?=@google.com</a>)’,’’’    #匹配域名为google.com的用户名<br> …: <a href="mailto:host@baidu.com" target="_blank" rel="noopener">host@baidu.com</a><br> …: <a href="mailto:root@google.com" target="_blank" rel="noopener">root@google.com</a><br> …: <a href="mailto:user@qq.com" target="_blank" rel="noopener">user@qq.com</a><br> …: <a href="mailto:admin@google.com" target="_blank" rel="noopener">admin@google.com</a><br> …: ‘’’)<br>Out[53]: [‘root’, ‘admin’]</p>
+<h5 id="负向前视断言"><a href="#负向前视断言" class="headerlink" title="(?!)负向前视断言"></a><code>(?!)</code>负向前视断言</h5><p>匹配后续内容不等于（？！）中内容的字符串</p>
+<p>In [73]: re.findall(r’(?m)^\w+@(?!google.com)’,’’’   #匹配域名不为google的用户名<br> …: <a href="mailto:host@baidu.com" target="_blank" rel="noopener">host@baidu.com</a><br> …: <a href="mailto:root@google.com" target="_blank" rel="noopener">root@google.com</a><br> …: <a href="mailto:user@qq.com" target="_blank" rel="noopener">user@qq.com</a><br> …: <a href="mailto:admin@google.com" target="_blank" rel="noopener">admin@google.com</a><br> …: ‘’’)<br>Out[73]: [‘host@’, ‘user@’]</p>
+<h4 id="非贪婪匹配-？"><a href="#非贪婪匹配-？" class="headerlink" title="非贪婪匹配 ？"></a>非贪婪匹配 ？</h4><p>贪婪匹配：正则表达式通过从左至右，试图尽可能多的获取匹配字符 通过在 *  + 后使用 ？进行非贪婪匹配</p>
+<p>In [30]: data =’abcdefg123456789-6-8’                #例如我们仅想提取后面的数字串</p>
+<p>In [31]: re.match(‘.+(\d+-\d+-\d+)’,data).group(1)   #发现仅提取了最后的9，因为贪婪匹配导致前面几位数被.+所匹配<br>Out[31]: ‘9-6-8’</p>
+<p>In [32]: re.match(‘.+<strong>?</strong>(\d+-\d+-\d+)’,data).group(1)  #在加号 + 后加上问号 ？ ，表示对 + 进行非贪婪匹配<br>Out[32]: ‘123456789-6-8’</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2017/12/python之re模块方法/" data-toggle="tooltip" data-placement="top" title="Python之re模块方法">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2017/12/重新养成写博客的习惯/" data-toggle="tooltip" data-placement="top" title="重新养成写博客的习惯">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

